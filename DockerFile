@@ -1,0 +1,13 @@
+From hub.c.163.com/library/java:8-jre
+
+COPY libAquesTalk10.so.1 /usr/lib/
+COPY libAqKanji2Koe.so.4 /usr/lib/
+COPY libAqUsrDic.so.4 /usr/lib/
+
+CMD ldconfig
+
+COPY silk /home/admin/silk/
+
+ADD target/*.jar tilitili-bot.jar
+
+ENTRYPOINT ["java", "-jar", "-Duser.timezone=GMT+8", "tilitili-bot.jar"]

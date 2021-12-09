@@ -1,0 +1,21 @@
+stages:
+  - build
+  - deploy
+
+bulid:
+  stage: build
+  script:
+    - echo "start building ..."
+    - cd /home/www/
+    - ./docker_build tilitili-bot springboot master
+  only:
+    - master
+
+deploy:
+  stage: deploy
+  script:
+    - echo "start deploy ..."
+    - cd /home/www/
+    - ./docker_deploy tilitili-bot 110.40.179.129 8087
+  only:
+    - master
