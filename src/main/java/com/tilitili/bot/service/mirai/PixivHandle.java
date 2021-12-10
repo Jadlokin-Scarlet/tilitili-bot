@@ -76,7 +76,7 @@ public class PixivHandle implements BaseMessageHandle {
             String titleKey = request.getTitleKey();
             String r18 = keyMap.getOrDefault(titleKey, request.getParamOrDefault("r18", "2"));
 
-            List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value, GroupEmum.TEST_GROUP.value, 588572960L);
+            List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value, GroupEmum.TEST_GROUP.value, 588572960L, 759168424L);
             if (! groupList.contains(sendGroup.getId())) {
                 if (! r18.equals("0")) {
                     return result.setMessage("不准色色o(*////▽////*)q").setMessageType("Plain");
