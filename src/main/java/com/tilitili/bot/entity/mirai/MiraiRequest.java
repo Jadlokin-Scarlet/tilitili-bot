@@ -34,9 +34,9 @@ public class MiraiRequest {
         text = messageChain.stream().filter(StreamUtil.isEqual(MessageChain::getType, "Plain")).map(MessageChain::getText).filter(StringUtils::isNotBlank).collect(Collectors.joining("\n"));
         url = messageChain.stream().filter(StreamUtil.isEqual(MessageChain::getType, "Image")).map(MessageChain::getUrl).filter(StringUtils::isNotBlank).findFirst().orElse("");
         textList = text.split("\n");
-        title = textList.length > 0? textList[0]: "";
-        titleKey = title.split(" ")[0];
-        titleValue = title.contains(" ")? title.substring(title.indexOf(" ") + 1): null;
+        title = textList.length > 0? textList[0].trim(): "";
+        titleKey = title.split(" +")[0].trim();
+        titleValue = title.contains(" ")? title.split(" +")[1].trim(): null;
         body = textList.length > 1? Stream.of(textList).skip(1).collect(Collectors.joining("\n")): "";
 
         String[] bodyList = body.split("\n");
@@ -46,8 +46,8 @@ public class MiraiRequest {
             if (lineSplit.length != 2) {
                 continue;
             }
-            String key = lineSplit[0];
-            String value = lineSplit[1];
+            String key = lineSplit[0].trim();
+            String value = lineSplit[1].trim();
             params.put(key.trim(), value.trim());
         }
     }
