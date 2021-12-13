@@ -16,6 +16,6 @@ public class GoCqhttpService {
     }
 
     public void syncHandleTextMessage(String messageStr) {
-        log.info(messageStr);
+
     }
 }
