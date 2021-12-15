@@ -1,6 +1,8 @@
 package com.tilitili.bot.service;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.mirai.MiraiRequest;
 import com.tilitili.bot.service.mirai.BaseMessageHandle;
@@ -37,7 +39,8 @@ public class GoCqhttpService {
 
     public void syncHandleTextMessage(String requestStr) {
         try {
-            List<GoCqhttpWsMessage> messageList = new Gson().fromJson(requestStr, new TypeToken<List<GoCqhttpWsMessage>>(){}.getType());
+            Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+            List<GoCqhttpWsMessage> messageList = gson.fromJson(requestStr, new TypeToken<List<GoCqhttpWsMessage>>(){}.getType());
             Asserts.notNull(messageList, "未获取到消息");
             Asserts.isFalse(messageList.isEmpty(), "未获取到消息");
 
