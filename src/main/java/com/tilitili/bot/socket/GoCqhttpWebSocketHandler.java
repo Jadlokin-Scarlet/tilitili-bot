@@ -28,7 +28,7 @@ public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        log.info("Message Received [{}]",message.getPayload());
+        log.debug("Message Received [{}]",message.getPayload());
         goCqhttpService.syncHandleTextMessage(message.getPayload());
     }
 
