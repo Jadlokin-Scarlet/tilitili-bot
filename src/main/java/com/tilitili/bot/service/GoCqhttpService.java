@@ -40,12 +40,9 @@ public class GoCqhttpService {
     public void syncHandleTextMessage(String requestStr) {
         try {
             Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-            List<GoCqhttpWsMessage> messageList = gson.fromJson(requestStr, new TypeToken<List<GoCqhttpWsMessage>>(){}.getType());
-            Asserts.notNull(messageList, "未获取到消息");
-            Asserts.isFalse(messageList.isEmpty(), "未获取到消息");
+            GoCqhttpWsMessage wsMessage = gson.fromJson(requestStr, GoCqhttpWsMessage.class);
+            Asserts.notNull(wsMessage, "未获取到消息");
 
-            GoCqhttpWsMessage wsMessage = messageList.get(0);
-            String message = wsMessage.getMessage();
             String messageType = wsMessage.getMessageType();
             String guildId = wsMessage.getGuildId();
             String channelId = wsMessage.getChannelId();
@@ -57,11 +54,6 @@ public class GoCqhttpService {
 
             MiraiMessage result = null;
             if (messageType.equals("guild")) {
-                if (messageList.size() != 1) {
-                    miraiManager.sendFriendMessage("Plain", message);
-                    return;
-                }
-
                 Asserts.isTrue(ChannelEmum.channelIds().contains(channelId), "不在可用频道");
 
                 MiraiSessionService.MiraiSession miraiSession = miraiSessionService.getSession("guild-" + guildId + "-" + channelId);
