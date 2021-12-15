@@ -1,36 +1,75 @@
 package com.tilitili.bot.entity.mirai;
 
 import com.tilitili.bot.service.MiraiSessionService;
+import com.tilitili.common.entity.gocqhttp.GoCqhttpWsMessage;
 import com.tilitili.common.entity.mirai.MessageChain;
 import com.tilitili.common.entity.mirai.MiraiMessageView;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MiraiRequest {
     private final MiraiSessionService.MiraiSession session;
-    private final MiraiMessageView message;
-    private final Map<String, String> params;
+    private final GoCqhttpWsMessage goCqhttpWsMessage;
+    private final MiraiMessageView miraiMessageView;
+    private final String messageId;
     private final String text;
+    private final Map<String, String> params;
     private final String body;
     private final String url;
     private final String title;
     private final String titleKey;
     private final String titleValue;
     private final String[] textList;
-    private final Long messageId;
+
+    public MiraiRequest(GoCqhttpWsMessage wsMessage, MiraiSessionService.MiraiSession session) {
+        this.miraiMessageView = null;
+        this.goCqhttpWsMessage = wsMessage;
+        this.session = session;
+
+        messageId = wsMessage.getMessageId();
+        text = wsMessage.getMessage();
+
+        // \[CQ:([a-zA-Z0-9-_.]+),([^\[\]]+)\]
+        // 图片CQ码
+        Matcher matcher = Pattern.compile("\\[CQ:image,([^\\[\\]]+)]").matcher(text);
+        if (matcher.find()) {
+            String paramsStr = matcher.group();
+            String urlParamStr = Arrays.stream(paramsStr.split(",")).filter(param -> param.startsWith("url")).findFirst().orElse(null);
+            if (urlParamStr != null && urlParamStr.contains("=")) {
+                this.url = urlParamStr.split("=")[1];
+            } else {
+                this.url = null;
+            }
+        } else {
+            this.url = null;
+        }
+
+
+        this.params = new HashMap<>();
+        this.body = null;
+
+        this.title = text.replaceAll("\\[CQ:[^\\[\\]]+]", "").trim();
+        this.titleKey = title.split(" +")[0].trim();
+        this.titleValue = title.contains(" ")? title.split(" +")[1].trim(): null;
+        this.textList = null;
+    }
 
     public MiraiRequest(MiraiMessageView message, MiraiSessionService.MiraiSession session) {
-        this.message = message;
+        this.miraiMessageView = message;
+        this.goCqhttpWsMessage = null;
         this.session = session;
 
         List<MessageChain> messageChain = message.getMessageChain();
-        messageId = message.getMessageChain().get(0).getId();
+        messageId = String.valueOf(message.getMessageChain().get(0).getId());
         text = messageChain.stream().filter(StreamUtil.isEqual(MessageChain::getType, "Plain")).map(MessageChain::getText).filter(StringUtils::isNotBlank).collect(Collectors.joining("\n"));
         url = messageChain.stream().filter(StreamUtil.isEqual(MessageChain::getType, "Image")).map(MessageChain::getUrl).filter(StringUtils::isNotBlank).findFirst().orElse("");
         textList = text.split("\n");
@@ -61,7 +100,7 @@ public class MiraiRequest {
     }
 
     public MiraiMessageView getMessage() {
-        return message;
+        return miraiMessageView;
     }
 
     public MiraiSessionService.MiraiSession getSession() {
@@ -100,7 +139,11 @@ public class MiraiRequest {
         return titleValue == null ? defaultValue: titleValue;
     }
 
-    public Long getMessageId() {
+    public String getMessageId() {
         return messageId;
+    }
+
+    public GoCqhttpWsMessage getGoCqhttpWsMessage() {
+        return goCqhttpWsMessage;
     }
 }

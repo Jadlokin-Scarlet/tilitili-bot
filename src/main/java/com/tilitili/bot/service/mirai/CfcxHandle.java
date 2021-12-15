@@ -29,7 +29,7 @@ public class CfcxHandle implements BaseMessageHandle {
     @Override
     public MiraiMessage handleMessage(MiraiRequest request) throws Exception {
         MiraiMessage result = new MiraiMessage();
-        Long sendMessageId = request.getMessageId();
+        Long sendMessageId = Long.valueOf(request.getMessageId());
 
         String titleValue = request.getTitleValue();
         if (TextUtils.isBlank(titleValue)) {
