@@ -22,6 +22,7 @@ public enum MessageHandleEnum {
     RecallHandle("RecallHandle", Arrays.asList("撤回", "ch"), "", "FriendMessage", 0),
     ConfigHandle("ConfigHandle", Arrays.asList("配置", "pz"), "", "FriendMessage", 0),
     CfcxHandle("CfcxHandle", Arrays.asList("成分查询", "cfcx"), "成分查询。格式:(cfcx Jadlokin_Scarlet)", "GroupMessage", 0),
+    NewVideoHandle("NewVideoHandle", Arrays.asList(".新视频", ".nv"), "随机获取昨日新增视频。格式:(.nv)", "guild", 0),
     ;
 
     private final String name;

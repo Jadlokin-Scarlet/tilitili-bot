@@ -77,7 +77,7 @@ public class GoCqhttpService {
             MiraiRequest miraiRequest = new MiraiRequest(wsMessage, miraiSession);
 
             for (BaseMessageHandle handle : messageHandleList) {
-                if (handle.getType().getSendType().equals("GuildMessage")) {
+                if (handle.getType().getSendType().equals("guild")) {
                     if (handle.getType().getKeyword().contains(miraiRequest.getTitleKey()) || handle.getType().getKeyword().isEmpty()) {
                         MiraiMessage result = handle.handleMessage(miraiRequest);
                         if (result != null) {
