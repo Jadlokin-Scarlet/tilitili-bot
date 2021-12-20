@@ -23,7 +23,7 @@ public class NewVideoHandle implements BaseMessageHandle {
 
     @Override
     public MiraiMessage handleMessage(MiraiRequest request) {
-        videoInfoMapper.
+
         return null;
     }
 }
