@@ -12,8 +12,8 @@ import org.springframework.web.socket.WebSocketSession;
 @Component
 public class MiraiWebSocketHandler extends BaseWebSocketHandler {
 
-    private final MiraiManager miraiManager;
     private final MiraiService miraiService;
+    private final MiraiManager miraiManager;
 
     @Autowired
     public MiraiWebSocketHandler(MiraiManager miraiManager, MiraiService miraiService) {
