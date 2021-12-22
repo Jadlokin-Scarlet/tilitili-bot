@@ -7,7 +7,7 @@ bulid:
   script:
     - echo "start building ..."
     - cd /home/www/
-    - ./docker_build tilitili-bot springboot re_ws
+    - ./docker_build tilitili-bot springboot master
   only:
     - master
 
