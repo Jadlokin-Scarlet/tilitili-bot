@@ -47,7 +47,9 @@ public class BaseWebSocketHandler implements WebSocketHandler {
         log.info("连接关闭，reason={}", status.getReason());
 //        sleepAndPing(session);
         webSocketConnectionManager.stop();
-        webSocketConnectionManager.start();
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            webSocketConnectionManager.start();
+        }, 1, TimeUnit.SECONDS);
     }
 
     @Override
