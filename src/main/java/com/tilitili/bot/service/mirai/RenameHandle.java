@@ -4,7 +4,7 @@ import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.mirai.MiraiRequest;
 import com.tilitili.bot.service.MiraiSessionService;
 import com.tilitili.common.emnus.GroupEmum;
-import com.tilitili.common.entity.view.mirai.MiraiMessage;
+import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;

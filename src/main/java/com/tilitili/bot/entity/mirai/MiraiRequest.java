@@ -1,9 +1,9 @@
 package com.tilitili.bot.entity.mirai;
 
 import com.tilitili.bot.service.MiraiSessionService;
-import com.tilitili.common.entity.view.gocqhttp.GoCqhttpWsMessage;
-import com.tilitili.common.entity.view.mirai.MessageChain;
-import com.tilitili.common.entity.view.mirai.MiraiMessageView;
+import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpWsMessage;
+import com.tilitili.common.entity.view.bot.mirai.MessageChain;
+import com.tilitili.common.entity.view.bot.mirai.MiraiMessageView;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 

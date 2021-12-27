@@ -4,12 +4,10 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.tilitili.common.entity.view.gocqhttp.GoCqhttpWsMessage;
+import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpWsMessage;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class StartApplicationTest {
 
