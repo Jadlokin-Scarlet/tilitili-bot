@@ -4,7 +4,7 @@ import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.mirai.MiraiRequest;
 import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.RecommendVideo;
-import com.tilitili.common.entity.mirai.MiraiMessage;
+import com.tilitili.common.entity.view.mirai.MiraiMessage;
 import com.tilitili.common.mapper.tilitili.RecommendMapper;
 import com.tilitili.common.mapper.tilitili.RecommendVideoMapper;
 import com.tilitili.common.utils.Asserts;

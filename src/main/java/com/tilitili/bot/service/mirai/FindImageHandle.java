@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.common.entity.mirai.MiraiMessage;
+import com.tilitili.common.entity.view.mirai.MiraiMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import org.jsoup.Jsoup;

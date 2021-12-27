@@ -3,8 +3,9 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.mirai.MiraiRequest;
 import com.tilitili.common.entity.PixivImage;
-import com.tilitili.common.entity.mirai.MiraiMessage;
-import com.tilitili.common.entity.mirai.Sender;
+import com.tilitili.common.entity.query.PixivImageQuery;
+import com.tilitili.common.entity.view.mirai.MiraiMessage;
+import com.tilitili.common.entity.view.mirai.Sender;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.tilitili.PixivImageMapper;
 import com.tilitili.common.utils.RedisCache;
@@ -52,7 +53,7 @@ public class RecallHandle implements BaseMessageHandle {
                     return result;
                 }
             } else {
-                List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImage().setPid(pid));
+                List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
                 for (PixivImage pixivImage : pixivImageList) {
                     Integer messageId = pixivImage.getMessageId();
                     if (messageId != null) {
