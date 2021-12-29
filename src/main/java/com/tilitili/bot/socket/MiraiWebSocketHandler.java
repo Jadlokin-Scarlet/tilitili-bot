@@ -14,8 +14,8 @@ import java.net.URISyntaxException;
 @Component
 public class MiraiWebSocketHandler extends BaseWebSocketHandler {
 
-    private final MiraiManager miraiManager;
     private final BotService botService;
+    private final MiraiManager miraiManager;
 
     @Autowired
     public MiraiWebSocketHandler(MiraiManager miraiManager, BotService botService) throws URISyntaxException {
