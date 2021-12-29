@@ -32,6 +32,6 @@ public class TagHandle extends ExceptionRespMessageHandle {
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
 		Asserts.notBlank(pid, "格式错啦(pid)");
 		List<PixivTag> tagList = pixivTagMapper.getPixivTagByCondition(new PixivTagQuery().setPid(pid));
-		return BotMessage.simpleTextMessage(String.format("[%s]的tag有：%s", pid, tagList.stream().map(PixivTag::getTag).collect(Collectors.joining(" "))));
+		return BotMessage.simpleTextMessage(String.format("[%s]的tag有：%s", pid, tagList.stream().map(PixivTag::getTag).collect(Collectors.joining("    "))));
 	}
 }
