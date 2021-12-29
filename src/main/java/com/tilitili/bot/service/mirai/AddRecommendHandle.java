@@ -1,10 +1,10 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
+import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.RecommendVideo;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.RecommendMapper;
 import com.tilitili.common.mapper.tilitili.RecommendVideoMapper;
 import com.tilitili.common.utils.Asserts;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AddRecommendHandle implements BaseMessageHandle {
+public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
     private final RecommendMapper recommendMapper;
     private final RecommendVideoMapper recommendVideoMapper;
@@ -31,14 +31,12 @@ public class AddRecommendHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiMessage result = new MiraiMessage();
-
-        String avStr = request.getParam("视频号");
-        String operator = request.getParam("推荐人");
-        String text = request.getParam("推荐语");
-        int startTime = Integer.parseInt(request.getParamOrDefault("开始时间", "0"));
-        int endTime = Integer.parseInt(request.getParamOrDefault("结束时间", String.valueOf(startTime + 30)));
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        String avStr = messageAction.getParam("视频号");
+        String operator = messageAction.getParam("推荐人");
+        String text = messageAction.getParam("推荐语");
+        int startTime = Integer.parseInt(messageAction.getParamOrDefault("开始时间", "0"));
+        int endTime = Integer.parseInt(messageAction.getParamOrDefault("结束时间", String.valueOf(startTime + 30)));
 
         Asserts.notNull(avStr, "格式错啦(视频号)");
         Asserts.notNull(operator, "格式错啦(推荐人)");
@@ -67,6 +65,6 @@ public class AddRecommendHandle implements BaseMessageHandle {
         recommend.setEndTime(endTime);
         recommendMapper.insert(recommend);
 
-        return result.setMessage("收到！").setMessageType("Plain");
+        return BotMessage.simpleTextMessage("收到！");
     }
 }

@@ -1,8 +1,10 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.bot.service.MiraiSessionService;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.mirai.MessageChain;
 import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiMessageView;
@@ -16,17 +18,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class RepeatHandle implements BaseMessageHandle {
+public class RepeatHandle extends ExceptionRespMessageHandle {
     private final String KeyKey = "repeat.key";
-    private final String valueKey = "repeat.value";
     private final String numberKey = "repeat.number";
-
-    private final MiraiManager miraiManager;
-
-    @Autowired
-    public RepeatHandle(MiraiManager miraiManager) {
-        this.miraiManager = miraiManager;
-    }
 
     @Override
     public MessageHandleEnum getType() {
@@ -34,10 +28,9 @@ public class RepeatHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiSessionService.MiraiSession session = request.getSession();
-        MiraiMessageView message = request.getMessage();
-        List<MessageChain> messageChainList = message.getMessageChain();
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        BotSessionService.MiraiSession session = messageAction.getSession();
+        List<BotMessageChain> messageChainList = messageAction.getBotMessage().getBotMessageChainList();
         String key = getKey(messageChainList);
 
         String oldKey = session.getOrDefault(KeyKey, "");
@@ -51,21 +44,21 @@ public class RepeatHandle implements BaseMessageHandle {
 
         String newNumber = session.get(numberKey);
         if (Objects.equals(newNumber, "3")) {
-            List<MessageChain> newMessageChainList = messageChainList.stream().map(messageChain -> {
+            List<BotMessageChain> newMessageChainList = messageChainList.stream().map(messageChain -> {
                 if (messageChain.getType().equals("Plain")) {
-                    return new MessageChain().setType("Plain").setText(messageChain.getText());
+                    return new BotMessageChain().setType("Plain").setText(messageChain.getText());
                 } else if (messageChain.getType().equals("Image")) {
-                    return new MessageChain().setType("Image").setUrl(QQUtil.getImageUrl(messageChain.getUrl()));
+                    return new BotMessageChain().setType("Image").setUrl(QQUtil.getImageUrl(messageChain.getUrl()));
                 } else {
                     return null;
                 }
             }).filter(Objects::nonNull).collect(Collectors.toList());
-            miraiManager.sendMessage(new MiraiMessage().setMessageType("List").setMessageChainList(newMessageChainList).setSendType("GroupMessage").setGroup(message.getSender().getGroup().getId()));
+            return new BotMessage().setBotMessageChainList(newMessageChainList);
         }
         return null;
     }
 
-    public String getKey(List<MessageChain> messageChainList) {
+    public String getKey(List<BotMessageChain> messageChainList) {
         return messageChainList.stream().map(messageChain -> {
             if (messageChain.getType().equals("Plain")) {
                 return messageChain.getText();

@@ -1,14 +1,13 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.VideoInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
-public class NewVideoHandle implements BaseMessageHandle {
+
+public class NewVideoHandle extends ExceptionRespMessageHandle {
     private final VideoInfoMapper videoInfoMapper;
 
     @Autowired
@@ -22,7 +21,7 @@ public class NewVideoHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
+    public BotMessage handleMessage(BotMessageAction messageAction) {
 
         return null;
     }

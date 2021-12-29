@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class MiraiSessionService {
+public class BotSessionService {
     private final Map<String, MiraiSession> sessionMap;
     private final RedisCache redisCache;
 
     @Autowired
-    public MiraiSessionService(RedisCache redisCache) {
+    public BotSessionService(RedisCache redisCache) {
         this.redisCache = redisCache;
         this.sessionMap = new HashMap<>();
     }

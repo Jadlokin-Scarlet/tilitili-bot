@@ -1,6 +1,7 @@
 package com.tilitili.bot.socket;
 
-import com.tilitili.bot.service.MiraiService;
+import com.tilitili.bot.service.BotService;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.MiraiManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +14,21 @@ import java.net.URISyntaxException;
 @Component
 public class MiraiWebSocketHandler extends BaseWebSocketHandler {
 
-    private final MiraiService miraiService;
+    private final MiraiManager miraiManager;
+    private final BotService botService;
 
     @Autowired
-    public MiraiWebSocketHandler(MiraiManager miraiManager, MiraiService miraiService) throws URISyntaxException {
+    public MiraiWebSocketHandler(MiraiManager miraiManager, BotService botService) throws URISyntaxException {
         super(new URI(miraiManager.getWebSocketUrl()));
-        this.miraiService = miraiService;
+        this.miraiManager = miraiManager;
+        this.botService = botService;
     }
 
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
-        miraiService.syncHandleTextMessage(message);
+        BotMessage botMessage = miraiManager.handleMiraiWsMessageToBotMessage(message);
+        botService.syncHandleTextMessage(botMessage);
     }
 
 }

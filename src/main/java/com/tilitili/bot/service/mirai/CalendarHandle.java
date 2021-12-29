@@ -1,10 +1,9 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
+import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.BotCalendar;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
-import com.tilitili.common.entity.view.bot.mirai.Sender;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.BotCalendarMapper;
 import com.tilitili.common.utils.AESUtils;
 import com.tilitili.common.utils.Asserts;
@@ -14,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 import static com.tilitili.common.utils.DateUtils.setDayOfWeekToCalendar;
 import static com.tilitili.common.utils.StringUtils.convertCnNumber;
@@ -23,7 +25,7 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 @Slf4j
 @Component
-public class CalendarHandle implements BaseMessageHandle {
+public class CalendarHandle extends ExceptionRespMessageHandle {
     private final BotCalendarMapper botCalendarMapper;
 
     @Autowired
@@ -37,12 +39,10 @@ public class CalendarHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiMessage result = new MiraiMessage();
-        String body = request.getBody();
-        Sender sender = request.getMessage().getSender();
-        Long qq = sender.getId();
-        Long group = Optional.ofNullable(sender.getGroup()).map(Sender::getId).orElse(null);
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        String body = messageAction.getBody();
+        Long qq = messageAction.getBotMessage().getQq();
+        Long group = messageAction.getBotMessage().getGroup();
 
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);
@@ -82,7 +82,7 @@ public class CalendarHandle implements BaseMessageHandle {
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");
         String reply = String.format("收到！%s（%s）", body.replaceAll("我", "你"), sdf.format(calendar.getTime()));
-        return result.setMessage(reply).setMessageType("Plain");
+        return BotMessage.simpleTextMessage(reply);
     }
     // (明天|今天|后天|大后天|周(?\d|日)|下周(?\d|日)|下下周(?\d|日)|\d+号)
     private void setDayToCalendar(Calendar calendar, String day) {

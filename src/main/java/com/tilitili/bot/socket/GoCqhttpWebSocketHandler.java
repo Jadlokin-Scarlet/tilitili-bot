@@ -1,6 +1,7 @@
 package com.tilitili.bot.socket;
 
-import com.tilitili.bot.service.GoCqhttpService;
+import com.tilitili.bot.service.BotService;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.GoCqhttpManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +14,23 @@ import java.net.URISyntaxException;
 @Component
 public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
 
-    private final GoCqhttpService goCqhttpService;
+    private final GoCqhttpManager goCqhttpManager;
+    private final BotService botService;
 
     @Autowired
-    public GoCqhttpWebSocketHandler(GoCqhttpManager goCqhttpManager, GoCqhttpService goCqhttpService) throws URISyntaxException {
+    public GoCqhttpWebSocketHandler(GoCqhttpManager goCqhttpManager, BotService botService) throws URISyntaxException {
         super(new URI(goCqhttpManager.getWebSocketUrl()));
-        this.goCqhttpService = goCqhttpService;
+        this.goCqhttpManager = goCqhttpManager;
+        this.botService = botService;
     }
 
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
         if (message.contains("meta_event_type\":\"heartbeat")) return;
-        goCqhttpService.syncHandleTextMessage(message);
+        if (! message.contains("\"message_type\":\"guild\"")) return;
+        BotMessage botMessage = goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
+        botService.syncHandleTextMessage(botMessage);
     }
 
 }

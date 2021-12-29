@@ -1,7 +1,8 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.MiraiManager;
@@ -15,7 +16,7 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class VoiceHandle implements BaseMessageHandle {
+public class VoiceHandle extends ExceptionRespMessageHandle {
     private final BaiduManager baiduManager;
     private final MiraiManager miraiManager;
 
@@ -31,14 +32,14 @@ public class VoiceHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) throws IOException, InterruptedException {
+    public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
         File wavFile = new File("/home/admin/silk/voice.wav");
         File slkFile = new File("/home/admin/silk/voice.slk");
 
         if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
         if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
-        String text = request.getBody();
+        String text = messageAction.getBody();
 
         String jpText = baiduManager.translate("jp", text);
 
@@ -54,6 +55,6 @@ public class VoiceHandle implements BaseMessageHandle {
         String voiceId = miraiManager.uploadVoice(slkFile);
         Asserts.notBlank(voiceId, "上传失败");
 
-        return new MiraiMessage().setVoiceId(voiceId).setMessageType("Voice");
+        return BotMessage.simpleVoiceIdMessage(voiceId);
     }
 }

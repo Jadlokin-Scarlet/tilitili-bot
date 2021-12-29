@@ -2,8 +2,8 @@ package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import org.jsoup.Jsoup;
@@ -12,8 +12,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-public class FindImageHandle implements BaseMessageHandle{
+public class FindImageHandle extends ExceptionRespMessageHandle{
 
     @Override
     public MessageHandleEnum getType() {
@@ -21,9 +23,10 @@ public class FindImageHandle implements BaseMessageHandle{
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiMessage result = new MiraiMessage();
-        String url = request.getUrl();
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        List<String> imageUrlList = messageAction.getImageList();
+        Asserts.notEmpty(imageUrlList, "格式错啦(图片)");
+        String url = imageUrlList.get(0);
         Asserts.notBlank(url, "格式错啦(图片)");
         String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
         Asserts.notBlank(html, "没要到图😇\n"+url);
@@ -40,6 +43,6 @@ public class FindImageHandle implements BaseMessageHandle{
         Asserts.isFalse(linkList.isEmpty(), "没找到😑\n"+url);
 
         String link = linkList.get(0).attr("href");
-        return result.setMessage(String.format("找到啦😊！相似度%s\n%s", rate, link)).setUrl(imageUrl).setMessageType("ImageText");
+        return BotMessage.simpleImageTextMessage(String.format("找到啦😊！相似度%s\n%s", rate, link), imageUrl);
     }
 }

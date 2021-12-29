@@ -1,6 +1,6 @@
 package com.tilitili.bot.entity.mirai;
 
-import com.tilitili.bot.service.MiraiSessionService;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpWsMessage;
 import com.tilitili.common.entity.view.bot.mirai.MessageChain;
 import com.tilitili.common.entity.view.bot.mirai.MiraiMessageView;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MiraiRequest {
-    private final MiraiSessionService.MiraiSession session;
+    private final BotSessionService.MiraiSession session;
     private final GoCqhttpWsMessage goCqhttpWsMessage;
     private final MiraiMessageView miraiMessageView;
     private final String messageId;
@@ -30,7 +30,7 @@ public class MiraiRequest {
     private final String titleValue;
     private final String[] textList;
 
-    public MiraiRequest(GoCqhttpWsMessage wsMessage, MiraiSessionService.MiraiSession session) {
+    public MiraiRequest(GoCqhttpWsMessage wsMessage, BotSessionService.MiraiSession session) {
         this.miraiMessageView = null;
         this.goCqhttpWsMessage = wsMessage;
         this.session = session;
@@ -63,7 +63,7 @@ public class MiraiRequest {
         this.textList = null;
     }
 
-    public MiraiRequest(MiraiMessageView message, MiraiSessionService.MiraiSession session) {
+    public MiraiRequest(MiraiMessageView message, BotSessionService.MiraiSession session) {
         this.miraiMessageView = message;
         this.goCqhttpWsMessage = null;
         this.session = session;
@@ -103,7 +103,7 @@ public class MiraiRequest {
         return miraiMessageView;
     }
 
-    public MiraiSessionService.MiraiSession getSession() {
+    public BotSessionService.MiraiSession getSession() {
         return session;
     }
 

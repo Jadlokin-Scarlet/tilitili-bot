@@ -1,8 +1,8 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import java.util.List;
 import static org.apache.http.util.TextUtils.isBlank;
 
 @Component
-public class PatternStringHandle implements BaseMessageHandle{
+public class PatternStringHandle extends ExceptionRespMessageHandle{
 
     @Override
     public MessageHandleEnum getType() {
@@ -21,10 +21,9 @@ public class PatternStringHandle implements BaseMessageHandle{
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiMessage result = new MiraiMessage();
-        String regex = request.getParam("r");
-        String string = request.getParam("s");
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        String regex = messageAction.getParam("r");
+        String string = messageAction.getParam("s");
         Asserts.notBlank(regex, "格式错啦(r)");
         Asserts.notBlank(string, "格式错啦(s)");
         List<String> pattenList = new ArrayList<>();
@@ -32,8 +31,8 @@ public class PatternStringHandle implements BaseMessageHandle{
         pattenList.addAll(StringUtils.extractList(regex, string));
         String patten = String.join("\n", pattenList);
         if (isBlank(patten)) {
-            return result.setMessage("没匹配到").setMessageType("Plain");
+            return BotMessage.simpleTextMessage("没匹配到");
         }
-        return result.setMessage(patten).setMessageType("Plain");
+        return BotMessage.simpleTextMessage(patten);
     }
 }

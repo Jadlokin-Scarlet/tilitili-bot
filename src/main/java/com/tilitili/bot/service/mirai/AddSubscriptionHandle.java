@@ -1,11 +1,10 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
+import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.entity.Subscription;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
-import com.tilitili.common.entity.view.bot.mirai.Sender;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.message.SimpleTask;
 import com.tilitili.common.manager.TaskManager;
 import com.tilitili.common.mapper.tilitili.SubscriptionMapper;
@@ -15,11 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Optional;
 
 @Slf4j
 @Component
-public class AddSubscriptionHandle implements BaseMessageHandle {
+public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
     private final SubscriptionMapper subscriptionMapper;
     private final TaskManager taskManager;
 
@@ -35,13 +33,10 @@ public class AddSubscriptionHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiMessage result = new MiraiMessage();
-
-        String uid = request.getParam("uid");
-        Sender sender = request.getMessage().getSender();
-        Long qq = sender.getId();
-        Long group = Optional.ofNullable(sender.getGroup()).map(Sender::getId).orElse(null);
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        String uid = messageAction.getParamOrDefault("uid", messageAction.getValue());
+        Long qq = messageAction.getBotMessage().getQq();
+        Long group = messageAction.getBotMessage().getGroup();
 
         Asserts.notBlank(uid, "格式错啦(uid)");
 
@@ -53,6 +48,6 @@ public class AddSubscriptionHandle implements BaseMessageHandle {
 
         SimpleTask simpleTask = new SimpleTask().setValueList(Collections.singletonList(uid)).setReason(TaskReason.SUPPLEMENT_VIDEO_OWNER.value);
         taskManager.simpleSpiderVideo(simpleTask);
-        return result.setMessage("关注成功！").setMessageType("Plain");
+        return BotMessage.simpleTextMessage("关注成功！");
     }
 }

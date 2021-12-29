@@ -1,9 +1,10 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
-import com.tilitili.bot.entity.mirai.MiraiRequest;
-import com.tilitili.bot.service.MiraiSessionService;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.emnus.GroupEmum;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.DateUtils;
@@ -18,7 +19,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 //@Component
-public class RenameHandle implements BaseMessageHandle {
+public class RenameHandle extends ExceptionRespMessageHandle {
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final int waitTime = 10;
@@ -41,13 +42,13 @@ public class RenameHandle implements BaseMessageHandle {
     }
 
     @Override
-    public MiraiMessage handleMessage(MiraiRequest request) {
-        MiraiSessionService.MiraiSession session = request.getSession();
-        Long group = request.getMessage().getSender().getGroup().getId();
-        Long sender = request.getMessage().getSender().getId();
+    public BotMessage handleMessage(BotMessageAction messageAction) {
+        BotSessionService.MiraiSession session = messageAction.getSession();
+        Long group = messageAction.getBotMessage().getGroup();
+        Long qq = messageAction.getBotMessage().getQq();
         String name = "<&ÿ?Çý>cirno";
 
-        if (Objects.equals(sender, MASTER_QQ) && Objects.equals(group, listenGroup)) {
+        if (Objects.equals(qq, MASTER_QQ) && Objects.equals(group, listenGroup)) {
             String status = session.getOrDefault(statusKey, "冒泡！");
             String lastSendTimeStr = session.get(lastSendTimeKey);
             boolean isUp = lastSendTimeStr == null || DateUtils.parseDateYMDHMS(lastSendTimeStr).before(getLimitDate());
