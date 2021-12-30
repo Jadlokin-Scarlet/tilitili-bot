@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
-    private final BilibiliManager bilibiliManager;
     private final SubscriptionMapper subscriptionMapper;
+    private final BilibiliManager bilibiliManager;
 
     @Autowired
     public AddSubscriptionHandle(SubscriptionMapper subscriptionMapper, BilibiliManager bilibiliManager) {
