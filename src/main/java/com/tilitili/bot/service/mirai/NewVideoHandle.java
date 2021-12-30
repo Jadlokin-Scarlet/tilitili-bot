@@ -17,7 +17,7 @@ public class NewVideoHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.NewVideoHandle;
+        return null;
     }
 
     @Override
