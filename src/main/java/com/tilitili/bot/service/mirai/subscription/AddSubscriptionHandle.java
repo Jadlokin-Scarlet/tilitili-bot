@@ -1,7 +1,8 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.subscription;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.entity.Subscription;
@@ -48,7 +49,7 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(uid, "格式错啦(uid)");
 
         Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
-        SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setType(1).setValue(uid).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
+        SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(1).setValue(uid).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
         int oldCount = subscriptionMapper.countSubscriptionByCondition(subscriptionQuery);
         Asserts.isTrue(oldCount == 0, "已经关注了哦。");
 
