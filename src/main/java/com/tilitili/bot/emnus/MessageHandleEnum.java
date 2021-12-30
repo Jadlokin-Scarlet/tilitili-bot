@@ -9,7 +9,7 @@ import static com.tilitili.common.emnus.SendTypeEmum.*;
 public enum MessageHandleEnum {
 
 	AddRecommendHandle(			"AddRecommendHandle",				Arrays.asList("推荐","tj"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
-	AddSubscriptionHandle(		"AddSubscriptionHandle",			Arrays.asList("关注","s.gz"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "关注b站up，使用uid，关注后可以获得开播提醒和动态推送。格式：(s.gz 114514)"),
+	AddSubscriptionHandle(		"AddSubscriptionHandle",			Arrays.asList("关注","s.gz"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "关注b站up，使用uid，关注后可以获得动态推送(私聊限定)和开播提醒。格式：(s.gz 114514)"),
 	DeleteSubscriptionHandle(	"DeleteSubscriptionHandle",		Arrays.asList("取关","s.qg"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "取关b站up，使用uid。格式：(s.qg 114514)"),
 	BeautifyJsonHandle(			"BeautifyJsonHandle",				Arrays.asList("Json","json"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	CalendarHandle(				"CalendarHandle",					Arrays.asList("日程表","rc"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）"),
@@ -25,7 +25,7 @@ public enum MessageHandleEnum {
 	RecallHandle(				"RecallHandle",					Arrays.asList("撤回","ch"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	ConfigHandle(				"ConfigHandle",					Arrays.asList("配置","pz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	CfcxHandle(					"CfcxHandle",						Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE), "成分查询。格式:(cfcx Jadlokin_Scarlet)"),
-	NewVideoHandle(				"NewVideoHandle",					Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE), "随机获取昨日新增视频。格式:(nv)"),
+//	NewVideoHandle(				"NewVideoHandle",					Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE), "随机获取昨日新增视频。格式:(nv)"),
 	TagHandle(					"TagHandle",						Arrays.asList("tag"),					0,		Arrays.asList(GROUP_MESSAGE), "查询指定pid的tag。格式:(tag 1231)"),
 	;
 

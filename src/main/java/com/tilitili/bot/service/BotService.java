@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -45,8 +46,8 @@ public class BotService {
             if (Objects.equals(sendType, SendTypeEmum.Guild_Message.sendType)) {
                 Asserts.isTrue(ChannelEmum.channelIds().contains(botMessage.getChannelId()), "不在可用频道");
                 if (actionKey != null) {
-                    String prefix = ".";
-                    if (!actionKey.startsWith(prefix)) {
+                    String prefix = "^[.。]";
+                    if (!Pattern.compile(prefix).matcher(actionKey).find()) {
                         throw new AssertException("频道命令以[" + prefix + "]开头");
                     } else {
                         actionKey = actionKey.substring(1);
