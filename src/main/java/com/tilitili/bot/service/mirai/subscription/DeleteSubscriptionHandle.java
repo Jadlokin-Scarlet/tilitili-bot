@@ -18,8 +18,8 @@ import java.util.List;
 
 @Component
 public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
-	private final SubscriptionMapper subscriptionMapper;
 	private final BilibiliManager bilibiliManager;
+	private final SubscriptionMapper subscriptionMapper;
 
 	@Autowired
 	public DeleteSubscriptionHandle(SubscriptionMapper subscriptionMapper, BilibiliManager bilibiliManager) {
