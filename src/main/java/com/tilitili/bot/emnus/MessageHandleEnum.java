@@ -9,8 +9,8 @@ import static com.tilitili.common.emnus.SendTypeEmum.*;
 public enum MessageHandleEnum {
 
 	AddRecommendHandle(			"AddRecommendHandle",				Arrays.asList("推荐","tj"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
-	AddSubscriptionHandle(		"AddSubscriptionHandle",			Arrays.asList("关注",".s.gz"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "关注b站up，使用uid，关注后可以获得开播提醒和动态推送。格式：(gz 114514)"),
-	DeleteSubscriptionHandle(	"DeleteSubscriptionHandle",		Arrays.asList("取关",".s.qg"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "取关b站up，使用uid。格式：(qg 114514)"),
+	AddSubscriptionHandle(		"AddSubscriptionHandle",			Arrays.asList("关注","s.gz"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "关注b站up，使用uid，关注后可以获得开播提醒和动态推送。格式：(s.gz 114514)"),
+	DeleteSubscriptionHandle(	"DeleteSubscriptionHandle",		Arrays.asList("取关","s.qg"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "取关b站up，使用uid。格式：(s.qg 114514)"),
 	BeautifyJsonHandle(			"BeautifyJsonHandle",				Arrays.asList("Json","json"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	CalendarHandle(				"CalendarHandle",					Arrays.asList("日程表","rc"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）"),
 	FindImageHandle(			"FindImageHandle",				Arrays.asList("找图","zt"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "查找原图。格式(zt[换行][图片])"),

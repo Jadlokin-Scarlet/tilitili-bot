@@ -29,7 +29,7 @@ public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
 	}
 
 	@Override
-	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+	public BotMessage handleMessage(BotMessageAction messageAction) {
 		String uid = messageAction.getParamOrDefault("uid", messageAction.getValue());
 		BotMessage botMessage = messageAction.getBotMessage();
 
