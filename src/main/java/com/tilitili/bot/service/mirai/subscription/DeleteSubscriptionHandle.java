@@ -48,16 +48,7 @@ public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
 
 		Asserts.notBlank(key, "格式错啦(key)");
 
-		Owner owner;
-		if (StringUtils.isNumber(key)) {
-			owner = bilibiliManager.getUserWithCache(Long.valueOf(key));
-		} else {
-			List<Owner> ownerList = bilibiliManager.searchUserWithCache(key);
-			List<Owner> filterOwnerList = ownerList.stream().filter(StreamUtil.isEqual(Owner::getName, key)).collect(Collectors.toList());
-			Asserts.notEmpty(filterOwnerList, "找不到用户");
-			Asserts.checkEquals(filterOwnerList.size(), 1, "有重名(%s)", filterOwnerList.stream().map(Owner::getName).collect(Collectors.joining(",")));
-			owner = filterOwnerList.get(0);
-		}
+		Owner owner = bilibiliManager.getOwnerWithCacheByUidOrName(key);
 		Long uid = owner.getUid();
 		String name = owner.getName();
 
