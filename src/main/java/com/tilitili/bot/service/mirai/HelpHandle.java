@@ -4,14 +4,22 @@ import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class HelpHandle extends ExceptionRespMessageHandle {
+    private final List<BaseMessageHandle> handleList;
+
+    @Autowired
+    public HelpHandle(List<BaseMessageHandle> handleList) {
+        this.handleList = handleList;
+        handleList.add(this);
+    }
+
     @Override
     public MessageHandleEnum getType() {
         return MessageHandleEnum.HelpHandle;
@@ -22,8 +30,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         String sendType = messageAction.getBotMessage().getSendType();
         String guildprefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
-        MessageHandleEnum[] handleList = MessageHandleEnum.values();
-        List<MessageHandleEnum> filterHandleList = Arrays.stream(handleList).filter(e -> e.getSendType().contains(sendType)).collect(Collectors.toList());
+        List<MessageHandleEnum> filterHandleList = handleList.stream().map(BaseMessageHandle::getType).filter(e -> e.getSendType().contains(sendType)).collect(Collectors.toList());
 
         StringBuilder stringBuilder = new StringBuilder("咱可以帮你做这些事！\n");
 
