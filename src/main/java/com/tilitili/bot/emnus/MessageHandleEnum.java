@@ -14,7 +14,7 @@ public enum MessageHandleEnum {
 	BeautifyJsonHandle(			"BeautifyJsonHandle",				Arrays.asList("Json","json"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	CalendarHandle(				"CalendarHandle",					Arrays.asList("日程表","rc"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）"),
 	FindImageHandle(			"FindImageHandle",				Arrays.asList("找图","zt"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "查找原图。格式(zt[换行][图片])"),
-	FranslateHandle(			"FranslateHandle",				Arrays.asList("翻译","fy"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), "翻译文本或图片。格式(fy[换行]hello!)"),
+	FranslateHandle(			"FranslateHandle",				Arrays.asList("翻译","fy"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE), "翻译文本或图片。格式(fy[换行]hello!)"),
 	HelpHandle(					"HelpHandle",						Arrays.asList("帮助","help"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "获取帮助"),
 	PatternStringHandle(		"PatternStringHandle",			Arrays.asList("正则","zz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	RenameHandle(				"RenameHandle",					Collections.emptyList(),				2,		Arrays.asList(GROUP_MESSAGE), ""),
