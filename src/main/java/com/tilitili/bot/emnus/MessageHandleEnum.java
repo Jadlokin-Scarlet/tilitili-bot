@@ -25,7 +25,7 @@ public enum MessageHandleEnum {
 	RecallHandle(				"RecallHandle",					Arrays.asList("撤回","ch"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	ConfigHandle(				"ConfigHandle",					Arrays.asList("配置","pz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	CfcxHandle(					"CfcxHandle",						Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE), "成分查询。格式:(cfcx Jadlokin_Scarlet)"),
-//	NewVideoHandle(				"NewVideoHandle",					Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE), "随机获取昨日新增视频。格式:(nv)"),
+//	NewVideoHandle(				"NewVideoHandle",						Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE), "随机获取昨日新增视频。格式:(nv)"),
 	TagHandle(					"TagHandle",						Arrays.asList("tag"),					0,		Arrays.asList(GROUP_MESSAGE), "查询指定pid的tag。格式:(tag 1231)"),
 	;
 

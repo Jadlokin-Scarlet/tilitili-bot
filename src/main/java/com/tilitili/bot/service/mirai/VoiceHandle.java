@@ -41,6 +41,10 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
         String text = messageAction.getBody();
 
+        if (text == null) {
+            return null;
+        }
+
         String jpText = baiduManager.translate("jp", text);
 
         log.info("jpText="+jpText);
