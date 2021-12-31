@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,8 +30,9 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String sendType = messageAction.getBotMessage().getSendType();
         String guildprefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
+        List<MessageHandleEnum> hideHandleList = Arrays.asList(MessageHandleEnum.AddRecommendHandle, MessageHandleEnum.RecallHandle, MessageHandleEnum.PatternStringHandle, MessageHandleEnum.BeautifyJsonHandle, MessageHandleEnum.ConfigHandle);
 
-        List<MessageHandleEnum> filterHandleList = handleList.stream().map(BaseMessageHandle::getType).filter(e -> e.getSendType().contains(sendType)).collect(Collectors.toList());
+        List<MessageHandleEnum> filterHandleList = handleList.stream().map(BaseMessageHandle::getType).filter(e -> e.getSendType().contains(sendType)).filter(e -> !hideHandleList.contains(e)).collect(Collectors.toList());
 
         StringBuilder stringBuilder = new StringBuilder("咱可以帮你做这些事！\n");
 
