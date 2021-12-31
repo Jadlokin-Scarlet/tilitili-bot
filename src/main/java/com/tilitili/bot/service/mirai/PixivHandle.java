@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -67,7 +68,7 @@ public class PixivHandle extends LockMessageHandle {
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
 
         if (group != null) {
-            List<Long> groupList = Arrays.asList();
+            List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value);
             if (!groupList.contains(group)) {
                 if (!r18.equals("0")) {
                     return BotMessage.simpleTextMessage("不准色色o(*////▽////*)q");

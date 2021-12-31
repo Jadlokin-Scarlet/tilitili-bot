@@ -32,6 +32,9 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
+        String titleKey = messageAction.getKey();
+
+
         String avStr = messageAction.getParam("视频号");
         String operator = messageAction.getParam("推荐人");
         String text = messageAction.getParam("推荐语");

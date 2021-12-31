@@ -8,7 +8,7 @@ import static com.tilitili.common.emnus.SendTypeEmum.*;
 
 public enum MessageHandleEnum {
 
-	AddRecommendHandle(			"AddRecommendHandle",				Arrays.asList("推荐","tj"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
+	AddRecommendHandle(			"AddRecommendHandle",				Arrays.asList("推荐","自荐","tj", "zj"),	0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
 	AddSubscriptionHandle(		"AddSubscriptionHandle",			Arrays.asList("关注","s.gz"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "关注b站up，使用uid，关注后可以获得动态推送(私聊限定)和开播提醒。格式：(s.gz 114514)"),
 	DeleteSubscriptionHandle(	"DeleteSubscriptionHandle",		Arrays.asList("取关","s.qg"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE), "取关b站up，使用uid。格式：(s.qg 114514)"),
 	BeautifyJsonHandle(			"BeautifyJsonHandle",				Arrays.asList("Json","json"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE), ""),
