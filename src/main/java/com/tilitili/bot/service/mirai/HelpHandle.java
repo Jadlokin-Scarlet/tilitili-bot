@@ -36,8 +36,8 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         handleDescMap.put(FIND_IMAGE_HANDLE, "查找原图。格式(zt[换行][图片])");
         handleDescMap.put(FRANSLATE_HANDLE, "翻译文本或图片。格式(fy[换行]hello!)");
         handleDescMap.put(HELP_HANDLE, "获取帮助");
-        handleDescMap.put(VOICE_HANDLE, "文本转语音(日语)(群聊)。格式:(s[换行]你好！)");
-        handleDescMap.put(PIXIV_HANDLE, "色图！(群聊)。格式:(st loli)");
+        handleDescMap.put(VOICE_HANDLE, "文本转语音(日语)。格式:(s[换行]你好！)");
+        handleDescMap.put(PIXIV_HANDLE, "色图！。格式:(st loli)");
         handleDescMap.put(CFCX_HANDLE, "成分查询。格式:(cfcx Jadlokin_Scarlet)");
         handleDescMap.put(NEW_VIDEO_HANDLE, "随机获取昨日新增视频。格式:(nv)");
         handleDescMap.put(TAG_HANDLE, "查询指定pid的tag。格式:(tag 1231)");
