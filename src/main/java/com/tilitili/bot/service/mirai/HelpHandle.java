@@ -25,6 +25,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     public HelpHandle(List<BaseMessageHandle> handleList) {
         handleList.add(this);
 
+        Map<MessageHandleEnum, String> handleDescMap = new HashMap<>();
         handleDescMap.put(AddSubscriptionHandle, "关注b站up，使用uid，关注后可以获得动态推送(私聊限定)和开播提醒。格式：(s.gz 114514)");
         handleDescMap.put(DeleteSubscriptionHandle, "取关b站up，使用uid。格式：(s.qg 114514)");
         handleDescMap.put(CalendarHandle, "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）");
@@ -42,6 +43,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             MessageHandleEnum e = handle.getType();
             String desc = handleDescMap.get(e);
             if (desc == null) continue;
+            this.handleDescMap.put(e, desc);
             for (String key : e.getKeyword()) {
                 keyHelpMap.put(key, desc);
             }
@@ -68,7 +70,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ");;
         String sendType = messageAction.getBotMessage().getSendType();
-        String guildprefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
+        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
         if (StringUtil.isBlank(paramListStr)) {
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！\n");
@@ -76,7 +78,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
                 MessageHandleEnum handle = entry.getKey();
                 String desc = entry.getValue();
                 if (handle.getSendType().contains(sendType)) continue;
-                String key = handle.getKeyword().stream().map(a -> guildprefix + a).collect(Collectors.joining(","));
+                String key = handle.getKeyword().stream().map(a -> guildPrefix + a).collect(Collectors.joining(","));
                 reply.append(String.format("%s：%s\n", key, desc));
             }
             if (reply.charAt(reply.length() - 1) == '\n') {
