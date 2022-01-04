@@ -4,9 +4,9 @@ import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import javafx.util.Pair;
 import org.jsoup.helper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             MessageHandleEnum e = handle.getType();
             String desc = handleDescMap.get(e);
             if (desc == null) continue;
-            this.handleDescMap.add(new Pair<>(e, desc));
+            this.handleDescMap.add(Pair.of(e, desc));
         }
 
         // 添加到单个命令查询，或覆盖
@@ -80,8 +80,8 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         if (StringUtil.isBlank(paramListStr)) {
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！\n");
             for (Pair<MessageHandleEnum, String> entry : handleDescMap) {
-                MessageHandleEnum handle = entry.getKey();
-                String desc = entry.getValue();
+                MessageHandleEnum handle = entry.getFirst();
+                String desc = entry.getSecond();
                 if (! handle.getSendType().contains(sendType)) continue;
                 String key = handle.getKeyword().stream().map(a -> guildPrefix + a).collect(Collectors.joining(","));
                 reply.append(String.format("%s：%s\n", key, desc));
