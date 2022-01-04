@@ -13,6 +13,8 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
@@ -32,9 +34,9 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String titleKey = messageAction.getKey();
+        String titleKey = messageAction.getKey().replaceAll("tj", "推荐").replaceAll("zj", "自荐");
 
-
+        int type = Objects.equals("自荐", titleKey) ? 1 : 0;
         String avStr = messageAction.getParam("视频号");
         String operator = messageAction.getParam("推荐人");
         String text = messageAction.getParam("推荐语");
@@ -50,7 +52,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         if (StringUtils.isNumber(avStr)) {
             av = Long.parseLong(avStr);
         } else {
-            av = BilibiliUtil.converseAvToBv(avStr);
+            av = BilibiliUtil.converseBvToAv(avStr);
         }
         Recommend oldRecommend = recommendMapper.getByAv(av);
         Asserts.checkNull(oldRecommend, "这个视频已经有啦");
@@ -60,14 +62,15 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
         Recommend recommend = new Recommend();
         recommend.setAv(av);
-        recommend.setStatus(1);
+        recommend.setStatus(0);
         recommend.setText(text);
         recommend.setOperator(operator);
         recommend.setIssueId(recommendVideo.getId());
         recommend.setStartTime(startTime);
         recommend.setEndTime(endTime);
+        recommend.setType(type);
         recommendMapper.insert(recommend);
 
-        return BotMessage.simpleTextMessage("收到！");
+        return BotMessage.simpleTextMessage(String.format("收到！已存至%s池。", titleKey));
     }
 }
