@@ -62,6 +62,8 @@ public class BotService {
                 if (handleType.getSendType().contains(sendType)) {
                     if (handleType.getKeyword().contains(actionKey) || handleType.getKeyword().isEmpty()) {
                         try {
+                            // 返回null则代表跳过，继续寻找
+                            // 返回空消息则代表已处理完毕但不回复，直接结束
                             respMessage = messageHandle.handleMessage(botMessageAction);
                         } catch (AssertException e) {
                             log.debug(e.getMessage());
@@ -74,18 +76,22 @@ public class BotService {
                 }
             }
 
-            if (respMessage != null && CollectionUtils.isNotEmpty(respMessage.getBotMessageChainList())) {
-                log.debug("无回复");
-                if (respMessage.getSendType() == null) {
-                    respMessage.setSendType(sendType);
-                    respMessage.setQq(botMessage.getQq());
-                    respMessage.setGroup(botMessage.getGroup());
-                    respMessage.setGuildId(botMessage.getGuildId());
-                    respMessage.setChannelId(botMessage.getChannelId());
-                }
-
-                botManager.sendMessage(respMessage);
+            // 如果最后为null，则标志无匹配处理器，则回复表情包
+            Asserts.notNull(respMessage, "无回复");
+            // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
+            if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
+                return;
             }
+            // 如果最后是消息，则回复
+            if (respMessage.getSendType() == null) {
+                respMessage.setSendType(sendType);
+                respMessage.setQq(botMessage.getQq());
+                respMessage.setGroup(botMessage.getGroup());
+                respMessage.setGuildId(botMessage.getGuildId());
+                respMessage.setChannelId(botMessage.getChannelId());
+            }
+
+            botManager.sendMessage(respMessage);
         } catch (AssertException e) {
             log.debug(e.getMessage());
             if (alwaysReply) {
