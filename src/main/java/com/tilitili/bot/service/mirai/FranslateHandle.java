@@ -25,7 +25,7 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.FranslateHandle;
+        return MessageHandleEnum.FRANSLATE_HANDLE;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class CfcxHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.CfcxHandle;
+        return MessageHandleEnum.CFCX_HANDLE;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class FindImageHandle extends ExceptionRespMessageHandle{
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.FindImageHandle;
+        return MessageHandleEnum.FIND_IMAGE_HANDLE;
     }
 
     @Override

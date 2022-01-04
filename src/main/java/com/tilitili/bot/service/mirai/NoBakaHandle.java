@@ -18,7 +18,7 @@ public class NoBakaHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.NoBakaHandle;
+        return MessageHandleEnum.NO_BAKA_HANDLE;
     }
 
     @Override

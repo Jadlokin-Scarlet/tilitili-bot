@@ -14,7 +14,7 @@ import java.util.Map;
 public class BeautifyJsonHandle extends ExceptionRespMessageHandle{
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.BeautifyJsonHandle;
+        return MessageHandleEnum.BEAUTIFY_JSON_HANDLE;
     }
 
     @Override

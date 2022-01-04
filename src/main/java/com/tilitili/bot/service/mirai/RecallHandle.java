@@ -35,7 +35,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.RecallHandle;
+        return MessageHandleEnum.RECALL_HANDLE;
     }
 
     @Override

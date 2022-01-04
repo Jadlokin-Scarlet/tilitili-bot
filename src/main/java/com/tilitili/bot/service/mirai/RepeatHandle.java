@@ -5,12 +5,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.entity.view.bot.mirai.MessageChain;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessageView;
-import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.QQUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,7 +19,7 @@ public class RepeatHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.RepeatHandle;
+        return MessageHandleEnum.REPEAT_HANDLE;
     }
 
     @Override

@@ -15,7 +15,6 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -32,7 +31,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.AddRecommendHandle;
+        return MessageHandleEnum.ADD_RECOMMEND_HANDLE;
     }
 
     @Override

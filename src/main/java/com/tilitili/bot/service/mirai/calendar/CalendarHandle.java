@@ -36,7 +36,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.CalendarHandle;
+        return MessageHandleEnum.CALENDAR_HANDLE;
     }
 
     @Override

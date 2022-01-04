@@ -24,7 +24,7 @@ public class TagHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public MessageHandleEnum getType() {
-		return MessageHandleEnum.TagHandle;
+		return MessageHandleEnum.TAG_HANDLE;
 	}
 
 	@Override

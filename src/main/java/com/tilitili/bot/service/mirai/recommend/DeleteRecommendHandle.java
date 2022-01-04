@@ -27,7 +27,7 @@ public class DeleteRecommendHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public MessageHandleEnum getType() {
-		return MessageHandleEnum.DeleteRecommendHandle;
+		return MessageHandleEnum.DELETE_RECOMMEND_HANDLE;
 	}
 
 	@Override

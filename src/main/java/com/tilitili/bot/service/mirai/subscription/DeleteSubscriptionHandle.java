@@ -29,7 +29,7 @@ public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public MessageHandleEnum getType() {
-		return MessageHandleEnum.DeleteSubscriptionHandle;
+		return MessageHandleEnum.DELETE_SUBSCRIPTION_HANDLE;
 	}
 
 	@Override

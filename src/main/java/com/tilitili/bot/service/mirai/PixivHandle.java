@@ -8,12 +8,9 @@ import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
-import com.tilitili.common.entity.view.bot.mirai.MessageChain;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.tilitili.PixivImageMapper;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +50,7 @@ public class PixivHandle extends LockMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.PixivHandle;
+        return MessageHandleEnum.PIXIV_HANDLE;
     }
 
     @Override

@@ -17,7 +17,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.ConfigHandle;
+        return MessageHandleEnum.CONFIG_HANDLE;
     }
 
     @Override

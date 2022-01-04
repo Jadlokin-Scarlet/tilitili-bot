@@ -20,7 +20,7 @@ public class DeleteCalendarHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public MessageHandleEnum getType() {
-		return MessageHandleEnum.DeleteCalendarHandle;
+		return MessageHandleEnum.DELETE_CALENDAR_HANDLE;
 	}
 
 	@Override

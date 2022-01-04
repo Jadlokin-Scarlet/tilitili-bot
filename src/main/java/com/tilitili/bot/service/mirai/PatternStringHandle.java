@@ -17,7 +17,7 @@ public class PatternStringHandle extends ExceptionRespMessageHandle{
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.PatternStringHandle;
+        return MessageHandleEnum.PATTERN_STRING_HANDLE;
     }
 
     @Override

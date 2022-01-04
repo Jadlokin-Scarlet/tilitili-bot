@@ -5,7 +5,6 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.MiraiMessage;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
-        return MessageHandleEnum.RenameHandle;
+        return MessageHandleEnum.RENAME_HANDLE;
     }
 
     @Override
