@@ -81,7 +81,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             for (Map.Entry<MessageHandleEnum, String> entry : handleDescMap.entrySet()) {
                 MessageHandleEnum handle = entry.getKey();
                 String desc = entry.getValue();
-                if (handle.getSendType().contains(sendType)) continue;
+                if (! handle.getSendType().contains(sendType)) continue;
                 String key = handle.getKeyword().stream().map(a -> guildPrefix + a).collect(Collectors.joining(","));
                 reply.append(String.format("%s：%s\n", key, desc));
             }
