@@ -15,7 +15,7 @@ public enum MessageHandleEnum {
 	BEAUTIFY_JSON_HANDLE(		"BeautifyJsonHandle",			Arrays.asList("Json","json"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CALENDAR_HANDLE(			"CalendarHandle",				Arrays.asList("日程表","rc"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	DELETE_CALENDAR_HANDLE(		"DeleteCalendarHandle",		Arrays.asList("移除日程"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
-	FIND_IMAGE_HANDLE(			"FindImageHandle",			Arrays.asList("找图","zt"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
+	FIND_IMAGE_HANDLE(			"FindImageHandle",			Arrays.asList("找图","zt"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	FRANSLATE_HANDLE(			"FranslateHandle",			Arrays.asList("翻译","fy"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	HELP_HANDLE(				"HelpHandle",					Arrays.asList("帮助","help"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	PATTERN_STRING_HANDLE(		"PatternStringHandle",		Arrays.asList("正则","zz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
@@ -23,12 +23,12 @@ public enum MessageHandleEnum {
 	NO_BAKA_HANDLE(				"NoBakaHandle",				Collections.emptyList(),				1,		Arrays.asList(GROUP_MESSAGE)),
 	REPEAT_HANDLE(				"RepeatHandle",				Collections.emptyList(),				-1,	Arrays.asList(GROUP_MESSAGE)),
 	VOICE_HANDLE(				"VoiceHandle",				Arrays.asList("说","s"),				0,		Arrays.asList(GROUP_MESSAGE)),
-	PIXIV_HANDLE(				"PixivHandle",				Arrays.asList("色图","st","ss","bs"),	1,		Arrays.asList(GROUP_MESSAGE)),
+	PIXIV_HANDLE(				"PixivHandle",				Arrays.asList("色图","st","ss","bs"),	1,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	RECALL_HANDLE(				"RecallHandle",				Arrays.asList("撤回","ch"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CONFIG_HANDLE(				"ConfigHandle",				Arrays.asList("配置","pz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CFCX_HANDLE(				"CfcxHandle",					Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE)),
 	NEW_VIDEO_HANDLE(			"NewVideoHandle",				Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE)),
-	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(GROUP_MESSAGE)),
+	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	;
 
 	private final String name;
