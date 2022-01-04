@@ -38,7 +38,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
         int type = Objects.equals("自荐", titleKey) ? 1 : 0;
         String avStr = messageAction.getParam("视频号");
-        String operator = messageAction.getParam("推荐人");
+        String operator = messageAction.getParamOrDefault("推荐人", messageAction.getBotMessage().getGroupNickName());
         String text = messageAction.getParam("推荐语");
         int startTime = Integer.parseInt(messageAction.getParamOrDefault("开始时间", "0"));
         int endTime = Integer.parseInt(messageAction.getParamOrDefault("结束时间", String.valueOf(startTime + 30)));
