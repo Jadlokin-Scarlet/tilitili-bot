@@ -1,12 +1,11 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.recommend;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.Recommend;
-import com.tilitili.common.entity.RecommendVideo;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.RecommendMapper;
-import com.tilitili.common.mapper.tilitili.RecommendVideoMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BilibiliUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -19,12 +18,10 @@ import java.util.Objects;
 public class AddRecommendHandle extends ExceptionRespMessageHandle {
 
     private final RecommendMapper recommendMapper;
-    private final RecommendVideoMapper recommendVideoMapper;
 
     @Autowired
-    public AddRecommendHandle(RecommendMapper recommendMapper, RecommendVideoMapper recommendVideoMapper) {
+    public AddRecommendHandle(RecommendMapper recommendMapper) {
         this.recommendMapper = recommendMapper;
-        this.recommendVideoMapper = recommendVideoMapper;
     }
 
     @Override
