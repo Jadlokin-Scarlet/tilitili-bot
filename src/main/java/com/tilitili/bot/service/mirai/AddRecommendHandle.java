@@ -57,15 +57,11 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         Recommend oldRecommend = recommendMapper.getByAv(av);
         Asserts.checkNull(oldRecommend, "这个视频已经有啦");
 
-        RecommendVideo recommendVideo = recommendVideoMapper.getNew();
-
-
         Recommend recommend = new Recommend();
         recommend.setAv(av);
         recommend.setStatus(0);
         recommend.setText(text);
         recommend.setOperator(operator);
-        recommend.setIssueId(recommendVideo.getId());
         recommend.setStartTime(startTime);
         recommend.setEndTime(endTime);
         recommend.setType(type);
