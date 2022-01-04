@@ -3,8 +3,11 @@ package com.tilitili.bot.service.mirai.recommend;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.message.SimpleTask;
+import com.tilitili.common.manager.TaskManager;
 import com.tilitili.common.mapper.tilitili.RecommendMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BilibiliUtil;
@@ -12,15 +15,18 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 @Component
 public class AddRecommendHandle extends ExceptionRespMessageHandle {
-
+    private final TaskManager taskManager;
     private final RecommendMapper recommendMapper;
 
     @Autowired
-    public AddRecommendHandle(RecommendMapper recommendMapper) {
+    public AddRecommendHandle(TaskManager taskManager, RecommendMapper recommendMapper) {
+        this.taskManager = taskManager;
         this.recommendMapper = recommendMapper;
     }
 
@@ -63,6 +69,8 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         recommend.setEndTime(endTime);
         recommend.setType(type);
         recommendMapper.insert(recommend);
+
+        taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SUPPLEMENT_VIDEO.value).setValueList(Collections.singletonList(String.valueOf(av))));
 
         return BotMessage.simpleTextMessage(String.format("收到！已存至%s池。", titleKey));
     }
