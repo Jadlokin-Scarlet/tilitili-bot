@@ -10,6 +10,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -72,18 +73,19 @@ public class BotService {
                     }
                 }
             }
-            Asserts.notNull(respMessage, "无回复");
-            Asserts.notEmpty(respMessage.getBotMessageChainList(), "回复为空");
 
-            if (respMessage.getSendType() == null) {
-                respMessage.setSendType(sendType);
-                respMessage.setQq(botMessage.getQq());
-                respMessage.setGroup(botMessage.getGroup());
-                respMessage.setGuildId(botMessage.getGuildId());
-                respMessage.setChannelId(botMessage.getChannelId());
+            if (respMessage != null && CollectionUtils.isNotEmpty(respMessage.getBotMessageChainList())) {
+                log.debug("无回复");
+                if (respMessage.getSendType() == null) {
+                    respMessage.setSendType(sendType);
+                    respMessage.setQq(botMessage.getQq());
+                    respMessage.setGroup(botMessage.getGroup());
+                    respMessage.setGuildId(botMessage.getGuildId());
+                    respMessage.setChannelId(botMessage.getChannelId());
+                }
+
+                botManager.sendMessage(respMessage);
             }
-
-            botManager.sendMessage(respMessage);
         } catch (AssertException e) {
             log.debug(e.getMessage());
             if (alwaysReply) {
