@@ -1,7 +1,8 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.calendar;
 
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.BotCalendarMapper;
@@ -78,10 +79,10 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         calendar.set(Calendar.SECOND, 0);
 
         BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(group == null? "FriendMessage": "TempMessage");
-        botCalendarMapper.insertBotCalendar(botCalendar);
+        botCalendarMapper.addBotCalendarSelective(botCalendar);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");
-        String reply = String.format("收到！%s（%s）", body.replaceAll("我", "你"), sdf.format(calendar.getTime()));
+        String reply = String.format("收到！%s（%s），日程码%s。", body.replaceAll("我", "你"), sdf.format(calendar.getTime()), botCalendar.getId());
         return BotMessage.simpleTextMessage(reply);
     }
     // (明天|今天|后天|大后天|周(?\d|日)|下周(?\d|日)|下下周(?\d|日)|\d+号)

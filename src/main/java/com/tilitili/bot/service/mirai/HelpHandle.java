@@ -26,9 +26,12 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         handleList.add(this);
 
         Map<MessageHandleEnum, String> handleDescMap = new HashMap<>();
+
+        // 同时添加到所有帮助列表和单个命令查询
         handleDescMap.put(AddSubscriptionHandle, "关注b站up，使用uid，关注后可以获得动态推送(私聊限定)和开播提醒。格式：(s.gz 114514)");
         handleDescMap.put(DeleteSubscriptionHandle, "取关b站up，使用uid。格式：(s.qg 114514)");
         handleDescMap.put(CalendarHandle, "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）");
+        handleDescMap.put(DeleteCalendarHandle, "日程表，在指定时间提醒做某事。格式：（xxx叫我xxx）");
         handleDescMap.put(FindImageHandle, "查找原图。格式(zt[换行][图片])");
         handleDescMap.put(FranslateHandle, "翻译文本或图片。格式(fy[换行]hello!)");
         handleDescMap.put(HelpHandle, "获取帮助");
@@ -38,27 +41,28 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         handleDescMap.put(NewVideoHandle, "随机获取昨日新增视频。格式:(nv)");
         handleDescMap.put(TagHandle, "查询指定pid的tag。格式:(tag 1231)");
 
-        // 命令简介默认使用desc
         for (BaseMessageHandle handle : handleList) {
             MessageHandleEnum e = handle.getType();
             String desc = handleDescMap.get(e);
             if (desc == null) continue;
             this.handleDescMap.put(e, desc);
+        }
+
+        // 添加到单个命令查询，或覆盖
+        handleDescMap.put(AddRecommendHandle, "推荐指令向推荐池添加推荐(自荐类推)，推荐人默认使用群昵称，必填参数为：视频号(av或bv)，推荐语。" +
+                "选填参数为开始时间(单位秒)(默认0)，结束时间(单位秒)(默认30)，推荐人(填了就不使用群昵称)。" +
+                "格式例子：推荐[回车]视频号=12[回车]开始时间=0[回车]结束时间=30[回车]推荐人=Jadlokin_Scarlet[回车]推荐语=好！");
+        handleDescMap.put(DeleteRecommendHandle, "移除推荐池或当期推荐中的视频(自荐类推)，往期不能删");
+        handleDescMap.put(DeleteCalendarHandle, "移除日程表，使用日程码，例子：移除日程 123");
+
+        for (BaseMessageHandle handle : handleList) {
+            MessageHandleEnum e = handle.getType();
+            String desc = handleDescMap.get(e);
+            if (desc == null) continue;
             for (String key : e.getKeyword()) {
                 keyHelpMap.put(key, desc);
             }
         }
-        // 推荐功能自定义desc
-        for (String key : AddRecommendHandle.getKeyword()) {
-            keyHelpMap.put(key, "推荐指令向推荐池添加推荐(自荐类推)，推荐人默认使用群昵称，必填参数为：视频号(av或bv)，推荐语。" +
-                    "选填参数为开始时间(单位秒)(默认0)，结束时间(单位秒)(默认30)，推荐人(填了就不使用群昵称)。" +
-                    "格式例子：推荐[回车]视频号=12[回车]开始时间=0[回车]结束时间=30[回车]推荐人=Jadlokin_Scarlet[回车]推荐语=好！");
-        }
-        // 移除推荐自定义desc
-        for (String key : DeleteRecommendHandle.getKeyword()) {
-            keyHelpMap.put(key, "移除推荐池或当期推荐中的视频(自荐类推)，往期不能删");
-        }
-
     }
 
     @Override
