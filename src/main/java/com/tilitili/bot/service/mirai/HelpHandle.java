@@ -66,7 +66,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String paramListStr = messageAction.getValue().replaceAll("\\s+", " ");;
+        String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ");;
         String sendType = messageAction.getBotMessage().getSendType();
         String guildprefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
