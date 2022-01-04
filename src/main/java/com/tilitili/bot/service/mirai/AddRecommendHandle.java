@@ -43,8 +43,8 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         int startTime = Integer.parseInt(messageAction.getParamOrDefault("开始时间", "0"));
         int endTime = Integer.parseInt(messageAction.getParamOrDefault("结束时间", String.valueOf(startTime + 30)));
 
-        Asserts.notNull(avStr, "格式错啦(视频号)");
         Asserts.notNull(operator, "格式错啦(推荐人)");
+        Asserts.notNull(avStr, "格式错啦(视频号)");
         Asserts.notBlank(text, "格式错啦(推荐语)");
         Asserts.isTrue(startTime < endTime, "时间线错乱啦");
 
