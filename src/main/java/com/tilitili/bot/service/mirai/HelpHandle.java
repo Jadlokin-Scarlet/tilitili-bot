@@ -56,6 +56,9 @@ public class HelpHandle extends ExceptionRespMessageHandle {
                 "格式例子：推荐[回车]视频号=12[回车]开始时间=0[回车]结束时间=30[回车]推荐人=Jadlokin_Scarlet[回车]推荐语=好！");
         handleDescMap.put(DELETE_RECOMMEND_HANDLE, "移除推荐池或当期推荐中的视频(自荐类推)，往期不能删");
         handleDescMap.put(DELETE_CALENDAR_HANDLE, "移除日程表，使用日程码，例子：移除日程 123");
+        handleDescMap.put(TALK_HANDLE, "设定对话，匹配方式为全文匹配，想要其他条件需要定制，\n" +
+                "格式1主要方便设置词语的问答，不支持使用空白字符和等于号，格式2可以设置问答句，可以使用空白字符，但也不能使用等于号。\n" +
+                "格式:(对话 提问 回答)或者(对话[回车]提问=hello？[回车]回答=hi？)");
         handleDescMap.put(DELETE_TALK_HANDLE, "移除对话。格式:(移除对话 提问)");
 
         for (BaseMessageHandle handle : handleList) {
