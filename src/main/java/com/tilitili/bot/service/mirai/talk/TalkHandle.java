@@ -44,7 +44,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
 		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
-		Asserts.notEquals(botTalkList.size(), 0, "已经有了。");
+		Asserts.checkEquals(botTalkList.size(), 0, "已经有了。");
 
 		BotTalk addBotTalk = new BotTalk().setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
 		botTalkMapper.addBotTalkSelective(addBotTalk);
