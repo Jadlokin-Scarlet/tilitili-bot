@@ -22,12 +22,10 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final BotTalkManager botTalkManager;
-    private final BotManager botManager;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotManager botManager) {
+    public ReplyHandle(BotTalkManager botTalkManager) {
         this.botTalkManager = botTalkManager;
-        this.botManager = botManager;
     }
 
     @Override
@@ -49,8 +47,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
         if (ddCount > 0) {
             String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
-            botManager.sendMessage(BotMessage.simpleTextMessage(repeat, botMessage));
-            return null;
+            return BotMessage.simpleTextMessage(repeat);
         }
 
         if (Objects.equals(qq, MASTER_QQ) && text.equals("cww")) {
