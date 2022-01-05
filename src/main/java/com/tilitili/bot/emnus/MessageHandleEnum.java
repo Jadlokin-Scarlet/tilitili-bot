@@ -20,7 +20,7 @@ public enum MessageHandleEnum {
 	HELP_HANDLE(				"HelpHandle",					Arrays.asList("帮助","help"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	PATTERN_STRING_HANDLE(		"PatternStringHandle",		Arrays.asList("正则","zz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	RENAME_HANDLE(				"RenameHandle",				Collections.emptyList(),				2,		Arrays.asList(GROUP_MESSAGE)),
-	NO_BAKA_HANDLE(				"NoBakaHandle",				Collections.emptyList(),				1,		Arrays.asList(GROUP_MESSAGE)),
+	REPLY_HANDLE(				"ReplyHandle",				Collections.emptyList(),				1,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	REPEAT_HANDLE(				"RepeatHandle",				Collections.emptyList(),				-1,	Arrays.asList(GROUP_MESSAGE)),
 	VOICE_HANDLE(				"VoiceHandle",				Arrays.asList("说","s"),				0,		Arrays.asList(GROUP_MESSAGE)),
 	PIXIV_HANDLE(				"PixivHandle",				Arrays.asList("色图","st","ss","bs"),	1,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
@@ -29,6 +29,8 @@ public enum MessageHandleEnum {
 	CFCX_HANDLE(				"CfcxHandle",					Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE)),
 	NEW_VIDEO_HANDLE(			"NewVideoHandle",				Arrays.asList("新视频","nv"),			0,		Arrays.asList(GUILD_MESSAGE)),
 	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
+	TALK_HANDLE(				"TalkHandle",					Arrays.asList("对话"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
+	DELETE_TALK_HANDLE(			"DeleteTalkHandle",			Arrays.asList("移除对话"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	;
 
 	private final String name;

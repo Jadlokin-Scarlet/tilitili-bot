@@ -6,10 +6,7 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,6 +21,7 @@ public class BotMessageAction {
     private final String body;
     private final String messageId;
     private final Map<String, String> paramMap;
+    private final Map<String, String> bodyMap;
     private String key;
     private String value;
 
@@ -31,6 +29,7 @@ public class BotMessageAction {
         this.botMessage = botMessage;
         this.session = session;
         this.paramMap = new HashMap<>();
+        this.bodyMap = new HashMap<>();
         this.messageId = botMessage.getMessageId();
 
         List<BotMessageChain> botMessageChainList = botMessage.getBotMessageChainList();
@@ -39,7 +38,7 @@ public class BotMessageAction {
 
         this.text = String.join("", textList).trim();
         this.body = text.contains("\n")? text.substring(text.indexOf("\n")).trim(): null;
-        List<String> lineList = Arrays.stream(text.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
+        List<String> lineList = body == null? Collections.emptyList(): Arrays.stream(body.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
         String head = lineList.isEmpty()? null: lineList.get(0);
 
         if (isNotBlank(head)) {
@@ -52,15 +51,22 @@ public class BotMessageAction {
             }
         }
 
-        if (lineList.size() > 1) {
-            for (String line : lineList.subList(1, lineList.size())) {
-                Matcher splitMatcher = Pattern.compile("[=＝]").matcher(line);
-                if (splitMatcher.find()) {
-                    int splitIndex = splitMatcher.end();
-                    String key = line.substring(0, splitIndex - 1).trim();
-                    String value = line.substring(splitIndex).trim();
-                    paramMap.put(key, value);
-                }
+        for (String line : lineList) {
+            Matcher splitMatcher = Pattern.compile("[=＝]").matcher(line);
+            if (splitMatcher.find()) {
+                int splitIndex = splitMatcher.end();
+                String key = line.substring(0, splitIndex - 1).trim();
+                String value = line.substring(splitIndex).trim();
+                paramMap.put(key, value);
+            }
+        }
+
+        if (body != null) {
+            String[] bodySplit = body.split("[=＝]");
+            for (int i = 0; i < bodySplit.length; i+=2) {
+                String key = bodySplit[i];
+                String value = bodySplit[i + 1];
+                bodyMap.put(key, value);
             }
         }
     }
@@ -71,6 +77,14 @@ public class BotMessageAction {
 
     public String getParamOrDefault(String paramKey, String defaultValue) {
         return paramMap.getOrDefault(paramKey, defaultValue);
+    }
+
+    public String getBody(String bodyKey) {
+        return bodyMap.get(bodyKey);
+    }
+
+    public String getBodyOrDefault(String bodyKey, String defaultValue) {
+        return bodyMap.getOrDefault(bodyKey, defaultValue);
     }
 
     public BotMessage getBotMessage() {

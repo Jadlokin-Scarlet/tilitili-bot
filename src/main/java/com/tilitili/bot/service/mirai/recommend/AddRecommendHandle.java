@@ -39,11 +39,11 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         String titleKey = messageAction.getKey().replaceAll("tj", "推荐").replaceAll("zj", "自荐");
 
         int type = Objects.equals("自荐", titleKey) ? 1 : 0;
-        String avStr = messageAction.getParam("视频号");
-        String operator = messageAction.getParamOrDefault("推荐人", messageAction.getBotMessage().getGroupNickName());
-        String text = messageAction.getParam("推荐语");
-        int startTime = Integer.parseInt(messageAction.getParamOrDefault("开始时间", "0"));
-        int endTime = Integer.parseInt(messageAction.getParamOrDefault("结束时间", String.valueOf(startTime + 30)));
+        String avStr = messageAction.getBody("视频号");
+        String operator = messageAction.getBodyOrDefault("推荐人", messageAction.getBotMessage().getGroupNickName());
+        String text = messageAction.getBody("推荐语");
+        int startTime = Integer.parseInt(messageAction.getBodyOrDefault("开始时间", "0"));
+        int endTime = Integer.parseInt(messageAction.getBodyOrDefault("结束时间", String.valueOf(startTime + 30)));
 
         Asserts.notNull(operator, "格式错啦(推荐人)");
         Asserts.notNull(avStr, "格式错啦(视频号)");

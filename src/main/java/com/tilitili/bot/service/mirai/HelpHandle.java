@@ -41,6 +41,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         handleDescMap.put(CFCX_HANDLE, "成分查询。格式:(cfcx Jadlokin_Scarlet)");
         handleDescMap.put(NEW_VIDEO_HANDLE, "随机获取昨日新增视频。格式:(nv)");
         handleDescMap.put(TAG_HANDLE, "查询指定pid的tag。格式:(tag 1231)");
+        handleDescMap.put(TALK_HANDLE, "设定对话。格式:(对话 提问 回答)或者(对话[回车]提问=hello？[回车]回答=hi？)");
 
         for (BaseMessageHandle handle : handleList) {
             MessageHandleEnum e = handle.getType();
@@ -55,6 +56,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
                 "格式例子：推荐[回车]视频号=12[回车]开始时间=0[回车]结束时间=30[回车]推荐人=Jadlokin_Scarlet[回车]推荐语=好！");
         handleDescMap.put(DELETE_RECOMMEND_HANDLE, "移除推荐池或当期推荐中的视频(自荐类推)，往期不能删");
         handleDescMap.put(DELETE_CALENDAR_HANDLE, "移除日程表，使用日程码，例子：移除日程 123");
+        handleDescMap.put(DELETE_TALK_HANDLE, "移除对话。格式:(移除对话 提问)");
 
         for (BaseMessageHandle handle : handleList) {
             MessageHandleEnum e = handle.getType();
