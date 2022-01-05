@@ -26,7 +26,7 @@ public class NewVideoHandle extends ExceptionRespMessageHandle {
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         VideoInfo video = videoInfoMapper.getRandomYesterdayVideo(new VideoInfoQuery());
-        String reply = String.format("随机推荐昨日新增车万视频。\n如有误判，不要在意\n%s\nhttps://www.bilibili.com/medialist/play/ml940681308/%s", video.getName(), video.getBv());
+        String reply = String.format("随机推荐昨日新增车万视频。如有误判，不要在意\n%s\nhttps://www.bilibili.com/medialist/play/ml940681308/%s", video.getName(), video.getBv());
         return BotMessage.simpleImageTextMessage(reply, video.getImg());
     }
 }
