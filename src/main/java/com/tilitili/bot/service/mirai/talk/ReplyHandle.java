@@ -7,6 +7,7 @@ import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.query.BotTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,12 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final BotTalkMapper botTalkMapper;
+    private final BotTalkManager botTalkManager;
 
     @Autowired
-    public ReplyHandle(BotTalkMapper botTalkMapper) {
+    public ReplyHandle(BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
         this.botTalkMapper = botTalkMapper;
+        this.botTalkManager = botTalkManager;
     }
 
     @Override
@@ -37,21 +40,8 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
-        BotMessage botMessage = messageAction.getBotMessage();
-        String sendType = botMessage.getSendType();
-        Long qq = botMessage.getQq();
-        Long group = botMessage.getGroup();
-        String guildId = botMessage.getGuildId();
-        String channelId = botMessage.getChannelId();
-
-        BotTalkQuery botTalkQuery = new BotTalkQuery().setReq(text).setSendType(sendType);
-        switch (sendType) {
-            case SendTypeEmum.FRIEND_MESSAGE: botMessage.setQq(qq); break;
-            case SendTypeEmum.GROUP_MESSAGE: botMessage.setGroup(group); break;
-            case SendTypeEmum.TEMP_MESSAGE: botMessage.setQq(qq).setGroup(group); break;
-            case SendTypeEmum.GUILD_MESSAGE: botMessage.setGuildId(guildId).setChannelId(channelId); break;
-        }
-        List<BotTalk> botTalkList = botTalkMapper.getBotTalkByCondition(botTalkQuery);
+        Long qq = messageAction.getBotMessage().getQq();
+        List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(text, messageAction.getBotMessage());
         if (!botTalkList.isEmpty()) {
             BotTalk botTalk = botTalkList.get(0);
             return BotMessage.simpleTextMessage(botTalk.getResp());

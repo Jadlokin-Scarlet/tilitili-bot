@@ -37,9 +37,9 @@ public class BotMessageAction {
         List<String> textList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Plain")).map(BotMessageChain::getText).filter(StringUtils::isNotBlank).collect(Collectors.toList());
 
         this.text = String.join("", textList).trim();
-        this.body = text.contains("\n")? text.substring(text.indexOf("\n")).trim(): null;
+        this.body = text.contains("\n")? text.substring(text.indexOf("\n") + 1).trim(): null;
         List<String> lineList = body == null? Collections.emptyList(): Arrays.stream(body.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
-        String head = lineList.isEmpty()? null: lineList.get(0);
+        String head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
 
         if (isNotBlank(head)) {
             if (head.contains(" ")) {
@@ -69,7 +69,7 @@ public class BotMessageAction {
                 if (split.contains("\n")) {
                     int index = split.lastIndexOf("\n");
                     bodyMap.put(key, split.substring(0, index));
-                    key = split.substring(index);
+                    key = split.substring(index + 1);
                 } else {
                     bodyMap.put(key, split);
                 }
