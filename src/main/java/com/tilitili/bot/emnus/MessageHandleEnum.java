@@ -16,6 +16,7 @@ public enum MessageHandleEnum {
 	CALENDAR_HANDLE(			"CalendarHandle",				Arrays.asList("日程表","rc"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	DELETE_CALENDAR_HANDLE(		"DeleteCalendarHandle",		Arrays.asList("移除日程"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	FIND_IMAGE_HANDLE(			"FindImageHandle",			Arrays.asList("找图","zt"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
+	FIND_EMOTICON_HANDLE(		"FindEmoticonHandle",			Arrays.asList("表情包","bqb"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	FRANSLATE_HANDLE(			"FranslateHandle",			Arrays.asList("翻译","fy"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
 	HELP_HANDLE(				"HelpHandle",					Arrays.asList("帮助","help"),			0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	PATTERN_STRING_HANDLE(		"PatternStringHandle",		Arrays.asList("正则","zz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
