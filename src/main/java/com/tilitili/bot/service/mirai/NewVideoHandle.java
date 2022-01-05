@@ -5,8 +5,9 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.VideoInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-
+//@Component
 public class NewVideoHandle extends ExceptionRespMessageHandle {
     private final VideoInfoMapper videoInfoMapper;
 
@@ -17,6 +18,7 @@ public class NewVideoHandle extends ExceptionRespMessageHandle {
 
     @Override
     public MessageHandleEnum getType() {
+        
         return null;
     }
 
