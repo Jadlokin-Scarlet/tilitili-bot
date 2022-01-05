@@ -63,10 +63,17 @@ public class BotMessageAction {
 
         if (body != null) {
             String[] bodySplit = body.split("[=＝]");
-            for (int i = 0; i < bodySplit.length; i+=2) {
-                String key = bodySplit[i];
-                String value = bodySplit[i + 1];
-                bodyMap.put(key, value);
+            String key = bodySplit[0];
+            String value;
+            for (int i = 1; i < bodySplit.length; i++) {
+                value = bodySplit[i];
+                if (value.contains("\n")) {
+                    value = value.substring(0, value.lastIndexOf("\n"));
+                    bodyMap.put(key, value);
+                    key = value.substring(value.lastIndexOf("\n"));
+                } else {
+                    bodyMap.put(key, value);
+                }
             }
         }
     }
