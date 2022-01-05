@@ -6,6 +6,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.QQUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,7 +27,7 @@ public class FindImageHandle extends ExceptionRespMessageHandle{
     public BotMessage handleMessage(BotMessageAction messageAction) {
         List<String> imageUrlList = messageAction.getImageList();
         Asserts.notEmpty(imageUrlList, "格式错啦(图片)");
-        String url = imageUrlList.get(0);
+        String url = QQUtil.getImageUrl(imageUrlList.get(0));
         Asserts.notBlank(url, "格式错啦(图片)");
         String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
         Asserts.notBlank(html, "没要到图😇\n"+url);
