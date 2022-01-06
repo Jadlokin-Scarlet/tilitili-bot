@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -61,15 +58,24 @@ public class PixivHandle extends LockMessageHandle {
         String sendMessageId = messageAction.getMessageId();
         BotMessage botMessage = messageAction.getBotMessage();
         Long group = botMessage.getGroup();
+        String tinyId = botMessage.getTinyId();
         String titleKey = messageAction.getKey();
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
 
+        // 群色图限制
         if (group != null) {
             List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value);
             if (!groupList.contains(group)) {
                 if (!r18.equals("0")) {
                     return BotMessage.simpleTextMessage("不准色色o(*////▽////*)q");
                 }
+            }
+        }
+
+        // 频道色图限制
+        if (tinyId != null) {
+            if (! Objects.equals(tinyId, "144115218678093982")) {
+                return null;
             }
         }
 
