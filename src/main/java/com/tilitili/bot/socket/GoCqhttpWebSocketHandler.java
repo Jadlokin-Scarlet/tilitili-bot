@@ -30,7 +30,7 @@ public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
         if (message.contains("meta_event_type\":\"heartbeat")) return;
-        if (! message.contains("\"message_type\":\"guild\"")) return;
+        if (!message.contains("\"message_type\":\"guild\"")) return;
         BotMessage botMessage = goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
         botMessageRecordManager.logRecord(message, botMessage);
         botService.syncHandleTextMessage(botMessage);
