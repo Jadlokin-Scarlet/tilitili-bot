@@ -36,7 +36,8 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
         String text = messageAction.getParamOrDefault("t", "");
 
         String url = imageList.isEmpty()? "": imageList.get(0);
-        Asserts.notBlank(body + url + text, "格式错啦(内容)");
+        String bodyNotNull = body == null? "": body;
+        Asserts.notBlank(bodyNotNull + url + text, "格式错啦(内容)");
 
         String enText = (text + body);
         String cnText;

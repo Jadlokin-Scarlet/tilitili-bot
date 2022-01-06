@@ -5,6 +5,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
+import org.jsoup.helper.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -106,7 +107,7 @@ public class BotMessageAction {
     }
 
     public String getValueOrDefault(String defaultValue) {
-        return value == null? defaultValue: value;
+        return StringUtil.isBlank(value)? defaultValue: value;
     }
 
     public BotSessionService.MiraiSession getSession() {
