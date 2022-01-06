@@ -1,5 +1,6 @@
 package com.tilitili.bot.socket;
 
+import com.tilitili.common.exception.AssertException;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -19,7 +20,11 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        handleTextMessage(message);
+        try {
+            handleTextMessage(message);
+        } catch (AssertException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
