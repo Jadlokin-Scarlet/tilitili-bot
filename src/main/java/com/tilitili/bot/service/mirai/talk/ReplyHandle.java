@@ -3,9 +3,10 @@ package com.tilitili.bot.service.mirai.talk;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.GuildEmum;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +39,20 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         String text = messageAction.getText();
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
+        String guildId = botMessage.getGuildId();
+        String sendType = botMessage.getSendType();
         List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(text, botMessage);
         if (!botTalkList.isEmpty()) {
             BotTalk botTalk = botTalkList.get(0);
             return BotMessage.simpleTextMessage(botTalk.getResp());
         }
 
-        int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
-        if (ddCount > 0) {
-            String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
-            return BotMessage.simpleTextMessage(repeat);
+        if (! Objects.equals(SendTypeEmum.Guild_Message.sendType, sendType) || Objects.equals(guildId, GuildEmum.Our_Homo.guildId)) {
+            int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
+            if (ddCount > 0) {
+                String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
+                return BotMessage.simpleTextMessage(repeat);
+            }
         }
 
         if (Objects.equals(qq, MASTER_QQ) && text.equals("cww")) {
