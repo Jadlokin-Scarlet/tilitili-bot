@@ -29,7 +29,7 @@ public enum MessageHandleEnum {
 	CONFIG_HANDLE(				"ConfigHandle",				Arrays.asList("配置","pz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CFCX_HANDLE(				"CfcxHandle",					Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE)),
 	NEW_VIDEO_HANDLE(			"NewVideoHandle",				Arrays.asList("新视频","nv"),			0,		Arrays.asList(GROUP_MESSAGE, GUILD_MESSAGE)),
-	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
+	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	TALK_HANDLE(				"TalkHandle",					Arrays.asList("对话"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	DELETE_TALK_HANDLE(			"DeleteTalkHandle",			Arrays.asList("移除对话"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	;
