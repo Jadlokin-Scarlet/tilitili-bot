@@ -81,7 +81,7 @@ public class PixivHandle extends LockMessageHandle {
         switch (source) {
             case "lolicon": messageId = sendLoliconImage(botMessage, searchKey == null? "チルノ": searchKey, source, num, r18); break;
             case "pixiv": messageId = pixivManager.sendPixivImage(sendMessageId, searchKey == null? "チルノ 東方Project100users入り": searchKey, source, r18); break;
-//            case "powner": messageId = pixivManager.sendPixivImage(sendMessageId, searchKey == null? "チルノ 東方Project100users入り": searchKey, source, r18); break;
+            case "powner": messageId = pixivManager.sendPixivUserImage(sendMessageId, searchKey == null? "ke-ta": searchKey, source, r18); break;
             default: throw new AssertException("没有这个平台");
         }
         if (messageId != null) {
