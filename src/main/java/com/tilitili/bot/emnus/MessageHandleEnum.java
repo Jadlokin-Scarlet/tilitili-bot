@@ -24,7 +24,7 @@ public enum MessageHandleEnum {
 	REPLY_HANDLE(				"ReplyHandle",				Collections.emptyList(),				-1,	Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	REPEAT_HANDLE(				"RepeatHandle",				Collections.emptyList(),				-2,	Arrays.asList(GROUP_MESSAGE)),
 	VOICE_HANDLE(				"VoiceHandle",				Arrays.asList("说","s"),				0,		Arrays.asList(GROUP_MESSAGE)),
-	PIXIV_HANDLE(				"PixivHandle",				Arrays.asList("色图","st","ss","bs"),	1,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE)),
+	PIXIV_HANDLE(				"PixivHandle",				Arrays.asList("色图","st","ss","bs"),	1,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	RECALL_HANDLE(				"RecallHandle",				Arrays.asList("撤回","ch"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CONFIG_HANDLE(				"ConfigHandle",				Arrays.asList("配置","pz"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE)),
 	CFCX_HANDLE(				"CfcxHandle",					Arrays.asList("成分查询","cfcx"),		0,		Arrays.asList(GROUP_MESSAGE)),
