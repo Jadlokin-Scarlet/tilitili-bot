@@ -70,6 +70,13 @@ public class PixivHandle extends LockMessageHandle {
             }
         }
 
+        // 频道色图限制
+        if (tinyId != null) {
+            if (!r18.equals("0")) {
+                return null;
+            }
+        }
+
         String messageId;
         switch (source) {
             case "lolicon": messageId = sendLoliconImage(botMessage, searchKey == null? "チルノ": searchKey, source, num, r18); break;
