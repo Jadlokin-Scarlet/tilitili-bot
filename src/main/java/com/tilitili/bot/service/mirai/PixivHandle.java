@@ -129,7 +129,7 @@ public class PixivHandle extends LockMessageHandle {
             pixivImage.setUrlList(imageUrl);
             pixivImage.setSearchKey(searchKey);
             pixivImage.setSource(source);
-            pixivImage.setMessageId(Integer.valueOf(messageId));
+            pixivImage.setMessageId(messageId);
             pixivImage.setStatus(1);
             pixivImageMapper.addPixivImageSelective(pixivImage);
         }

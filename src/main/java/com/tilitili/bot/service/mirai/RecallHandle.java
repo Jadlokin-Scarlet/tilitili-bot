@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.tilitili.PixivImageMapper;
 import com.tilitili.common.utils.RedisCache;
@@ -25,12 +26,14 @@ public class RecallHandle extends ExceptionRespMessageHandle {
     private final MiraiManager miraiManager;
     private final RedisCache redisCache;
     private final PixivImageMapper pixivImageMapper;
+    private final BotManager botManager;
 
     @Autowired
-    public RecallHandle(MiraiManager miraiManager, RedisCache redisCache, PixivImageMapper pixivImageMapper) {
+    public RecallHandle(MiraiManager miraiManager, RedisCache redisCache, PixivImageMapper pixivImageMapper, BotManager botManager) {
         this.miraiManager = miraiManager;
         this.redisCache = redisCache;
         this.pixivImageMapper = pixivImageMapper;
+        this.botManager = botManager;
     }
 
     @Override
@@ -47,16 +50,15 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             if (pid == null) {
                 String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
                 if (! isBlank(messageIdStr)) {
-                    int messageId = Integer.parseInt(messageIdStr);
-                    miraiManager.recallMessage(messageId);
+                    botManager.recallMessage(messageIdStr);
                     return BotMessage.simpleTextMessage("搞定");
                 }
             } else {
                 List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
                 for (PixivImage pixivImage : pixivImageList) {
-                    Integer messageId = pixivImage.getMessageId();
+                    String messageId = pixivImage.getMessageId();
                     if (messageId != null) {
-                        miraiManager.recallMessage(messageId);
+                        botManager.recallMessage(messageId);
                         return BotMessage.simpleTextMessage("搞定");
                     }
                 }
