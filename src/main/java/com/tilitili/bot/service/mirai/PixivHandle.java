@@ -26,7 +26,6 @@ public class PixivHandle extends LockMessageHandle {
     public static final String messageIdKey = "pixiv.messageId";
 
     private final RedisCache redisCache;
-    private final MiraiManager miraiManager;
     private final PixivImageMapper pixivImageMapper;
     private final LoliconManager loliconManager;
     private final PixivManager pixivManager;
@@ -35,10 +34,9 @@ public class PixivHandle extends LockMessageHandle {
     private final Map<String, String> keyMap = ImmutableMap.of("ss", "1", "bs", "0");
 
     @Autowired
-    public PixivHandle(RedisCache redisCache, MiraiManager miraiManager, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager) {
+    public PixivHandle(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager) {
         super("出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
         this.redisCache = redisCache;
-        this.miraiManager = miraiManager;
         this.pixivImageMapper = pixivImageMapper;
         this.loliconManager = loliconManager;
         this.pixivManager = pixivManager;
@@ -59,7 +57,7 @@ public class PixivHandle extends LockMessageHandle {
         BotMessage botMessage = messageAction.getBotMessage();
         Long group = botMessage.getGroup();
         String tinyId = botMessage.getTinyId();
-        String titleKey = messageAction.getKey();
+        String titleKey = messageAction.getKeyWithoutPrefix();
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
 
         // 群色图限制

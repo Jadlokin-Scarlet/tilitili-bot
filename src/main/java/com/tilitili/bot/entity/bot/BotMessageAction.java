@@ -23,6 +23,7 @@ public class BotMessageAction {
     private final String messageId;
     private final Map<String, String> paramMap;
     private final Map<String, String> bodyMap;
+    private String keyWithoutPrefix;
     private String key;
     private String value;
 
@@ -46,6 +47,7 @@ public class BotMessageAction {
             if (head.contains(" ")) {
                 int splitIndex = head.indexOf(" ");
                 key = head.substring(0, splitIndex).trim();
+                keyWithoutPrefix = Pattern.compile("^[.。]").matcher(key).find()? key.substring(1): key;
                 value = head.substring(splitIndex).trim();
             } else {
                 key = head;
@@ -130,4 +132,7 @@ public class BotMessageAction {
         return text;
     }
 
+    public String getKeyWithoutPrefix() {
+        return keyWithoutPrefix;
+    }
 }
