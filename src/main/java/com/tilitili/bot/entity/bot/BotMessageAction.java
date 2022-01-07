@@ -47,11 +47,11 @@ public class BotMessageAction {
             if (head.contains(" ")) {
                 int splitIndex = head.indexOf(" ");
                 key = head.substring(0, splitIndex).trim();
-                keyWithoutPrefix = Pattern.compile("^[.。]").matcher(key).find()? key.substring(1): key;
                 value = head.substring(splitIndex).trim();
             } else {
                 key = head;
             }
+            keyWithoutPrefix = Pattern.compile("^[.。]").matcher(key).find()? key.substring(1): key;
         }
 
         for (String line : lineList) {
