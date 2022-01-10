@@ -38,7 +38,7 @@ public class FindEmoticonHandle extends ExceptionRespMessageHandle{
         String tinyId = botMessage.getTinyId();
         String sender = qq != null? String.valueOf(qq) : tinyId;
 
-        Long start = redisCache.increment(emoticonKey, sender) - 1;
+        Long start = (redisCache.increment(emoticonKey, sender) - 1) % 20;
 
         List<String> imgList = dbbqbManager.searchEmoticon(tag, start);
         Asserts.notEmpty(imgList, "没找到表情包");
