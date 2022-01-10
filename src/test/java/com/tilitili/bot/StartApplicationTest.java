@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpWsMessage;
+import com.tilitili.common.utils.RedisCache;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,12 @@ import java.util.stream.Collectors;
 class StartApplicationTest {
     @Autowired
     private HelpHandle helpHandle;
+    @Autowired
+    private RedisCache redisCache;
 
     @Test
     void main() {
-        System.out.println("?");
+        Long start = redisCache.increment("testMap", "test");
+        System.out.println(start);
     }
 }
