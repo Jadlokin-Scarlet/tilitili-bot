@@ -106,11 +106,12 @@ public class PixivHandle extends LockMessageHandle {
                 messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
             }
             if (isSese) {
-                String ossUrl = OSSUtil.getCacheOSSOrUploadByUrl(imageUrl);
+                String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
                 messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl));
             } else {
+                String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
                 messageChainList.add(new BotMessageChain().setType("Plain").setText(pid + "\n"));
-                messageChainList.add(new BotMessageChain().setType("Image").setUrl(imageUrl));
+                messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
             }
         }
 
