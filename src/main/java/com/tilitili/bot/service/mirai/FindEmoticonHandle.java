@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 public class FindEmoticonHandle extends ExceptionRespMessageHandle{
-    private final String emoticonKey = "emoticon";
+    private final String emoticonKey = "emoticon-";
     private final DbbqbManager dbbqbManager;
     private final RedisCache redisCache;
 
@@ -37,8 +37,9 @@ public class FindEmoticonHandle extends ExceptionRespMessageHandle{
         Long qq = botMessage.getQq();
         String tinyId = botMessage.getTinyId();
         String sender = qq != null? String.valueOf(qq) : tinyId;
+        Asserts.notBlank(sender, "发送者为空");
 
-        int start = Math.toIntExact((redisCache.increment(emoticonKey, sender) - 1) % 20);
+        int start = Math.toIntExact((redisCache.increment(emoticonKey + sender, tag) - 1) % 20);
 
         List<String> imgList = dbbqbManager.searchEmoticon(tag, start);
         Asserts.notEmpty(imgList, "没找到表情包");
