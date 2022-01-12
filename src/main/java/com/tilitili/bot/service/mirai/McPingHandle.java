@@ -34,7 +34,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws IOException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		String key = messageAction.getKey();
+		String key = messageAction.getKeyWithoutPrefix();
 		Asserts.notBlank(key, "key是啥");
 		if (key.equals("mcpd")) {
 			String value = messageAction.getValue();
