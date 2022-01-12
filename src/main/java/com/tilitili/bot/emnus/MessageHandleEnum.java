@@ -32,6 +32,7 @@ public enum MessageHandleEnum {
 	TAG_HANDLE(					"TagHandle",					Arrays.asList("tag"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	TALK_HANDLE(				"TalkHandle",					Arrays.asList("对话"),					0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	DELETE_TALK_HANDLE(			"DeleteTalkHandle",			Arrays.asList("移除对话"),				0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
+	MC_PING_HANDLE(				"McPingHandle",				Arrays.asList("mcp", "mcpd", "mcm"),	0,		Arrays.asList(FRIEND_MESSAGE, TEMP_MESSAGE, GROUP_MESSAGE, GUILD_MESSAGE)),
 	;
 
 	private final String name;
