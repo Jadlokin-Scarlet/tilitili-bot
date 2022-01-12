@@ -36,9 +36,9 @@ public enum MessageHandleEnum {
 	;
 
 	private final String name;
+	private final Integer sort;
 	private final List<String> keyword;
 	private final List<String> sendType;
-	private final Integer sort;
 
 	MessageHandleEnum(String name, List<String> keyword, Integer sort, List<String> sendType) {
 		this.name = name;
