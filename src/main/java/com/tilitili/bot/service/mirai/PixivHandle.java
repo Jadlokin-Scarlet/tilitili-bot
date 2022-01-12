@@ -136,47 +136,4 @@ public class PixivHandle extends LockMessageHandle {
         }
         return messageId;
     }
-//
-//    private Integer sendPixivMoeImage(Sender sendGroup, String searchKey, String source) throws InterruptedException {
-//        PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setSearchKey(searchKey).setSource(source));
-//        if (noUsedImage == null) {
-//            List<SearchIllust> dataList = pixivMoeManager.search(searchKey, 1L);
-//            Asserts.isFalse(dataList.isEmpty(), "搜不到tag");
-//            List<SearchIllust> filterDataList = dataList.stream().filter(data -> pixivImageMapper.getPixivImageByCondition(new PixivImage().setPid(data.getId())).isEmpty()).collect(Collectors.toList());
-//
-//            if (filterDataList.isEmpty()) {
-//                Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
-//                filterDataList = pixivMoeManager.search(searchKey, pageNo);
-//                Asserts.isFalse(filterDataList.isEmpty(), "搜不到tag");
-//            }
-//
-//            for (SearchIllust data : filterDataList) {
-//                String pid = data.getId();
-//
-//                PixivImage pixivImage = new PixivImage();
-//                pixivImage.setPid(pid);
-//                pixivImage.setTitle(data.getTitle());
-//                pixivImage.setPageCount(data.getPage_count());
-//                pixivImage.setSmallUrl(data.getImage_urls().getOriginal());
-//                pixivImage.setUserName(data.getUser().getName());
-//                pixivImage.setUserId(data.getUser().getId());
-//                pixivImage.setSearchKey(searchKey);
-//                pixivImage.setSource(source);
-//
-//                List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImage().setPid(pid).setSource(source));
-//                if (oldDataList.isEmpty()) {
-//                    pixivImageMapper.addPixivImageSelective(pixivImage);
-//                }
-//            }
-//            noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setSearchKey(searchKey).setSource(source));
-//        }
-//
-//        String url = noUsedImage.getSmallUrl();
-//        String pid = noUsedImage.getPid();
-//
-//        pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
-//        Integer messageId = miraiManager.sendMessage(new MiraiMessage().setMessageType("ImageText").setSendType("GroupMessage").setUrl(url.replace("https://", "https://api.pixiv.moe/image/")).setMessage("https://pixiv.moe/illust/"+pid+"\n").setGroup(sendGroup.getId()));
-//        pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setMessageId(messageId));
-//        return messageId;
-//    }
 }
