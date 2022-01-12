@@ -37,7 +37,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			session.put(hostKey, value);
 			return BotMessage.simpleTextMessage("记住啦！下次mcp不用加地址了。");
 		}
-		String host = session.getOrDefault(hostKey, messageAction.getValue());
+		String host = messageAction.getValueOrDefault(session.get(hostKey));
 		Asserts.notBlank(host, "没有地址");
 		McsrvstatResponse response = mcsrvstatManager.mcping(host);
 		Boolean online = response.getOnline();
