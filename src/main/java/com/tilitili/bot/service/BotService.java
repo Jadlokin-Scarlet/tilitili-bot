@@ -43,24 +43,27 @@ public class BotService {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session);
             String actionKey = botMessageAction.getKey();
+            Asserts.notNull(actionKey, "key为空");
 
+            String prefix = "";
             if (Objects.equals(sendType, SendTypeEmum.Guild_Message.sendType)) {
                 Asserts.isTrue(ChannelEmum.channelIds().contains(botMessage.getChannelId()), "不在可用频道");
-                if (actionKey != null) {
-                    String prefix = "^[.。]";
-                    if (!Pattern.compile(prefix).matcher(actionKey).find()) {
-                        throw new AssertException("频道命令以[" + prefix + "]开头");
-                    } else {
-                        actionKey = actionKey.substring(1);
-                    }
-                }
+                prefix = ".";
+                actionKey = actionKey.replaceAll("^[.。]", prefix);
+//                String prefix = "^[.。]";
+//                if (!Pattern.compile("^[.。]").matcher(actionKey).find()) {
+//                    throw new AssertException("频道命令以句号开头");
+//                } else {
+//                    actionKey = actionKey.substring(1);
+//                }
             }
 
             BotMessage respMessage = null;
             for (BaseMessageHandle messageHandle : messageHandleList) {
                 MessageHandleEnum handleType = messageHandle.getType();
                 if (handleType.getSendType().contains(sendType)) {
-                    if (handleType.getKeyword().contains(actionKey) || handleType.getKeyword().isEmpty()) {
+                    boolean isKeyword = handleType.getKeyword().stream().map(prefix::concat).anyMatch(actionKey::equals);
+                    if (isKeyword || handleType.getKeyword().isEmpty()) {
                         try {
                             // 返回null则代表跳过，继续寻找
                             // 返回空消息则代表已处理完毕但不回复，直接结束
