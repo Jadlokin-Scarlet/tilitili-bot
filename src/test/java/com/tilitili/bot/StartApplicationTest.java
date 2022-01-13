@@ -34,6 +34,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.tilitili.common.emnus.ChannelEmum.*;
+import static com.tilitili.common.emnus.GroupEmum.RANK_GROUP;
+import static com.tilitili.common.emnus.GroupEmum.TEST_GROUP;
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 class StartApplicationTest {
@@ -69,6 +73,7 @@ class StartApplicationTest {
     @Test
     void test() {
         botSenderMapper.deleteAllBotSender();
+        botSenderTaskMappingMapper.deleteAllMapping();
         // friend message
         List<MiraiFriend> friendList = miraiManager.getFriendList();
         for (MiraiFriend friend : friendList) {
@@ -76,9 +81,9 @@ class StartApplicationTest {
             botSenderMapper.addBotSenderSelective(friendSender);
             List<Integer> list = new ArrayList<>();
             if (friendSender.getQq().equals(545459363L)) {
-                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,14,17,18,19,20,21,22,23,24));
+                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,14,17,18,19,20,21,22,23,24,25));
             } else {
-                list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,17,20,21,22,23,24));
+                list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,17,20,21,22,23,24,25));
             }
             list.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(friendSender.getId()).setTaskId(taskId)));
         }
@@ -88,14 +93,12 @@ class StartApplicationTest {
             BotSender groupSender = new BotSender().setSendType(SendTypeEmum.GROUP_MESSAGE).setGroup(group.getId()).setName(group.getName());
             botSenderMapper.addBotSenderSelective(groupSender);
             List<Integer> list = new ArrayList<>();
-            if (groupSender.getGroup().equals(759168424L)) {
-                list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24));
-            } else if (groupSender.getGroup().equals(670290958L)) {
-                list.addAll(Arrays.asList(1,2,3,4,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24));
-            } else if (groupSender.getGroup().equals(729412455L)) {
-                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24));
+            if (groupSender.getGroup().equals(RANK_GROUP.value)) {
+                list.addAll(Arrays.asList(1,2,3,4,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24,25));
+            } else if (groupSender.getGroup().equals(TEST_GROUP.value)) {
+                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,20,21,22,23,24,25));
             } else {
-                list.addAll(Arrays.asList(11));
+                list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24,25));
             }
             list.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(groupSender.getId()).setTaskId(taskId)));
 
@@ -105,7 +108,7 @@ class StartApplicationTest {
                 BotSender tempSender = new BotSender().setSendType(SendTypeEmum.TEMP_MESSAGE).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
                 botSenderMapper.addBotSenderSelective(tempSender);
 
-                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,11));
+                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,17,20,21,22,23,24,25));
                 list2.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(tempSender.getId()).setTaskId(taskId)));
             }
         }
@@ -116,9 +119,25 @@ class StartApplicationTest {
             for (GoCqhttpChannel channel : channelList) {
                 BotSender guildSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
                 botSenderMapper.addBotSenderSelective(guildSender);
-                List<Integer> list2 = new ArrayList<>(Arrays.asList(11));
-//                if (channel.getChannelId().equals())
-                list2.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(guildSender.getId()).setTaskId(taskId)));
+                List<Integer> list = new ArrayList<>();
+                if (channel.getChannelId().equals(CaiHong_Guanzhu_Channel.channelId)) {// 转播自助用
+                    list.addAll(Arrays.asList(3,4,11));
+                } else if (channel.getChannelId().equals(Our_Homo_Bot_Channel.channelId)) {// Bot灌水
+                    list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
+                } else if (channel.getChannelId().equals(Our_Homo_Test_Channel.channelId)) {// test
+                    list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,18,20,21,22,23,24,25));
+                } else if (channel.getChannelId().equals(Touhou_Guild_Watch_Channel.channelId)) {// 石油之海 | 查级灌水
+                    list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
+                } else if (channel.getChannelId().equals(Touhou_Guild_Video_Channel.channelId)) {// 伏瓦鲁魔法图书馆
+                    list.addAll(Arrays.asList(11,21));
+                } else if (channel.getChannelId().equals(CaiHong_Image_Channel.channelId)) {// 不可以色色的女V图片区
+                    list.addAll(Arrays.asList(11,17,22));
+                } else if (channel.getChannelId().equals(CaiHong_Game_Channel.channelId)) {// 游戏讨论
+                    list.addAll(Arrays.asList(11,25));
+                } else {
+                    list.addAll(Arrays.asList(11));
+                }
+                list.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(guildSender.getId()).setTaskId(taskId)));
             }
         }
     }
