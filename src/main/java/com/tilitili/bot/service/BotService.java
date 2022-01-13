@@ -1,13 +1,16 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.BaseMessageHandle;
 import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotSenderManager;
+import com.tilitili.common.manager.BotTaskManager;
+import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,23 +18,28 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 public class BotService {
     private final BotManager botManager;
-    private final List<BaseMessageHandle> messageHandleList;
+    private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
+    private final BotTaskMapper botTaskMapper;
+    private final BotTaskManager botTaskManager;
+    private final BotSenderManager botSenderManager;
 
-    public BotService(BotManager botManager, List<BaseMessageHandle> messageHandleList, BotSessionService botSessionService) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotTaskManager botTaskManager, BotSenderManager botSenderManager) {
         this.botManager = botManager;
-        this.messageHandleList = messageHandleList;
+        this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
-        this.messageHandleList.sort(Comparator.comparing(a -> a.getType().getSort(), Comparator.reverseOrder()));
+        this.botTaskMapper = botTaskMapper;
+        this.botTaskManager = botTaskManager;
+        this.botSenderManager = botSenderManager;
+//        this.messageHandleMap.sort(Comparator.comparing(a -> a.getType().getSort(), Comparator.reverseOrder()));
     }
 
     @Async
@@ -58,26 +66,43 @@ public class BotService {
 //                }
             }
 
+            List<BotTask> botTaskDTOList = botTaskManager.getTaskListByBotMessage(botMessage, actionKey, prefix);
             BotMessage respMessage = null;
-            for (BaseMessageHandle messageHandle : messageHandleList) {
-                MessageHandleEnum handleType = messageHandle.getType();
-                if (handleType.getSendType().contains(sendType)) {
-                    boolean isKeyword = handleType.getKeyword().stream().map(prefix::concat).anyMatch(actionKey::equals);
-                    if (isKeyword || handleType.getKeyword().isEmpty()) {
-                        try {
-                            // 返回null则代表跳过，继续寻找
-                            // 返回空消息则代表已处理完毕但不回复，直接结束
-                            respMessage = messageHandle.handleMessage(botMessageAction);
-                        } catch (AssertException e) {
-                            log.debug(e.getMessage());
-                            respMessage = messageHandle.handleAssertException(botMessageAction, e);
-                        }
-                        if (respMessage != null) {
-                            break;
-                        }
-                    }
+            for (BotTask botTask : botTaskDTOList) {
+                BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
+                try {
+                    // 返回null则代表跳过，继续寻找
+                    // 返回空消息则代表已处理完毕但不回复，直接结束
+                    respMessage = messageHandle.handleMessage(botMessageAction);
+                } catch (AssertException e) {
+                    log.debug(e.getMessage());
+                    respMessage = messageHandle.handleAssertException(botMessageAction, e);
+                }
+                if (respMessage != null) {
+                    break;
                 }
             }
+
+//            BotMessage respMessage = null;
+//            for (BaseMessageHandle messageHandle : messageHandleMap) {
+//                MessageHandleEnum handleType = messageHandle.getType();
+//                if (handleType.getSendType().contains(sendType)) {
+//                    boolean isKeyword = handleType.getKeyword().stream().map(prefix::concat).anyMatch(actionKey::equals);
+//                    if (isKeyword || handleType.getKeyword().isEmpty()) {
+//                        try {
+//                            // 返回null则代表跳过，继续寻找
+//                            // 返回空消息则代表已处理完毕但不回复，直接结束
+//                            respMessage = messageHandle.handleMessage(botMessageAction);
+//                        } catch (AssertException e) {
+//                            log.debug(e.getMessage());
+//                            respMessage = messageHandle.handleAssertException(botMessageAction, e);
+//                        }
+//                        if (respMessage != null) {
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
 
             // 如果最后为null，则标志无匹配处理器，则回复表情包
             Asserts.notNull(respMessage, "无回复");
