@@ -62,7 +62,7 @@ public class PixivHandle extends LockMessageHandle {
 
         // 群色图限制
         if (group != null) {
-            List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value);
+            List<Long> groupList = Arrays.asList(GroupEmum.HOMO_LIVE_GROUP.value, 759168424L);
             if (!groupList.contains(group)) {
                 if (!r18.equals("0")) {
                     return BotMessage.simpleTextMessage("不准色色o(*////▽////*)q");
