@@ -76,12 +76,15 @@ class StartApplicationTest {
         botSenderTaskMappingMapper.deleteAllMapping();
         // friend message
         List<MiraiFriend> friendList = miraiManager.getFriendList();
+        List<Long> qqList = friendList.stream().map(MiraiFriend::getId).collect(Collectors.toList());
         for (MiraiFriend friend : friendList) {
             BotSender friendSender = new BotSender().setSendType(SendTypeEmum.FRIEND_MESSAGE).setQq(friend.getId()).setName(friend.getNickname());
             botSenderMapper.addBotSenderSelective(friendSender);
             List<Integer> list = new ArrayList<>();
+            if (Arrays.asList(66600000L, 1701008067L).contains(friendSender.getQq())) continue;
+
             if (friendSender.getQq().equals(545459363L)) {
-                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,14,17,18,19,20,21,22,23,24,25));
+                list.addAll(Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12,14,15,17,18,19,20,21,22,23,24,25));
             } else {
                 list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,17,20,21,22,23,24,25));
             }
@@ -105,10 +108,12 @@ class StartApplicationTest {
             // temp message
             List<MiraiFriend> tempList = miraiManager.getMemberList(group.getId());
             for (MiraiFriend temp : tempList) {
+                if (qqList.contains(temp.getId())) continue;
+
                 BotSender tempSender = new BotSender().setSendType(SendTypeEmum.TEMP_MESSAGE).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
                 botSenderMapper.addBotSenderSelective(tempSender);
 
-                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,17,20,21,22,23,24,25));
+                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
                 list2.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(tempSender.getId()).setTaskId(taskId)));
             }
         }
