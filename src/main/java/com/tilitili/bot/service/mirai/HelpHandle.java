@@ -82,17 +82,19 @@ public class HelpHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ");;
+        String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ").trim();;
         String sendType = messageAction.getBotMessage().getSendType();
         String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
         BotSender botSender = botSenderManager.getSenderByBotMessage(messageAction.getBotMessage());
         if (StringUtil.isBlank(paramListStr)) {
-            List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId());
+            List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListBySenderId(botSender.getId());
 
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！查看详情发送（帮助 [指令]）\n");
-            for (BotTaskDTO botTask : botTaskDTOList) {
-                reply.append(String.format("%s：%s\n", botTask.getKeyListStr(), botTask.getNick()));
+            for (int i = 0; i < botTaskDTOList.size(); i++) {
+                BotTaskDTO botTask = botTaskDTOList.get(i);
+                String key = botTask.getKeyListStr() == null ? "" : botTask.getKeyListStr();
+                reply.append(String.format("%s.%s: %s\n", i + 1, botTask.getNick(), key));
             }
 //
 //            for (Pair<MessageHandleEnum, String> entry : handleDescMap) {
@@ -108,9 +110,14 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleTextMessage(reply.toString());
         } else if (! paramListStr.contains(" ")) {
             List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, guildPrefix);
-            Asserts.checkEquals(botTaskList.size(), 1, "不对劲");
-            BotTask botTask = botTaskList.get(0);
-            String reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            Asserts.isTrue(botTaskList.size() < 2, "不对劲");
+            String reply;
+            if (botTaskList.isEmpty()) {
+                reply = String.format("[%s]的作用是[%s]。", paramListStr, paramListStr);
+            } else {
+                BotTask botTask = botTaskList.get(0);
+                reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            }
             return BotMessage.simpleTextMessage(reply);
         } else {
             return null;
