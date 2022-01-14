@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai.subscription;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
@@ -27,12 +26,7 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
         this.bilibiliManager = bilibiliManager;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.ADD_SUBSCRIPTION_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String key = messageAction.getParamOrDefault("key", messageAction.getValue());
         BotMessage botMessage = messageAction.getBotMessage();

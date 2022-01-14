@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BaiduManager;
@@ -25,12 +24,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         this.miraiManager = miraiManager;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.VOICE_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
         File wavFile = new File("/home/admin/silk/voice.wav");
         File slkFile = new File("/home/admin/silk/voice.slk");

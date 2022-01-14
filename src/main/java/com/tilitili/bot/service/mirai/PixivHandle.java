@@ -1,7 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.ImmutableMap;
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.PixivImage;
@@ -43,12 +42,7 @@ public class PixivHandle extends LockMessageHandle {
         this.botManager = botManager;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.PIXIV_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessageAfterLock(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
         String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
         String source = messageAction.getParamOrDefault("source", "pixiv");

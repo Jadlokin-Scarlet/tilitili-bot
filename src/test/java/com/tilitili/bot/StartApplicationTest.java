@@ -1,19 +1,11 @@
 package com.tilitili.bot;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
-import com.tilitili.common.entity.BotTask;
-import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpChannel;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpGuild;
-import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpWsMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiFriend;
 import com.tilitili.common.entity.view.bot.mirai.MiraiGroup;
 import com.tilitili.common.manager.GoCqhttpManager;
@@ -32,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
 import static com.tilitili.common.emnus.GroupEmum.RANK_GROUP;
@@ -58,16 +49,16 @@ class StartApplicationTest {
 
     @Test
     void main() {
-        for (MessageHandleEnum e : MessageHandleEnum.values()) {
-            String name = e.getName();
-            BotTask botTask = botTaskMapper.getBotTaskByName(name);
-            List<String> sendTypeList = e.getSendType();
-            for (String sendType : sendTypeList) {
-                List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setSendType(sendType));
-                BotSender botSender = botSenderList.get(0);
-                botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(botSender.getId()).setTaskId(botTask.getId()));
-            }
-        }
+//        for (MessageHandleEnum e : MessageHandleEnum.values()) {
+//            String name = e.getName();
+//            BotTask botTask = botTaskMapper.getBotTaskByName(name);
+//            List<String> sendTypeList = e.getSendType();
+//            for (String sendType : sendTypeList) {
+//                List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setSendType(sendType));
+//                BotSender botSender = botSenderList.get(0);
+//                botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(botSender.getId()).setTaskId(botTask.getId()));
+//            }
+//        }
     }
 
     @Test

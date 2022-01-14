@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai.recommend;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.TaskReason;
@@ -29,12 +28,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         this.recommendMapper = recommendMapper;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.ADD_RECOMMEND_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String titleKey = messageAction.getKey().replaceAll("tj", "推荐").replaceAll("zj", "自荐");
 

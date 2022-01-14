@@ -1,7 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
 import com.google.gson.Gson;
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.entity.cfcx.CfcxData;
 import com.tilitili.bot.entity.cfcx.CfcxItem;
@@ -19,12 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class CfcxHandle extends ExceptionRespMessageHandle {
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.CFCX_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String sendMessageId = messageAction.getMessageId();
 

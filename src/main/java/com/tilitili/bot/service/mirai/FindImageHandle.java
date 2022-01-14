@@ -1,7 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.ImmutableMap;
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
@@ -18,12 +17,7 @@ import java.util.List;
 @Component
 public class FindImageHandle extends ExceptionRespMessageHandle{
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.FIND_IMAGE_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         List<String> imageUrlList = messageAction.getImageList();
         Asserts.notEmpty(imageUrlList, "格式错啦(图片)");

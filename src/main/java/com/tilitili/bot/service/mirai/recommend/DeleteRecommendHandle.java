@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai.recommend;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.Recommend;
@@ -23,11 +22,6 @@ public class DeleteRecommendHandle extends ExceptionRespMessageHandle {
 	public DeleteRecommendHandle(RecommendMapper recommendMapper, RecommendVideoMapper recommendVideoMapper) {
 		this.recommendMapper = recommendMapper;
 		this.recommendVideoMapper = recommendVideoMapper;
-	}
-
-	@Override
-	public MessageHandleEnum getType() {
-		return MessageHandleEnum.DELETE_RECOMMEND_HANDLE;
 	}
 
 	@Override

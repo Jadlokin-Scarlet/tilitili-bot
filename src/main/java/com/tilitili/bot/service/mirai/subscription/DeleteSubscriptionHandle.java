@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai.subscription;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
@@ -25,11 +24,6 @@ public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
 	public DeleteSubscriptionHandle(SubscriptionMapper subscriptionMapper, BilibiliManager bilibiliManager) {
 		this.subscriptionMapper = subscriptionMapper;
 		this.bilibiliManager = bilibiliManager;
-	}
-
-	@Override
-	public MessageHandleEnum getType() {
-		return MessageHandleEnum.DELETE_SUBSCRIPTION_HANDLE;
 	}
 
 	@Override

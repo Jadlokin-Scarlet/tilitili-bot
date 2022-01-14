@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
@@ -15,12 +14,7 @@ import static org.apache.http.util.TextUtils.isBlank;
 @Component
 public class PatternStringHandle extends ExceptionRespMessageHandle{
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.PATTERN_STRING_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String regex = messageAction.getParam("r");
         String string = messageAction.getParam("s");

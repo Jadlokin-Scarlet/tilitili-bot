@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai.talk;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
@@ -22,11 +21,6 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	public TalkHandle(BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
 		this.botTalkMapper = botTalkMapper;
 		this.botTalkManager = botTalkManager;
-	}
-
-	@Override
-	public MessageHandleEnum getType() {
-		return MessageHandleEnum.TALK_HANDLE;
 	}
 
 	@Override

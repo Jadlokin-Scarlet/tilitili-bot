@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.emnus.GroupEmum;
@@ -35,12 +34,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
         this.miraiManager = miraiManager;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.RENAME_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
         Long group = messageAction.getBotMessage().getGroup();

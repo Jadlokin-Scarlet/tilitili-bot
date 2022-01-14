@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -17,12 +16,7 @@ public class RepeatHandle extends ExceptionRespMessageHandle {
     private final String KeyKey = "repeat.key";
     private final String numberKey = "repeat.number";
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.REPEAT_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
         List<BotMessageChain> messageChainList = messageAction.getBotMessage().getBotMessageChainList();

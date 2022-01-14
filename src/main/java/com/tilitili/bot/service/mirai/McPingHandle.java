@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -24,11 +23,6 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	@Autowired
 	public McPingHandle(McPingManager mcPingManager) {
 		this.mcPingManager = mcPingManager;
-	}
-
-	@Override
-	public MessageHandleEnum getType() {
-		return MessageHandleEnum.MC_PING_HANDLE;
 	}
 
 	@Override

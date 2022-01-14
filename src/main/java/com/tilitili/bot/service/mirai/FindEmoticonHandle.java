@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.emnus.MessageHandleEnum;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.DbbqbManager;
@@ -23,12 +22,7 @@ public class FindEmoticonHandle extends ExceptionRespMessageHandle{
         this.redisCache = redisCache;
     }
 
-    @Override
-    public MessageHandleEnum getType() {
-        return MessageHandleEnum.FIND_EMOTICON_HANDLE;
-    }
-
-    @Override
+	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String tag = messageAction.getParamOrDefault("tag", messageAction.getValue());
         Asserts.notBlank(tag, "格式错啦(tag)");
