@@ -25,20 +25,18 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String body = messageAction.getBody();
+        String enText = messageAction.getValueOrDefault(messageAction.getBody());
         List<String> imageList = messageAction.getImageList();
         String to = messageAction.getParam("to");
-        String text = messageAction.getParamOrDefault("t", "");
 
         String url = imageList.isEmpty()? "": imageList.get(0);
-        String bodyNotNull = body == null? "": body;
-        Asserts.notBlank(bodyNotNull + url + text, "格式错啦(内容)");
+        String bodyNotNull = enText == null? "": enText;
+        Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
-        String enText = (text + body);
         String cnText;
         if (to != null) {
             cnText = baiduManager.translate(to, enText);
-        } else if (isNotBlank(body)) {
+        } else if (isNotBlank(enText)) {
             cnText = baiduManager.translate(enText);
         } else {
             cnText = baiduManager.translateImage(url);
