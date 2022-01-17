@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.view.baidu.TranslateView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.utils.Asserts;
@@ -33,17 +34,18 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
         String bodyNotNull = enText == null? "": enText;
         Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
-        String cnText;
+        String message;
         if (to != null) {
-            cnText = baiduManager.translate(to, enText);
+            message = baiduManager.translate(to, enText);
         } else if (isNotBlank(enText)) {
-            cnText = baiduManager.translate(enText);
+            message = baiduManager.translate(enText);
         } else {
-            cnText = baiduManager.translateImage(url);
+            TranslateView resultView = baiduManager.translateImage(url);
+            message = String.format("%s\n---机翻\n%s", resultView.getSumSrc(), resultView.getSumDst());
         }
-        if (isBlank(cnText)) {
+        if (isBlank(message)) {
             return BotMessage.simpleTextMessage("无法翻译");
         }
-        return BotMessage.simpleTextMessage(cnText);
+        return BotMessage.simpleTextMessage(message);
     }
 }
