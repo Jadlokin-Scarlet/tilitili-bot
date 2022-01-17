@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.DbbqbManager;
 import com.tilitili.common.utils.Asserts;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class FindEmoticonHandle extends ExceptionRespMessageHandle{
+public class FindEmoticonHandle extends ExceptionRespMessageHandle {
     private final String emoticonKey = "emoticon-";
     private final DbbqbManager dbbqbManager;
     private final RedisCache redisCache;

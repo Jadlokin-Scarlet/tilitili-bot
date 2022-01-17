@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.calendar;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.tilitili.BotCalendarMapper;

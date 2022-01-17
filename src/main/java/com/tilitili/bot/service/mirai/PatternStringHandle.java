@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
@@ -12,7 +13,7 @@ import java.util.List;
 import static org.apache.http.util.TextUtils.isBlank;
 
 @Component
-public class PatternStringHandle extends ExceptionRespMessageHandle{
+public class PatternStringHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {

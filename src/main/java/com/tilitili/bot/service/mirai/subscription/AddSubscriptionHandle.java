@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.subscription;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.Owner;
 import com.tilitili.common.entity.Subscription;

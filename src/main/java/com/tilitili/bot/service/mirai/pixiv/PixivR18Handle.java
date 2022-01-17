@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai.pixiv;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.PixivService;
-import com.tilitili.bot.service.mirai.LockMessageHandle;
+import com.tilitili.bot.service.mirai.base.LockMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

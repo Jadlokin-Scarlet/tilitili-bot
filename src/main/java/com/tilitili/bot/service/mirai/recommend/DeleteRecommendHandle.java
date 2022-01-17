@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.recommend;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.ExceptionRespMessageHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.RecommendVideo;
 import com.tilitili.common.entity.view.bot.BotMessage;

@@ -1,4 +1,4 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.base;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;

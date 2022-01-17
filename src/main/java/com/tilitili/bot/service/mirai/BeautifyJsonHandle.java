@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class BeautifyJsonHandle extends ExceptionRespMessageHandle{
+public class BeautifyJsonHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
