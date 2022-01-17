@@ -71,11 +71,10 @@ public class PixivService {
 			if (i != 0) {
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
 			}
+			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 			if (isSese) {
-				String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl));
 			} else {
-				String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText(pid + "\n"));
 				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
 			}
