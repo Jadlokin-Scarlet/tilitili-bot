@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.pixiv.PixivHandle;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;

@@ -1,14 +1,18 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.pixiv;
 
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.mirai.LockMessageHandle;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.*;
+import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.LoliconManager;
+import com.tilitili.common.manager.PixivManager;
 import com.tilitili.common.mapper.tilitili.PixivImageMapper;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
@@ -19,9 +23,11 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static com.tilitili.common.utils.StringUtils.isNotBlank;
+
 @Slf4j
 @Component
-public class PixivHandle extends LockMessageHandle {
+public class PixivR18Handle extends LockMessageHandle {
     public static final String messageIdKey = "pixiv.messageId";
 
     private final RedisCache redisCache;
@@ -29,22 +35,25 @@ public class PixivHandle extends LockMessageHandle {
     private final LoliconManager loliconManager;
     private final PixivManager pixivManager;
     private final BotManager botManager;
+    private final PixivService pixivService;
 
     private final Map<String, String> keyMap = ImmutableMap.of("ss", "1", "bs", "0");
 
     @Autowired
-    public PixivHandle(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager) {
+    public PixivR18Handle(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivService pixivService) {
         super("出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
         this.redisCache = redisCache;
         this.pixivImageMapper = pixivImageMapper;
         this.loliconManager = loliconManager;
         this.pixivManager = pixivManager;
         this.botManager = botManager;
+        this.pixivService = pixivService;
     }
 
 	@Override
     public BotMessage handleMessageAfterLock(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
         String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
+        String user = messageAction.getParam("u");
         String source = messageAction.getParamOrDefault("source", "pixiv");
         String num = messageAction.getParamOrDefault("num", "1");
         String sendMessageId = messageAction.getMessageId();
@@ -71,16 +80,7 @@ public class PixivHandle extends LockMessageHandle {
             }
         }
 
-        String messageId;
-        switch (source) {
-            case "lolicon": messageId = sendLoliconImage(botMessage, searchKey == null? "チルノ": searchKey, source, num, r18); break;
-            case "pixiv": messageId = pixivManager.sendPixivImage(sendMessageId, searchKey == null? "チルノ 東方Project100users入り": searchKey, source, r18); break;
-            case "powner": messageId = pixivManager.sendPixivUserImage(sendMessageId, searchKey == null? "ke-ta": searchKey, source, r18); break;
-            default: throw new AssertException("没有这个平台");
-        }
-        if (messageId != null) {
-            redisCache.setValue(messageIdKey, messageId);
-        }
+        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num);
         return BotMessage.emptyMessage();
     }
 
