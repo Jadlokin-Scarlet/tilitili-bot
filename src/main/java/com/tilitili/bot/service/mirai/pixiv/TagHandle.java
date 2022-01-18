@@ -53,7 +53,7 @@ public class TagHandle extends ExceptionRespMessageHandle {
 	}
 
 	private void saveImageFromPixiv(String pid) throws InterruptedException {
-		PixivInfoIllust info = pixivManager.getInfo(pid);
+		PixivInfoIllust info = pixivManager.getInfoProxy(pid);
 		PixivImage pixivImage = new PixivImage();
 		pixivImage.setPid(pid);
 		pixivImage.setTitle(info.getTitle());
@@ -69,7 +69,7 @@ public class TagHandle extends ExceptionRespMessageHandle {
 		pixivImage.setBookmark(info.getBookmarkCount());
 
 		if (pixivImage.getPageCount() != null && pixivImage.getPageCount() > 1) {
-			List<String> urlList = pixivManager.getPageList(pid);
+			List<String> urlList = pixivManager.getPageListProxy(pid);
 			if (urlList.size() > 6) {
 				urlList = urlList.subList(0, 5);
 			}
