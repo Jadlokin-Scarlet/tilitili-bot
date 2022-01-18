@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.QQUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -39,6 +40,10 @@ public class FindImageHandle extends ExceptionRespMessageHandle {
         Asserts.isFalse(linkList.isEmpty(), "没找到😑\n"+url);
 
         String link = linkList.get(0).attr("href");
+        String rateStr = rate.replace("%", "");
+        if (StringUtils.isNumber(rateStr)) {
+            Asserts.isTrue(Double.parseDouble(rateStr) > 80.0, "相似度过低\n"+url);
+        }
         return BotMessage.simpleImageTextMessage(String.format("找到啦😊！相似度%s\n%s", rate, link), imageUrl);
     }
 }
