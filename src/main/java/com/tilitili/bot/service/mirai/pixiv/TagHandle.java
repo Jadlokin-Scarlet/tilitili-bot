@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 public class TagHandle extends ExceptionRespMessageHandle {
 	private static final String source = "pixiv";
 
-	private final PixivTagMapper pixivTagMapper;
 	private final PixivManager pixivManager;
+	private final PixivTagMapper pixivTagMapper;
 	private final PixivImageMapper pixivImageMapper;
 
 	@Autowired
