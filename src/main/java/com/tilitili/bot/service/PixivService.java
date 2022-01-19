@@ -54,15 +54,14 @@ public class PixivService {
 	}
 
 	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException, InterruptedException {
-		if (Objects.equals(source, "pixiv") && isNotBlank(user)) {
-			source = "powner";
-		}
-
 		String messageId;
 		switch (source) {
 			case "lolicon": messageId = sendLoliconImage(botMessage, searchKey == null? "チルノ": searchKey, source, num, r18); break;
-			case "pixiv": messageId = pixivManager.sendPixivImage(sendMessageId, searchKey == null? "チルノ 東方Project100users入り": searchKey, source, r18); break;
-			case "powner": messageId = pixivManager.sendPixivUserImage(sendMessageId, user == null? "ke-ta": user, source, r18); break;
+			case "pixiv": {
+				if (isNotBlank(user)) messageId = pixivManager.sendPixivUserImage(sendMessageId, user, source, r18);
+				else messageId = pixivManager.sendPixivImage(sendMessageId, searchKey == null ? "チルノ 東方Project100users入り" : searchKey, source, r18);
+				break;
+			}
 			default: throw new AssertException("没有这个平台");
 		}
 		if (messageId != null) {
