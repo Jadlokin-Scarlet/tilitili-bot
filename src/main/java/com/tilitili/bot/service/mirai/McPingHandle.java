@@ -46,7 +46,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Asserts.notNull(response, "服务器不在线");
 		Integer onlinePlayerCnt = response.getPlayers().getOnline();
 		String version = response.getVersion().getName();
-		String message = String.format("服务器在线！版本%s, 在线玩家数：%s", version, onlinePlayerCnt);
+		String message = String.format("服务器在线！版本%s, 在线玩家数：%s，地址: %s", version, onlinePlayerCnt, url);
 		if (key.equals("mcm")) {
 			String modListStr = response.getModinfo().getModList().stream().map(McPingMod::getModid).collect(Collectors.joining(","));
 			message += String.format("\nmod列表：%s", modListStr);
