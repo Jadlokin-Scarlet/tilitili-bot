@@ -113,7 +113,7 @@ public class PixivService {
 			}
 			messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
 		}
-		throw new AssertException("不对劲。");
+		return messageId;
 	}
 
 	public String sendCachePixivUserImage(String quote, String userName, String source, String r18) {
