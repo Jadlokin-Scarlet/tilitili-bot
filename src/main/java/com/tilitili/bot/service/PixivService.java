@@ -16,10 +16,9 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivManager;
-import com.tilitili.common.manager.TaskManager;
-import com.tilitili.common.mapper.tilitili.BatchTaskMapper;
 import com.tilitili.common.mapper.tilitili.PixivImageMapper;
 import com.tilitili.common.mapper.tilitili.PixivTagMapper;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,7 @@ public class PixivService {
 	private final PixivTagMapper pixivTagMapper;
 
 	@Autowired
-	public PixivService(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper, BatchTaskMapper batchTaskMapper, TaskManager taskManager) {
+	public PixivService(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
 		this.redisCache = redisCache;
 		this.pixivImageMapper = pixivImageMapper;
 		this.loliconManager = loliconManager;
@@ -73,7 +72,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivUserImage(String quote, String userName, String source, String r18) throws InterruptedException {
+	public String sendPixivUserImage(String quote, String userName, String source, String r18) {
 		// step 1 有缓存直接读缓存
 		String messageId = sendCachePixivUserImage(quote, userName, source, r18);
 		if (messageId != null) {
@@ -82,10 +81,12 @@ public class PixivService {
 		// step 2 爬取作者所有插画
 		spiderPixivUserImage(userName);
 		// step 3 从缓存中取
-		return sendCachePixivUserImage(quote, userName, source, r18);
+		messageId = sendCachePixivUserImage(quote, userName, source, r18);
+		Asserts.notNull(messageId, "啊嘞，找不到了 Σ（ﾟдﾟlll）");
+		return messageId;
 	}
 
-	public String sendPixivImage(String quote, String searchKey, String source, String r18) throws InterruptedException {
+	public String sendPixivImage(String quote, String searchKey, String source, String r18) {
 		// step 1 有缓存直接读缓存
 		String messageId = sendCachePixivImage(quote, searchKey, source, r18);
 		if (messageId != null) {
@@ -101,17 +102,21 @@ public class PixivService {
 		while (messageId == null) {
 			Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
 			List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
-			if (dataList.isEmpty()) break;
+			if (dataList.isEmpty()) {
+				// step 4 爬到底了，再次检查缓存
+				messageId = sendCachePixivImage(quote, searchKey, source, r18);
+				if (messageId != null) {
+					return messageId;
+				}
+				// stop 5 缓存也没有了
+				throw new AssertException("啊嘞，找不到了 Σ（ﾟдﾟlll）");
+			}
 			messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
 		}
-		if (messageId != null) {
-			return messageId;
-		}
-		// step 4 再次检查缓存
-		return sendCachePixivImage(quote, searchKey, source, r18);
+		throw new AssertException("不对劲。");
 	}
 
-	public String sendCachePixivUserImage(String quote, String userName, String source, String r18) throws InterruptedException {
+	public String sendCachePixivUserImage(String quote, String userName, String source, String r18) {
 		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18));
 		if (noUsedImage != null) {
 			return sendPixivImage(quote, noUsedImage);
@@ -120,7 +125,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivImage(String quote, String searchKey, String source, String r18) throws InterruptedException {
+	public String sendCachePixivImage(String quote, String searchKey, String source, String r18) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
 		if (noUsedImage != null) {
@@ -130,12 +135,11 @@ public class PixivService {
 		}
 	}
 
-	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18) throws InterruptedException {
+	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		for (PixivSearchIllust data : dataList) {
 			String pid = data.getId();
-			List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
-			if (! oldDataList.isEmpty()) continue;
+			supplePixivTag(data, searchTagList);
 			saveImageFromPixiv(pid, searchTagList);
 		}
 		PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
@@ -145,117 +149,13 @@ public class PixivService {
 		return null;
 	}
 
-	public void spiderPixivUserImage(String userName) throws InterruptedException {
+	public void spiderPixivUserImage(String userName) {
 		String userId = pixivManager.getUserIdByNameProxy(userName);
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		for (String pid : userPidList) {
-			saveImageFromPixiv(pid, Collections.emptyList());
+			saveImageFromPixiv(pid);
 		}
 	}
-
-
-
-//	public String sendPixivImage(String quote, String searchKey, String source, String r18) throws InterruptedException {
-//		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
-//		PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-//		if (noUsedImage != null) {
-//			return sendPixivImage(quote, noUsedImage);
-//		}
-//		String messageId = null;
-//		boolean isSend = false;
-//
-//		Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
-//		List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
-//
-//		for (PixivSearchIllust data : dataList) {
-//			log.debug("处理pixiv图片data={}", new Gson().toJson(data));
-//			String pid = data.getId();
-//
-//			PixivImage pixivImage = new PixivImage();
-//			pixivImage.setPid(pid);
-//			pixivImage.setTitle(data.getTitle());
-//			pixivImage.setPageCount(data.getPageCount());
-//			pixivImage.setSmallUrl(data.getUrl());
-//			pixivImage.setIllustType(data.getIllustType());
-//			pixivImage.setUserName(data.getUserName());
-//			pixivImage.setUserId(data.getUserId());
-//			pixivImage.setSearchKey(searchKey);
-//			pixivImage.setSource(source);
-//			pixivImage.setSl(data.getSl());
-//
-//			boolean hasTag = pixivTagMapper.countPixivTagByCondition(new PixivTagQuery().setPid(pid)) > 0;
-//			if (! hasTag) {
-//				List<String> tagList = data.getTags();
-//				for (String searchTag : searchTagList) {
-//					if (! tagList.contains(searchTag)) tagList.add(searchTag);
-//				}
-//				for (String tag : tagList) {
-//					PixivTag addTag = new PixivTag();
-//					addTag.setTag(tag);
-//					addTag.setPid(pid);
-//					pixivTagMapper.addPixivTagSelective(addTag);
-//				}
-//			}
-//
-//			List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
-//			if (oldDataList.isEmpty()) {
-//				PixivInfoIllust info = pixivManager.getInfoProxy(pid);
-//				log.debug("处理pixiv图片info={}", new Gson().toJson(info));
-//				pixivImage.setUrlList(info.getUrls().getOriginal());
-//				pixivImage.setBookmark(info.getBookmarkCount());
-//
-//				if (pixivImage.getPageCount() != null && pixivImage.getPageCount() > 1) {
-//					List<String> urlList = pixivManager.getPageListProxy(pid);
-//					log.debug("处理pixiv图片urlList={}", new Gson().toJson(urlList));
-//					if (urlList.size() > 6) {
-//						urlList = urlList.subList(0, 5);
-//					}
-//					pixivImage.setUrlList(Strings.join(urlList, ','));
-//				}
-//
-//				pixivImageMapper.addPixivImageSelective(pixivImage);
-//
-//				if (! isSend) {
-//					noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-//					if (noUsedImage != null) {
-//						isSend = true;
-//						messageId = sendPixivImage(quote, noUsedImage);
-//					}
-//				}
-//			}
-//		}
-//
-//		if (dataList.isEmpty()) {
-//			noUsedImage = pixivImageMapper.getNoUsedImageWithoutLimit(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-//			if (noUsedImage != null) {
-//				sendPixivImage(quote, noUsedImage);
-//			} else {
-//				botManager.sendMessage(BotMessage.simpleTextMessage("啊嘞，找不到了 Σ（ﾟдﾟlll）").setQuote(quote));
-//			}
-//		} else {
-//			if (! isSend) {
-//				taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SPIDER_PIXIV.value).setValueList(Arrays.asList(searchKey, String.valueOf(quote), r18)));
-//			}
-//		}
-//
-//
-//		noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-//
-//	}
-
-//	public String sendPixivUserImage(String quote, String userName, String source, String r18) {
-//		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18));
-//		if (noUsedImage == null) {
-//			int spiderTaskCnt = batchTaskMapper.countBatchTaskByTypeAndReasonAndStatus(new BatchTaskQuery().setType(TaskType.SpiderVideo.value).setReason(TaskReason.SPIDER_PIXIV_OWNER.value).setTaskStatusList(Arrays.asList(TaskStatus.WAIT.value, TaskStatus.SPIDER.value)));
-//			Asserts.isTrue(spiderTaskCnt == 0, "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
-
-//			taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SPIDER_PIXIV_OWNER.value).setValueList(Arrays.asList(userName, quote, r18)));
-//			return null;
-//			noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18));
-//		}
-//		Asserts.notNull(noUsedImage, "");
-//		return sendPixivImage(quote, noUsedImage);
-//	}
 
 	public String sendPixivImage(String quote, PixivImage noUsedImage) {
 		String pid = noUsedImage.getPid();
@@ -263,15 +163,14 @@ public class PixivService {
 		String[] urlList = noUsedImage.getUrlList().split(",");
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
+		messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
 		if (sl == null || sl < 5) {
-			messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
 				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
 			}
 		} else {
-			messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
@@ -284,7 +183,7 @@ public class PixivService {
 		return messageId;
 	}
 
-	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18) throws InterruptedException, UnsupportedEncodingException {
+	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18) throws UnsupportedEncodingException, InterruptedException {
 		List<SetuData> dataList = loliconManager.getAImage(searchKey, num, r18);
 		if (dataList.isEmpty()) {
 			botManager.sendMessage(BotMessage.simpleTextMessage("没库存啦！", reqBotMessage));
@@ -330,11 +229,14 @@ public class PixivService {
 		return messageId;
 	}
 
-	public void saveImageFromPixiv(String pid) throws InterruptedException {
+	public void saveImageFromPixiv(String pid) {
 		saveImageFromPixiv(pid, Collections.emptyList());
 	}
 
-	public void saveImageFromPixiv(String pid, List<String> externalTagList) throws InterruptedException {
+	public void saveImageFromPixiv(String pid, List<String> externalTagList) {
+		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
+		if (! oldDataList.isEmpty()) return;
+
 		PixivInfoIllust info = pixivManager.getInfoProxy(pid);
 		PixivImage pixivImage = new PixivImage();
 		pixivImage.setPid(pid);
@@ -361,8 +263,7 @@ public class PixivService {
 
 		boolean hasTag = pixivTagMapper.countPixivTagByCondition(new PixivTagQuery().setPid(pid)) > 0;
 		if (! hasTag) {
-			// p站tag，p站翻译tag(不包含翻译中带空格的) 搜索词tag列表
-			// 去重作为最终tag列表
+			// p站tag，p站翻译tag(不包含翻译中带空格的) 搜索词tag列表 去重作为最终tag列表
 			Function<PixivInfoTag, String> getTransTag = t -> Optional.ofNullable(t.getTranslation()).map(PixivInfoTagTranslation::getEn).orElse(null);
 			List<String> tagList = info.getTags().getTags().stream().flatMap(t-> Stream.of(t.getTag(), getTransTag.apply(t))).filter(Objects::nonNull).filter(s->!s.contains(" ")).distinct().collect(Collectors.toList());
 			for (String searchTag : externalTagList) {
@@ -374,6 +275,29 @@ public class PixivService {
 				addTag.setPid(pid);
 				pixivTagMapper.addPixivTagSelective(addTag);
 			}
+		}
+	}
+
+	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList) {
+		String pid = data.getId();
+		// 只补充有info的图片
+		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
+		if (oldDataList.isEmpty()) return;
+		// 只补充没tag的图片
+		boolean hasTag = pixivTagMapper.countPixivTagByCondition(new PixivTagQuery().setPid(pid)) > 0;
+		if (hasTag) return;
+
+		// p站tag 搜索词tag列表 去重作为最终tag列表
+		List<String> tagList = new ArrayList<>(data.getTags());
+		for (String searchTag : externalTagList) {
+			if (! tagList.contains(searchTag)) tagList.add(searchTag);
+		}
+
+		for (String tag : tagList) {
+			PixivTag addTag = new PixivTag();
+			addTag.setTag(tag);
+			addTag.setPid(pid);
+			pixivTagMapper.addPixivTagSelective(addTag);
 		}
 	}
 }
