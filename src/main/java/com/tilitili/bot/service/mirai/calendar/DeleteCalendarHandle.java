@@ -4,7 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.mapper.tilitili.BotCalendarMapper;
+import com.tilitili.common.mapper.mysql.BotCalendarMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
