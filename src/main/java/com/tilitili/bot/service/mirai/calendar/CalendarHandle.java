@@ -36,8 +36,12 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String body = messageAction.getBody();
-        Long qq = messageAction.getBotMessage().getQq();
-        Long group = messageAction.getBotMessage().getGroup();
+        BotMessage botMessage = messageAction.getBotMessage();
+        String sendType = botMessage.getSendType();
+        Long qq = botMessage.getQq();
+        Long group = botMessage.getGroup();
+        String guildId = botMessage.getGuildId();
+        String channelId = botMessage.getChannelId();
 
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);
@@ -72,7 +76,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(group == null? "FriendMessage": "TempMessage");
+        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId);
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");
