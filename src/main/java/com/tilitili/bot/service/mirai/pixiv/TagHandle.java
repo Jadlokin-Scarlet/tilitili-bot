@@ -6,7 +6,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.PixivTag;
 import com.tilitili.common.entity.query.PixivTagQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.mapper.tilitili.PixivTagMapper;
+import com.tilitili.common.mapper.mysql.PixivTagMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

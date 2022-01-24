@@ -7,7 +7,7 @@ import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.mapper.tilitili.PixivImageMapper;
+import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import lombok.extern.slf4j.Slf4j;
