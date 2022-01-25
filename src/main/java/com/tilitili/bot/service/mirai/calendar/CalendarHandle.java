@@ -65,7 +65,8 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(something, "怪怪的");
 
         log.info("day={} a={} hour={} minute={} somebody={} something={}", day, a, hour, minute, somebody, something);
-        if (Objects.equals(somebody, "提醒")) {
+        boolean isAtOther = Objects.equals(somebody, "提醒");
+        if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
         }
 
@@ -86,12 +87,12 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        String atListStr = atList.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String atListStr = isAtOther? atList.stream().map(String::valueOf).collect(Collectors.joining(",")): null;
         BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId).setAtList(atListStr);
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");
-        String reply = String.format("知道啦！%s（%s），日程码%s。", body.replaceAll("我", "你").replace("提醒", somebody.equals("提醒")?"提醒他们":"提醒"), sdf.format(calendar.getTime()), botCalendar.getId());
+        String reply = String.format("知道啦！%s（%s），日程码%s。", body.replaceAll("我", "你").replace("提醒", isAtOther?"提醒他们":"提醒"), sdf.format(calendar.getTime()), botCalendar.getId());
         return BotMessage.simpleTextMessage(reply);
     }
     // (明天|今天|后天|大后天|周(?\d|日)|下周(?\d|日)|下下周(?\d|日)|\d+号)
