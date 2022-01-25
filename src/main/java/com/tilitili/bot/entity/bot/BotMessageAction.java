@@ -18,6 +18,7 @@ public class BotMessageAction {
     private final BotSessionService.MiraiSession session;
     private final BotMessage botMessage;
     private final List<String> imageList;
+    private final List<Long> atList;
     private final String text;
     private final String body;
     private final String messageId;
@@ -36,6 +37,7 @@ public class BotMessageAction {
 
         List<BotMessageChain> botMessageChainList = botMessage.getBotMessageChainList();
         this.imageList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Image")).map(BotMessageChain::getUrl).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        this.atList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "At")).map(BotMessageChain::getTarget).filter(Objects::nonNull).collect(Collectors.toList());
         List<String> textList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Plain")).map(BotMessageChain::getText).filter(StringUtils::isNotBlank).collect(Collectors.toList());
 
         this.text = String.join("", textList).trim();
@@ -134,5 +136,9 @@ public class BotMessageAction {
 
     public String getKeyWithoutPrefix() {
         return keyWithoutPrefix;
+    }
+
+    public List<Long> getAtList() {
+        return atList;
     }
 }

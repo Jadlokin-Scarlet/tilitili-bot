@@ -17,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.tilitili.common.utils.DateUtils.setDayOfWeekToCalendar;
 import static com.tilitili.common.utils.StringUtils.convertCnNumber;
@@ -37,6 +38,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String body = messageAction.getBody();
         BotMessage botMessage = messageAction.getBotMessage();
+        List<Long> atList = messageAction.getAtList();
         String sendType = botMessage.getSendType();
         Long qq = botMessage.getQq();
         Long group = botMessage.getGroup();
@@ -46,18 +48,26 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);
         List<String> pattenList = StringUtils.extractList("^(明天|今天|后天|大后天|周(?:\\d|日)|下周(?:\\d|日)|下下周(?:\\d|日)|\\d+号|\\d+天后)?" +
-                "(早上|上午|中午|下午|晚上)?" +
+                "(凌晨|早上|上午|中午|下午|晚上)?" +
                 "(\\d+点||\\d+小时后)?" +
                 "(半|1刻|3刻|\\d+时|\\d+分|\\d+分钟后)?" +
-                "叫我(.*)", body);
+                "(叫我|提醒)" +
+                "(.*)", body);
         Asserts.isTrue(pattenList.size() > 1, "格式错啦()");
         String day = pattenList.get(0);
         String a = pattenList.get(1);
         String hour = pattenList.get(2);
         String minute = pattenList.get(3);
-        String something = pattenList.get(4);
+        String somebody = pattenList.get(4);
+        String something = pattenList.get(5);
 
-        log.info("day={} a={} hour={} minute={} something={}", day, a, hour, minute, something);
+        Asserts.notBlank(somebody, "怪怪的");
+        Asserts.notBlank(something, "怪怪的");
+
+        log.info("day={} a={} hour={} minute={} somebody={} something={}", day, a, hour, minute, somebody, something);
+        if (Objects.equals(somebody, "提醒")) {
+            Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
+        }
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -76,11 +86,12 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId);
+        String atListStr = atList.stream().map(String::valueOf).collect(Collectors.joining(","));
+        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId).setAtList(atListStr);
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");
-        String reply = String.format("收到！%s（%s），日程码%s。", body.replaceAll("我", "你"), sdf.format(calendar.getTime()), botCalendar.getId());
+        String reply = String.format("知道啦！%s（%s），日程码%s。", body.replaceAll("我", "你").replace("提醒", somebody.equals("提醒")?"提醒他们":"提醒"), sdf.format(calendar.getTime()), botCalendar.getId());
         return BotMessage.simpleTextMessage(reply);
     }
     // (明天|今天|后天|大后天|周(?\d|日)|下周(?\d|日)|下下周(?\d|日)|\d+号)
@@ -100,7 +111,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
     }
 
-    // (早上|上午|中午|下午|晚上)?(\d+点||d+小时后)?
+    // (凌晨|早上|上午|中午|下午|晚上)?(\d+点||d+小时后)?
     private void setHourToCalendar(Calendar calendar, String a, String hourStr) {
         boolean hasHour = isNotBlank(hourStr);
         int hour = hasHour? (hourStr.contains("点")?
@@ -108,6 +119,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
                 calendar.get(Calendar.HOUR_OF_DAY) + Integer.parseInt(hourStr.split("小时后")[0])
         ) : 0;
         switch (a) {
+            case "凌晨": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 4); break;
             case "早上": case "上午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 10); break;
             case "中午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour : 14); break;
             case "下午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? (12 + hour % 12) : 16); break;
