@@ -37,6 +37,9 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
+		Asserts.notBlank(req, "格式不对(提问)");
+		Asserts.notBlank(resp, "格式不对(回答)");
+
 		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
 		Asserts.checkEquals(botTalkList.size(), 0, "已经有了。");
 
