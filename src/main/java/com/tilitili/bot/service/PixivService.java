@@ -137,16 +137,26 @@ public class PixivService {
 
 	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
+		String messageId = null;
 		for (PixivSearchIllust data : dataList) {
 			String pid = data.getId();
 			supplePixivTag(data, searchTagList);
 			saveImageFromPixiv(pid, searchTagList);
+
+			if (messageId == null) {
+				PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
+				if (noUsedImage != null) {
+					messageId = sendPixivImage(quote, noUsedImage);
+				}
+			}
 		}
-		PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-		if (noUsedImage != null) {
-			return sendPixivImage(quote, noUsedImage);
+		if (messageId == null) {
+			PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
+			if (noUsedImage != null) {
+				messageId = sendPixivImage(quote, noUsedImage);
+			}
 		}
-		return null;
+		return messageId;
 	}
 
 	public void spiderPixivUserImage(String userName) {
