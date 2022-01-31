@@ -8,7 +8,7 @@ import com.tilitili.common.entity.Subscription;
 import com.tilitili.common.entity.query.SubscriptionQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BilibiliManager;
-import com.tilitili.common.mapper.tilitili.SubscriptionMapper;
+import com.tilitili.common.mapper.mysql.SubscriptionMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
