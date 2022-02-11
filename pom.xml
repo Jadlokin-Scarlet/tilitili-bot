@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.tilitili.common</groupId>
             <artifactId>tilitili-common</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency><!--添加websocket依赖 -->
             <groupId>org.springframework</groupId>

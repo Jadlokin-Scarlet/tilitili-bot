@@ -5,8 +5,8 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.RecommendVideo;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.mapper.tilitili.RecommendMapper;
-import com.tilitili.common.mapper.tilitili.RecommendVideoMapper;
+import com.tilitili.common.mapper.rank.RecommendMapper;
+import com.tilitili.common.mapper.rank.RecommendVideoMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BilibiliUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -37,14 +37,14 @@ public class DeleteRecommendHandle extends ExceptionRespMessageHandle {
 			av = BilibiliUtil.converseBvToAv(avOrBv);
 		}
 
-		Recommend oldRecommend = recommendMapper.getByAv(av);
+		Recommend oldRecommend = recommendMapper.getNormalRecommendByAv(av);
 		Asserts.notNull(oldRecommend, "没有找到该视频。");
 		Asserts.notEquals(oldRecommend.getStatus(), -1, "没有找到该视频。");
 		if (oldRecommend.getStatus().equals(1)) {
 			Asserts.checkEquals(oldRecommend.getIssueId(), newVideo.getId(), "该视频在往期中，不能删。");
 		}
 
-		recommendMapper.update(new Recommend().setId(oldRecommend.getId()).setStatus(-1));
+		recommendMapper.updateRecommendSelective(new Recommend().setId(oldRecommend.getId()).setStatus(-1));
 		return BotMessage.simpleTextMessage("已删除。");
 	}
 }

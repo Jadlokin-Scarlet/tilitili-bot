@@ -5,7 +5,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.VideoInfo;
 import com.tilitili.common.entity.query.VideoInfoQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.mapper.tilitili.VideoInfoMapper;
+import com.tilitili.common.mapper.rank.VideoInfoMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 

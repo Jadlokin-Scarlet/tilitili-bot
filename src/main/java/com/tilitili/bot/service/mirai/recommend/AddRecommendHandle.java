@@ -7,7 +7,7 @@ import com.tilitili.common.entity.Recommend;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.message.SimpleTask;
 import com.tilitili.common.manager.TaskManager;
-import com.tilitili.common.mapper.tilitili.RecommendMapper;
+import com.tilitili.common.mapper.rank.RecommendMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BilibiliUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -50,7 +50,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         } else {
             av = BilibiliUtil.converseBvToAv(avStr);
         }
-        Recommend oldRecommend = recommendMapper.getByAv(av);
+        Recommend oldRecommend = recommendMapper.getNormalRecommendByAv(av);
         Asserts.checkNull(oldRecommend, "这个视频已经有啦");
 
         Recommend recommend = new Recommend();
@@ -61,7 +61,7 @@ public class AddRecommendHandle extends ExceptionRespMessageHandle {
         recommend.setStartTime(startTime);
         recommend.setEndTime(endTime);
         recommend.setType(type);
-        recommendMapper.insert(recommend);
+        recommendMapper.addRecommendSelective(recommend);
 
         taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SUPPLEMENT_VIDEO.value).setValueList(Collections.singletonList(String.valueOf(av))));
 
