@@ -41,10 +41,10 @@ public class PixivService {
 	public static final String messageIdKey = "pixiv.messageId";
 	private final RedisCache redisCache;
 	private final PixivImageMapper pixivImageMapper;
+	private final PixivTagMapper pixivTagMapper;
 	private final LoliconManager loliconManager;
 	private final PixivManager pixivManager;
 	private final BotManager botManager;
-	private final PixivTagMapper pixivTagMapper;
 
 	@Autowired
 	public PixivService(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
