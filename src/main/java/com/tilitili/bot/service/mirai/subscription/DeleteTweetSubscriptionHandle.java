@@ -46,6 +46,6 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 
 		subscriptionMapper.updateSubscriptionSelective(new Subscription().setId(old.getId()).setStatus(-1));
 
-		return BotMessage.simpleTextMessage(String.format("取关%s成功", name));
+		return BotMessage.simpleTextMessage(String.format("取关%s成功", old.getName()));
 	}
 }

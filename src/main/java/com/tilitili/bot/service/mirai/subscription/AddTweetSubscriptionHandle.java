@@ -41,15 +41,16 @@ public class AddTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 
         TwitterUser user = twitterManager.getUserByUserName(name);
         Asserts.notNull(user, "没找到用户");
+        String nike = user.getLegacy().getName();
 
         Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
         SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(name).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
         int oldCount = subscriptionMapper.countSubscriptionByCondition(subscriptionQuery);
         Asserts.isTrue(oldCount == 0, "已经关注了哦。");
 
-        Subscription add = new Subscription().setValue(name).setType(2).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId).setName(name);
+        Subscription add = new Subscription().setValue(name).setType(2).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId).setName(nike);
         subscriptionMapper.addSubscriptionSelective(add);
 
-        return BotMessage.simpleTextMessage(String.format("关注%s成功！", name));
+        return BotMessage.simpleTextMessage(String.format("关注%s成功！", nike));
     }
 }
