@@ -40,21 +40,21 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
-		int status;
+		int type;
 		if (StringUtils.isBlank(req) && StringUtils.isBlank(resp) && imageList.size() == 2) {
 			req = QQUtil.getImageUrl(imageList.get(0));
 			resp = QQUtil.getImageUrl(imageList.get(1));
-			status = 1;
+			type = 1;
 		} else {
 			Asserts.notBlank(req, "格式不对(提问)");
 			Asserts.notBlank(resp, "格式不对(回答)");
-			status = 0;
+			type = 0;
 		}
 
 		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
 		Asserts.checkEquals(botTalkList.size(), 0, "已经有了。");
 
-		BotTalk addBotTalk = new BotTalk().setStatus(status).setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
+		BotTalk addBotTalk = new BotTalk().setType(type).setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
 		botTalkMapper.addBotTalkSelective(addBotTalk);
 		return BotMessage.simpleTextMessage("学废了！");
 	}
