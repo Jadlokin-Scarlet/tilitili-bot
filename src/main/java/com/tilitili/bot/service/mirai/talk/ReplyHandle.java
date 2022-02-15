@@ -45,7 +45,11 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         }
         if (!botTalkList.isEmpty()) {
             BotTalk botTalk = botTalkList.get(0);
-            return BotMessage.simpleTextMessage(botTalk.getResp());
+            if (botTalk.getType().equals(0)) {
+                return BotMessage.simpleTextMessage(botTalk.getResp());
+            } else {
+                return BotMessage.simpleImageMessage(botTalk.getResp());
+            }
         }
 
         if (! Objects.equals(SendTypeEmum.Guild_Message.sendType, sendType) || Objects.equals(guildId, GuildEmum.Our_Homo.guildId)) {
