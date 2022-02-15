@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
@@ -30,13 +31,16 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
         List<String> imageList = messageAction.getImageList();
         String from = messageAction.getParam("from");
         String to = messageAction.getParam("to");
+        String isStatic = messageAction.getParamOrDefault("static", "0");
 
         String url = imageList.isEmpty()? "": imageList.get(0);
         String bodyNotNull = enText == null? "": enText;
         Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
         String message;
-        if (from != null) {
+        if (Objects.equals(isStatic, "1") && from != null && to != null) {
+            message = BaiduManager.staticTranslate(from, to, enText);
+        } else if (from != null) {
             message = baiduManager.translate(from, to, enText);
         } else if (to != null) {
             message = baiduManager.translate(to, enText);
