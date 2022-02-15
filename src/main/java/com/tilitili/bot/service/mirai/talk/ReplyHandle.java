@@ -7,6 +7,7 @@ import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
+import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +32,17 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
+        List<String> imageList = messageAction.getImageList();
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
         String guildId = botMessage.getGuildId();
         String sendType = botMessage.getSendType();
-        List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(text, botMessage);
+        List<BotTalk> botTalkList;
+        if (StringUtils.isBlank(text) && imageList.size() == 1) {
+            botTalkList = botTalkManager.getBotTalkByBotMessage(QQUtil.getImageUrl(imageList.get(0)), botMessage);
+        } else {
+            botTalkList = botTalkManager.getBotTalkByBotMessage(text, botMessage);
+        }
         if (!botTalkList.isEmpty()) {
             BotTalk botTalk = botTalkList.get(0);
             return BotMessage.simpleTextMessage(botTalk.getResp());
