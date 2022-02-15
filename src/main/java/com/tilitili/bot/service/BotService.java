@@ -44,7 +44,6 @@ public class BotService {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session);
             String actionKey = botMessageAction.getKey();
-            Asserts.notNull(actionKey, "key为空");
 
             String prefix = "";
             if (Objects.equals(sendType, SendTypeEmum.Guild_Message.sendType)) {

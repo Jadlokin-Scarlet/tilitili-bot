@@ -45,6 +45,7 @@ public class BotMessageAction {
         List<String> lineList = body == null? Collections.emptyList(): Arrays.stream(body.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
         String head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
 
+        key = "";
         if (isNotBlank(head)) {
             if (head.contains(" ")) {
                 int splitIndex = head.indexOf(" ");
