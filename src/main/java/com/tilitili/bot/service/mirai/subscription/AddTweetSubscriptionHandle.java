@@ -41,7 +41,7 @@ public class AddTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 
         TwitterUser user = twitterManager.getUserByUserName(name);
         Asserts.notNull(user, "没找到用户");
-        String nike = user.getLegacy().getName();
+        String nike = user.getLegacy().getNike();
 
         Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
         SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(name).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
