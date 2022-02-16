@@ -29,6 +29,7 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String enText = messageAction.getValueOrDefault(messageAction.getBody());
         List<String> imageList = messageAction.getImageList();
+        String from = messageAction.getParam("from");
         String to = messageAction.getParam("to");
 
         String url = imageList.isEmpty()? "": imageList.get(0);
@@ -36,7 +37,9 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
         String message;
-        if (to != null) {
+        if (from != null) {
+            message = BaiduUtil.translate(from, to, enText);
+        } else if (to != null) {
             message = BaiduUtil.translate(to, enText);
         } else if (isNotBlank(enText)) {
             message = BaiduUtil.translate(enText);

@@ -6,6 +6,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.McPingManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.util.stream.Collectors;
 
 @Component
@@ -42,7 +44,12 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Asserts.isTrue(url.contains(":"), "地址格式不对");
 		String host = url.substring(0, url.indexOf(":"));
 		String port = url.substring(url.indexOf(":") + 1);
-		McPingResponse response = mcPingManager.mcPing(new InetSocketAddress(host, Integer.parseInt(port)));
+		McPingResponse response;
+		try {
+			response = mcPingManager.mcPing(new InetSocketAddress(host, Integer.parseInt(port)));
+		} catch (SocketTimeoutException e) {
+			throw new AssertException("网络异常");
+		}
 		Asserts.notNull(response, "服务器不在线");
 		Integer onlinePlayerCnt = response.getPlayers().getOnline();
 		String version = response.getVersion().getName();

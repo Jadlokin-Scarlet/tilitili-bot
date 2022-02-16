@@ -41,10 +41,10 @@ public class PixivService {
 	public static final String messageIdKey = "pixiv.messageId";
 	private final RedisCache redisCache;
 	private final PixivImageMapper pixivImageMapper;
+	private final PixivTagMapper pixivTagMapper;
 	private final LoliconManager loliconManager;
 	private final PixivManager pixivManager;
 	private final BotManager botManager;
-	private final PixivTagMapper pixivTagMapper;
 
 	@Autowired
 	public PixivService(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
@@ -141,7 +141,7 @@ public class PixivService {
 		for (PixivSearchIllust data : dataList) {
 			String pid = data.getId();
 			supplePixivTag(data, searchTagList);
-			saveImageFromPixiv(pid, searchTagList);
+			saveImageFromPixiv(pid, searchKey, searchTagList);
 
 			if (messageId == null) {
 				PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
@@ -163,7 +163,7 @@ public class PixivService {
 		String userId = pixivManager.getUserIdByNameProxy(userName);
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		for (String pid : userPidList) {
-			saveImageFromPixiv(pid);
+			saveImageFromPixiv(pid, userName);
 		}
 	}
 
@@ -242,10 +242,14 @@ public class PixivService {
 	}
 
 	public void saveImageFromPixiv(String pid) {
-		saveImageFromPixiv(pid, Collections.emptyList());
+		saveImageFromPixiv(pid, pid, Collections.emptyList());
 	}
 
-	public void saveImageFromPixiv(String pid, List<String> externalTagList) {
+	public void saveImageFromPixiv(String pid, String searchKey) {
+		saveImageFromPixiv(pid, searchKey, Collections.emptyList());
+	}
+
+	public void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) {
 		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
 		if (! oldDataList.isEmpty()) return;
 
@@ -258,7 +262,7 @@ public class PixivService {
 		pixivImage.setIllustType(info.getIllustType());
 		pixivImage.setUserName(info.getUserName());
 		pixivImage.setUserId(info.getUserId());
-		pixivImage.setSearchKey(pid);
+		pixivImage.setSearchKey(searchKey);
 		pixivImage.setSource(source);
 		pixivImage.setSl(info.getSl());
 		pixivImage.setUrlList(info.getUrls().getOriginal());
