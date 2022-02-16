@@ -31,7 +31,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ").trim();;
         String sendType = messageAction.getBotMessage().getSendType();
-        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
+//        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
         BotSender botSender = botSenderManager.getSenderByBotMessage(messageAction.getBotMessage());
         if (StringUtil.isBlank(paramListStr)) {
@@ -48,7 +48,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage(reply.toString());
         } else if (! paramListStr.contains(" ")) {
-            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, guildPrefix);
+            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
             Asserts.isTrue(botTaskList.size() < 2, "不对劲");
             String reply;
             if (botTaskList.isEmpty()) {
