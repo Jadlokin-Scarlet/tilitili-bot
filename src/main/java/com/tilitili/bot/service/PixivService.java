@@ -177,6 +177,7 @@ public class PixivService {
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
+				Asserts.notNull(ossUrl, "上传OSS失败");
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
 				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
 			}
@@ -184,7 +185,7 @@ public class PixivService {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl));
+				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: url));
 			}
 		}
 		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
@@ -210,9 +211,10 @@ public class PixivService {
 			}
 			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 			if (isSese) {
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl));
+				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: imageUrl));
 			} else {
 				messageChainList.add(new BotMessageChain().setType("Plain").setText(pid + "\n"));
+				Asserts.notNull(ossUrl, "上传OSS失败");
 				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
 			}
 		}

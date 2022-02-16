@@ -48,6 +48,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 			messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
+				Asserts.notNull(ossUrl, "上传OSS失败");
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
 				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
 			}
@@ -56,7 +57,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl));
+				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: url));
 			}
 		}
 		return BotMessage.simpleListMessage(messageChainList);
