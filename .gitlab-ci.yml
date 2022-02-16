@@ -7,9 +7,9 @@ bulid:
   script:
     - echo "start building ..."
     - cd /home/www/
-    - ./docker_build tilitili-bot springboot master
+    - ./docker_build tilitili-bot springboot re_bd
   only:
-    - master
+    - re_bd
 
 deploy:
   stage: deploy
@@ -18,4 +18,4 @@ deploy:
     - cd /home/www/
     - ./docker_deploy tilitili-bot 110.40.179.129 8087
   only:
-    - master
+    - re_bd
