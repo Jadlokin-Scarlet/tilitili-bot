@@ -23,10 +23,10 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class BotService {
-    private final BotManager botManager;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
     private final BotTaskManager botTaskManager;
+    private final BotManager botManager;
 
     public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskManager botTaskManager) {
         this.botManager = botManager;
