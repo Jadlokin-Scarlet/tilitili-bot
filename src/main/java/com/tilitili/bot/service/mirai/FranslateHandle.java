@@ -6,6 +6,7 @@ import com.tilitili.common.entity.view.baidu.TranslateView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.BaiduUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,9 +37,9 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
 
         String message;
         if (to != null) {
-            message = baiduManager.translate(to, enText);
+            message = BaiduUtil.translate(to, enText);
         } else if (isNotBlank(enText)) {
-            message = baiduManager.translate(enText);
+            message = BaiduUtil.translate(enText);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
             message = String.format("%s\n---机翻\n%s", resultView.getSumSrc(), resultView.getSumDst());

@@ -3,9 +3,9 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.BaiduUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,12 +16,10 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class VoiceHandle extends ExceptionRespMessageHandle {
-    private final BaiduManager baiduManager;
     private final MiraiManager miraiManager;
 
     @Autowired
-    public VoiceHandle(BaiduManager baiduManager, MiraiManager miraiManager) {
-        this.baiduManager = baiduManager;
+    public VoiceHandle(MiraiManager miraiManager) {
         this.miraiManager = miraiManager;
     }
 
@@ -39,7 +37,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
             return null;
         }
 
-        String jpText = baiduManager.translate("jp", text);
+        String jpText = BaiduUtil.translate("jp", text);
 
         log.info("jpText="+jpText);
 
