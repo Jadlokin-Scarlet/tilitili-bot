@@ -47,7 +47,6 @@ public class BotService {
 
             String prefix = "";
             if (Objects.equals(sendType, SendTypeEmum.Guild_Message.sendType)) {
-                Asserts.isTrue(ChannelEmum.channelIds().contains(botMessage.getChannelId()), "不在可用频道");
                 prefix = ".";
                 actionKey = actionKey.replaceAll("^[.。]", prefix);
             }
