@@ -46,6 +46,6 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 		List<GitlabTrigger> triggerList = gitlabManager.getProjectTrigger(projectId);
 		Asserts.notEmpty(triggerList, "找不到构建token");
 		gitlabManager.reBuild(projectId, triggerList.get(0).getToken(), branches);
-		return null;
+		return BotMessage.simpleTextMessage("重启中");
 	}
 }
