@@ -1,6 +1,7 @@
 package com.tilitili.bot;
 
 import com.tilitili.bot.service.mirai.HelpHandle;
+import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
@@ -23,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
@@ -46,19 +48,12 @@ class StartApplicationTest {
     private BotSenderMapper botSenderMapper;
     @Autowired
     private BotSenderTaskMappingMapper botSenderTaskMappingMapper;
+    @Autowired
+    private Map<String, BaseMessageHandle> messageHandleMap;
 
     @Test
     void main() {
-//        for (MessageHandleEnum e : MessageHandleEnum.values()) {
-//            String name = e.getName();
-//            BotTask botTask = botTaskMapper.getBotTaskByName(name);
-//            List<String> sendTypeList = e.getSendType();
-//            for (String sendType : sendTypeList) {
-//                List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setSendType(sendType));
-//                BotSender botSender = botSenderList.get(0);
-//                botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(botSender.getId()).setTaskId(botTask.getId()));
-//            }
-//        }
+        System.out.println(messageHandleMap);
     }
 
     @Test
