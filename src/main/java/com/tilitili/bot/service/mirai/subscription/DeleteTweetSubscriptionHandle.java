@@ -6,6 +6,8 @@ import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.Subscription;
 import com.tilitili.common.entity.query.SubscriptionQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.twitter.user.TwitterUser;
+import com.tilitili.common.manager.TwitterManager;
 import com.tilitili.common.mapper.mysql.SubscriptionMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,12 @@ import java.util.List;
 @Component
 public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 	private final SubscriptionMapper subscriptionMapper;
+	private final TwitterManager twitterManager;
 
 	@Autowired
-	public DeleteTweetSubscriptionHandle(SubscriptionMapper subscriptionMapper) {
+	public DeleteTweetSubscriptionHandle(SubscriptionMapper subscriptionMapper, TwitterManager twitterManager) {
 		this.subscriptionMapper = subscriptionMapper;
+		this.twitterManager = twitterManager;
 	}
 
 	@Override
@@ -35,8 +39,12 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 
 		Asserts.notBlank(name, "格式错啦(name)");
 
+		TwitterUser user = twitterManager.getUserByUserName(name);
+		Asserts.notNull(user, "没找到用户");
+		String userId = user.getRestId();
+
 		Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
-		SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(name).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
+		SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(userId).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
 		List<Subscription> oldList = subscriptionMapper.getSubscriptionByCondition(subscriptionQuery);
 		Asserts.notEmpty(oldList, "还没关注哦。");
 		Asserts.checkEquals(oldList.size(), 1, "不太对劲。");
