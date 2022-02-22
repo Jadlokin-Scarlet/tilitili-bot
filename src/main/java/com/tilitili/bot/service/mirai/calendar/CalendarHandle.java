@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.utils.DateUtils.setDayOfWeekToCalendar;
@@ -66,11 +63,13 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
         log.info("day={} a={} hour={} minute={} somebody={} something={}", day, a, hour, minute, somebody, something);
         boolean isAtOther = Objects.equals(somebody, "提醒");
+        List<Long> respAtList = new ArrayList<>();
         if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
+            respAtList.addAll(atList);
         } else if (sendType.equals(SendTypeEmum.GROUP_MESSAGE)) {
             Asserts.notNull(qq, "怪怪的");
-            atList.add(qq);
+            respAtList.add(qq);
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -90,7 +89,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        String atListStr = isAtOther? atList.stream().map(String::valueOf).collect(Collectors.joining(",")): null;
+        String atListStr = respAtList.isEmpty()? null: atList.stream().map(String::valueOf).collect(Collectors.joining(","));
         BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId).setAtList(atListStr);
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
