@@ -174,6 +174,7 @@ public class PixivService {
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 //		messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
+		messageChainList.add(new BotMessageChain().setType("Plain").setText("pid "+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
