@@ -41,6 +41,11 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 		}
 		Asserts.notBlank(name, "格式错啦(项目)");
 		Asserts.notBlank(branches, "格式错啦(分支)");
+
+		if (!name.startsWith("tilitili-")) {
+			name = "tilitili-" + name;
+		}
+
 		Long projectId = gitlabManager.getProjectIdByProjectName(name);
 		Asserts.notNull(projectId, "找不到项目");
 		List<GitlabTrigger> triggerList = gitlabManager.getProjectTrigger(projectId);
