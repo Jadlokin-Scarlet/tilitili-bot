@@ -62,7 +62,6 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         String somebody = pattenList.get(4);
         String something = pattenList.get(5);
 
-        Asserts.notBlank(something, "怪怪的");
         Asserts.notBlank(somebody, "怪怪的");
 
         log.info("day={} a={} hour={} minute={} somebody={} something={}", day, a, hour, minute, somebody, something);
