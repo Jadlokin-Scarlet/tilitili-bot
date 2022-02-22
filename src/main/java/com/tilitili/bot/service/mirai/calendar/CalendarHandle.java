@@ -89,7 +89,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        String atListStr = respAtList.isEmpty()? null: atList.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String atListStr = respAtList.isEmpty()? null: respAtList.stream().map(String::valueOf).collect(Collectors.joining(","));
         BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId).setAtList(atListStr);
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
