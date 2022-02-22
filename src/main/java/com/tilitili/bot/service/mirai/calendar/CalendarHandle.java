@@ -49,7 +49,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);
         List<String> pattenList = StringUtils.extractList("^(明天|今天|后天|大后天|周(?:\\d|日)|下周(?:\\d|日)|下下周(?:\\d|日)|\\d+号|\\d+天后)?" +
-                "(凌晨|早上|上午|中午|下午|晚上)?" +
+                "(凌晨|早上|早晨|今早|上午|中午|白天|下午|晚上|今晚)?" +
                 "(\\d+点||\\d+小时后)?" +
                 "(半|1刻|3刻|\\d+时|\\d+分|\\d+分钟后)?" +
                 "(叫我|提醒)" +
@@ -124,10 +124,10 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         ) : 0;
         switch (a) {
             case "凌晨": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 4); break;
-            case "早上": case "上午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 10); break;
-            case "中午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour : 14); break;
+            case "早上": case "上午": case "早晨": case "今早": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 10); break;
+            case "中午": case "白天": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour : 14); break;
             case "下午": calendar.set(Calendar.HOUR_OF_DAY, hasHour? (12 + hour % 12) : 16); break;
-            case "晚上": calendar.set(Calendar.HOUR_OF_DAY, hasHour? (12 + hour % 12) : 20); break;
+            case "晚上": case "今晚": calendar.set(Calendar.HOUR_OF_DAY, hasHour? (12 + hour % 12) : 20); break;
             default: break;
         }
     }
