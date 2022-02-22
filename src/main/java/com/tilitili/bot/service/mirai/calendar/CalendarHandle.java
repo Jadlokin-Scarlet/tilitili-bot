@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai.calendar;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotCalendarMapper;
@@ -68,6 +69,8 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         boolean isAtOther = Objects.equals(somebody, "提醒");
         if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
+        } else if (sendType.equals(SendTypeEmum.GROUP_MESSAGE)) {
+            atList.add(qq);
         }
 
         Calendar calendar = Calendar.getInstance();
