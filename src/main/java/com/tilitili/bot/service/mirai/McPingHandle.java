@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		McPingResponse response;
 		try {
 			response = mcPingManager.mcPing(new InetSocketAddress(host, Integer.parseInt(port)));
-		} catch (SocketTimeoutException e) {
+		} catch (SocketTimeoutException | ConnectException e) {
 			throw new AssertException("网络异常");
 		}
 		Asserts.notNull(response, "服务器不在线");
