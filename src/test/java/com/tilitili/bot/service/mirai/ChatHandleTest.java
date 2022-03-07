@@ -1,25 +1,21 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tencentcloudapi.common.Credential;
+import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.nlp.v20190408.NlpClient;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
-import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.utils.Asserts;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.junit.jupiter.api.Test;
 
-@Slf4j
-@Component
-public class ChatHandle extends ExceptionRespMessageHandle {
-	@Override
-	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String text = messageAction.getParamOrDefault("提问", messageAction.getValue());
-		Asserts.notBlank(text, "格式错啦(提问)");
+import static org.junit.jupiter.api.Assertions.*;
+
+class ChatHandleTest {
+
+	@Test
+	void handleMessage() throws TencentCloudSDKException {
+		String text = "你好";
 
 		// 实例化一个认证对象，入参需要传入腾讯云账户secretId，secretKey,此处还需注意密钥对的保密
 		// 密钥可前往https://console.cloud.tencent.com/cam/capi网站进行获取
@@ -38,20 +34,6 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		// 返回的resp是一个ChatBotResponse的实例，与请求对象对应
 		ChatBotResponse resp = client.ChatBot(req);
 
-		return BotMessage.simpleTextMessage(resp.getReply());
+		System.out.println(resp.getReply());
 	}
-
-
-//	@Override
-//	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-//		String req = messageAction.getParamOrDefault("提问", messageAction.getValue());
-//		Asserts.notBlank(req, "格式错啦(提问)");
-//
-//		String respStr = HttpClientUtil.httpGet("http://api.qingyunke.com/api.php?key=free&appid=0&msg=" + URLEncoder.encode(req, "UTF-8"));
-//		JSONObject resp = JSONObject.parseObject(respStr);
-//		log.debug("请求青云 req={} result={}", req, respStr);
-//		Asserts.checkEquals(resp.getInteger("result"), 0, "不对劲");
-//
-//		return BotMessage.simpleTextMessage(resp.getString("content").replaceAll("\\{br}", "\n"));
-//	}
 }
