@@ -23,6 +23,8 @@ import java.util.Objects;
 @Component
 public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	private final String pixivImageKey = "pixivImageKey-";
+	private final String pixivImageListKey = "pixivImageListKey-";
+	private final String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
 	private final RedisCache redisCache;
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
@@ -58,10 +60,20 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			} else {
 				return null;
 			}
+			redisCache.delete(pixivImageListKey+sender);
+			redisCache.delete(pixivImageListPageNoKey + sender);
 		}
 
 		log.debug("PixivRecommendHandle get info");
-		PixivRecommendIllust illust = pixivManager.getRecommendImageByCookie(cookie);
+		List<PixivRecommendIllust> illustList;
+		if (redisCache.exists(pixivImageListKey+sender)) {
+			illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListKey + sender);
+		} else {
+			illustList = pixivManager.getRecommendImageByCookie(cookie);
+			redisCache.setValue(pixivImageListKey+sender, illustList);
+		}
+		int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender));
+		PixivRecommendIllust illust = illustList.get(pageNo);
 		String pid = illust.getId();
 		Integer sl = illust.getSl();
 		log.debug("PixivRecommendHandle get url");
