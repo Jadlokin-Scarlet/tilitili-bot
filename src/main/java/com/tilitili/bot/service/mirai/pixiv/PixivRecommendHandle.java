@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -25,6 +28,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	private final String pixivImageKey = "pixivImageKey-";
 	private final String pixivImageListKey = "pixivImageListKey-";
 	private final String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
+	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final RedisCache redisCache;
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
@@ -41,19 +45,24 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		BotMessage botMessage = messageAction.getBotMessage();
 		log.debug("PixivRecommendHandle start");
 
+		String key = messageAction.getKeyWithoutPrefix();
+		boolean isBookmark = Objects.equals(key, "好");
 		log.debug("PixivRecommendHandle get cookie");
 		Long qq = botMessage.getQq();
 		String tinyId = botMessage.getTinyId();
 		String sender = qq != null? String.valueOf(qq) : tinyId;
 		Asserts.notBlank(sender, "发送者为空");
+
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
+		if (isBookmark && (pixivLoginUser == null || !redisCache.exists(pixivImageKey + sender))) {
+			return null;
+		}
 		Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
 		String cookie = pixivLoginUser.getCookie();
 		Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
 
 		log.debug("PixivRecommendHandle bookmark");
-		String key = messageAction.getKeyWithoutPrefix();
-		if (Objects.equals(key, "好")) {
+		if (isBookmark) {
 			String pid = (String) redisCache.getValue(pixivImageKey + sender);
 			if (pid != null) {
 				pixivManager.bookmarkImageForCookie(pid, cookie);
@@ -104,6 +113,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageKey + sender, pid);
+		scheduled.schedule(() -> {
+			redisCache.delete(pixivImageKey + sender);
+		}, 1, TimeUnit.MINUTES);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
