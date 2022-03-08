@@ -112,7 +112,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle save result");
-		redisCache.setValue(pixivImageKey + sender, pid, 60);
+		redisCache.setValue(pixivImageKey + sender, pid, 120);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
