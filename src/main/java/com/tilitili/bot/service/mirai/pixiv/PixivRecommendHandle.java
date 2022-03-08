@@ -37,7 +37,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotMessage botMessage = messageAction.getBotMessage();
+		log.debug("PixivRecommendHandle start");
 
+		log.debug("PixivRecommendHandle get cookie");
 		Long qq = botMessage.getQq();
 		String tinyId = botMessage.getTinyId();
 		String sender = qq != null? String.valueOf(qq) : tinyId;
@@ -47,6 +49,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		String cookie = pixivLoginUser.getCookie();
 		Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
 
+		log.debug("PixivRecommendHandle bookmark");
 		String key = messageAction.getKeyWithoutPrefix();
 		if (Objects.equals(key, "好")) {
 			String pid = (String) redisCache.getValue(pixivImageKey + sender);
@@ -57,15 +60,18 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			}
 		}
 
+		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust = pixivManager.getRecommendImageByCookie(cookie);
 		String pid = illust.getId();
 		Integer sl = illust.getSl();
+		log.debug("PixivRecommendHandle get url");
 		List<String> urlList = pixivManager.getPageListProxy(pid);
 
 		if (urlList.size() > 10) {
 			urlList = urlList.subList(0, 10);
 		}
 
+		log.debug("PixivRecommendHandle get make messageChainList");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
 		for (String url : urlList) {
@@ -79,7 +85,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			}
 		}
 
+		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageKey + sender, pid);
+		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
 }
