@@ -28,7 +28,6 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	private final String pixivImageKey = "pixivImageKey-";
 	private final String pixivImageListKey = "pixivImageListKey-";
 	private final String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
-	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final RedisCache redisCache;
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
@@ -54,7 +53,8 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		Asserts.notBlank(sender, "发送者为空");
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
-		if (isBookmark && (pixivLoginUser == null || !redisCache.exists(pixivImageKey + sender))) {
+		if (isBookmark && !redisCache.exists(pixivImageKey + sender)) {
+			log.info("无可收藏的pid");
 			return null;
 		}
 		Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
@@ -112,10 +112,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle save result");
-		redisCache.setValue(pixivImageKey + sender, pid);
-		scheduled.schedule(() -> {
-			redisCache.delete(pixivImageKey + sender);
-		}, 1, TimeUnit.MINUTES);
+		redisCache.setValue(pixivImageKey + sender, pid, 60000);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
