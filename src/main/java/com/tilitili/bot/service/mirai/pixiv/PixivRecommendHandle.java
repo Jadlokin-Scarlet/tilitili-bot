@@ -66,13 +66,18 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle get info");
 		List<PixivRecommendIllust> illustList;
+		int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
+		if (pageNo >= 60) {
+			redisCache.delete(pixivImageListKey+sender);
+			redisCache.delete(pixivImageListPageNoKey + sender);
+			pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
+		}
 		if (redisCache.exists(pixivImageListKey+sender)) {
 			illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListKey + sender);
 		} else {
 			illustList = pixivManager.getRecommendImageByCookie(cookie);
 			redisCache.setValue(pixivImageListKey+sender, illustList);
 		}
-		int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender));
 		PixivRecommendIllust illust = illustList.get(pageNo);
 		String pid = illust.getId();
 		Integer sl = illust.getSl();
