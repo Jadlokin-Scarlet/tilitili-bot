@@ -36,9 +36,9 @@ public class RepeatHandle extends ExceptionRespMessageHandle {
         if (Objects.equals(newNumber, "3")) {
             List<BotMessageChain> newMessageChainList = messageChainList.stream().map(messageChain -> {
                 if (messageChain.getType().equals("Plain")) {
-                    return new BotMessageChain().setType("Plain").setText(messageChain.getText());
+                    return BotMessageChain.ofPlain(messageChain.getText());
                 } else if (messageChain.getType().equals("Image")) {
-                    return new BotMessageChain().setType("Image").setUrl(QQUtil.getImageUrl(messageChain.getUrl()));
+                    return BotMessageChain.ofImage(QQUtil.getImageUrl(messageChain.getUrl()));
                 } else {
                     return null;
                 }

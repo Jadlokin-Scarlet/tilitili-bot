@@ -38,7 +38,7 @@ public class BotService {
     @Async
     public void syncHandleTextMessage(BotMessage botMessage) {
         String sendType = botMessage.getSendType();
-        List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.Friend_Message.sendType, SendTypeEmum.Temp_Message.sendType);
+        List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType, SendTypeEmum.TEMP_MESSAGE.sendType);
         boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
         try {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
@@ -46,7 +46,7 @@ public class BotService {
             String actionKey = botMessageAction.getKey();
 
             String prefix = "";
-            if (Objects.equals(sendType, SendTypeEmum.Guild_Message.sendType)) {
+            if (Objects.equals(sendType, SendTypeEmum.GUILD_MESSAGE.sendType)) {
                 prefix = ".";
                 actionKey = actionKey.replaceAll("^[.。]", prefix);
             }
@@ -100,16 +100,16 @@ public class BotService {
     public String getSessionKey(BotMessage botMessage) {
         String sendType = botMessage.getSendType();
         switch (sendType) {
-            case SendTypeEmum.TEMP_MESSAGE: Asserts.notNull(botMessage.getGroup(), "找不到发送对象");
-            case SendTypeEmum.FRIEND_MESSAGE: Asserts.notNull(botMessage.getQq(), "找不到发送对象"); return SendTypeEmum.FRIEND_MESSAGE + "-" + botMessage.getQq();
-            case SendTypeEmum.GROUP_MESSAGE: Asserts.notNull(botMessage.getGroup(), "找不到发送对象"); return SendTypeEmum.GROUP_MESSAGE + "-" + botMessage.getGroup();
-            case SendTypeEmum.GUILD_MESSAGE: {
+            case SendTypeEmum.TEMP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象");
+            case SendTypeEmum.FRIEND_MESSAGE_STR: Asserts.notNull(botMessage.getQq(), "找不到发送对象"); return SendTypeEmum.FRIEND_MESSAGE_STR + "-" + botMessage.getQq();
+            case SendTypeEmum.GROUP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象"); return SendTypeEmum.GROUP_MESSAGE_STR + "-" + botMessage.getGroup();
+            case SendTypeEmum.GUILD_MESSAGE_STR: {
                 ChannelEmum channel = botMessage.getChannel();
                 String guildId = channel != null? channel.guildId: botMessage.getGuildId();
                 String channelId = channel != null? channel.channelId: botMessage.getChannelId();
                 Asserts.notBlank(guildId, "找不到发送对象");
                 Asserts.notBlank(channelId, "找不到发送对象");
-                return SendTypeEmum.GUILD_MESSAGE + "-" + guildId + "-" + channelId;
+                return SendTypeEmum.GUILD_MESSAGE_STR + "-" + guildId + "-" + channelId;
             }
             default: throw new AssertException("未知发送类型："+sendType);
         }

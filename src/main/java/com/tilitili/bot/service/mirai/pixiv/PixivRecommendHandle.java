@@ -99,15 +99,15 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle get make messageChainList");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
+		messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 		for (String url : urlList) {
 			String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-			messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
+			messageChainList.add(BotMessageChain.ofPlain("\n"));
 			if (sl == null || sl < 5) {
 				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
+				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			} else {
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null ? ossUrl : url));
+				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null ? ossUrl : url));
 			}
 		}
 

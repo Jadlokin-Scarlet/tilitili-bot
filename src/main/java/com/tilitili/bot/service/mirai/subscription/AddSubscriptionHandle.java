@@ -44,7 +44,7 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
         String name = owner.getName();
         Long roomId = owner.getRoomId();
 
-        Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
+        Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE_STR.equals(sendType)? null: qq;
         SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(1).setValue(String.valueOf(uid)).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
         int oldCount = subscriptionMapper.countSubscriptionByCondition(subscriptionQuery);
         Asserts.isTrue(oldCount == 0, "已经关注了哦。");

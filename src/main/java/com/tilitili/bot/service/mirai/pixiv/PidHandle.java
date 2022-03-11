@@ -45,19 +45,19 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		String[] urlList = pixivImage.getUrlList().split(",");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		if (sl == null || sl < 5) {
-			messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
+			messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
 		} else {
-			messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
+			messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: url));
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}
 		}
 		return BotMessage.simpleListMessage(messageChainList);

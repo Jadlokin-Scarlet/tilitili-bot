@@ -43,7 +43,7 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 		Asserts.notNull(user, "没找到用户");
 		String userId = user.getRestId();
 
-		Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE.equals(sendType)? null: qq;
+		Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE_STR.equals(sendType)? null: qq;
 		SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(userId).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
 		List<Subscription> oldList = subscriptionMapper.getSubscriptionByCondition(subscriptionQuery);
 		Asserts.notEmpty(oldList, "还没关注哦。");

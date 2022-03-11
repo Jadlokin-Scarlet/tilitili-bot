@@ -45,7 +45,7 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
             message = BaiduUtil.translate(enText);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
-            message = String.format("%s\n---机翻\n%s", resultView.getSumSrc(), resultView.getSumDst());
+            message = String.format("%s%n---机翻%n%s", resultView.getSumSrc(), resultView.getSumDst());
         }
         if (isBlank(message)) {
             return BotMessage.simpleTextMessage("无法翻译");

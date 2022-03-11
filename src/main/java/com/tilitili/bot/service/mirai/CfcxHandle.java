@@ -36,7 +36,7 @@ public class CfcxHandle extends ExceptionRespMessageHandle {
         Asserts.checkEquals(cfcxResponse.getCode(), 0, cfcxResponse.getMessage());
         CfcxData data = cfcxResponse.getData();
         String nameListStr = data.getList().stream().map(CfcxItem::getUname).collect(Collectors.joining(","));
-        String message = String.format("关注的VUP有：\n%s\n查询时间：%s\n数据来源：ProJectASF", nameListStr, DateUtils.formatDateYMDHMS(new Date()));
+        String message = String.format("关注的VUP有：%n%s%n查询时间：%s%n数据来源：ProJectASF", nameListStr, DateUtils.formatDateYMDHMS(new Date()));
 
         return BotMessage.simpleTextMessage(message).setQuote(sendMessageId);
     }

@@ -57,7 +57,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		String message = String.format("服务器在线！版本%s, 在线玩家数：%s，地址: %s", version, onlinePlayerCnt, url);
 		if (key.equals("mcm")) {
 			String modListStr = response.getModinfo().getModList().stream().map(McPingMod::getModid).collect(Collectors.joining(","));
-			message += String.format("\nmod列表：%s", modListStr);
+			message += String.format("%nmod列表：%s", modListStr);
 		}
 		return BotMessage.simpleTextMessage(message);
 	}

@@ -64,7 +64,7 @@ class StartApplicationTest {
         List<MiraiFriend> friendList = miraiManager.getFriendList();
         List<Long> qqList = friendList.stream().map(MiraiFriend::getId).collect(Collectors.toList());
         for (MiraiFriend friend : friendList) {
-            BotSender friendSender = new BotSender().setSendType(SendTypeEmum.FRIEND_MESSAGE).setQq(friend.getId()).setName(friend.getNickname());
+            BotSender friendSender = new BotSender().setSendType(SendTypeEmum.FRIEND_MESSAGE_STR).setQq(friend.getId()).setName(friend.getNickname());
             botSenderMapper.addBotSenderSelective(friendSender);
             List<Integer> list = new ArrayList<>();
             if (Arrays.asList(66600000L, 1701008067L).contains(friendSender.getQq())) continue;
@@ -79,7 +79,7 @@ class StartApplicationTest {
         // group message
         List<MiraiGroup> groupList = miraiManager.getGroupList();
         for (MiraiGroup group : groupList) {
-            BotSender groupSender = new BotSender().setSendType(SendTypeEmum.GROUP_MESSAGE).setGroup(group.getId()).setName(group.getName());
+            BotSender groupSender = new BotSender().setSendType(SendTypeEmum.GROUP_MESSAGE_STR).setGroup(group.getId()).setName(group.getName());
             botSenderMapper.addBotSenderSelective(groupSender);
             List<Integer> list = new ArrayList<>();
             if (groupSender.getGroup().equals(RANK_GROUP.value)) {
@@ -96,7 +96,7 @@ class StartApplicationTest {
             for (MiraiFriend temp : tempList) {
                 if (qqList.contains(temp.getId())) continue;
 
-                BotSender tempSender = new BotSender().setSendType(SendTypeEmum.TEMP_MESSAGE).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
+                BotSender tempSender = new BotSender().setSendType(SendTypeEmum.TEMP_MESSAGE_STR).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
                 botSenderMapper.addBotSenderSelective(tempSender);
 
                 List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
@@ -108,22 +108,22 @@ class StartApplicationTest {
         for (GoCqhttpGuild guild : guildList) {
             List<GoCqhttpChannel> channelList = goCqhttpManager.getGuildChannelList(guild.getGuildId());
             for (GoCqhttpChannel channel : channelList) {
-                BotSender guildSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
+                BotSender guildSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE_STR).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
                 botSenderMapper.addBotSenderSelective(guildSender);
                 List<Integer> list = new ArrayList<>();
-                if (channel.getChannelId().equals(CaiHong_Guanzhu_Channel.channelId)) {// 转播自助用
+                if (channel.getChannelId().equals(CAI_HONG_GUANZHU_CHANNEL.channelId)) {// 转播自助用
                     list.addAll(Arrays.asList(3,4,11));
-                } else if (channel.getChannelId().equals(Our_Homo_Bot_Channel.channelId)) {// Bot灌水
+                } else if (channel.getChannelId().equals(OUR_HOMO_BOT_CHANNEL.channelId)) {// Bot灌水
                     list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
-                } else if (channel.getChannelId().equals(Our_Homo_Test_Channel.channelId)) {// test
+                } else if (channel.getChannelId().equals(OUR_HOMO_TEST_CHANNEL.channelId)) {// test
                     list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,18,20,21,22,23,24,25));
-                } else if (channel.getChannelId().equals(Touhou_Guild_Watch_Channel.channelId)) {// 石油之海 | 查级灌水
+                } else if (channel.getChannelId().equals(TOUHOU_GUILD_WATCH_CHANNEL.channelId)) {// 石油之海 | 查级灌水
                     list.addAll(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
-                } else if (channel.getChannelId().equals(Touhou_Guild_Video_Channel.channelId)) {// 伏瓦鲁魔法图书馆
+                } else if (channel.getChannelId().equals(TOUHOU_GUILD_VIDEO_CHANNEL.channelId)) {// 伏瓦鲁魔法图书馆
                     list.addAll(Arrays.asList(11,21));
-                } else if (channel.getChannelId().equals(CaiHong_Image_Channel.channelId)) {// 不可以色色的女V图片区
+                } else if (channel.getChannelId().equals(CAI_HONG_IMAGE_CHANNEL.channelId)) {// 不可以色色的女V图片区
                     list.addAll(Arrays.asList(11,17,22));
-                } else if (channel.getChannelId().equals(CaiHong_Game_Channel.channelId)) {// 游戏讨论
+                } else if (channel.getChannelId().equals(CAI_HONG_GAME_CHANNEL.channelId)) {// 游戏讨论
                     list.addAll(Arrays.asList(11,25));
                 } else {
                     list.addAll(Arrays.asList(11));

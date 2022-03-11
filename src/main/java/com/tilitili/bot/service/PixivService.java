@@ -173,20 +173,20 @@ public class PixivService {
 		String[] urlList = noUsedImage.getUrlList().split(",");
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(new BotMessageChain().setType("Plain").setText("https://pixiv.moe/illust/"+pid));
-//		messageChainList.add(new BotMessageChain().setType("Plain").setText("pid "+pid));
+		messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
+//		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
 		} else {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: url));
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}
 		}
 		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
@@ -208,15 +208,15 @@ public class PixivService {
 			String imageUrl = data.getUrls().getOriginal();
 			boolean isSese = data.getTags().contains("R-18") || data.getR18();
 			if (i != 0) {
-				messageChainList.add(new BotMessageChain().setType("Plain").setText("\n"));
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
 			}
 			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 			if (isSese) {
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(ossUrl != null? ossUrl: imageUrl));
+				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: imageUrl));
 			} else {
-				messageChainList.add(new BotMessageChain().setType("Plain").setText(pid + "\n"));
+				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
 				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(new BotMessageChain().setType("Image").setUrl(ossUrl));
+				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
 		}
 

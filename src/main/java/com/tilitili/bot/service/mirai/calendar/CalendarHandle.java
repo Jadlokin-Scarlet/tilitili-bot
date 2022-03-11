@@ -67,7 +67,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
             respAtList.addAll(atList);
-        } else if (sendType.equals(SendTypeEmum.GROUP_MESSAGE)) {
+        } else if (sendType.equals(SendTypeEmum.GROUP_MESSAGE_STR)) {
             Asserts.notNull(qq, "怪怪的");
             respAtList.add(qq);
         }

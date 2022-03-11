@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotTaskDTO;
@@ -41,7 +40,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             for (int i = 0; i < botTaskDTOList.size(); i++) {
                 BotTaskDTO botTask = botTaskDTOList.get(i);
                 String key = botTask.getKeyListStr() == null ? "" : botTask.getKeyListStr();
-                reply.append(String.format("%s.%s: %s\n", i + 1, botTask.getNick(), key));
+                reply.append(String.format("%s.%s: %s%n", i + 1, botTask.getNick(), key));
             }
             if (reply.charAt(reply.length() - 1) == '\n') {
                 reply.deleteCharAt(reply.length() - 1);
