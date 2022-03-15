@@ -52,7 +52,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if (! Objects.equals(SendTypeEmum.GUILD_MESSAGE.sendType, sendType) || Objects.equals(guildId, GuildEmum.GUILD_EMUM.guildId)) {
+        if (! Objects.equals(SendTypeEmum.GUILD_MESSAGE.sendType, sendType) || Objects.equals(guildId, GuildEmum.OUR_HOMO.guildId)) {
             int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
             if (ddCount > 0) {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
