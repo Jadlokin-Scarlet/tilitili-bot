@@ -65,7 +65,8 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		if (isBookmark) {
 			String pid = (String) redisCache.getValue(pixivImageKey + sender);
 			if (pid != null) {
-				pixivManager.bookmarkImageForCookie(pid, cookie);
+				String token = pixivManager.getPixivToken(sender, cookie);
+				pixivManager.bookmarkImageForCookie(pid, cookie, token);
 			} else {
 				return null;
 			}
