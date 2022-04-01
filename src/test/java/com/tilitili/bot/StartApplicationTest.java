@@ -2,9 +2,11 @@ package com.tilitili.bot;
 
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.common.emnus.GuildEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
+import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpChannel;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpGuild;
 import com.tilitili.common.entity.view.bot.mirai.MiraiFriend;
@@ -54,6 +56,21 @@ class StartApplicationTest {
     @Test
     void main() {
         System.out.println(messageHandleMap);
+    }
+
+    @Test
+    public void test2() {
+        List<GoCqhttpChannel> channelList = goCqhttpManager.getGuildChannelList(GuildEmum.HUA_NA_GUILD.guildId);
+        for (GoCqhttpChannel channel : channelList) {
+            List<BotSender> oldBotsendList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setGuildId(GuildEmum.HUA_NA_GUILD.guildId).setChannelId(channel.getChannelId()));
+            if (oldBotsendList.isEmpty()) {
+                BotSender addBotSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE_STR).setGuildId(GuildEmum.HUA_NA_GUILD.guildId).setChannelId(channel.getChannelId()).setStatus(0).setName(channel.getChannelName());
+                botSenderMapper.addBotSenderSelective(addBotSender);
+                for (Long taskId : Arrays.asList(11L)) {
+                    botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(addBotSender.getId()).setTaskId(taskId));
+                }
+            }
+        }
     }
 
     @Test

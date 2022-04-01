@@ -10,4 +10,4 @@ COPY silk /home/admin/silk/
 
 ADD target/*.jar tilitili-bot.jar
 
-ENTRYPOINT ["java", "-jar", "-Duser.timezone=GMT+8", "tilitili-bot.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=pro", "tilitili-bot.jar"]
