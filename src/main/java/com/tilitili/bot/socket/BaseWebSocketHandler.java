@@ -29,7 +29,8 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("连接关闭，code ={}, reason={}, remote={}", code, reason, remote);
+        log.error("连接关闭，code ={}, reason={}, remote={}", code, reason, remote);
+        this.reconnect();
     }
 
     @Override
