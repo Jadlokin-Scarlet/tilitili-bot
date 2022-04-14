@@ -3,12 +3,7 @@ package com.tilitili.bot.config;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.client.WebSocketConnectionManager;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
