@@ -1,6 +1,7 @@
 package com.tilitili.bot.entity.bot;
 
 import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
@@ -27,6 +28,7 @@ public class BotMessageAction {
     private String keyWithoutPrefix;
     private String key;
     private String value;
+    private BotSender botSender;
 
     public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
         this.botMessage = botMessage;
@@ -141,5 +143,14 @@ public class BotMessageAction {
 
     public List<Long> getAtList() {
         return atList;
+    }
+
+    public BotSender getBotSender() {
+        return botSender;
+    }
+
+    public BotMessageAction setBotSender(BotSender botSender) {
+        this.botSender = botSender;
+        return this;
     }
 }

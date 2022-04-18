@@ -4,11 +4,14 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotSenderManager;
 import com.tilitili.common.manager.BotTaskManager;
+import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -25,14 +28,16 @@ import java.util.Objects;
 public class BotService {
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
-    private final BotTaskManager botTaskManager;
     private final BotManager botManager;
+    private final BotSenderManager botSenderManager;
+    private final BotTaskMapper botTaskMapper;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskManager botTaskManager) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
-        this.botTaskManager = botTaskManager;
+        this.botSenderManager = botSenderManager;
+        this.botTaskMapper = botTaskMapper;
     }
 
     @Async
@@ -51,7 +56,10 @@ public class BotService {
                 actionKey = actionKey.replaceAll("^[.。]", prefix);
             }
 
-            List<BotTask> botTaskDTOList = botTaskManager.getTaskListByBotMessage(botMessage, actionKey, prefix);
+            BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
+            botMessageAction.setBotSender(botSender);
+
+            List<BotTask> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
             BotMessage respMessage = null;
             for (BotTask botTask : botTaskDTOList) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
