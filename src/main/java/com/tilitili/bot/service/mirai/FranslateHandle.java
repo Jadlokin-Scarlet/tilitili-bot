@@ -43,11 +43,11 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
 
         String message;
         if (from != null) {
-            message = botTranslateMappingManager.translate(botSender.getId(), enText);
+            message = botTranslateMappingManager.translate(botSender.getId(), enText, from, to);
         } else if (to != null) {
             message = botTranslateMappingManager.translate(botSender.getId(), enText, to);
         } else if (isNotBlank(enText)) {
-            message = botTranslateMappingManager.translate(botSender.getId(), enText, from, to);
+            message = botTranslateMappingManager.translate(botSender.getId(), enText);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
             message = String.format("%s%n---机翻%n%s", resultView.getSumSrc(), resultView.getSumDst());
