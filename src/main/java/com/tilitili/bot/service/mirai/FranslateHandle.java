@@ -43,9 +43,9 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
 
         String message;
         if (from != null) {
-            message = botTranslateMappingManager.translate(botSender.getId(), from, to, enText);
+            message = botTranslateMappingManager.translate(botSender.getId(), enText);
         } else if (to != null) {
-            message = botTranslateMappingManager.translate(botSender.getId(), to, enText);
+            message = botTranslateMappingManager.translate(botSender.getId(), enText, to);
         } else if (isNotBlank(enText)) {
             message = botTranslateMappingManager.translate(botSender.getId(), enText, from, to);
         } else {
