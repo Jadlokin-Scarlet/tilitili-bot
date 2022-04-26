@@ -42,7 +42,11 @@ public class FranslateHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
         String message;
-        if (isNotBlank(enText)) {
+        if (from != null) {
+            message = botTranslateMappingManager.translate(botSender.getId(), from, to, enText);
+        } else if (to != null) {
+            message = botTranslateMappingManager.translate(botSender.getId(), to, enText);
+        } else if (isNotBlank(enText)) {
             message = botTranslateMappingManager.translate(botSender.getId(), enText, from, to);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
