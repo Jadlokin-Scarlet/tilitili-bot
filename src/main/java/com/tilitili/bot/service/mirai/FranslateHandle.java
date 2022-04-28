@@ -20,8 +20,8 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 @Component
 public class FranslateHandle extends ExceptionRespMessageHandle {
 
-    private final BotTranslateMappingManager botTranslateMappingManager;
     private final BaiduManager baiduManager;
+    private final BotTranslateMappingManager botTranslateMappingManager;
 
     @Autowired
     public FranslateHandle(BaiduManager baiduManager, BotTranslateMappingManager botTranslateMappingManager) {
