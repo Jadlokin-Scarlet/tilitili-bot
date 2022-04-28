@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BaiduUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +16,11 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class VoiceHandle extends ExceptionRespMessageHandle {
-    private final MiraiManager miraiManager;
+    private final BotManager botManager;
 
     @Autowired
-    public VoiceHandle(MiraiManager miraiManager) {
-        this.miraiManager = miraiManager;
+    public VoiceHandle(BotManager botManager) {
+        this.botManager = botManager;
     }
 
 	@Override
@@ -48,7 +48,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
         Asserts.isTrue(slkFile.exists(), "转码slk失败");
 
-        String voiceId = miraiManager.uploadVoice(slkFile);
+        String voiceId = botManager.uploadVoice(slkFile);
         Asserts.notBlank(voiceId, "上传失败");
 
         return BotMessage.simpleVoiceIdMessage(voiceId);

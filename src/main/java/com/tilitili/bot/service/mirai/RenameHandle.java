@@ -5,7 +5,7 @@ import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +27,12 @@ public class RenameHandle extends ExceptionRespMessageHandle {
     private final String statusKey = "rename.status";
     private final String lastSendTimeKey = "rename.last_send_time";
 
-    private final MiraiManager miraiManager;
+    private final BotManager botManager;
     private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 
     @Autowired
-    public RenameHandle(MiraiManager miraiManager) {
-        this.miraiManager = miraiManager;
+    public RenameHandle(BotManager botManager) {
+        this.botManager = botManager;
     }
 
 	@Override
@@ -47,10 +47,10 @@ public class RenameHandle extends ExceptionRespMessageHandle {
             String lastSendTimeStr = session.get(lastSendTimeKey);
             boolean isUp = lastSendTimeStr == null || DateUtils.parseDateYMDHMS(lastSendTimeStr).before(getLimitDate());
             if (status.equals("冒泡！") && !isUp) {
-                miraiManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 水群ing");
+                botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 水群ing");
                 session.put(statusKey, "水群ing");
             } else if (isUp) {
-                miraiManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 冒泡！");
+                botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 冒泡！");
                 session.put(statusKey, "冒泡！");
             }
 
@@ -58,7 +58,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
                 String lastSendTime2Str = session.get(lastSendTimeKey);
                 boolean isDown = lastSendTime2Str == null || DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
                 if (isDown) {
-                    miraiManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 潜水。");
+                    botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 潜水。");
                     session.put(statusKey, "潜水。");
                 }
             }, waitTime, TimeUnit.MINUTES);

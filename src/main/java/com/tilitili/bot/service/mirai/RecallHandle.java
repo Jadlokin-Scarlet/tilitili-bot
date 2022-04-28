@@ -7,7 +7,6 @@ import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +23,12 @@ public class RecallHandle extends ExceptionRespMessageHandle {
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
 
-    private final MiraiManager miraiManager;
     private final RedisCache redisCache;
     private final PixivImageMapper pixivImageMapper;
     private final BotManager botManager;
 
     @Autowired
-    public RecallHandle(MiraiManager miraiManager, RedisCache redisCache, PixivImageMapper pixivImageMapper, BotManager botManager) {
-        this.miraiManager = miraiManager;
+    public RecallHandle(RedisCache redisCache, PixivImageMapper pixivImageMapper, BotManager botManager) {
         this.redisCache = redisCache;
         this.pixivImageMapper = pixivImageMapper;
         this.botManager = botManager;
