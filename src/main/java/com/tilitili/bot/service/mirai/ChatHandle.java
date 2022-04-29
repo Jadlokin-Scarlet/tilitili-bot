@@ -49,6 +49,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			TimeUtil.millisecondsSleep(1000);
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(2489917059L),
+					BotMessageChain.ofPlain(" "),
 					BotMessageChain.ofPlain(reply)
 			));
 		}
