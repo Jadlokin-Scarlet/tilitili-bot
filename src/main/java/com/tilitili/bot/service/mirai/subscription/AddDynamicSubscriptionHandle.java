@@ -45,11 +45,11 @@ public class AddDynamicSubscriptionHandle extends ExceptionRespMessageHandle {
         Long roomId = owner.getRoomId();
 
         Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE_STR.equals(sendType)? null: qq;
-        SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(1).setValue(String.valueOf(uid)).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
+        SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(3).setValue(String.valueOf(uid)).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
         int oldCount = subscriptionMapper.countSubscriptionByCondition(subscriptionQuery);
         Asserts.isTrue(oldCount == 0, "已经关注了哦。");
 
-        Subscription add = new Subscription().setValue(String.valueOf(uid)).setType(1).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId).setName(name).setRoomId(roomId);
+        Subscription add = new Subscription().setValue(String.valueOf(uid)).setType(3).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId).setName(name).setRoomId(roomId);
         subscriptionMapper.addSubscriptionSelective(add);
 
         return BotMessage.simpleTextMessage(String.format("关注%s成功！", name));
