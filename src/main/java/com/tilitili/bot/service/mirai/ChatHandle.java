@@ -9,9 +9,14 @@ import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -19,6 +24,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String text = messageAction.getParamOrDefault("提问", messageAction.getValue());
+		Long group = messageAction.getBotSender().getGroup();
 		Asserts.notBlank(text, "格式错啦(提问)");
 
 		// 实例化一个认证对象，入参需要传入腾讯云账户secretId，secretKey,此处还需注意密钥对的保密
@@ -37,7 +43,16 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		req.setQuery(text);
 		// 返回的resp是一个ChatBotResponse的实例，与请求对象对应
 		ChatBotResponse resp = client.ChatBot(req);
+		String reply = resp.getReply();
 
-		return BotMessage.simpleTextMessage(resp.getReply());
+		if (Objects.equals(group, 674446384L)) {
+			TimeUtil.millisecondsSleep(1000);
+			return BotMessage.simpleListMessage(Arrays.asList(
+					BotMessageChain.ofAt(2489917059L),
+					BotMessageChain.ofPlain(reply)
+			));
+		}
+
+		return BotMessage.simpleTextMessage(reply);
 	}
 }
