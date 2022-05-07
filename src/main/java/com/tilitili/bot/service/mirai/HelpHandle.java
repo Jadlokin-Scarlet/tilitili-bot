@@ -52,9 +52,13 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         } else if (! paramListStr.contains(" ")) {
             List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
             Asserts.isTrue(botTaskList.size() < 2, "不对劲");
-            Asserts.notEmpty(botTaskList, "我不会" + paramListStr);
-            BotTask botTask = botTaskList.get(0);
-            String reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            String reply;
+            if (botTaskList.isEmpty()) {
+                reply = String.format("[%s]的作用是[%s]。", paramListStr, paramListStr);
+            } else {
+                BotTask botTask = botTaskList.get(0);
+                reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            }
             return BotMessage.simpleTextMessage(reply);
         } else {
             return null;
