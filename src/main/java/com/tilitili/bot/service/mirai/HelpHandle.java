@@ -32,10 +32,13 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         String sendType = messageAction.getBotMessage().getSendType();
 //        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
-        BotSender botSender = botSenderManager.getSenderByBotMessage(messageAction.getBotMessage());
-        if (StringUtil.isBlank(paramListStr)) {
-            List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListBySenderId(botSender.getId());
+        BotSender botSender = messageAction.getBotSender();
+        List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListBySenderId(botSender.getId());
+        if (botTaskDTOList.isEmpty()) {
+            return null;
+        }
 
+        if (StringUtil.isBlank(paramListStr)) {
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！查看详情发送（帮助 [指令]）\n");
             for (int i = 0; i < botTaskDTOList.size(); i++) {
                 BotTaskDTO botTask = botTaskDTOList.get(i);
@@ -49,13 +52,9 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         } else if (! paramListStr.contains(" ")) {
             List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
             Asserts.isTrue(botTaskList.size() < 2, "不对劲");
-            String reply;
-            if (botTaskList.isEmpty()) {
-                reply = String.format("[%s]的作用是[%s]。", paramListStr, paramListStr);
-            } else {
-                BotTask botTask = botTaskList.get(0);
-                reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
-            }
+            Asserts.notEmpty(botTaskList, "我不会" + paramListStr);
+            BotTask botTask = botTaskList.get(0);
+            String reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
             return BotMessage.simpleTextMessage(reply);
         } else {
             return null;

@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotTranslateMapping;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotTranslateMappingMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,8 @@ public class DeleteTranslateConfigHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		Long senderId = botSender.getId();
+		String senderIdStr = messageAction.getBody("senderId");
+		Long senderId = StringUtils.isBlank(senderIdStr)? botSender.getId(): Long.valueOf(senderIdStr);
 		String value = messageAction.getValueOrDefault("");
 		String from = messageAction.getBodyOrDefault("from", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);
 

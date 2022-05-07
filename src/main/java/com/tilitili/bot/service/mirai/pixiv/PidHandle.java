@@ -3,10 +3,13 @@ package com.tilitili.bot.service.mirai.pixiv;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
@@ -22,17 +25,24 @@ import java.util.List;
 public class PidHandle extends ExceptionRespMessageHandle {
 	private final PixivImageMapper pixivImageMapper;
 	private final PixivService pixivService;
+	private final BotTaskMapper botTaskMapper;
 
 	@Autowired
-	public PidHandle(PixivImageMapper pixivImageMapper, PixivService pixivService) {
+	public PidHandle(PixivImageMapper pixivImageMapper, PixivService pixivService, BotTaskMapper botTaskMapper) {
 		this.pixivImageMapper = pixivImageMapper;
 		this.pixivService = pixivService;
+		this.botTaskMapper = botTaskMapper;
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
 		Asserts.notBlank(pid, "格式错啦(pid)");
+
+		BotSender botSender = messageAction.getBotSender();
+		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
+		boolean canSS = !botTaskList.isEmpty();
+
 		List<PixivImage> imageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setSource("pixiv").setPid(pid));
 		if (imageList.isEmpty()) {
 			pixivService.saveImageFromPixiv(pid);
@@ -53,6 +63,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
 		} else {
+			Asserts.isTrue(canSS, "不准色色");
 			messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
