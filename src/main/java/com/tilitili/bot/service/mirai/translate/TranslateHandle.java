@@ -1,4 +1,4 @@
-package com.tilitili.bot.service.mirai;
+package com.tilitili.bot.service.mirai.translate;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -18,13 +18,13 @@ import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 @Component
-public class FranslateHandle extends ExceptionRespMessageHandle {
+public class TranslateHandle extends ExceptionRespMessageHandle {
 
     private final BaiduManager baiduManager;
     private final BotTranslateMappingManager botTranslateMappingManager;
 
     @Autowired
-    public FranslateHandle(BaiduManager baiduManager, BotTranslateMappingManager botTranslateMappingManager) {
+    public TranslateHandle(BaiduManager baiduManager, BotTranslateMappingManager botTranslateMappingManager) {
         this.baiduManager = baiduManager;
         this.botTranslateMappingManager = botTranslateMappingManager;
     }
