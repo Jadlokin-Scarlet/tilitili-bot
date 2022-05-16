@@ -28,7 +28,7 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 		String req = messageAction.getBodyOrDefault("提问", messageAction.getValue());
 
 		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
-		Asserts.notEquals(botTalkList.size(), 0, "已经有了。");
+		Asserts.notEquals(botTalkList.size(), 0, "没找到。");
 
 		BotTalk botTalk = botTalkList.get(0);
 		botTalkMapper.updateBotTalkSelective(new BotTalk().setId(botTalk.getId()).setStatus(-1));
