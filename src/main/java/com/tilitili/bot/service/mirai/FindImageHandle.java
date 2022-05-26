@@ -31,8 +31,8 @@ public class FindImageHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        List<String> imageUrlList = messageAction.getImageList();
         String quoteMessageId = messageAction.getQuoteMessageId();
+        List<String> imageUrlList = messageAction.getImageList();
 
         if (CollectionUtils.isEmpty(imageUrlList) && quoteMessageId != null) {
             BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
