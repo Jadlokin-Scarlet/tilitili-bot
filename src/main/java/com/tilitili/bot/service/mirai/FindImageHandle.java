@@ -3,25 +3,44 @@ package com.tilitili.bot.service.mirai;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class FindImageHandle extends ExceptionRespMessageHandle {
+    private final BotManager botManager;
 
-	@Override
+    @Autowired
+    public FindImageHandle(BotManager botManager) {
+        this.botManager = botManager;
+    }
+
+    @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         List<String> imageUrlList = messageAction.getImageList();
+        Long quoteMessageId = messageAction.getQuoteMessageId();
+
+        if (CollectionUtils.isEmpty(imageUrlList) && quoteMessageId != null) {
+            BotMessageRecord quoteMessageRecord = botManager.getMessage(String.valueOf(quoteMessageId));
+            BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+            BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
+            imageUrlList = quoteMessageAction.getImageList();
+        }
+
         Asserts.notEmpty(imageUrlList, "格式错啦(图片)");
         String url = QQUtil.getImageUrl(imageUrlList.get(0));
         Asserts.notBlank(url, "格式错啦(图片)");

@@ -6,6 +6,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.jsoup.helper.StringUtil;
 
 import java.util.*;
@@ -29,6 +30,7 @@ public class BotMessageAction {
     private String key;
     private String value;
     private BotSender botSender;
+    private Long quoteMessageId;
 
     public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
         this.botMessage = botMessage;
@@ -82,6 +84,12 @@ public class BotMessageAction {
                     bodyMap.put(key, split);
                 }
             }
+        }
+
+        List<BotMessageChain> quoteMessageList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Quote")).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(quoteMessageList)) {
+            BotMessageChain quoteMessageChain = quoteMessageList.get(0);
+            quoteMessageId = quoteMessageChain.getId();
         }
     }
 
@@ -152,5 +160,9 @@ public class BotMessageAction {
     public BotMessageAction setBotSender(BotSender botSender) {
         this.botSender = botSender;
         return this;
+    }
+
+    public Long getQuoteMessageId() {
+        return quoteMessageId;
     }
 }
