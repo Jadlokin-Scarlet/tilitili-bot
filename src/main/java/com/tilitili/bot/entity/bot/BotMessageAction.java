@@ -30,7 +30,7 @@ public class BotMessageAction {
     private String key;
     private String value;
     private BotSender botSender;
-    private Long quoteMessageId;
+    private String quoteMessageId;
 
     public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
         this.botMessage = botMessage;
@@ -162,7 +162,7 @@ public class BotMessageAction {
         return this;
     }
 
-    public Long getQuoteMessageId() {
+    public String getQuoteMessageId() {
         return quoteMessageId;
     }
 }
