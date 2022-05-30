@@ -61,7 +61,8 @@ public class FindImageHandle extends ExceptionRespMessageHandle {
         String link = linkList.get(0).attr("href");
         String rateStr = rate.replace("%", "");
         if (StringUtils.isNumber(rateStr)) {
-            Asserts.isTrue(Double.parseDouble(rateStr) > 80.0, "相似度过低\n"+url);
+            Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低(怪图警告)\n"+link);
+            Asserts.isTrue(Double.parseDouble(rateStr) > 80.0, "相似度过低\n"+link);
         }
         return BotMessage.simpleImageTextMessage(String.format("找到啦😊！相似度%s%n%s", rate, link), imageUrl);
     }
