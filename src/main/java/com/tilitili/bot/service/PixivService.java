@@ -177,8 +177,10 @@ public class PixivService {
 //		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
-				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
+				String ossUrl = OSSUtil.uploadSOSSByUrlOrErrorMessage(url);
+				if ("资源不存在".equals(ossUrl)) return null;
 				Asserts.notNull(ossUrl, "上传OSS失败");
+				Asserts.isTrue(ossUrl.contains("http"), "上传OSS失败");
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
