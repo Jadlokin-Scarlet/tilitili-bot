@@ -179,7 +179,6 @@ public class PixivService {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				Asserts.notNull(ossUrl, "上传OSS失败");
-				Asserts.isTrue(ossUrl.contains("http"), "上传OSS失败");
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
