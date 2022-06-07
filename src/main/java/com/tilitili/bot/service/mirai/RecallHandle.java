@@ -3,10 +3,14 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.pixiv.PixivHandle;
+import com.tilitili.common.entity.BotSendMessageRecord;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,24 +30,39 @@ public class RecallHandle extends ExceptionRespMessageHandle {
     private final RedisCache redisCache;
     private final PixivImageMapper pixivImageMapper;
     private final BotManager botManager;
+    private final BotSenderMapper botSenderMapper;
+    private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public RecallHandle(RedisCache redisCache, PixivImageMapper pixivImageMapper, BotManager botManager) {
+    public RecallHandle(RedisCache redisCache, PixivImageMapper pixivImageMapper, BotManager botManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.redisCache = redisCache;
         this.pixivImageMapper = pixivImageMapper;
         this.botManager = botManager;
+        this.botSenderMapper = botSenderMapper;
+        this.botSendMessageRecordMapper = botSendMessageRecordMapper;
     }
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         Long qq = messageAction.getBotMessage().getQq();
         String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String all = messageAction.getParamOrDefault("all", messageAction.getValue());
+        boolean recallAll = Objects.equals(all, "1");
 
         if (Objects.equals(qq, MASTER_QQ)) {
-            if (pid == null) {
+            if (recallAll) {
+                List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
+                for (BotSendMessageRecord sendMessage : sendMessageList) {
+                    BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
+                    botManager.recallMessage(sendMessage.getMessageId(), botSender.getSendType());
+                }
+                return BotMessage.simpleTextMessage("搞定");
+            } else if (pid == null) {
                 String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
                 if (! isBlank(messageIdStr)) {
-                    botManager.recallMessage(messageIdStr);
+                    BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
+                    BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+                    botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getSendType());
                     return BotMessage.simpleTextMessage("搞定");
                 }
             } else {
@@ -51,7 +70,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                 for (PixivImage pixivImage : pixivImageList) {
                     String messageId = pixivImage.getMessageId();
                     if (messageId != null) {
-                        botManager.recallMessage(messageId);
+                        botManager.recallMessage(messageId, null);
                         return BotMessage.simpleTextMessage("搞定");
                     }
                 }

@@ -1,44 +1,61 @@
 package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotMessageRecord;
+import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.QQUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
+import com.tilitili.common.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class FindImageHandle extends ExceptionRespMessageHandle {
+    @Value("${mirai.bot-qq}")
+    private String BOT_QQ;
+    private final Gson gson;
     private final BotManager botManager;
+    private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public FindImageHandle(BotManager botManager) {
+    public FindImageHandle(BotManager botManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+        gson = new Gson();
         this.botManager = botManager;
+        this.botSendMessageRecordMapper = botSendMessageRecordMapper;
     }
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String quoteMessageId = messageAction.getQuoteMessageId();
+        Long quoteSenderId = messageAction.getQuoteSenderId();
         List<String> imageUrlList = messageAction.getImageList();
 
         if (CollectionUtils.isEmpty(imageUrlList) && quoteMessageId != null) {
-            BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
-            BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
-            BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
-            imageUrlList = quoteMessageAction.getImageList();
+            if (Objects.equals(String.valueOf(quoteSenderId), BOT_QQ)) {
+                BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
+                BotMessage quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                imageUrlList = quoteMessage.getBotMessageChainList().stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Image")).map(BotMessageChain::getUrl).collect(Collectors.toList());
+            } else {
+                BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
+                BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+                BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
+                imageUrlList = quoteMessageAction.getImageList();
+            }
         }
 
         Asserts.notEmpty(imageUrlList, "格式错啦(图片)");

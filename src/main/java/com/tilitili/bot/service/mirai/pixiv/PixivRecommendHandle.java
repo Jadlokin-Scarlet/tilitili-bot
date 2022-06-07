@@ -2,11 +2,14 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.pixiv.PixivRecommendIllust;
 import com.tilitili.common.manager.PixivManager;
+import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
@@ -18,9 +21,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -31,12 +31,14 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	private final RedisCache redisCache;
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
+	private final BotTaskMapper botTaskMapper;
 
 	@Autowired
-	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivManager pixivManager) {
+	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivManager pixivManager, BotTaskMapper botTaskMapper) {
 		this.redisCache = redisCache;
 		this.pixivManager = pixivManager;
 		this.pixivLoginUserMapper = pixivLoginUserMapper;
+		this.botTaskMapper = botTaskMapper;
 	}
 
 	@Override
@@ -51,6 +53,10 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		String tinyId = botMessage.getTinyId();
 		String sender = qq != null? String.valueOf(qq) : tinyId;
 		Asserts.notBlank(sender, "发送者为空");
+
+		BotSender botSender = messageAction.getBotSender();
+		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
+		boolean canSS = !botTaskList.isEmpty();
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
 		if (isBookmark && !redisCache.exists(pixivImageKey + sender)) {
@@ -75,20 +81,31 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle get info");
-		List<PixivRecommendIllust> illustList;
-		int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
-		if (pageNo >= 60) {
-			redisCache.delete(pixivImageListKey+sender);
-			redisCache.delete(pixivImageListPageNoKey + sender);
-			pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
+		PixivRecommendIllust illust;
+		while (true) {
+			int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
+			if (pageNo >= 60) {
+				redisCache.delete(pixivImageListKey + sender);
+				redisCache.delete(pixivImageListPageNoKey + sender);
+				pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender)) - 1;
+			}
+			List<PixivRecommendIllust> illustList;
+			if (redisCache.exists(pixivImageListKey + sender)) {
+				illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListKey + sender);
+			} else {
+				illustList = pixivManager.getRecommendImageByCookie(cookie);
+				redisCache.setValue(pixivImageListKey + sender, illustList);
+			}
+			if (illustList == null || pageNo >= illustList.size()) {
+				return BotMessage.simpleTextMessage("啊嘞，怎么会找不到呢。");
+			}
+			illust = illustList.get(pageNo);
+			if (!canSS && illust.getSl() > 4) {
+				continue;
+			}
+			break;
 		}
-		if (redisCache.exists(pixivImageListKey+sender)) {
-			illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListKey + sender);
-		} else {
-			illustList = pixivManager.getRecommendImageByCookie(cookie);
-			redisCache.setValue(pixivImageListKey+sender, illustList);
-		}
-		PixivRecommendIllust illust = illustList.get(pageNo);
+
 		String pid = illust.getId();
 		Integer sl = illust.getSl();
 		log.debug("PixivRecommendHandle get url");

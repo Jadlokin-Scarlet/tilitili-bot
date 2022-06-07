@@ -31,6 +31,7 @@ public class BotMessageAction {
     private String value;
     private BotSender botSender;
     private String quoteMessageId;
+    private Long quoteSenderId;
 
     public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
         this.botMessage = botMessage;
@@ -90,6 +91,7 @@ public class BotMessageAction {
         if (CollectionUtils.isNotEmpty(quoteMessageList)) {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
             quoteMessageId = quoteMessageChain.getId();
+            quoteSenderId = quoteMessageChain.getSenderId();
         }
     }
 
@@ -164,5 +166,9 @@ public class BotMessageAction {
 
     public String getQuoteMessageId() {
         return quoteMessageId;
+    }
+
+    public Long getQuoteSenderId() {
+        return quoteSenderId;
     }
 }

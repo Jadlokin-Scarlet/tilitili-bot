@@ -10,7 +10,6 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderManager;
-import com.tilitili.common.manager.BotTaskManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
