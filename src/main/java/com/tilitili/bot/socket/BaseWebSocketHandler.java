@@ -1,6 +1,7 @@
 package com.tilitili.bot.socket;
 
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -30,6 +31,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.error("连接关闭，code ={}, reason={}, remote={}", code, reason, remote);
+        TimeUtil.millisecondsSleep(1000 * 10);
         this.reconnect();
     }
 
