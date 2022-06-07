@@ -21,6 +21,7 @@ import com.tilitili.common.mapper.mysql.PixivTagMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +59,15 @@ public class PixivService {
 
 	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException, InterruptedException {
 		String messageId;
+		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
-			case "lolicon": messageId = sendLoliconImage(botMessage, searchKey == null? "チルノ": searchKey, source, num, r18); break;
+			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18); break;
 			case "pixiv": {
 				if (isNotBlank(user)) messageId = sendPixivUserImage(sendMessageId, user, source, r18);
-				else messageId = sendPixivImage(sendMessageId, searchKey == null ? "チルノ" : searchKey, source, r18);
+				else {
+					messageId = sendPixivImage(sendMessageId, searchKeyOrDefault + " 1000users入り", source, r18);
+					if (StringUtils.isBlank(messageId)) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18);
+				}
 				break;
 			}
 			default: throw new AssertException("没有这个平台");
