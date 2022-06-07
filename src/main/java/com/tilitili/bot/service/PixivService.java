@@ -199,9 +199,7 @@ public class PixivService {
 
 	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18) throws UnsupportedEncodingException, InterruptedException {
 		List<SetuData> dataList = loliconManager.getAImage(searchKey, num, r18);
-		if (dataList.isEmpty()) {
-			return null;
-		}
+		Asserts.notEmpty(dataList, "没库存啦！");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		for (int i = 0; i < dataList.size(); i++) {
 			SetuData data = dataList.get(i);
