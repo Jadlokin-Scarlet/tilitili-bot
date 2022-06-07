@@ -106,15 +106,12 @@ public class PixivService {
 		// step 3 从最新最新一页开始
 		while (messageId == null) {
 			Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
+			if (pageNo == 1L) pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
 			List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
 			if (dataList.isEmpty()) {
 				// step 4 爬到底了，再次检查缓存
 				messageId = sendCachePixivImage(quote, searchKey, source, r18);
-				if (messageId != null) {
-					return messageId;
-				}
-				// stop 5 缓存也没有了
-				return null;
+				return messageId;
 			}
 			messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
 		}
