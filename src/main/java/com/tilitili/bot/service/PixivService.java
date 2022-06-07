@@ -72,9 +72,10 @@ public class PixivService {
 			}
 			default: throw new AssertException("没有这个平台");
 		}
-		if (messageId != null) {
-			redisCache.setValue(messageIdKey, messageId);
+		if (messageId == null) {
+			throw new AssertException("啊嘞，找不到了 Σ（ﾟдﾟlll）");
 		}
+		redisCache.setValue(messageIdKey, messageId);
 	}
 
 	public String sendPixivUserImage(String quote, String userName, String source, String r18) {
@@ -87,7 +88,6 @@ public class PixivService {
 		spiderPixivUserImage(userName);
 		// step 3 从缓存中取
 		messageId = sendCachePixivUserImage(quote, userName, source, r18);
-		Asserts.notNull(messageId, "啊嘞，找不到了 Σ（ﾟдﾟlll）");
 		return messageId;
 	}
 
@@ -114,7 +114,7 @@ public class PixivService {
 					return messageId;
 				}
 				// stop 5 缓存也没有了
-				throw new AssertException("啊嘞，找不到了 Σ（ﾟдﾟlll）");
+				return null;
 			}
 			messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
 		}
