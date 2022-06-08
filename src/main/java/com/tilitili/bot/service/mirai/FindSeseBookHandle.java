@@ -29,7 +29,8 @@ public class FindSeseBookHandle extends ExceptionRespMessageHandle {
 		String url = imageList.get(0);
 		Asserts.notBlank(url, "格式错啦(图片)");
 
-		taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SPIDER_SESE_BOOK.value).setValueList(Arrays.asList(url, messageId)));
-		return BotMessage.emptyMessage();
+		return BotMessage.simpleTextMessage("还不支持喵。用这个吧[https://soutubot.moe/]");
+//		taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SPIDER_SESE_BOOK.value).setValueList(Arrays.asList(url, messageId)));
+//		return BotMessage.emptyMessage();
 	}
 }
