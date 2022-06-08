@@ -31,17 +31,17 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
         if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
-        String text = messageAction.getBody();
+        String text = messageAction.getValueOrDefault(messageAction.getBody());
 
         if (text == null) {
             return null;
         }
 
-        String jpText = BaiduUtil.translate("jp", text);
+//        String jpText = BaiduUtil.translate("jp", text);
 
-        log.info("jpText="+jpText);
+//        log.info("jpText="+jpText);
 
-        String speakShell = String.format("sh /home/admin/silk/run.sh %s", jpText);
+        String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
         Runtime.getRuntime().exec(speakShell);
 
         Thread.sleep(1000);
@@ -53,4 +53,34 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
         return BotMessage.simpleVoiceIdMessage(voiceId);
     }
+//	@Override
+//    public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
+//        File wavFile = new File("/home/admin/silk/voice.wav");
+//        File slkFile = new File("/home/admin/silk/voice.slk");
+//
+//        if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
+//        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
+//
+//        String text = messageAction.getBody();
+//
+//        if (text == null) {
+//            return null;
+//        }
+//
+//        String jpText = BaiduUtil.translate("jp", text);
+//
+//        log.info("jpText="+jpText);
+//
+//        String speakShell = String.format("sh /home/admin/silk/run.sh %s", jpText);
+//        Runtime.getRuntime().exec(speakShell);
+//
+//        Thread.sleep(1000);
+//
+//        Asserts.isTrue(slkFile.exists(), "转码slk失败");
+//
+//        String voiceId = botManager.uploadVoice(slkFile);
+//        Asserts.notBlank(voiceId, "上传失败");
+//
+//        return BotMessage.simpleVoiceIdMessage(voiceId);
+//    }
 }
