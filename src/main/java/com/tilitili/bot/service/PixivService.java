@@ -40,6 +40,7 @@ import static com.tilitili.common.utils.StringUtils.isNotBlank;
 public class PixivService {
 	public static final String source = "pixiv";
 	public static final String messageIdKey = "pixiv.messageId";
+	public static final String goodTag = "users入り";
 	private final RedisCache redisCache;
 	private final PixivImageMapper pixivImageMapper;
 	private final PixivTagMapper pixivTagMapper;
@@ -58,15 +59,16 @@ public class PixivService {
 	}
 
 	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException, InterruptedException {
-		String messageId;
+		String messageId = null;
 		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
 			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18); break;
 			case "pixiv": {
 				if (isNotBlank(user)) messageId = sendPixivUserImage(sendMessageId, user, source, r18);
 				else {
-					messageId = sendPixivImage(sendMessageId, searchKeyOrDefault + " 1000users入り", source, r18);
-					if (StringUtils.isBlank(messageId)) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18);
+					String goodSearchKey = searchKeyOrDefault.contains("users入り") ? searchKeyOrDefault : searchKeyOrDefault + " " + goodTag;
+					messageId = sendPixivImage(sendMessageId, goodSearchKey, source, r18);
+					if (StringUtils.isBlank(messageId) && !searchKeyOrDefault.contains("users入り")) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18);
 				}
 				break;
 			}
@@ -129,7 +131,13 @@ public class PixivService {
 
 	public String sendCachePixivImage(String quote, String searchKey, String source, String r18) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
-		PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
+		boolean isFilterBookmark = ! searchKey.contains("goodTag");
+		PixivImage noUsedImage;
+		if (isFilterBookmark) {
+			noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
+		} else {
+			noUsedImage = pixivImageMapper.getNoUsedImageWithoutLimit(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
+		}
 		if (noUsedImage != null) {
 			return sendPixivImage(quote, noUsedImage);
 		} else {
@@ -146,17 +154,11 @@ public class PixivService {
 			saveImageFromPixiv(pid, searchKey, searchTagList);
 
 			if (messageId == null) {
-				PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-				if (noUsedImage != null) {
-					messageId = sendPixivImage(quote, noUsedImage);
-				}
+				messageId = sendCachePixivImage(quote, searchKey, source, r18);
 			}
 		}
 		if (messageId == null) {
-			PixivImage noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18));
-			if (noUsedImage != null) {
-				messageId = sendPixivImage(quote, noUsedImage);
-			}
+			messageId = sendCachePixivImage(quote, searchKey, source, r18);
 		}
 		return messageId;
 	}

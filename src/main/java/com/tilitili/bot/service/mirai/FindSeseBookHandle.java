@@ -22,14 +22,14 @@ public class FindSeseBookHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
-		List<String> imageList = messageAction.getImageList();
-		String messageId = messageAction.getMessageId();
-		Asserts.notBlank(messageId, "参数异常");
-		Asserts.notEmpty(imageList, "格式错啦(图片)");
-		String url = imageList.get(0);
-		Asserts.notBlank(url, "格式错啦(图片)");
-
 		return BotMessage.simpleTextMessage("还不支持喵。用这个吧[https://soutubot.moe/]");
+//		List<String> imageList = messageAction.getImageList();
+//		String messageId = messageAction.getMessageId();
+//		Asserts.notBlank(messageId, "参数异常");
+//		Asserts.notEmpty(imageList, "格式错啦(图片)");
+//		String url = imageList.get(0);
+//		Asserts.notBlank(url, "格式错啦(图片)");
+//
 //		taskManager.simpleSpiderVideo(new SimpleTask().setReason(TaskReason.SPIDER_SESE_BOOK.value).setValueList(Arrays.asList(url, messageId)));
 //		return BotMessage.emptyMessage();
 	}
