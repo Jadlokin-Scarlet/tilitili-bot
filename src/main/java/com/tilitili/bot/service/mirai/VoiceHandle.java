@@ -6,12 +6,14 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.BaiduUtil;
+import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 @Slf4j
 @Component
@@ -25,6 +27,9 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
+        String speaker = messageAction.getParamOrDefault("who", "cyangfp");
+        String speed = messageAction.getParamOrDefault("speed", "1");
+
         File wavFile = new File("/home/admin/silk/voice.wav");
         File slkFile = new File("/home/admin/silk/voice.slk");
 
@@ -37,9 +42,8 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
             return null;
         }
 
-//        String jpText = BaiduUtil.translate("jp", text);
-
-//        log.info("jpText="+jpText);
+        String url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=mp3&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
+        HttpClientUtil.downloadFile(url, wavFile);
 
         String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
         Runtime.getRuntime().exec(speakShell);
