@@ -42,7 +42,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
             return null;
         }
 
-        String url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=mp3&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
+        String url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
         HttpClientUtil.downloadFile(url, wavFile);
 
         String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
