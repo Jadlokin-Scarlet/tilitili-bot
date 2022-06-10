@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.PixivTag;
@@ -18,16 +19,18 @@ import java.util.stream.Collectors;
 public class TagHandle extends ExceptionRespMessageHandle {
 	private final PixivTagMapper pixivTagMapper;
 	private final PixivService pixivService;
+	private final BotMessageService botMessageService;
 
 	@Autowired
-	public TagHandle(PixivTagMapper pixivTagMapper, PixivService pixivService) {
+	public TagHandle(PixivTagMapper pixivTagMapper, PixivService pixivService, BotMessageService botMessageService) {
 		this.pixivTagMapper = pixivTagMapper;
 		this.pixivService = pixivService;
+		this.botMessageService = botMessageService;
 	}
 
 	@Override
-	public BotMessage handleMessage(BotMessageAction messageAction) throws InterruptedException {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+	public BotMessage handleMessage(BotMessageAction messageAction) {
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
 		Asserts.notBlank(pid, "格式错啦(pid)");
 		List<PixivTag> tagList = pixivTagMapper.getPixivTagByCondition(new PixivTagQuery().setPid(pid));
 		if (tagList.isEmpty()) {

@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.PixivImage;
@@ -17,16 +18,18 @@ import java.util.List;
 public class PixivUserHandle extends ExceptionRespMessageHandle {
 	private final PixivImageMapper pixivImageMapper;
 	private final PixivService pixivService;
+	private final BotMessageService botMessageService;
 
 	@Autowired
-	public PixivUserHandle(PixivImageMapper pixivImageMapper, PixivService pixivService) {
+	public PixivUserHandle(PixivImageMapper pixivImageMapper, PixivService pixivService, BotMessageService botMessageService) {
 		this.pixivImageMapper = pixivImageMapper;
 		this.pixivService = pixivService;
+		this.botMessageService = botMessageService;
 	}
 
 	@Override
-	public BotMessage handleMessage(BotMessageAction messageAction) throws InterruptedException {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+	public BotMessage handleMessage(BotMessageAction messageAction) {
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
 		Asserts.notBlank(pid, "格式错啦(pid)");
 		List<PixivImage> imageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setSource("pixiv").setPid(pid));
 		if (imageList.isEmpty()) {

@@ -1,6 +1,8 @@
 package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotMessageService;
+import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
@@ -28,17 +30,21 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 	private final PixivManager pixivManager;
 	private final BotTaskMapper botTaskMapper;
 	private final RedisCache redisCache;
+	private final BotMessageService botMessageService;
+	private final PixivService pixivService;
 
 	@Autowired
-	public PixivLikeRecommendHandle(PixivManager pixivManager, BotTaskMapper botTaskMapper, RedisCache redisCache) {
+	public PixivLikeRecommendHandle(PixivManager pixivManager, BotTaskMapper botTaskMapper, RedisCache redisCache, BotMessageService botMessageService, PixivService pixivService) {
 		this.pixivManager = pixivManager;
 		this.botTaskMapper = botTaskMapper;
 		this.redisCache = redisCache;
+		this.botMessageService = botMessageService;
+		this.pixivService = pixivService;
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
 		BotMessage botMessage = messageAction.getBotMessage();
 
 		BotSender botSender = messageAction.getBotSender();

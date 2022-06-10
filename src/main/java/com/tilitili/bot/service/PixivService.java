@@ -1,5 +1,7 @@
 package com.tilitili.bot.service;
 
+import com.google.common.collect.ImmutableMap;
+import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.common.emnus.RedisKeyEnum;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.PixivTag;
@@ -18,12 +20,13 @@ import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivManager;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.mapper.mysql.PixivTagMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.OSSUtil;
-import com.tilitili.common.utils.RedisCache;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -325,5 +328,37 @@ public class PixivService {
 			addTag.setPid(pid);
 			pixivTagMapper.addPixivTagSelective(addTag);
 		}
+	}
+
+	public FindImageResult findImage(String url) {
+		Asserts.notBlank(url, "找不到图片");
+		String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
+		Asserts.notBlank(html, "没要到图😇\n"+url);
+		Document document = Jsoup.parse(html);
+		Elements imageList = document.select(".result:not(.hidden):not(#result-hidden-notification)");
+		Asserts.isFalse(imageList.isEmpty(), "没找到🤕\n"+url);
+		Element image = imageList.get(0);
+
+		String rate = image.select(".resultsimilarityinfo").text();
+		String imageUrl = image.select(".resulttableimage img").attr("src");
+		Elements linkList = image.select(".resultcontentcolumn a.linkify");
+		Asserts.notBlank(rate, "没找到😑\n"+url);
+		Asserts.notBlank(imageUrl, "没找到😑\n"+url);
+		Asserts.isFalse(linkList.isEmpty(), "没找到😑\n"+url);
+
+		String link = linkList.get(0).attr("href");
+		String rateStr = rate.replace("%", "");
+		if (StringUtils.isNumber(rateStr)) {
+			Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低(怪图警告)\n"+link);
+			Asserts.isTrue(Double.parseDouble(rateStr) > 80.0, "相似度过低\n"+link);
+		}
+
+		return new FindImageResult().setLink(link).setRate(rate).setImageUrl(imageUrl);
+	}
+
+	public String findPixivImage(String url) {
+		FindImageResult findImageResult = this.findImage(url);
+		String link = findImageResult.getLink();
+		return StringUtils.patten1("&illust_id=(\\d+)", link);
 	}
 }
