@@ -349,8 +349,8 @@ public class PixivService {
 		String link = linkList.get(0).attr("href");
 		String rateStr = rate.replace("%", "");
 		if (StringUtils.isNumber(rateStr)) {
-			Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低(怪图警告)\n"+link);
-			Asserts.isTrue(Double.parseDouble(rateStr) > 80.0, "相似度过低\n"+link);
+			Asserts.isTrue(Double.parseDouble(rateStr) > 40.0, "相似度过低(怪图警告)\n"+link);
+			Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低\n"+link);
 		}
 
 		return new FindImageResult().setLink(link).setRate(rate).setImageUrl(imageUrl);
