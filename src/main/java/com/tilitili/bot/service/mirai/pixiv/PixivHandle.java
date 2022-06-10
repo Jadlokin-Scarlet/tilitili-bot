@@ -24,6 +24,7 @@ public class PixivHandle extends LockMessageHandle {
 
 	@Override
     public BotMessage handleMessageAfterLock(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
+        String pro = messageAction.getParamOrDefault("pro", "0");
         String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
         String user = messageAction.getParam("u");
         String source = messageAction.getParamOrDefault("source", "pixiv");
@@ -32,7 +33,7 @@ public class PixivHandle extends LockMessageHandle {
         BotMessage botMessage = messageAction.getBotMessage();
         String r18 = "0";
 
-        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num);
+        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num, pro);
         return BotMessage.emptyMessage();
     }
 

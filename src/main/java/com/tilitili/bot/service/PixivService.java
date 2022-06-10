@@ -61,8 +61,8 @@ public class PixivService {
 		this.pixivTagMapper = pixivTagMapper;
 	}
 
-	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException, InterruptedException {
-		String messageId = null;
+	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num, String pro) throws UnsupportedEncodingException, InterruptedException {
+		String messageId;
 		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
 			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18); break;
@@ -102,19 +102,25 @@ public class PixivService {
 		if (messageId != null) {
 			return messageId;
 		}
-		// step 2 爬第一页
+		// step 2 爬热门
+		List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L);
+		messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18);
+		if (messageId != null) {
+			return messageId;
+		}
+		// step 3 爬第一页
 		List<PixivSearchIllust> firstDataList = pixivManager.searchProxy(searchKey, 1L);
 		messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18);
 		if (messageId != null) {
 			return messageId;
 		}
-		// step 3 从最新最新一页开始
+		// step 4 从最新最新一页开始
 		while (messageId == null) {
 			Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
 			if (pageNo == 1L) pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
 			List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
 			if (dataList.isEmpty()) {
-				// step 4 爬到底了，再次检查缓存
+				// step 5 爬到底了，再次检查缓存
 				messageId = sendCachePixivImage(quote, searchKey, source, r18);
 				return messageId;
 			}
