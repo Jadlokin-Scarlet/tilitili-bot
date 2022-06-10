@@ -9,6 +9,7 @@ import com.tilitili.common.entity.query.PixivImageQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,8 @@ public class PixivUserHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+		if (StringUtils.isBlank(pid)) pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		Asserts.notBlank(pid, "格式错啦(pid)");
 		List<PixivImage> imageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setSource("pixiv").setPid(pid));
 		if (imageList.isEmpty()) {

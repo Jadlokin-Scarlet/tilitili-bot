@@ -9,6 +9,7 @@ import com.tilitili.common.entity.query.PixivTagQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.PixivTagMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,8 @@ public class TagHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+		if (StringUtils.isBlank(pid)) pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		Asserts.notBlank(pid, "格式错啦(pid)");
 		List<PixivTag> tagList = pixivTagMapper.getPixivTagByCondition(new PixivTagQuery().setPid(pid));
 		if (tagList.isEmpty()) {

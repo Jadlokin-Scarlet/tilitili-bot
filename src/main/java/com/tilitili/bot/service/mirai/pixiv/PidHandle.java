@@ -14,6 +14,7 @@ import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,8 @@ public class PidHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String pid = messageAction.getParamOrDefault("pid", messageAction.getValueOrDefault(pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction))));
+		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+		if (StringUtils.isBlank(pid)) pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		Asserts.notBlank(pid, "格式错啦(pid)");
 
 		BotSender botSender = messageAction.getBotSender();
