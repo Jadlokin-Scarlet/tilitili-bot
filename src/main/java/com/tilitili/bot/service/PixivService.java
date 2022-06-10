@@ -149,12 +149,16 @@ public class PixivService {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		String messageId = null;
 		for (PixivSearchIllust data : dataList) {
-			String pid = data.getId();
-			supplePixivTag(data, searchTagList);
-			saveImageFromPixiv(pid, searchKey, searchTagList);
+			try {
+				String pid = data.getId();
+				supplePixivTag(data, searchTagList);
+				saveImageFromPixiv(pid, searchKey, searchTagList);
 
-			if (messageId == null) {
-				messageId = sendCachePixivImage(quote, searchKey, source, r18);
+				if (messageId == null) {
+					messageId = sendCachePixivImage(quote, searchKey, source, r18);
+				}
+			} catch (AssertException e) {
+				log.error("搜索结果保存失败, pid={}, message={}", data.getId(), e.getMessage());
 			}
 		}
 		if (messageId == null) {
@@ -167,7 +171,11 @@ public class PixivService {
 		String userId = pixivManager.getUserIdByNameProxy(userName);
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		for (String pid : userPidList) {
-			saveImageFromPixiv(pid, userName);
+			try {
+				saveImageFromPixiv(pid, userName);
+			} catch (AssertException e) {
+				log.error("作者列表保存失败, pid={}, message={}", pid, e.getMessage());
+			}
 		}
 	}
 
@@ -251,7 +259,7 @@ public class PixivService {
 		saveImageFromPixiv(pid, searchKey, Collections.emptyList());
 	}
 
-	public void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) {
+	public void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) throws AssertException {
 		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
 		if (! oldDataList.isEmpty()) return;
 

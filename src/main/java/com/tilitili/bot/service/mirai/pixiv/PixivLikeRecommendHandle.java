@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.PixivManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -60,7 +61,12 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 				return BotMessage.simpleTextMessage("已经看光光了。");
 			}
 			String recommendPid = pidList.get(index);
-			illust = pixivManager.getInfoProxy(recommendPid);
+			try {
+				illust = pixivManager.getInfoProxy(recommendPid);
+			} catch (AssertException e) {
+				log.error("获取相关推荐失败, pid={}, message={}", recommendPid, e.getMessage());
+				continue;
+			}
 			if (!canSS && illust.getSl() > 4) {
 				continue;
 			}
