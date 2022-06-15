@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +51,7 @@ public class PixivService {
 	private final LoliconManager loliconManager;
 	private final PixivManager pixivManager;
 	private final BotManager botManager;
+	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 
 	@Autowired
 	public PixivService(RedisCache redisCache, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
@@ -89,11 +91,15 @@ public class PixivService {
 		if (messageId != null) {
 			return messageId;
 		}
-		// step 2 爬取作者所有插画
-		spiderPixivUserImage(userName);
-		// step 3 从缓存中取
-		messageId = sendCachePixivUserImage(quote, userName, source, r18);
-		return messageId;
+		try {
+			// step 2 爬取作者所有插画
+			spiderPixivUserImage(userName);
+			// step 3 从缓存中取
+			messageId = sendCachePixivUserImage(quote, userName, source, r18);
+			return messageId;
+		} finally {
+			lockFlag.set(false);
+		}
 	}
 
 	public String sendPixivImage(String quote, String searchKey, String source, String r18) {
@@ -102,31 +108,36 @@ public class PixivService {
 		if (messageId != null) {
 			return messageId;
 		}
-		// step 2 爬热门
-		List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L);
-		messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18);
-		if (messageId != null) {
-			return messageId;
-		}
-		// step 3 爬第一页
-		List<PixivSearchIllust> firstDataList = pixivManager.searchProxy(searchKey, 1L);
-		messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18);
-		if (messageId != null) {
-			return messageId;
-		}
-		// step 4 从最新最新一页开始
-		while (messageId == null) {
-			Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
-			if (pageNo == 1L) pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
-			List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
-			if (dataList.isEmpty()) {
-				// step 5 爬到底了，再次检查缓存
-				messageId = sendCachePixivImage(quote, searchKey, source, r18);
+		try {
+			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
+			// step 2 爬热门
+			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L);
+			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18);
+			if (messageId != null) {
 				return messageId;
 			}
-			messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
+			// step 3 爬第一页
+			List<PixivSearchIllust> firstDataList = pixivManager.searchProxy(searchKey, 1L);
+			messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18);
+			if (messageId != null) {
+				return messageId;
+			}
+			// step 4 从最新最新一页开始
+			while (messageId == null) {
+				Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
+				if (pageNo == 1L) pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
+				List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
+				if (dataList.isEmpty()) {
+					// step 5 爬到底了，再次检查缓存
+					messageId = sendCachePixivImage(quote, searchKey, source, r18);
+					return messageId;
+				}
+				messageId = handleSearchDataList(dataList, quote, searchKey, source, r18);
+			}
+			return messageId;
+		} finally {
+			lockFlag.set(false);
 		}
-		return messageId;
 	}
 
 	public String sendCachePixivUserImage(String quote, String userName, String source, String r18) {
