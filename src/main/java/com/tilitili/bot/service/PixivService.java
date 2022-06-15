@@ -156,11 +156,17 @@ public class PixivService {
 
 	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
+		List<String> pidList = dataList.stream().map(PixivSearchIllust::getId).collect(Collectors.toList());
+		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(pidList).setSource(source));
+		Map<String, PixivImage> oldPixivImageMap = oldPixivImageList.stream().collect(Collectors.toMap(PixivImage::getPid, Function.identity()));
+
 		String messageId = null;
 		for (PixivSearchIllust data : dataList) {
 			try {
 				String pid = data.getId();
 				supplePixivTag(data, searchTagList);
+				PixivImage oldPixivImage = oldPixivImageMap.get(pid);
+				if (oldPixivImage != null) continue;
 				saveImageFromPixiv(pid, searchKey, searchTagList);
 
 				if (messageId == null) {
@@ -179,8 +185,13 @@ public class PixivService {
 	public void spiderPixivUserImage(String userName) {
 		String userId = pixivManager.getUserIdByNameProxy(userName);
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
+		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(userPidList).setSource(source));
+		Map<String, PixivImage> oldPixivImageMap = oldPixivImageList.stream().collect(Collectors.toMap(PixivImage::getPid, Function.identity()));
+
 		for (String pid : userPidList) {
 			try {
+				PixivImage oldPixivImage = oldPixivImageMap.get(pid);
+				if (oldPixivImage != null) continue;
 				saveImageFromPixiv(pid, userName);
 			} catch (AssertException e) {
 				log.error("作者列表保存失败, pid={}, message={}", pid, e.getMessage());
@@ -269,9 +280,6 @@ public class PixivService {
 	}
 
 	public void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) throws AssertException {
-		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
-		if (! oldDataList.isEmpty()) return;
-
 		PixivInfoIllust info = pixivManager.getInfoProxy(pid);
 		PixivImage pixivImage = new PixivImage();
 		pixivImage.setPid(pid);
