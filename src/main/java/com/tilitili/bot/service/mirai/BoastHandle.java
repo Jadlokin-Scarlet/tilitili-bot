@@ -30,7 +30,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		String text = JSONPath.read(result, "$.data.text", String.class);
 		Asserts.notBlank(text, "网络异常");
 		if (Arrays.asList("夸夸他", "kkt").contains(key)) {
-			Long firstAt = atList.stream().filter(Predicate.isEqual(BOT_QQ).negate()).findFirst().orElse(null);
+			Long firstAt = atList.stream().filter(Predicate.isEqual(Long.valueOf(BOT_QQ)).negate()).findFirst().orElse(null);
 			Asserts.notNull(firstAt, "想我夸谁鸭");
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(firstAt),
