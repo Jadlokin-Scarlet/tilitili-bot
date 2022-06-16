@@ -18,11 +18,13 @@ import java.util.function.Predicate;
 public class BoastHandle extends ExceptionRespMessageHandle {
 	@Value("${mirai.bot-qq}")
 	private String BOT_QQ;
+	@Value("${mirai.bot-guild-qq}")
+	private String BOT_GUILD_QQ;
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		String key = messageAction.getKeyWithoutPrefix();
 		List<Long> atList = messageAction.getAtList();
-		if (!atList.contains(Long.valueOf(BOT_QQ))) {
+		if (!atList.contains(Long.valueOf(BOT_QQ)) && !atList.contains(Long.valueOf(BOT_GUILD_QQ))) {
 			return null;
 		}
 		String result = HttpClientUtil.httpGet("https://api.shadiao.app/chp");
@@ -30,7 +32,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		String text = JSONPath.read(result, "$.data.text", String.class);
 		Asserts.notBlank(text, "网络异常");
 		if (Arrays.asList("夸夸他", "kkt").contains(key)) {
-			Long firstAt = atList.stream().filter(Predicate.isEqual(Long.valueOf(BOT_QQ)).negate()).findFirst().orElse(null);
+			Long firstAt = atList.stream().filter(Predicate.isEqual(Long.valueOf(BOT_QQ)).or(Predicate.isEqual(BOT_GUILD_QQ)).negate()).findFirst().orElse(null);
 			Asserts.notNull(firstAt, "想我夸谁鸭");
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(firstAt),
