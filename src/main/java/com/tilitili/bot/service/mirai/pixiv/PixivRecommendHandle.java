@@ -25,9 +25,9 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class PixivRecommendHandle extends ExceptionRespMessageHandle {
-	private final String pixivImageKey = "pixivImageKey-";
-	private final String pixivImageListKey = "pixivImageListKey-";
-	private final String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
+	private final static String pixivImageKey = "pixivImageKey-";
+	public final static String pixivImageListKey = "pixivImageListKey-";
+	public final static String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
 	private final RedisCache redisCache;
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
