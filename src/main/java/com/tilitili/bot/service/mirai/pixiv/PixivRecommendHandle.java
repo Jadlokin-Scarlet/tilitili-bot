@@ -63,6 +63,10 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
 		boolean canSS = !botTaskList.isEmpty();
 
+		if (!canSS) {
+			Asserts.notEquals(mode, "r18", "不准色色");
+		}
+
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
 		if (isBookmark && !redisCache.exists(pixivImageKey + sender + mode)) {
 			log.info("无可收藏的pid");
