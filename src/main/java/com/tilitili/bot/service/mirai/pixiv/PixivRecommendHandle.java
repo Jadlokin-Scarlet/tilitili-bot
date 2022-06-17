@@ -68,7 +68,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
-		if (isBookmark && !redisCache.exists(pixivImageKey + sender + mode)) {
+		if (isBookmark && !redisCache.exists(pixivImageKey + sender)) {
 			log.info("无可收藏的pid");
 			return null;
 		}
@@ -78,7 +78,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle bookmark");
 		if (isBookmark) {
-			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender + mode);
+			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender);
 			String pid = pidAndMode.split("_")[0];
 			mode = pidAndMode.split("_")[1];
 			if (pid != null) {
@@ -141,7 +141,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle save result");
-		redisCache.setValue(pixivImageKey + sender + mode, pid + "_" + mode, 120);
+		redisCache.setValue(pixivImageKey + sender, pid + "_" + mode, 120);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
