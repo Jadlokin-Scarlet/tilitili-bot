@@ -78,7 +78,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle bookmark");
 		if (isBookmark) {
-			String pid = (String) redisCache.getValue(pixivImageKey + sender + mode);
+			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender + mode);
+			String pid = pidAndMode.split("_")[0];
+			mode = pidAndMode.split("_")[1];
 			if (pid != null) {
 				String token = pixivManager.getPixivToken(sender, cookie);
 				pixivManager.bookmarkImageForCookie(pid, cookie, token);
@@ -139,7 +141,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle save result");
-		redisCache.setValue(pixivImageKey + sender, pid, 120);
+		redisCache.setValue(pixivImageKey + sender + mode, pid + "_" + mode, 120);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
