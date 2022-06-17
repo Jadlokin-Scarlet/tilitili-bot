@@ -149,4 +149,10 @@ class StartApplicationTest {
             }
         }
     }
+
+    @Test
+    public void test4() {
+        List<MiraiFriend> adminList = miraiManager.getAdminList(674446384L);
+        System.out.println(adminList);
+    }
 }

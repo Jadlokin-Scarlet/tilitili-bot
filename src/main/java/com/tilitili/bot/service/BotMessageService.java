@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -61,5 +62,27 @@ public class BotMessageService {
 			}
 		}
 		return imageUrlList;
+	}
+
+	public boolean isAdmin(BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
+		String sendType = botMessage.getSendType();
+		Asserts.notNull(sendType, "找不到发送渠道");
+		switch (sendType) {
+			case SendTypeEmum.FRIEND_MESSAGE_STR: return true;
+			case SendTypeEmum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
+			case SendTypeEmum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
+			default: return false;
+		}
+	}
+
+	private boolean isGuildAdmin(BotMessageAction messageAction) {
+		return false;
+	}
+
+	private boolean isGroupAdmin(BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
+//		botManager.getMemberProfile();
+		return false;
 	}
 }
