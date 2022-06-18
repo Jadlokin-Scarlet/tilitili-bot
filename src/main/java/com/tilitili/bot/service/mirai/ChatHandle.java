@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tencentcloudapi.common.Credential;
+import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
 import com.tencentcloudapi.common.profile.HttpProfile;
 import com.tencentcloudapi.nlp.v20190408.NlpClient;
@@ -11,6 +12,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,26 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		Long group = messageAction.getBotSender().getGroup();
 		Asserts.notBlank(text, "格式错啦(提问)");
 
+		String reply = null;
+		for (int index = 0; index < 10; index++) {
+			reply = reqReply(text);
+			if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
+		}
+		if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
+
+		if (Objects.equals(group, 674446384L)) {
+			TimeUtil.millisecondsSleep(1000);
+			return BotMessage.simpleListMessage(Arrays.asList(
+					BotMessageChain.ofAt(2489917059L),
+					BotMessageChain.ofPlain(" "),
+					BotMessageChain.ofPlain(reply)
+			));
+		}
+
+		return BotMessage.simpleTextMessage(reply);
+	}
+
+	private String reqReply(String text) throws TencentCloudSDKException {
 		// 实例化一个认证对象，入参需要传入腾讯云账户secretId，secretKey,此处还需注意密钥对的保密
 		// 密钥可前往https://console.cloud.tencent.com/cam/capi网站进行获取
 		Credential cred = new Credential("AKIDYzDDyeCWbREubHpAH8kCYidKmzwe8Rba", "qRntjJcgX9WdV8iGlDXcS3aw53oNincD");
@@ -43,17 +65,6 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		req.setQuery(text);
 		// 返回的resp是一个ChatBotResponse的实例，与请求对象对应
 		ChatBotResponse resp = client.ChatBot(req);
-		String reply = resp.getReply();
-
-		if (Objects.equals(group, 674446384L)) {
-			TimeUtil.millisecondsSleep(1000);
-			return BotMessage.simpleListMessage(Arrays.asList(
-					BotMessageChain.ofAt(2489917059L),
-					BotMessageChain.ofPlain(" "),
-					BotMessageChain.ofPlain(reply)
-			));
-		}
-
-		return BotMessage.simpleTextMessage(reply);
+		return resp.getReply();
 	}
 }
