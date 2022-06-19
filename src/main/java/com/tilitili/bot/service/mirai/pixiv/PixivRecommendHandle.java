@@ -52,6 +52,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		String key = messageAction.getKeyWithoutPrefix();
 		boolean isBookmark = Objects.equals(key, "好");
+		boolean isNoBookmark = Objects.equals(key, "不");
 		String mode = keyModeMap.getOrDefault(key, "all");
 		log.debug("PixivRecommendHandle get cookie");
 		Long qq = botMessage.getQq();
@@ -68,7 +69,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
-		if (isBookmark && !redisCache.exists(pixivImageKey + sender)) {
+		if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageKey + sender)) {
 			log.info("无可收藏的pid");
 			return null;
 		}
@@ -89,6 +90,10 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			}
 			redisCache.delete(pixivImageListKey+sender + mode);
 			redisCache.delete(pixivImageListPageNoKey + sender + mode);
+		}
+		if (isNoBookmark) {
+			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender);
+			mode = pidAndMode.split("_")[1];
 		}
 
 		log.debug("PixivRecommendHandle get info");
