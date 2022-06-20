@@ -11,16 +11,13 @@ public class CalculateObject {
 	private int value;
 
 	public CalculateObject(String initStr) {
-		if (initStr.charAt(0) == '(' && initStr.charAt(initStr.length() - 1) == ')') {
-			initStr = initStr.substring(1, initStr.length() - 1);
-		}
-
 		int addIndex = -1;
 		int subIndex = -1;
 		int mulIndex = -1;
 		int divIndex = -1;
 
 		int level = 0;
+		int levelCnt = 0;
 		char[] charArray = initStr.toCharArray();
 		for (int index = 0, charArrayLength = charArray.length; index < charArrayLength; index++) {
 			char item = charArray[index];
@@ -30,6 +27,15 @@ public class CalculateObject {
 			else if (item == '-' && level == 0) subIndex = index;
 			else if (item == '*' && level == 0) mulIndex = index;
 			else if (item == '/' && level == 0) divIndex = index;
+
+			if (level == 0) levelCnt++;
+		}
+
+		if (initStr.contains("(") && levelCnt == 1) {
+			left = new CalculateObject(initStr.substring(1, initStr.length() - 1));
+			operate = "+";
+			right = new CalculateObject("0");
+			return;
 		}
 
 		if (addIndex != -1 || subIndex != -1) {
@@ -38,8 +44,8 @@ public class CalculateObject {
 			Asserts.notEquals(subIndex, 0, "这个减号的左值是什么");
 			Asserts.notEquals(subIndex + 1, initStr.length(), "这个减号的右值是什么");
 
-			operate = addIndex < subIndex? "+": "-";
-			int operateIndex = Math.min(addIndex, subIndex);
+			operate = addIndex > subIndex? "+": "-";
+			int operateIndex = Math.max(addIndex, subIndex);
 			left = new CalculateObject(initStr.substring(0, operateIndex));
 			right = new CalculateObject(initStr.substring(operateIndex + 1));
 			return;
@@ -51,8 +57,8 @@ public class CalculateObject {
 			Asserts.notEquals(divIndex, 0, "这个除号的左值是什么");
 			Asserts.notEquals(divIndex + 1, initStr.length(), "这个除号的右值是什么");
 
-			operate = mulIndex < divIndex? "*": "/";
-			int operateIndex = Math.min(mulIndex, divIndex);
+			operate = mulIndex > divIndex? "*": "/";
+			int operateIndex = Math.max(mulIndex, divIndex);
 			left = new CalculateObject(initStr.substring(0, operateIndex));
 			right = new CalculateObject(initStr.substring(operateIndex + 1));
 			return;

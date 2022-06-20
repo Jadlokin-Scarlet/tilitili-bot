@@ -9,6 +9,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.MathUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,7 +28,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final static String numListKey = "playGameHandle.numListKey";
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
 	private final static String lockKey = "playGameHandle.lock";
-	private final static int waitTime = 10;
+	private final static int waitTime = 2;
 
 	private final BotManager botManager;
 
@@ -83,13 +85,14 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 
 			String numListStr = session.get(numListKey);
 			String[] numList = numListStr.split(",");
-			String[] calNumList = calculateStr.split("[+\\-*/()]");
+			String[] calNumList = StringUtils.pattenAll("(\\d+)", calculateStr).stream().filter(Predicate.isEqual("0").negate()).toArray(String[]::new);
 			Arrays.sort(numList);
 			Arrays.sort(calNumList);
 			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
 		} finally {
 			session.put(lockKey, "lock");
 		}
+		session.remove(lockKey);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
 		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
