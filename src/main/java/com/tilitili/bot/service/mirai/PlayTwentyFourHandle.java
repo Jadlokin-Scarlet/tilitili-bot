@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
-public class PlayGameHandle extends ExceptionRespMessageToSenderHandle {
+public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final List<Integer> cardList = IntStream.rangeClosed(1, 13).flatMap(i -> IntStream.rangeClosed(1, 4).map((j)->i)).boxed().collect(Collectors.toList());
 	private final static String numListKey = "playGameHandle.numListKey";
@@ -32,7 +32,7 @@ public class PlayGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotManager botManager;
 
 	@Autowired
-	public PlayGameHandle(BotManager botManager) {
+	public PlayTwentyFourHandle(BotManager botManager) {
 		this.botManager = botManager;
 	}
 
