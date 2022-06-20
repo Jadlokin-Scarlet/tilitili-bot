@@ -28,7 +28,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final static String numListKey = "playGameHandle.numListKey";
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
 	private final static String lockKey = "playGameHandle.lock";
-	private final static int waitTime = 2;
+	private final static int waitTime = 3;
 
 	private final BotManager botManager;
 
