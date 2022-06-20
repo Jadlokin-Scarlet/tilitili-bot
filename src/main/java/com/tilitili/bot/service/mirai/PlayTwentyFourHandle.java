@@ -111,7 +111,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 
 		scheduled.schedule(() -> {
 			String lastSendTime2Str = session.get(lastSendTimeKey);
-			boolean needEnd = lastSendTime2Str == null || DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
+			boolean needEnd = lastSendTime2Str != null && DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
 			if (needEnd) {
 				botManager.sendMessage(BotMessage.simpleTextMessage("时间到啦！没有人能答出来吗？", messageAction.getBotMessage()));
 				session.remove(numListKey);
