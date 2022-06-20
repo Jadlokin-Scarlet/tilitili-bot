@@ -149,10 +149,8 @@ class StartApplicationTest {
 
     @Test
     public void test4() {
-        String[] numList = new String[]{"1", "3", "5", "6"};
-        String[] calNumList = new String[]{"3", "1", "5", "6"};
-        System.out.println(Arrays.equals(numList, calNumList));
-        Arrays.sort(calNumList);
-        System.out.println(Arrays.equals(numList, calNumList));
+        redisCache.addMapValue("test", "test", "lock");
+        System.out.println(redisCache.removeMapValue("test", "test"));
+        System.out.println(redisCache.removeMapValue("test", "test"));
     }
 }

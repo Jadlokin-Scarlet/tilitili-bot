@@ -12,10 +12,7 @@ import com.tilitili.common.utils.MathUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +25,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final List<Integer> cardList = IntStream.rangeClosed(1, 13).flatMap(i -> IntStream.rangeClosed(1, 4).map((j)->i)).boxed().collect(Collectors.toList());
 	private final static String numListKey = "playGameHandle.numListKey";
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
+	private final static String lockKey = "playGameHandle.lock";
 	private final static int waitTime = 10;
 
 	private final BotManager botManager;
@@ -58,6 +56,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleGame(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValue();
+		if (Objects.equals(session.remove(lockKey), 0)) return null;
+		if (!session.containsKey(numListKey)) return null;
 		Asserts.notBlank(result, "你想答什么。");
 		String resultAfterReplace = result
 				.replace("÷", "/")
@@ -78,6 +78,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		CalculateObject calculateObject = new CalculateObject(resultAfterClean);
 		int resultNum = calculateObject.getResult();
 		String calculateStr = calculateObject.toString();
+		Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
 
 		String numListStr = session.get(numListKey);
 		String[] numList = numListStr.split(",");
@@ -86,7 +87,6 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		Arrays.sort(calNumList);
 		Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
 
-		Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
 		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
@@ -101,6 +101,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
+		session.put(lockKey, "lock");
 
 		scheduled.schedule(() -> {
 			String lastSendTime2Str = session.get(lastSendTimeKey);
@@ -109,6 +110,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 				botManager.sendMessage(BotMessage.simpleTextMessage("时间到啦！没有人能答出来吗？", messageAction.getBotMessage()));
 				session.remove(numListKey);
 				session.remove(lastSendTimeKey);
+				session.remove(lockKey);
 			}
 		}, waitTime, TimeUnit.MINUTES);
 		return BotMessage.simpleTextMessage("试试看这道题吧("+newNumListStr+")，时限"+waitTime+"分钟哦~");

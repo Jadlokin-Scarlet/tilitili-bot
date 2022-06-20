@@ -49,8 +49,8 @@ public class BotSessionService {
         public boolean containsKey(String key) {
             return redisCache.existsHashKey(sessionKey, key);
         }
-        public void remove(String key) {
-            redisCache.removeMapValue(sessionKey, key);
+        public Object remove(String key) {
+            return redisCache.removeMapValue(sessionKey, key);
         }
     }
 }
