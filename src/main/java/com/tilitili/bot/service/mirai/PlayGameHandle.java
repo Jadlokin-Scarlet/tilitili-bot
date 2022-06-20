@@ -1,8 +1,9 @@
 package com.tilitili.bot.service.mirai;
 
+import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
-import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
-public class PlayGameHandle extends ExceptionRespMessageHandle {
+public class PlayGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final List<Integer> cardList = IntStream.rangeClosed(1, 13).flatMap(i -> IntStream.rangeClosed(1, 4).map((j)->i)).boxed().collect(Collectors.toList());
 	private final static String numListKey = "playGameHandle.numListKey";
@@ -46,6 +47,7 @@ public class PlayGameHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleGame(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValue();
 		Asserts.notBlank(result, "你想答什么。");
 		String resultAfterReplace = result
@@ -62,13 +64,13 @@ public class PlayGameHandle extends ExceptionRespMessageHandle {
 				.replace("等于", "=");
 		if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
 		String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
-		int resultNum = this.complate(resultAfterClean);
-		return null;
-	}
-
-	private int complate(String resultAfterClean) {
-		if (resultAfterClean.contains("("));
-		return 0;
+		CalculateObject calculateObject = new CalculateObject(resultAfterClean);
+		int resultNum = calculateObject.getResult();
+		String calculateStr = calculateObject.toString();
+		Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
+		session.remove(numListKey);
+		session.remove(lastSendTimeKey);
+		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {
