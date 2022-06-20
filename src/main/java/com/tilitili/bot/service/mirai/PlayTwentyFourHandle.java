@@ -57,36 +57,39 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValue();
 		if (Objects.equals(session.remove(lockKey), 0)) return null;
-		if (!session.containsKey(numListKey)) return null;
-		Asserts.notBlank(result, "你想答什么。");
-		String resultAfterReplace = result
-				.replace("÷", "/")
-				.replace("＋", "+")
-				.replace("x", "*")
-				.replace("X", "*")
-				.replace("乘", "*")
-				.replace("除", "/")
-				.replace("加", "+")
-				.replace("减", "-")
-				.replace("减", "-")
-				.replace("＝", "=")
-				.replace("（", "(")
-				.replace("）", ")")
-				.replace("等于", "=");
-		if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
-		String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
-		CalculateObject calculateObject = new CalculateObject(resultAfterClean);
-		int resultNum = calculateObject.getResult();
-		String calculateStr = calculateObject.toString();
-		Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
+		try {
+			if (!session.containsKey(numListKey)) return null;
+			Asserts.notBlank(result, "你想答什么。");
+			String resultAfterReplace = result
+					.replace("÷", "/")
+					.replace("＋", "+")
+					.replace("x", "*")
+					.replace("X", "*")
+					.replace("乘", "*")
+					.replace("除", "/")
+					.replace("加", "+")
+					.replace("减", "-")
+					.replace("减", "-")
+					.replace("＝", "=")
+					.replace("（", "(")
+					.replace("）", ")")
+					.replace("等于", "=");
+			if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
+			String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
+			CalculateObject calculateObject = new CalculateObject(resultAfterClean);
+			int resultNum = calculateObject.getResult();
+			String calculateStr = calculateObject.toString();
+			Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
 
-		String numListStr = session.get(numListKey);
-		String[] numList = numListStr.split(",");
-		String[] calNumList = calculateStr.split("[+\\-*/()]");
-		Arrays.sort(numList);
-		Arrays.sort(calNumList);
-		Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
-
+			String numListStr = session.get(numListKey);
+			String[] numList = numListStr.split(",");
+			String[] calNumList = calculateStr.split("[+\\-*/()]");
+			Arrays.sort(numList);
+			Arrays.sort(calNumList);
+			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
+		} finally {
+			session.put(lockKey, "lock");
+		}
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
 		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
