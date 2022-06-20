@@ -28,7 +28,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final List<Integer> cardList = IntStream.rangeClosed(1, 13).flatMap(i -> IntStream.rangeClosed(1, 4).map((j)->i)).boxed().collect(Collectors.toList());
 	private final static String numListKey = "playGameHandle.numListKey";
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
-	private final static int waitTime = 1;
+	private final static int waitTime = 10;
 
 	private final BotManager botManager;
 
@@ -41,8 +41,9 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
-			case "玩24点": case "wyx": return startGame(messageAction);
-			case "回答24点": case "yx": return handleGame(messageAction);
+			case "玩24点": case "w24": return startGame(messageAction);
+			case "回答24点": case "hd24": return handleGame(messageAction);
+			case "放弃24点": case "fq24": return handleGame(messageAction);
 			default: return null;
 		}
 	}
