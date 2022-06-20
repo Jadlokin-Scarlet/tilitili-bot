@@ -61,6 +61,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 				.replace("减", "-")
 				.replace("减", "-")
 				.replace("＝", "=")
+				.replace("（", "(")
+				.replace("）", ")")
 				.replace("等于", "=");
 		if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
 		String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
