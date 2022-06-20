@@ -12,6 +12,7 @@ import com.tilitili.common.utils.MathUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +70,14 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		CalculateObject calculateObject = new CalculateObject(resultAfterClean);
 		int resultNum = calculateObject.getResult();
 		String calculateStr = calculateObject.toString();
+
+		String numListStr = session.get(numListKey);
+		String[] numList = numListStr.split(",");
+		String[] calNumList = calculateStr.split("[+\\-*/()]");
+		Arrays.sort(numList);
+		Arrays.sort(calNumList);
+		Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
+
 		Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);

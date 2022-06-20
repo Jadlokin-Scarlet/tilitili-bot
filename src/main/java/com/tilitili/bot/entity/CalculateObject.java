@@ -30,7 +30,7 @@ public class CalculateObject {
 			else if (item == '-' && level == 0) subIndex = index;
 			else if (item == '*' && level == 0) mulIndex = index;
 			else if (item == '/' && level == 0) divIndex = index;
-			else Asserts.isTrue(Character.isDigit(item), "存在不支持的字符");
+			else Asserts.isTrue(Character.isDigit(item), "存在不支持的字符[%s]", item);
 		}
 
 		if (addIndex != -1 || subIndex != -1) {

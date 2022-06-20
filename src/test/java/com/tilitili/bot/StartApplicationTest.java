@@ -23,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
@@ -152,7 +149,10 @@ class StartApplicationTest {
 
     @Test
     public void test4() {
-        List<MiraiFriend> adminList = miraiManager.getAdminList(674446384L);
-        System.out.println(adminList);
+        String[] numList = new String[]{"1", "3", "5", "6"};
+        String[] calNumList = new String[]{"3", "1", "5", "6"};
+        System.out.println(Arrays.equals(numList, calNumList));
+        Arrays.sort(calNumList);
+        System.out.println(Arrays.equals(numList, calNumList));
     }
 }
