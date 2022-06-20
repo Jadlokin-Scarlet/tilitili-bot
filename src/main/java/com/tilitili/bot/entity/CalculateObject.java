@@ -30,7 +30,6 @@ public class CalculateObject {
 			else if (item == '-' && level == 0) subIndex = index;
 			else if (item == '*' && level == 0) mulIndex = index;
 			else if (item == '/' && level == 0) divIndex = index;
-			else Asserts.isTrue(Character.isDigit(item), "存在不支持的字符[%s]", item);
 		}
 
 		if (addIndex != -1 || subIndex != -1) {
@@ -59,7 +58,7 @@ public class CalculateObject {
 			return;
 		}
 
-		Asserts.isTrue(NumberUtils.isDigits(initStr), "哎呀，好像哪里算错了");
+		Asserts.isTrue(NumberUtils.isDigits(initStr), "啊嘞，这个好像不对劲[%s]", initStr);
 
 		value = Integer.parseInt(initStr);
 	}
