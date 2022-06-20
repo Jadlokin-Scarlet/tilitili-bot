@@ -43,9 +43,16 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		switch (key) {
 			case "玩24点": case "w24": return startGame(messageAction);
 			case "回答24点": case "hd24": return handleGame(messageAction);
-			case "放弃24点": case "fq24": return handleGame(messageAction);
+			case "放弃24点": case "fq24": return endGame(messageAction);
 			default: return null;
 		}
+	}
+
+	private BotMessage endGame(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		session.remove(numListKey);
+		session.remove(lastSendTimeKey);
+		return BotMessage.simpleTextMessage("游戏结束了！");
 	}
 
 	private BotMessage handleGame(BotMessageAction messageAction) {
