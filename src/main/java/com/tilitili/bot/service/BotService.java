@@ -1,17 +1,20 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.PlayTwentyFourHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -30,13 +33,15 @@ public class BotService {
     private final BotManager botManager;
     private final BotSenderManager botSenderManager;
     private final BotTaskMapper botTaskMapper;
+    private final PlayTwentyFourHandle playTwentyFourHandle;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
         this.botSenderManager = botSenderManager;
         this.botTaskMapper = botTaskMapper;
+        this.playTwentyFourHandle = playTwentyFourHandle;
     }
 
     @Async
@@ -59,6 +64,20 @@ public class BotService {
             botMessageAction.setBotSender(botSender);
 
             List<BotTask> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
+
+            // 尝试智能匹配key
+            boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
+            if (isNoKey) {
+                String key;
+                // 尝试匹配回答24点
+                key = playTwentyFourHandle.isThisTask(botMessageAction);
+                if (key != null) {
+                    botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(key + " "));
+                    syncHandleTextMessage(botMessage);
+                    return;
+                }
+            }
+
             BotMessage respMessage = null;
             for (BotTask botTask : botTaskDTOList) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());

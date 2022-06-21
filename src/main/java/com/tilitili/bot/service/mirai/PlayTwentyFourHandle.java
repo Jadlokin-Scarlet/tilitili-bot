@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
@@ -29,12 +30,33 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
 	private final static String lockKey = "playGameHandle.lock";
 	private final static int waitTime = 3;
+	public final Map<String, String> replaceMap;
+	public final String calRegix;
 
 	private final BotManager botManager;
 
 	@Autowired
 	public PlayTwentyFourHandle(BotManager botManager) {
 		this.botManager = botManager;
+		replaceMap = ImmutableMap.<String, String>builder()
+				.put("÷", "/")
+				.put("＋", "+")
+				.put("×", "*")
+				.put("x", "*")
+				.put("X", "*")
+				.put("乘", "*")
+				.put("除", "/")
+				.put("加", "+")
+				.put("减", "-")
+				.put("等于", "=")
+				.put("＝", "=")
+				.put("（", "(")
+				.put("）", ")")
+				.put(" ", "")
+				.put("\t", "").build();
+		Set<String> charSet = new HashSet<>(replaceMap.keySet());
+		charSet.addAll(replaceMap.values());
+		calRegix = String.format("([%s]+)", String.join("", charSet));
 	}
 
 	@Override
@@ -46,6 +68,20 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			case "放弃24点": case "fq24": return endGame(messageAction);
 			default: return null;
 		}
+	}
+
+	public String isThisTask(BotMessageAction botMessageAction) {
+		String text = botMessageAction.getText();
+		BotSessionService.MiraiSession session = botMessageAction.getSession();
+		if (! session.containsKey(numListKey)) {
+			return null;
+		}
+		if (Objects.equals(StringUtils.patten1(calRegix, text), text)) {
+			if (StringUtils.pattenAll("(\\d+)", text).size() == 4) {
+				return "回答24点";
+			}
+		}
+		return null;
 	}
 
 	private BotMessage endGame(BotMessageAction messageAction) {
@@ -62,20 +98,12 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		try {
 			if (!session.containsKey(numListKey)) return null;
 			Asserts.notBlank(result, "你想答什么。");
-			String resultAfterReplace = result
-					.replace("÷", "/")
-					.replace("＋", "+")
-					.replace("x", "*")
-					.replace("X", "*")
-					.replace("乘", "*")
-					.replace("除", "/")
-					.replace("加", "+")
-					.replace("减", "-")
-					.replace("减", "-")
-					.replace("＝", "=")
-					.replace("（", "(")
-					.replace("）", ")")
-					.replace("等于", "=");
+			String resultAfterReplace = result;
+			for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
+				String key = entry.getKey();
+				String value = entry.getValue();
+				resultAfterReplace = resultAfterReplace.replace(key, value);
+			}
 			if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
 			String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
 			CalculateObject calculateObject = new CalculateObject(resultAfterClean);
