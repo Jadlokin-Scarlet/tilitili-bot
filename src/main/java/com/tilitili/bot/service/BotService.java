@@ -72,7 +72,7 @@ public class BotService {
                 // 尝试匹配回答24点
                 key = playTwentyFourHandle.isThisTask(botMessageAction);
                 if (key != null) {
-                    botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(key + " "));
+                    botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(prefix + key + " "));
                     syncHandleTextMessage(botMessage);
                     return;
                 }
