@@ -33,8 +33,6 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String text = messageAction.getText();
-		Long group = messageAction.getBotSender().getGroup();
-		Asserts.notBlank(text, "格式错啦(提问)");
 
 		List<Long> atList = messageAction.getAtList();
 		if (!messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR)) {
@@ -42,6 +40,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				return null;
 			}
 		}
+		Long group = messageAction.getBotSender().getGroup();
+		Asserts.notBlank(text, "格式错啦(提问)");
 
 		String reply = null;
 		for (int index = 0; index < 10; index++) {
