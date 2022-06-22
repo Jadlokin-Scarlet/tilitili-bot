@@ -9,25 +9,39 @@ import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 @Component
 public class ChatHandle extends ExceptionRespMessageHandle {
+	@Value("${mirai.bot-qq}")
+	private String BOT_QQ;
+	@Value("${mirai.bot-guild-qq}")
+	private String BOT_GUILD_QQ;
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String text = messageAction.getParamOrDefault("提问", messageAction.getValue());
+		String text = messageAction.getText();
 		Long group = messageAction.getBotSender().getGroup();
 		Asserts.notBlank(text, "格式错啦(提问)");
+
+		List<Long> atList = messageAction.getAtList();
+		if (!messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR)) {
+			if (!atList.contains(Long.valueOf(BOT_QQ)) && !atList.contains(Long.valueOf(BOT_GUILD_QQ))) {
+				return null;
+			}
+		}
 
 		String reply = null;
 		for (int index = 0; index < 10; index++) {
