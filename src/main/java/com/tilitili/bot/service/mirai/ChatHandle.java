@@ -12,7 +12,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 		}
 		Long group = messageAction.getBotSender().getGroup();
-		Asserts.notBlank(text, "格式错啦(提问)");
+		if (StringUtils.isBlank(text)) {
+			return null;
+		}
 
 		String reply = null;
 		for (int index = 0; index < 10; index++) {
