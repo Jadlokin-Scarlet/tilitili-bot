@@ -36,6 +36,9 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 		BotMessage botMessage = messageAction.getBotMessage();
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
 		if (StringUtils.isBlank(pid)) {
+			pid = botMessageService.getQuotePid(messageAction);
+		}
+		if (StringUtils.isBlank(pid)) {
 			String url = botMessageService.getFirstImageListOrQuoteImage(messageAction);
 			pid = pixivService.findPixivImage(url);
 		}

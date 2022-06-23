@@ -1,10 +1,13 @@
 package com.tilitili.bot.service;
 
+import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.PlayTwentyFourHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.entity.BotMessageRecord;
+import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -12,11 +15,13 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderManager;
+import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,20 +33,26 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class BotService {
+    @Value("${mirai.bot-qq}")
+    private String BOT_QQ;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
     private final BotManager botManager;
     private final BotSenderManager botSenderManager;
     private final BotTaskMapper botTaskMapper;
     private final PlayTwentyFourHandle playTwentyFourHandle;
+    private final BotSendMessageRecordMapper botSendMessageRecordMapper;
+    private final Gson gson;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
         this.botSenderManager = botSenderManager;
         this.botTaskMapper = botTaskMapper;
         this.playTwentyFourHandle = playTwentyFourHandle;
+        this.botSendMessageRecordMapper = botSendMessageRecordMapper;
+        gson = new Gson();
     }
 
     @Async
@@ -77,6 +88,21 @@ public class BotService {
                     return;
                 }
             }
+
+            String quoteMessageId = botMessageAction.getQuoteMessageId();
+            Long quoteSenderId = botMessageAction.getQuoteSenderId();
+            if (quoteMessageId != null) {
+                if (Objects.equals(String.valueOf(quoteSenderId), BOT_QQ)) {
+                    BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
+                    BotMessage quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                    botMessageAction.setQuoteMessage(quoteMessage);
+                } else {
+                    BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
+                    BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+                    botMessageAction.setQuoteMessage(quoteMessage);
+                }
+            }
+
 
             BotMessage respMessage = null;
             for (BotTask botTask : botTaskDTOList) {

@@ -46,7 +46,12 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
-		if (StringUtils.isBlank(pid)) pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
+		if (StringUtils.isBlank(pid)) {
+			pid = botMessageService.getQuotePid(messageAction);
+		}
+		if (StringUtils.isBlank(pid)) {
+			pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
+		}
 		BotMessage botMessage = messageAction.getBotMessage();
 
 		BotSender botSender = messageAction.getBotSender();
