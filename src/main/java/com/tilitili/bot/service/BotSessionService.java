@@ -46,6 +46,9 @@ public class BotSessionService {
         public void put(String key, String value) {
             redisCache.addMapValue(sessionKey, key, value);
         }
+        public Boolean putIfAbsent(String key, String value) {
+            return redisCache.addIfAbsentMapValue(sessionKey, key, value);
+        }
         public boolean containsKey(String key) {
             return redisCache.existsHashKey(sessionKey, key);
         }
