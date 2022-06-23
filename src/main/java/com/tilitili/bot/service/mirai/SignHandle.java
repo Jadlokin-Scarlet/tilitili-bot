@@ -40,25 +40,30 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			return null;
 		}
 
-		Date now = new Date();
-		BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
-		if (botUser == null) {
-			botUserMapper.addBotUserSelective(new BotUser().setExternalId(externalId).setSignTime(now));
-			botUser = botUserMapper.getBotUserByExternalId(externalId);
-		}
-		Asserts.notNull(botUser, "似乎有什么不对劲");
-		if (botUser.getSignTime().after(DateUtils.getCurrentDay())) {
-			log.error("已经签到过了");
-			return null;
-		}
+		try {
+			Date now = new Date();
+			BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
+			if (botUser == null) {
+				botUserMapper.addBotUserSelective(new BotUser().setExternalId(externalId).setSignTime(now));
+				botUser = botUserMapper.getBotUserByExternalId(externalId);
+			}
+			Asserts.notNull(botUser, "似乎有什么不对劲");
+			if (botUser.getSignTime().after(DateUtils.getCurrentDay())) {
+				log.error("已经签到过了");
+				return null;
+			}
+			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + 100).setSignTime(now));
 
-		int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
-		String time = "早上";
-		if (hour > 9) time = "中午";
-		if (hour > 12) time = "下午";
-		if (hour > 18) time = "晚上";
+			int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
+			String time = "早上";
+			if (hour > 9) time = "中午";
+			if (hour > 12) time = "下午";
+			if (hour > 18) time = "晚上";
 
-		String talk = "今天也是充满希望的一天";
-		return BotMessage.simpleTextMessage(String.format("%s好，%s(分数+100)", time, talk));
+			String talk = "今天也是充满希望的一天";
+			return BotMessage.simpleTextMessage(String.format("%s好，%s(分数+100)", time, talk));
+		} finally {
+			session.remove(externalIdLockKey + externalId);
+		}
 	}
 }
