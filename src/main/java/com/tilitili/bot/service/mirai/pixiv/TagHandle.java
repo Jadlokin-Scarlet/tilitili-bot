@@ -38,7 +38,7 @@ public class TagHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isBlank(pid)) {
 			pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		}
-		Asserts.notBlank(pid, "格式错啦(pid)");
+		Asserts.isNumber(pid, "格式错啦(pid)");
 		List<PixivTag> tagList = pixivTagMapper.getPixivTagByCondition(new PixivTagQuery().setPid(pid));
 		if (tagList.isEmpty()) {
 			pixivService.saveImageFromPixiv(pid);

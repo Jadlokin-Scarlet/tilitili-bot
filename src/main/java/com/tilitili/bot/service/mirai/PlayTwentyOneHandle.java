@@ -133,19 +133,19 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage startGame(BotMessageAction messageAction) {
 //		BotSender botSender = messageAction.getBotSender();
-//		String sender = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): String.valueOf(botSender.getQq());
+//		Long sender = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): botSender.getQq();
 //
 //		Queue<String> cardList = this.newCardList();
 //
-//		Map<String, List<String>> table = new HashMap<>();
-//		table.put(BOT_QQ, Lists.newArrayList(cardList.poll(), cardList.poll()));
-//		table.put(sender, Lists.newArrayList(cardList.poll(), cardList.poll()));
+//		List<twentyOnePlayer> table = Lists.newArrayList(
+//				new twentyOnePlayer(Long.valueOf(BOT_QQ), Lists.newArrayList(cardList.poll(), cardList.poll())),
+//				new twentyOnePlayer(sender, Lists.newArrayList(cardList.poll(), cardList.poll()))
+//		);
 //
 //		TwentyOneGameData gameData = new TwentyOneGameData(cardList, table);
+//		List<BotMessageChain> result = this.getShowTable(table);
 //
-//		return BotMessage.simpleListMessage(
-//				BotMessageChain.ofPlain(String.format("庄家牌:%s\n", ))
-//		);
+//		return BotMessage.simpleListMessage(result);
 
 
 
@@ -185,4 +185,15 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		calstart.add(Calendar.MINUTE, -waitTime);
 		return calstart.getTime();
 	}
+
+
+
+//	private List<BotMessageChain> getShowTable(List<twentyOnePlayer> table) {
+//		return table.entrySet().stream().peek(entry -> entry.getKey().equals(Long.valueOf(BOT_QQ))? entry.getValue().set(0, "*"))
+//				.flatMap(entry -> Stream.of(
+//				BotMessageChain.ofAt(entry.getKey()),
+//				BotMessageChain.ofPlain(String.join(",", entry.getValue())),
+//				BotMessageChain.ofPlain("\n")
+//		)).collect(Collectors.toList());
+//	}
 }
