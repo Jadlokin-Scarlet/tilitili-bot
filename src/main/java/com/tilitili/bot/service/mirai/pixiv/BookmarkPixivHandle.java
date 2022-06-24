@@ -42,7 +42,7 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 			String url = botMessageService.getFirstImageListOrQuoteImage(messageAction);
 			pid = pixivService.findPixivImage(url);
 		}
-		Asserts.notBlank(pid, "参数错啦(pid)");
+		Asserts.isNumber(pid, "格式错啦(pid)");
 
 		Long qq = botMessage.getQq();
 		Long tinyId = botMessage.getTinyId();

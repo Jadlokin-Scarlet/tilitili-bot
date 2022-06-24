@@ -52,6 +52,8 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isBlank(pid)) {
 			pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		}
+		Asserts.isNumber(pid, "格式错啦(pid)");
+
 		BotMessage botMessage = messageAction.getBotMessage();
 
 		BotSender botSender = messageAction.getBotSender();

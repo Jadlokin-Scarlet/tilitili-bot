@@ -37,7 +37,7 @@ public class PixivUserHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isBlank(pid)) {
 			pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		}
-		Asserts.notBlank(pid, "格式错啦(pid)");
+		Asserts.isNumber(pid, "格式错啦(pid)");
 		List<PixivImage> imageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setSource("pixiv").setPid(pid));
 		if (imageList.isEmpty()) {
 			pixivService.saveImageFromPixiv(pid);

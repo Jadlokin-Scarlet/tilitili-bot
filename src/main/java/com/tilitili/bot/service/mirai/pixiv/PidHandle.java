@@ -47,7 +47,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isBlank(pid)) {
 			pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
 		}
-		Asserts.notBlank(pid, "格式错啦(pid)");
+		Asserts.isNumber(pid, "格式错啦(pid)");
 
 		BotSender botSender = messageAction.getBotSender();
 		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
