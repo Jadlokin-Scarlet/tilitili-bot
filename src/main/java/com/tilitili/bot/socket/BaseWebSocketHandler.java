@@ -1,6 +1,7 @@
 package com.tilitili.bot.socket;
 
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -22,7 +23,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         try {
-            handleTextMessage(message);
+            handleTextMessage(StringUtils.removeCfCode(message));
         } catch (AssertException e) {
             log.error(e.getMessage());
         }

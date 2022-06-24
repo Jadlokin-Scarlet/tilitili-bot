@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.entity.SortObject;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
@@ -12,6 +13,7 @@ import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.MathUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -24,13 +26,17 @@ import java.util.stream.IntStream;
 //@Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
-	private final List<Integer> cardList = IntStream.rangeClosed(1, 13).flatMap(i -> IntStream.rangeClosed(1, 4).map((j)->i)).boxed().collect(Collectors.toList());
+	private final List<String> cardTypeList = Arrays.asList("♤️", "♧", "♢", "♡");
+	private final List<String> cardList = IntStream.range(0, 52).mapToObj(index -> cardTypeList.get(index / 13) + "" + index % 13).flatMap(i -> IntStream.rangeClosed(1, 4).mapToObj((j)->i)).collect(Collectors.toList());
 	private final static String numListKey = "playGameHandle.numListKey";
 	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
 	private final static String lockKey = "playGameHandle.lock";
 	private final static int waitTime = 3;
 	public final Map<String, String> replaceMap;
 	public final String calRegix;
+	private final static Random random = new Random(System.currentTimeMillis());
+	@Value("${mirai.bot-qq}")
+	private String BOT_QQ;
 
 	private final BotManager botManager;
 
@@ -126,9 +132,20 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {
-//		List<>
-
-//		return BotMessage.simpleTextMessage(String.format("发牌完毕！庄家:%s", ))
+//		BotSender botSender = messageAction.getBotSender();
+//		String sender = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): String.valueOf(botSender.getQq());
+//
+//		Queue<String> cardList = this.newCardList();
+//
+//		Map<String, List<String>> table = new HashMap<>();
+//		table.put(BOT_QQ, Lists.newArrayList(cardList.poll(), cardList.poll()));
+//		table.put(sender, Lists.newArrayList(cardList.poll(), cardList.poll()));
+//
+//		TwentyOneGameData gameData = new TwentyOneGameData(cardList, table);
+//
+//		return BotMessage.simpleListMessage(
+//				BotMessageChain.ofPlain(String.format("庄家牌:%s\n", ))
+//		);
 
 
 
@@ -137,7 +154,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		String numListStr = session.get(numListKey);
 		Asserts.checkNull(numListStr, "先玩完这一局吧："+numListStr);
 
-		List<Integer> numList = MathUtil.getNThingFromList(cardList, 4);
+		List<String> numList = MathUtil.getNThingFromList(this.cardList, 4);
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
@@ -154,6 +171,12 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}, waitTime, TimeUnit.MINUTES);
 		return BotMessage.simpleTextMessage("试试看这道题吧("+newNumListStr+")，时限"+waitTime+"分钟哦~");
+	}
+
+	private Queue<String> newCardList() {
+		return IntStream.range(0, 208).mapToObj(index -> cardTypeList.get((index % 52) / 13) + "" + index % 13)
+				.map(item -> new SortObject<>(random.nextInt(Integer.MAX_VALUE), item))
+				.sorted().map(SortObject::getT).collect(Collectors.toCollection(LinkedList::new));
 	}
 
 	private Date getLimitDate() {
