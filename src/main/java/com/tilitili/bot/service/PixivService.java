@@ -29,6 +29,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -166,6 +167,8 @@ public class PixivService {
 	}
 
 	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18) {
+		if (CollectionUtils.isEmpty(dataList)) return null;
+
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		List<String> pidList = dataList.stream().map(PixivSearchIllust::getId).collect(Collectors.toList());
 		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(pidList).setSource(source));
