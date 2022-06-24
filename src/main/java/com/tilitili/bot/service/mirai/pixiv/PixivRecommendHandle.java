@@ -56,9 +56,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		String mode = keyModeMap.getOrDefault(key, "all");
 		log.debug("PixivRecommendHandle get cookie");
 		Long qq = botMessage.getQq();
-		String tinyId = botMessage.getTinyId();
-		String sender = qq != null? String.valueOf(qq) : tinyId;
-		Asserts.notBlank(sender, "发送者为空");
+		Long tinyId = botMessage.getTinyId();
+		Long sender = qq != null? qq : tinyId;
+		Asserts.notNull(sender, "发送者为空");
 
 		BotSender botSender = messageAction.getBotSender();
 		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");

@@ -70,7 +70,9 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                 for (PixivImage pixivImage : pixivImageList) {
                     String messageId = pixivImage.getMessageId();
                     if (messageId != null) {
-                        botManager.recallMessage(messageId, null);
+                        BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageId);
+                        BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+                        botManager.recallMessage(messageId, botSender.getSendType());
                         return BotMessage.simpleTextMessage("搞定");
                     }
                 }

@@ -12,6 +12,8 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
@@ -32,10 +34,11 @@ public class TranslateHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSender botSender = messageAction.getBotSender();
         String enText = messageAction.getValueOrDefault(messageAction.getBody());
-        String url = botMessageService.getFirstImageListOrQuoteImage(messageAction);
+        List<String> imageList = botMessageService.getImageListOrQuoteImage(messageAction);
         String from = messageAction.getParam("from");
         String to = messageAction.getParam("to");
 
+        String url = imageList.isEmpty()? "": imageList.get(0);
         String bodyNotNull = enText == null? "": enText;
         Asserts.notBlank(bodyNotNull + url, "格式错啦(内容)");
 
@@ -48,7 +51,7 @@ public class TranslateHandle extends ExceptionRespMessageHandle {
             message = botTranslateMappingManager.translate(botSender.getId(), enText);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
-            message = String.format("%s%n---机翻%n%s", resultView.getSumSrc(), resultView.getSumDst());
+            message = resultView != null ? String.format("%s%n---机翻%n%s", resultView.getSumSrc(), resultView.getSumDst()) : null;
         }
         if (isBlank(message)) {
             return BotMessage.simpleTextMessage("无法翻译");

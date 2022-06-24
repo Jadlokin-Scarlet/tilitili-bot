@@ -157,10 +157,10 @@ public class BotService {
             case SendTypeEmum.GROUP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象"); return SendTypeEmum.GROUP_MESSAGE_STR + "-" + botMessage.getGroup();
             case SendTypeEmum.GUILD_MESSAGE_STR: {
                 ChannelEmum channel = botMessage.getChannel();
-                String guildId = channel != null? channel.guildId: botMessage.getGuildId();
-                String channelId = channel != null? channel.channelId: botMessage.getChannelId();
-                Asserts.notBlank(guildId, "找不到发送对象");
-                Asserts.notBlank(channelId, "找不到发送对象");
+                Long guildId = channel != null? channel.guildId: botMessage.getGuildId();
+                Long channelId = channel != null? channel.channelId: botMessage.getChannelId();
+                Asserts.notNull(guildId, "找不到发送对象");
+                Asserts.notNull(channelId, "找不到发送对象");
                 return SendTypeEmum.GUILD_MESSAGE_STR + "-" + guildId + "-" + channelId;
             }
             default: throw new AssertException("未知发送类型："+sendType);

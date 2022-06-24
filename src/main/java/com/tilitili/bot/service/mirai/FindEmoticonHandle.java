@@ -30,9 +30,9 @@ public class FindEmoticonHandle extends ExceptionRespMessageHandle {
 
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
-        String tinyId = botMessage.getTinyId();
-        String sender = qq != null? String.valueOf(qq) : tinyId;
-        Asserts.notBlank(sender, "发送者为空");
+        Long tinyId = botMessage.getTinyId();
+        Long sender = qq != null? qq : tinyId;
+        Asserts.notNull(sender, "发送者为空");
 
         int start = Math.toIntExact((redisCache.increment(emoticonKey + sender, tag) - 1) % 20);
 

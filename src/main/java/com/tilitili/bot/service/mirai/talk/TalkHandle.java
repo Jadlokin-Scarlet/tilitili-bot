@@ -32,9 +32,9 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String sendType = botMessage.getSendType();
 		Long qq = botMessage.getQq();
 		Long group = botMessage.getGroup();
-		String guildId = botMessage.getGuildId();
-		String channelId = botMessage.getChannelId();
-		String tinyId = botMessage.getTinyId();
+		Long guildId = botMessage.getGuildId();
+		Long channelId = botMessage.getChannelId();
+		Long tinyId = botMessage.getTinyId();
 
 		String value = messageAction.getValueOrDefault("");
 		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);

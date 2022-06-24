@@ -40,8 +40,8 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         String sendType = botMessage.getSendType();
         Long qq = botMessage.getQq();
         Long group = botMessage.getGroup();
-        String guildId = botMessage.getGuildId();
-        String channelId = botMessage.getChannelId();
+        Long guildId = botMessage.getGuildId();
+        Long channelId = botMessage.getChannelId();
 
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);

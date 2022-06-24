@@ -35,7 +35,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         List<String> imageList = messageAction.getImageList();
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
-        String guildId = botMessage.getGuildId();
+        Long guildId = botMessage.getGuildId();
         String sendType = botMessage.getSendType();
         List<BotTalk> botTalkList;
         if (StringUtils.isBlank(text) && imageList.size() == 1) {

@@ -33,8 +33,8 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 
 		Long qq = botMessage.getQq();
 		Long group = botMessage.getGroup();
-		String guildId = botMessage.getChannel() == null? botMessage.getGuildId(): botMessage.getChannel().guildId;
-		String channelId = botMessage.getChannel() == null? botMessage.getChannelId(): botMessage.getChannel().channelId;
+		Long guildId = botMessage.getChannel() == null? botMessage.getGuildId(): botMessage.getChannel().guildId;
+		Long channelId = botMessage.getChannel() == null? botMessage.getChannelId(): botMessage.getChannel().channelId;
 		String sendType = botMessage.getSendType();
 
 		Asserts.notBlank(name, "格式错啦(name)");

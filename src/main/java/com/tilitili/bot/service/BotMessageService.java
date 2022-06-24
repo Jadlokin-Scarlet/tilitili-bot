@@ -24,7 +24,7 @@ public class BotMessageService {
 		return null;
 	}
 
-	public String getFirstImageListOrQuoteImage(BotMessageAction messageAction) {
+	public List<String> getImageListOrQuoteImage(BotMessageAction messageAction) {
 		List<String> imageUrlList = messageAction.getImageList();
 
 		if (CollectionUtils.isEmpty(imageUrlList) && messageAction.getQuoteMessage() != null) {
@@ -32,6 +32,12 @@ public class BotMessageService {
 			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
 			imageUrlList = quoteMessageAction.getImageList();
 		}
+
+		return imageUrlList;
+	}
+
+	public String getFirstImageListOrQuoteImage(BotMessageAction messageAction) {
+		List<String> imageUrlList = this.getImageListOrQuoteImage(messageAction);
 
 		Asserts.notEmpty(imageUrlList, "格式错啦(图片)");
 		String url = QQUtil.getImageUrl(imageUrlList.get(0));

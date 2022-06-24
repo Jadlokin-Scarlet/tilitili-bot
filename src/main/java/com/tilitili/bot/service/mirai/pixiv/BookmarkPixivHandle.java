@@ -45,9 +45,9 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 		Asserts.notBlank(pid, "参数错啦(pid)");
 
 		Long qq = botMessage.getQq();
-		String tinyId = botMessage.getTinyId();
-		String sender = qq != null? String.valueOf(qq) : tinyId;
-		Asserts.notBlank(sender, "发送者为空");
+		Long tinyId = botMessage.getTinyId();
+		Long sender = qq != null? qq : tinyId;
+		Asserts.notNull(sender, "发送者为空");
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
 		Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");

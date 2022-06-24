@@ -33,10 +33,10 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotSender botSender = messageAction.getBotSender();
-		String externalId = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): String.valueOf(botSender.getQq());
-		Asserts.notBlank(externalId, "似乎哪里不对劲");
+		Long externalId = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): botSender.getQq();
+		Asserts.notNull(externalId, "似乎哪里不对劲");
 		if (! session.putIfAbsent(externalIdLockKey + externalId, "lock")) {
-			log.error("别签到刷屏");
+			log.info("别签到刷屏");
 			return null;
 		}
 
@@ -49,7 +49,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			}
 			Asserts.notNull(botUser, "似乎有什么不对劲");
 			if (botUser.getSignTime().after(DateUtils.getCurrentDay())) {
-				log.error("已经签到过了");
+				log.info("已经签到过了");
 				return null;
 			}
 			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + 100).setSignTime(now));
