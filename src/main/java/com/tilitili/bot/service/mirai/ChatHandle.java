@@ -9,6 +9,7 @@ import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -29,16 +31,20 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private String BOT_QQ;
 	@Value("${mirai.bot-guild-qq}")
 	private String BOT_GUILD_QQ;
+	private final static Random random = new Random(System.currentTimeMillis());
+
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String text = messageAction.getText();
 
 		List<Long> atList = messageAction.getAtList();
-		if (!messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR)) {
-			if (!atList.contains(Long.valueOf(BOT_QQ)) && !atList.contains(Long.valueOf(BOT_GUILD_QQ))) {
-				return null;
-			}
+		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
+		boolean hasAtBot = atList.contains(Long.valueOf(BOT_QQ)) || atList.contains(Long.valueOf(BOT_GUILD_QQ));
+		boolean isRandomReply = random.nextInt(100) == 0 && Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value);
+		if (!isFriend && !hasAtBot && !isRandomReply) {
+			return null;
 		}
+
 		Long group = messageAction.getBotSender().getGroup();
 		if (StringUtils.isBlank(text)) {
 			return null;
