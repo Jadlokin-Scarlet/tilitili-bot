@@ -387,6 +387,8 @@ public class PixivService {
 	public String findPixivImage(String url) {
 		FindImageResult findImageResult = this.findImage(url);
 		String link = findImageResult.getLink();
-		return StringUtils.patten1("&illust_id=(\\d+)", link);
+		String pid = StringUtils.patten1("&illust_id=(\\d+)", link);
+		Asserts.isNumber(pid, "似乎不是Pixiv图片。");
+		return pid;
 	}
 }
