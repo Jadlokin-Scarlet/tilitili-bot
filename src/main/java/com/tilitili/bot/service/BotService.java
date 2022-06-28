@@ -58,7 +58,7 @@ public class BotService {
     @Async
     public void syncHandleTextMessage(BotMessage botMessage) {
         String sendType = botMessage.getSendType();
-        List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType, SendTypeEmum.TEMP_MESSAGE.sendType);
+        List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType);
         boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
         try {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
