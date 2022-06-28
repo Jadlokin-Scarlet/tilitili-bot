@@ -116,11 +116,13 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
     // (凌晨|早上|上午|中午|下午|晚上)?(\d+点||d+小时后)?
     private void setHourToCalendar(Calendar calendar, String a, String hourStr) {
+        if (hourStr.contains("小时后")) {
+            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + Integer.parseInt(hourStr.split("小时后")[0]));
+            return;
+        }
+
         boolean hasHour = isNotBlank(hourStr);
-        int hour = hasHour? (hourStr.contains("点")?
-                Integer.parseInt(hourStr.split("点")[0]):
-                calendar.get(Calendar.HOUR_OF_DAY) + Integer.parseInt(hourStr.split("小时后")[0])
-        ) : 0;
+        int hour = hasHour? Integer.parseInt(hourStr.split("点")[0]) : 0;
         switch (a) {
             case "凌晨": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 4); break;
             case "早上": case "上午": case "早晨": case "今早": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 10); break;
