@@ -9,7 +9,6 @@ import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -42,8 +41,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = atList.contains(Long.valueOf(BOT_QQ)) || atList.contains(Long.valueOf(BOT_GUILD_QQ));
 		boolean isRandomReply = random == 0 && messageAction.getBotMessage().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
-		boolean isTestRandomReply = random < 10 && Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value);
-		if (!isFriend && !hasAtBot && !isRandomReply && !isTestRandomReply) {
+		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
 		}
 
