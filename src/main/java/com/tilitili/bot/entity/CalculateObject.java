@@ -4,6 +4,8 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.util.Objects;
+
 public class CalculateObject {
 	private CalculateObject left;
 	private String operate;
@@ -90,7 +92,11 @@ public class CalculateObject {
 			String leftResult = left.toString();
 			String rightResult = right.toString();
 			switch (operate) {
-				case "+": return "(" + leftResult + "+" + rightResult + ")";
+				case "+": {
+					if (Objects.equals(leftResult, "0")) return rightResult;
+					if (Objects.equals(rightResult, "0")) return leftResult;
+					return "(" + leftResult + "+" + rightResult + ")";
+				}
 				case "-": return "(" + leftResult + "-" + rightResult + ")";
 				case "*": return "(" + leftResult + "*" + rightResult + ")";
 				case "/": return "(" + leftResult + "/" + rightResult + ")";
