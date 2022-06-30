@@ -26,7 +26,7 @@ public class TimeCalculateHandle extends ExceptionRespMessageHandle {
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		long time = calendar.getTimeInMillis() - System.currentTimeMillis();
-		if (time < 0) return null;
+		if (time < 0) return BotMessage.simpleTextMessage("已经到点啦！");
 		long second = time / 1000 % 60;
 		long minute = time / 1000 / 60 % 60;
 		long hour = time / 1000 / 60 / 60;
