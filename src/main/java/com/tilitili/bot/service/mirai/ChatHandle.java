@@ -10,6 +10,7 @@ import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -39,7 +40,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String source = messageAction.getParamOrDefault("source", "tencent");
+		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tencent";
+		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(100);
 
