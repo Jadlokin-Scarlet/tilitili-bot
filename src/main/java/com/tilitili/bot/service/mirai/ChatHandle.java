@@ -59,8 +59,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String reply = null;
 		for (int index = 0; index < 10; index++) {
 			switch (source) {
-				case "tencent": reply = reqReply(text);
-				case "qy": reply = reqQingYunReply(text);
+				case "tencent": reply = reqReply(text); break;
+				case "qy": reply = reqQingYunReply(text); break;
 			}
 			if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
 		}
