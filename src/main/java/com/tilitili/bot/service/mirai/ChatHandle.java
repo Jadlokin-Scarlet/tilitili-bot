@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -12,12 +13,16 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +39,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		String source = messageAction.getParamOrDefault("source", "tencent");
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(100);
 
@@ -52,7 +58,10 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 		String reply = null;
 		for (int index = 0; index < 10; index++) {
-			reply = reqReply(text);
+			switch (source) {
+				case "tencent": reply = reqReply(text);
+				case "qy": reply = reqQingYunReply(text);
+			}
 			if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
 		}
 		if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
@@ -67,6 +76,15 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		}
 
 		return BotMessage.simpleTextMessage(reply);
+	}
+
+	private String reqQingYunReply(String text) throws UnsupportedEncodingException {
+		String respStr = HttpClientUtil.httpGet("http://api.qingyunke.com/api.php?key=free&appid=0&msg=" + URLEncoder.encode(text, "UTF-8"));
+		JSONObject resp = JSONObject.parseObject(respStr);
+		log.debug("请求青云 req={} result={}", text, respStr);
+		Asserts.checkEquals(resp.getInteger("result"), 0, "不对劲");
+
+		return resp.getString("content").replaceAll("\\{br}", "\n");
 	}
 
 	private String reqReply(String text) throws TencentCloudSDKException {
