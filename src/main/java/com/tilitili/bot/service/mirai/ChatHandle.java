@@ -1,6 +1,9 @@
 package com.tilitili.bot.service.mirai;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -14,20 +17,18 @@ import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
-import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -37,6 +38,13 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	@Value("${mirai.bot-guild-qq}")
 	private String BOT_GUILD_QQ;
 	private final static Random random = new Random(System.currentTimeMillis());
+	private final Gson gson = new Gson();
+	private final BotManager botManager;
+
+	@Autowired
+	public ChatHandle(BotManager botManager) {
+		this.botManager = botManager;
+	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
@@ -59,25 +67,60 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		}
 
 		String reply = null;
-		for (int index = 0; index < 10; index++) {
-			switch (source) {
-				case "tencent": reply = reqReply(text); break;
-				case "qy": reply = reqQingYunReply(text); break;
+		List<BotMessageChain> chainList;
+		switch (source) {
+			case "tencent": {
+				for (int index = 0; index < 10; index++) {
+					reply = reqReply(text);
+					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
+				}
+				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
+				break;
 			}
-			if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
+			case "qy": reply = reqQingYunReply(text); break;
+			case "ml": chainList = reqMoLiReply(text, messageAction.getBotMessage()); break;
 		}
-		if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
 
-		if (Objects.equals(group, 674446384L)) {
-			TimeUtil.millisecondsSleep(1000);
-			return BotMessage.simpleListMessage(Arrays.asList(
-					BotMessageChain.ofAt(2489917059L),
-					BotMessageChain.ofPlain(" "),
-					BotMessageChain.ofPlain(reply)
-			));
-		}
+//		if (Objects.equals(group, 674446384L)) {
+//			TimeUtil.millisecondsSleep(1000);
+//			return BotMessage.simpleListMessage(Arrays.asList(
+//					BotMessageChain.ofAt(2489917059L),
+//					BotMessageChain.ofPlain(" "),
+//					BotMessageChain.ofPlain(reply)
+//			));
+//		}
 
 		return BotMessage.simpleTextMessage(reply);
+	}
+
+	private final static Map<String, String> header = ImmutableMap.of("Api-Key", "g1cpoxzjnw6teqjr", "Api-Secret", "7bmdopdk");
+	private List<BotMessageChain> reqMoLiReply(String text, BotMessage botMessage) {
+		int type = Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR) ? 1 : 2;
+		String json = gson.toJson(ImmutableMap.of("content", text, "type", type, "from", botMessage.getQq(), "fromName", botMessage.getGroupNickName(), "to", botMessage.getGroup(), "toName", botMessage.getGroupName()));
+		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);
+		JSONObject resp = JSONObject.parseObject(respStr);
+		log.debug("请求茉莉 req={} result={}", text, respStr);
+		Asserts.notEquals(resp.getInteger("code"), "C1001", "呜呜呜被关小黑屋了。");
+		Asserts.checkEquals(resp.getInteger("code"), "00000", "不对劲");
+
+		JSONArray replyList = resp.getJSONArray("data");
+		List<BotMessageChain> chainList = new ArrayList<>();
+		for (int index = 0; index < replyList.size(); index++) {
+			JSONObject reply = replyList.getJSONObject(index);
+			Integer typed = reply.getInteger("typed");
+			String content = reply.getString("content");
+			if (typed == null) continue;
+			switch (typed) {
+				case 1: chainList.add(BotMessageChain.ofPlain(content)); break;
+				case 2: chainList.add(BotMessageChain.ofImage("https://files.molicloud.com/" + content)); break;
+				case 3: log.error("记录文档, content={}", content);
+				case 4: chainList.add(BotMessageChain.ofVoice(botManager.uploadVoice("https://files.molicloud.com/" + content)));
+				case 8: log.error("记录json, json={}", content);
+				case 9: log.error("记录其他文件, content={}", content);
+				default: log.error("记录其他情况, content={}", content);
+			}
+		}
+		return chainList;
 	}
 
 	private String reqQingYunReply(String text) throws UnsupportedEncodingException {
