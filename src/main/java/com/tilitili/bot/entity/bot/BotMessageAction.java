@@ -22,6 +22,7 @@ public class BotMessageAction {
     private final List<String> imageList;
     private final List<Long> atList;
     private final String text;
+    private final String head;
     private final String body;
     private final String messageId;
     private final Map<String, String> paramMap;
@@ -49,7 +50,7 @@ public class BotMessageAction {
         this.text = String.join("", textList).trim();
         this.body = text.contains("\n")? text.substring(text.indexOf("\n") + 1).trim(): null;
         List<String> lineList = body == null? Collections.emptyList(): Arrays.stream(body.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
-        String head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
+        head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
 
         key = "";
         if (isNotBlank(head)) {
@@ -180,5 +181,9 @@ public class BotMessageAction {
     public BotMessageAction setQuoteMessage(BotMessage quoteMessage) {
         this.quoteMessage = quoteMessage;
         return this;
+    }
+
+    public String getHead() {
+        return head;
     }
 }

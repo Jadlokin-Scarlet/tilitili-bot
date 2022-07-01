@@ -50,7 +50,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tencent";
 		String source = messageAction.getParamOrDefault("source", defaultSource);
-		String text = messageAction.getText();
+		String text = messageAction.getHead();
 		int random = ChatHandle.random.nextInt(100);
 
 		List<Long> atList = messageAction.getAtList();
