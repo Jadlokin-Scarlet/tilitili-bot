@@ -67,7 +67,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		}
 
 		String reply = null;
-		List<BotMessageChain> chainList;
+		List<BotMessageChain> chainList = null;
 		switch (source) {
 			case "tencent": {
 				for (int index = 0; index < 10; index++) {
@@ -89,8 +89,11 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 //					BotMessageChain.ofPlain(reply)
 //			));
 //		}
-
-		return BotMessage.simpleTextMessage(reply);
+		if (chainList != null) {
+			return BotMessage.simpleListMessage(chainList);
+		} else {
+			return BotMessage.simpleTextMessage(reply);
+		}
 	}
 
 	private final static Map<String, String> header = ImmutableMap.of("Api-Key", "g1cpoxzjnw6teqjr", "Api-Secret", "7bmdopdk");
