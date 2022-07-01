@@ -102,7 +102,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String json = gson.toJson(ImmutableMap.of("content", text, "type", type, "from", botMessage.getQq(), "fromName", botMessage.getGroupNickName(), "to", botMessage.getGroup(), "toName", botMessage.getGroupName()));
 		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);
 		JSONObject resp = JSONObject.parseObject(respStr);
-		log.debug("请求茉莉 req={} result={}", text, respStr);
+		log.debug("请求茉莉 req={} result={}", json, respStr);
 		Asserts.notEquals(resp.getInteger("code"), "C1001", "呜呜呜被关小黑屋了。");
 		Asserts.checkEquals(resp.getString("code"), "00000", "不对劲");
 

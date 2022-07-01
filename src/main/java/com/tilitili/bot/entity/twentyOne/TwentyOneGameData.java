@@ -5,9 +5,9 @@ import java.util.Queue;
 
 public class TwentyOneGameData {
 	private Queue<String> cardList;
-	private List<twentyOnePlayer> table;
+	private List<TwentyOnePlayer> table;
 
-	public TwentyOneGameData(Queue<String> cardList, List<twentyOnePlayer> table) {
+	public TwentyOneGameData(Queue<String> cardList, List<TwentyOnePlayer> table) {
 		this.cardList = cardList;
 		this.table = table;
 	}
@@ -21,11 +21,11 @@ public class TwentyOneGameData {
 		return this;
 	}
 
-	public List<twentyOnePlayer> getTable() {
+	public List<TwentyOnePlayer> getTable() {
 		return table;
 	}
 
-	public TwentyOneGameData setTable(List<twentyOnePlayer> table) {
+	public TwentyOneGameData setTable(List<TwentyOnePlayer> table) {
 		this.table = table;
 		return this;
 	}

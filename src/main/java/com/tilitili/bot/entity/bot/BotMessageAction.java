@@ -1,6 +1,7 @@
 package com.tilitili.bot.entity.bot;
 
 import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -27,6 +28,8 @@ public class BotMessageAction {
     private final String messageId;
     private final Map<String, String> paramMap;
     private final Map<String, String> bodyMap;
+    private final Long qqOrGroupOrChannelId;
+    private final Long qqOrTinyId;
     private String keyWithoutPrefix;
     private String key;
     private String value;
@@ -94,6 +97,28 @@ public class BotMessageAction {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
             quoteMessageId = quoteMessageChain.getId();
             quoteSenderId = quoteMessageChain.getSenderId();
+        }
+
+        switch (botMessage.getSendType()) {
+            case SendTypeEmum.FRIEND_MESSAGE_STR: {
+                qqOrTinyId = botMessage.getQq();
+                qqOrGroupOrChannelId = botMessage.getQq();
+                break;
+            }
+            case SendTypeEmum.GROUP_MESSAGE_STR: {
+                qqOrTinyId = botMessage.getQq();
+                qqOrGroupOrChannelId = botMessage.getGroup();
+                break;
+            }
+            case SendTypeEmum.GUILD_MESSAGE_STR: {
+                qqOrTinyId = botMessage.getTinyId();
+                qqOrGroupOrChannelId = botMessage.getChannelId();
+                break;
+            }
+            default: {
+                qqOrTinyId = null;
+                qqOrGroupOrChannelId = null;
+            }
         }
     }
 
@@ -185,5 +210,13 @@ public class BotMessageAction {
 
     public String getHead() {
         return head;
+    }
+
+    public Long getQqOrGroupOrChannelId() {
+        return qqOrGroupOrChannelId;
+    }
+
+    public Long getQqOrTinyId() {
+        return qqOrTinyId;
     }
 }

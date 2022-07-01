@@ -2,11 +2,12 @@ package com.tilitili.bot.entity.twentyOne;
 
 import java.util.List;
 
-public class twentyOnePlayer {
+public class TwentyOnePlayer {
+	private Integer score;
 	private Long playerId;
 	private List<String> cardList;
 
-	public twentyOnePlayer(Long playerId, List<String> cardList) {
+	public TwentyOnePlayer(Long playerId, List<String> cardList) {
 		this.playerId = playerId;
 		this.cardList = cardList;
 	}
@@ -15,7 +16,7 @@ public class twentyOnePlayer {
 		return playerId;
 	}
 
-	public twentyOnePlayer setPlayerId(Long playerId) {
+	public TwentyOnePlayer setPlayerId(Long playerId) {
 		this.playerId = playerId;
 		return this;
 	}
@@ -24,8 +25,17 @@ public class twentyOnePlayer {
 		return cardList;
 	}
 
-	public twentyOnePlayer setCardList(List<String> cardList) {
+	public TwentyOnePlayer setCardList(List<String> cardList) {
 		this.cardList = cardList;
+		return this;
+	}
+
+	public Integer getScore() {
+		return score;
+	}
+
+	public TwentyOnePlayer setScore(Integer score) {
+		this.score = score;
 		return this;
 	}
 }
