@@ -104,7 +104,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		JSONObject resp = JSONObject.parseObject(respStr);
 		log.debug("请求茉莉 req={} result={}", text, respStr);
 		Asserts.notEquals(resp.getInteger("code"), "C1001", "呜呜呜被关小黑屋了。");
-		Asserts.checkEquals(resp.getInteger("code"), "00000", "不对劲");
+		Asserts.checkEquals(resp.getString("code"), "00000", "不对劲");
 
 		JSONArray replyList = resp.getJSONArray("data");
 		List<BotMessageChain> chainList = new ArrayList<>();
