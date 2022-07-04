@@ -45,7 +45,7 @@ public class TimeCalculateHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleKfcMessage(BotMessageAction messageAction) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.DAY_OF_WEEK, 4);
+		calendar.set(Calendar.DAY_OF_WEEK, 5);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);

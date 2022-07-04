@@ -92,7 +92,7 @@ public class BotMessageAction {
             }
         }
 
-        List<BotMessageChain> quoteMessageList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Quote")).collect(Collectors.toList());
+        List<BotMessageChain> quoteMessageList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_QUOTE)).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(quoteMessageList)) {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
             quoteMessageId = quoteMessageChain.getId();

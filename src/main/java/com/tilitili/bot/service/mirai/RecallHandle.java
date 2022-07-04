@@ -52,7 +52,8 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
         if (Objects.equals(qq, MASTER_QQ)) {
             if (quoteMessageId != null) {
-                botManager.recallMessage(quoteMessageId, messageAction.getBotMessage().getSendType());
+                Long bot = messageAction.getBotSender().getBot();
+                botManager.recallMessage(quoteMessageId, bot);
                 return BotMessage.emptyMessage();
             }
 
@@ -60,7 +61,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                 List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
                 for (BotSendMessageRecord sendMessage : sendMessageList) {
                     BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                    botManager.recallMessage(sendMessage.getMessageId(), botSender.getSendType());
+                    botManager.recallMessage(sendMessage.getMessageId(), botSender.getBot());
                 }
                 return BotMessage.simpleTextMessage("搞定");
             }
@@ -72,7 +73,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                     if (messageId != null) {
                         BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageId);
                         BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
-                        botManager.recallMessage(messageId, botSender.getSendType());
+                        botManager.recallMessage(messageId, botSender.getBot());
                         return BotMessage.simpleTextMessage("搞定");
                     }
                 }
@@ -83,7 +84,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             if (! isBlank(messageIdStr)) {
                 BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
                 BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
-                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getSendType());
+                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getBot());
                 return BotMessage.simpleTextMessage("搞定");
             }
         }

@@ -99,6 +99,10 @@ public class BotService {
                 } else {
                     BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
                     BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+                    if (quoteMessage == null) {
+                        BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
+                        quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                    }
                     botMessageAction.setQuoteMessage(quoteMessage);
                 }
             }
