@@ -56,7 +56,7 @@ public class BotService {
     }
 
     @Async
-    public void syncHandleTextMessage(BotMessage botMessage) {
+    public void syncHandleTextMessage(BotMessage botMessage, BotSender botSender) {
         String sendType = botMessage.getSendType();
         List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType);
         boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
@@ -84,7 +84,7 @@ public class BotService {
                 key = playTwentyFourHandle.isThisTask(botMessageAction);
                 if (key != null) {
                     botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(prefix + key + " "));
-                    syncHandleTextMessage(botMessage);
+                    syncHandleTextMessage(botMessage, botSender);
                     return;
                 }
             }
