@@ -47,9 +47,15 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         Long qq = messageAction.getBotMessage().getQq();
         String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
         String all = messageAction.getParamOrDefault("all", messageAction.getValue());
+        String quoteMessageId = messageAction.getQuoteMessageId();
         boolean recallAll = Objects.equals(all, "1");
 
         if (Objects.equals(qq, MASTER_QQ)) {
+            if (quoteMessageId != null) {
+                botManager.recallMessage(quoteMessageId, messageAction.getBotMessage().getSendType());
+                return BotMessage.simpleTextMessage("搞定");
+            }
+
             if (recallAll) {
                 List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
                 for (BotSendMessageRecord sendMessage : sendMessageList) {
@@ -57,15 +63,9 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                     botManager.recallMessage(sendMessage.getMessageId(), botSender.getSendType());
                 }
                 return BotMessage.simpleTextMessage("搞定");
-            } else if (pid == null) {
-                String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
-                if (! isBlank(messageIdStr)) {
-                    BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
-                    BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
-                    botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getSendType());
-                    return BotMessage.simpleTextMessage("搞定");
-                }
-            } else {
+            }
+
+            if (pid != null) {
                 List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
                 for (PixivImage pixivImage : pixivImageList) {
                     String messageId = pixivImage.getMessageId();
@@ -76,6 +76,15 @@ public class RecallHandle extends ExceptionRespMessageHandle {
                         return BotMessage.simpleTextMessage("搞定");
                     }
                 }
+                return null;
+            }
+
+            String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
+            if (! isBlank(messageIdStr)) {
+                BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
+                BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getSendType());
+                return BotMessage.simpleTextMessage("搞定");
             }
         }
         return null;
