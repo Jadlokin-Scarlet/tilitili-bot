@@ -219,7 +219,9 @@ public class PixivService {
 		String[] urlList = noUsedImage.getUrlList().split(",");
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
+		messageChainList.add(BotMessageChain.ofPlain("标题: "+noUsedImage.getTitle()));
+		messageChainList.add(BotMessageChain.ofPlain("作者: "+noUsedImage.getUserName()));
+		messageChainList.add(BotMessageChain.ofPlain("镜像站: https://pixiv.moe/illust/"+pid));
 //		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {

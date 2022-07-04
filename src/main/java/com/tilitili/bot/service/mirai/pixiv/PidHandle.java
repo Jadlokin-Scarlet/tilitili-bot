@@ -64,8 +64,10 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		Integer sl = pixivImage.getSl();
 		String[] urlList = pixivImage.getUrlList().split(",");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
+		messageChainList.add(BotMessageChain.ofPlain("标题: "+pixivImage.getTitle()));
+		messageChainList.add(BotMessageChain.ofPlain("作者: "+pixivImage.getUserName()));
+		messageChainList.add(BotMessageChain.ofPlain("镜像站: https://pixiv.moe/illust/"+pid));
 		if (sl == null || sl < 5) {
-			messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				Asserts.notNull(ossUrl, "上传OSS失败");
@@ -74,7 +76,6 @@ public class PidHandle extends ExceptionRespMessageHandle {
 			}
 		} else {
 			Asserts.isTrue(canSS, "不准色色");
-			messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
