@@ -53,7 +53,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         if (Objects.equals(qq, MASTER_QQ)) {
             if (quoteMessageId != null) {
                 botManager.recallMessage(quoteMessageId, messageAction.getBotMessage().getSendType());
-                return BotMessage.simpleTextMessage("搞定");
+                return BotMessage.emptyMessage();
             }
 
             if (recallAll) {
