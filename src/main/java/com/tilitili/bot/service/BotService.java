@@ -71,7 +71,6 @@ public class BotService {
                 actionKey = actionKey.replaceAll("^[.。]", prefix);
             }
 
-            BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
             botMessageAction.setBotSender(botSender);
 
             List<BotTask> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
