@@ -65,8 +65,8 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		String[] urlList = pixivImage.getUrlList().split(",");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		messageChainList.add(BotMessageChain.ofPlain("标题: "+pixivImage.getTitle()));
-		messageChainList.add(BotMessageChain.ofPlain("作者: "+pixivImage.getUserName()));
-		messageChainList.add(BotMessageChain.ofPlain("镜像站: https://pixiv.moe/illust/"+pid));
+		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+pixivImage.getUserName()));
+		messageChainList.add(BotMessageChain.ofPlain("\n镜像站: https://pixiv.moe/illust/"+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
