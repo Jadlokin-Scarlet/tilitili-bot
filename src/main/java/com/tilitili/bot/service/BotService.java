@@ -63,6 +63,7 @@ public class BotService {
         try {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session);
+            botMessageAction.setBotSender(botSender);
             String actionKey = botMessageAction.getKey();
 
             String prefix = "";
@@ -70,8 +71,6 @@ public class BotService {
                 prefix = ".";
                 actionKey = actionKey.replaceAll("^[.。]", prefix);
             }
-
-            botMessageAction.setBotSender(botSender);
 
             List<BotTask> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
 

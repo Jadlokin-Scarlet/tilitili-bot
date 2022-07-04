@@ -35,7 +35,8 @@ public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
-        if (message.contains("meta_event_type\":\"heartbeat")) return;
+        if (message.contains("post_type\":\"meta_event")) return;
+        if (message.contains("post_type\":\"notice")) return;
         BotMessage botMessage = goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
         if (botMessage == null) return;
         BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
