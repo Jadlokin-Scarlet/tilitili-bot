@@ -33,7 +33,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
 //        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
 
         BotSender botSender = messageAction.getBotSender();
-        List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListBySenderId(botSender.getId());
+        List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListForHelp(botSender.getId());
         if (botTaskDTOList.isEmpty()) {
             return null;
         }
