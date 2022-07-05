@@ -25,7 +25,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
         try {
             handleTextMessage(StringUtils.removeCfCode(message));
         } catch (AssertException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
     }
 

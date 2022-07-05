@@ -116,7 +116,7 @@ public class BotService {
                     // 返回空消息则代表已处理完毕但不回复，直接结束
                     respMessage = messageHandle.handleMessage(botMessageAction);
                 } catch (AssertException e) {
-                    log.debug(e.getMessage());
+                    log.debug(e.getMessage(), e);
                     respMessage = messageHandle.handleAssertException(botMessageAction, e);
                 }
                 if (respMessage != null) {
@@ -141,7 +141,7 @@ public class BotService {
 
             botManager.sendMessage(respMessage);
         } catch (AssertException e) {
-            log.debug("异步消息处理断言异常, message={}", e.getMessage());
+            log.debug("异步消息处理断言异常, message=" + e.getMessage(), e);
             if (alwaysReply) {
                 botManager.sendMessage(BotMessage.simpleImageMessage("http://m.qpic.cn/psc?/V53UUlnk2IehYn4WcXfY2dBFO92OvB1L/TmEUgtj9EK6.7V8ajmQrEPBYbjL66rmGmhZeULQk5K23cRElRpiBGW67YBgbgQxSQQ*jZ1sT2lB3FSogwc0t5DyuSeiAT17yAwmaSTNULPo!/b&bo=aABPAAAAAAABFxc!&rf=viewer_4", botMessage));
             }
