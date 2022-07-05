@@ -2,8 +2,7 @@ package com.tilitili.bot.service.mirai.talk;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.GuildEmum;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
@@ -35,6 +34,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         List<String> imageList = messageAction.getImageList();
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
+        Long group = botMessage.getGroup();
         Long guildId = botMessage.getGuildId();
         String sendType = botMessage.getSendType();
         List<BotTalk> botTalkList;
@@ -52,13 +52,11 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if (! Objects.equals(SendTypeEmum.GUILD_MESSAGE.sendType, sendType) || Objects.equals(guildId, GuildEmum.OUR_HOMO.guildId)) {
-            if (! text.contains("addons") && !text.contains("http")) {
-                int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
-                if (ddCount > 0) {
-                    String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
-                    return BotMessage.simpleTextMessage(repeat);
-                }
+        if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value)) {
+            int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
+            if (ddCount > 0) {
+                String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
+                return BotMessage.simpleTextMessage(repeat);
             }
         }
 
