@@ -96,8 +96,10 @@ public class BotService {
                     botMessageAction.setQuoteMessage(quoteMessage);
                 } else {
                     BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
-                    BotMessage quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
-                    if (quoteMessage == null) {
+                    BotMessage quoteMessage;
+                    if (quoteMessageRecord != null) {
+                        quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+                    } else {
                         BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
                         quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
                     }
