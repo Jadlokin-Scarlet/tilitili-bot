@@ -43,16 +43,12 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		try {
 			Date now = new Date();
 			BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
-			if (botUser == null) {
-				botUserMapper.addBotUserSelective(new BotUser().setExternalId(externalId).setSignTime(now));
-				botUser = botUserMapper.getBotUserByExternalId(externalId);
-			}
 			Asserts.notNull(botUser, "似乎有什么不对劲");
-			if (botUser.getSignTime().after(DateUtils.getCurrentDay())) {
+			if (botUser.getLastSignTime() != null && botUser.getLastSignTime().after(DateUtils.getCurrentDay())) {
 				log.info("已经签到过了");
 				return null;
 			}
-			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + 100).setSignTime(now));
+			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + 100).setLastSignTime(now));
 
 			int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
 			String time = "早上";

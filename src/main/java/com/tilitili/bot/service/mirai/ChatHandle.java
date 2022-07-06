@@ -51,7 +51,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tencent";
 		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getHead();
-		int random = ChatHandle.random.nextInt(100);
+		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList();
 		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);

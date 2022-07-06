@@ -14,7 +14,6 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.BotSenderManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -38,17 +37,15 @@ public class BotService {
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
     private final BotManager botManager;
-    private final BotSenderManager botSenderManager;
     private final BotTaskMapper botTaskMapper;
     private final PlayTwentyFourHandle playTwentyFourHandle;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final Gson gson;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotSenderManager botSenderManager, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
-        this.botSenderManager = botSenderManager;
         this.botTaskMapper = botTaskMapper;
         this.playTwentyFourHandle = playTwentyFourHandle;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
