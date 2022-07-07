@@ -69,8 +69,10 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.getScore() != null) {
 			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getPlayerId()).setScore(botUser.getScore() + player.getScore()));
 			return BotMessage.simpleTextMessage(String.format("退出成功啦。返还积分%d，剩余%d积分", player.getScore(), botUser.getScore() + player.getScore()));
-		} else {
+		} else if (Objects.equals(status, TwentyOneTable.STATUS_PLAYING)) {
 			return BotMessage.simpleTextMessage("退出成功啦，游戏已经开始，不返还积分。");
+		} else {
+			return BotMessage.simpleTextMessage("退出成功啦。");
 		}
 	}
 
