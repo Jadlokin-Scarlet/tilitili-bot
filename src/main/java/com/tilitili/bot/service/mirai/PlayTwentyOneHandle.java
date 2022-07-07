@@ -11,12 +11,10 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.StreamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
@@ -45,12 +43,34 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		switch (key) {
-			case "玩21点": return startGame(messageAction);
+			case "玩21点": case "w21": return startGame(messageAction);
 			case "加入21点": case "准备": return prepareGame(messageAction);
-			case "加牌": case "jp": return addCard(botUser, twentyOneTable);
-			case "停牌": case "tp": return stopCard(botUser, twentyOneTable);
-			case "加倍": case "jb": return doubleAddCard(botUser, twentyOneTable);
+			case "加牌": case "jp": return addCard(messageAction, botUser, twentyOneTable);
+			case "停牌": case "tp": return stopCard(messageAction, botUser, twentyOneTable);
+			case "加倍": case "jb": return doubleAddCard(messageAction, botUser, twentyOneTable);
+			case "退出": return quitGame(messageAction, botUser);
 			default: return null;
+		}
+	}
+
+	private BotMessage quitGame(BotMessageAction messageAction, BotUser botUser) {
+		Long playerId = botUser.getExternalId();
+		Long tableId = playerLock.get(playerId);
+		Asserts.notNull(tableId, "你好像还没加入哦，没东西退");
+		playerLock.remove(playerId);
+
+		TwentyOneTable twentyOneTable = tableMap.get(tableId);
+		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
+		String status = twentyOneTable.getStatus();
+
+		boolean removePlayerSuccess = twentyOneTable.removePlayer(playerId);
+		Asserts.isTrue(removePlayerSuccess, "啊嘞，不太对劲");
+
+		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.getScore() != null) {
+			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getPlayerId()).setScore(botUser.getScore() + player.getScore()));
+			return BotMessage.simpleTextMessage(String.format("退出成功啦。返还积分%d，剩余%d积分", player.getScore(), botUser.getScore() + player.getScore()));
+		} else {
+			return BotMessage.simpleTextMessage("退出成功啦，游戏已经开始，不返还积分。");
 		}
 	}
 
@@ -61,13 +81,26 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			return true;
 		}
 
-		// 不是开始指令，游戏还没开始，无效
+		// 不是开始指令，游戏还不存在，无效
 		boolean notGaming = twentyOneTable == null;
 		if (notGaming) {
 			return false;
 		}
 
-		// 不是开始指令，游戏已经开始了，是当前轮到的玩家，有效
+		// 游戏已经存在了，是准备指令，有效
+		boolean isJoinGame = Arrays.asList("加入21点", "准备", "退出").contains(key);
+		if (isJoinGame) {
+			return true;
+		}
+
+		// 不是准备和开始指令，游戏还没开始，，
+		String status = twentyOneTable.getStatus();
+		if (status == TwentyOneTable.STATUS_WAIT) {
+			return false;
+		}
+
+
+		// 不是准备和开始指令，游戏已经开始了，是当前轮到的玩家，有效
 		TwentyOnePlayer lastPlayer = twentyOneTable.getLastPlayer();
 		if (lastPlayer == null) {
 			return false;
@@ -80,36 +113,32 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		return false;
 	}
 
-	private BotMessage doubleAddCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+	private BotMessage doubleAddCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
 		boolean doubleAddCardSuccess = twentyOneTable.doubleAddCard(botUser);
 		Asserts.isTrue(doubleAddCardSuccess, "啊嘞，不对劲");
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
 
 		return BotMessage.simpleListMessage(resp);
 	}
 
-	private BotMessage stopCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+	private BotMessage stopCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
 		boolean stopCardSuccess = twentyOneTable.stopCard(botUser);
 		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
 		if (twentyOneTable.isEnd()) {
-			Long tableId = twentyOneTable.getTableId();
-			tableMap.remove(tableId);
-			List<Long> playerIdList = playerLock.entrySet().stream().filter(StreamUtil.isEqual(Map.Entry::getValue, tableId)).map(Map.Entry::getKey).collect(Collectors.toList());
-			playerIdList.forEach(playerLock::remove);
 			List<BotMessageChain> resp = twentyOneTable.getEndMessage();
 			return BotMessage.simpleListMessage(resp);
 		} else {
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
 			return BotMessage.simpleListMessage(resp);
 		}
 	}
 
-	private BotMessage addCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+	private BotMessage addCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
 		boolean addCardSuccess = twentyOneTable.addCard(botUser);
 		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
 
 		return BotMessage.simpleListMessage(resp);
 	}
@@ -166,7 +195,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (ready) {
 			boolean flashCardSuccess = twentyOneTable.flashCard();
 			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
 			return BotMessage.simpleListMessage(resp);
 		} else {
 			return BotMessage.emptyMessage();

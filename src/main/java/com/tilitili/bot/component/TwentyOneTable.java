@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.twentyOne.TwentyOneAdmin;
 import com.tilitili.bot.entity.twentyOne.TwentyOneCard;
 import com.tilitili.bot.entity.twentyOne.TwentyOnePlayer;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.SortObject;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -21,10 +22,11 @@ public class TwentyOneTable {
 	public static final String STATUS_PLAYING = "playing";
 	public static final String FIVE_CARD = "五龙";
 	public static final String BLACK_JACK = "黑杰克";
+	public static final String BOOM_CARD = "爆牌";
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final BotUserMapper botUserMapper;
 	private final Long tableId;
-	private final String status;
+	private String status;
 	private final List<TwentyOnePlayer> playerList;
 	private final Queue<TwentyOneCard> cardList;
 	private final TwentyOneAdmin admin;
@@ -58,6 +60,18 @@ public class TwentyOneTable {
 		}
 	}
 
+	public boolean removePlayer(Long playerId) {
+		int playerIndex = -1;
+		for (int index = 0, playerListSize = playerList.size(); index < playerListSize; index++) {
+			TwentyOnePlayer player = playerList.get(index);
+			if (Objects.equals(player.getPlayerId(), playerId)) playerIndex = index;
+		}
+		Asserts.notEquals(playerIndex, -1, "啊嘞，好像不对劲");
+		playerList.remove(playerIndex);
+
+		return true;
+	}
+
 	public boolean flashCard() {
 		TwentyOneCard hiddenCard = cardList.poll();
 		Asserts.notNull(hiddenCard, "啊嘞，不对劲。");
@@ -65,19 +79,21 @@ public class TwentyOneTable {
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
 			player.setCardList(Lists.newArrayList(cardList.poll(), cardList.poll()));
 		}
+		status = STATUS_PLAYING;
 		return true;
 	}
 
-	public List<BotMessageChain> getNoticeMessage() {
+	public List<BotMessageChain> getNoticeMessage(String sendType) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
 		Asserts.notNull(nowPlayer, "啊嘞，似乎不对劲");
 
 		String adminStr = this.admin.toString() + "\n";
 		String playerStr = this.getGamingPlayerList().stream().map(TwentyOnePlayer::toString).collect(Collectors.joining("\n"));
 		List<BotMessageChain> result = Lists.newArrayList(BotMessageChain.ofPlain(adminStr), BotMessageChain.ofPlain(playerStr));
-		result.addAll(Arrays.asList(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()), BotMessageChain.ofPlain(
-				"请选择：加牌、停牌、加倍(加倍积分并加牌)"
-		)));
+		if (!Objects.equals(sendType, SendTypeEmum.FRIEND_MESSAGE_STR)) {
+			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
+		}
+		result.add(BotMessageChain.ofPlain("\n请选择：加牌、停牌、加倍(加倍积分并加牌)"));
 		return result;
 	}
 
@@ -85,8 +101,8 @@ public class TwentyOneTable {
 	public List<BotMessageChain> getEndMessage() {
 		// 庄家翻牌
 		admin.getCardList().get(0).setHidden(false);
-		// 抽牌
 
+		// 抽牌
 		String adminCardResult;
 		while (admin.needAddCard(adminCardResult = this.getCardResult(admin.getCardList(), "admin"))) {
 			admin.addCard(cardList.poll());
@@ -101,14 +117,21 @@ public class TwentyOneTable {
 			String playerStr = String.format("%s (%s) (+%d分)%n", player.toString(), playerResult, subScore);
 			resp.add(BotMessageChain.ofPlain("\n"));
 			resp.add(BotMessageChain.ofPlain(playerStr));
-			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(player.getBotUser().getScore() + subScore));
+			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
+			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore));
+		}
+		status = STATUS_WAIT;
+		for (TwentyOnePlayer player : playerList) {
+			player.setScore(null);
+			player.setStatus(0);
+			player.setCardList(null);
 		}
 		return resp;
 	}
 
-	private int compareCard(String adminCardResult, String playerResult, TwentyOnePlayer player) {
+	private int compareCard(String adminResult, String playerResult, TwentyOnePlayer player) {
 		Integer score = player.getScore();
-		if (Objects.equals(playerResult, adminCardResult)) {
+		if (Objects.equals(playerResult, adminResult)) {
 			return score;
 		}
 
@@ -120,11 +143,19 @@ public class TwentyOneTable {
 			return score * 5 / 2;
 		}
 
-		if (adminCardResult.equals(BLACK_JACK)) {
+		if (adminResult.equals(BLACK_JACK)) {
 			return 0;
 		}
 
-		if (playerResult.compareTo(adminCardResult) > 0) {
+		if (playerResult.equals(BOOM_CARD)) {
+			return 0;
+		}
+
+		if (adminResult.equals(BOOM_CARD)) {
+			return score * 2;
+		}
+
+		if (playerResult.compareTo(adminResult) > 0) {
 			return score * 2;
 		} else {
 			return 0;
@@ -160,6 +191,10 @@ public class TwentyOneTable {
 			}
 		}
 
+		if (sum > 21) {
+			return BOOM_CARD;
+		}
+
 		return String.format("%02d", sum);
 	}
 
@@ -191,6 +226,10 @@ public class TwentyOneTable {
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
 		player.addCard(cardList.poll());
 		return true;
+	}
+
+	public TwentyOnePlayer getPlayer(Long playerId) {
+		return playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
 	}
 
 	public List<TwentyOnePlayer> getGamingPlayerList() {

@@ -122,7 +122,10 @@ public class BotService {
             }
 
             // 如果最后为null，则标志无匹配处理器，则回复表情包
-            Asserts.notNull(respMessage, "无回复");
+            if (respMessage == null) {
+                log.info("无回复");
+                return;
+            }
             // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
             if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
                 return;

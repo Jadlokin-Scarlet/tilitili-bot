@@ -25,7 +25,7 @@ public class TwentyOneCard {
 
 	@Override
 	public String toString() {
-		if (hidden) return "*";
+		if (hidden) return "**";
 		return type + value;
 	}
 
