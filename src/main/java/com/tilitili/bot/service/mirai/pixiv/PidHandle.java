@@ -75,6 +75,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 				messageChainList.add(BotMessageChain.ofImage(ossUrl));
 			}
 		} else {
+			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
 			Asserts.isTrue(canSS, "不准色色");
 			for (String url : urlList) {
 				String ossUrl = OSSUtil.uploadSOSSByUrl(url);

@@ -10,21 +10,36 @@ public class TwentyOnePlayer {
 	private Integer score;
 	private List<TwentyOneCard> cardList;
 	private int status;
+	private boolean isDouble;
 
 	public TwentyOnePlayer() {
 		status = 0;
+		isDouble = false;
 	}
 
 	public TwentyOnePlayer(BotUser botUser, List<TwentyOneCard> cardList) {
+		this();
 		this.botUser = botUser;
 		this.cardList = cardList;
-		status = 0;
 	}
 
 	@Override
 	public String toString() {
 		return String.format("%s：%s", botUser.getName(), cardList.stream().map(TwentyOneCard::toString).collect(Collectors.joining(",")));
 	}
+
+	public Long getPlayerId() {
+		return botUser == null? null: botUser.getExternalId();
+	}
+
+	public void addCard(TwentyOneCard card) {
+		this.cardList.add(card);
+	}
+
+
+
+
+
 
 	public List<TwentyOneCard> getCardList() {
 		return cardList;
@@ -60,5 +75,9 @@ public class TwentyOnePlayer {
 	public TwentyOnePlayer setStatus(int status) {
 		this.status = status;
 		return this;
+	}
+
+	public boolean getIsDouble() {
+		return isDouble;
 	}
 }

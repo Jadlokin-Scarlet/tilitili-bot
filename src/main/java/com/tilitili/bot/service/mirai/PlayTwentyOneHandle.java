@@ -1,83 +1,104 @@
 package com.tilitili.bot.service.mirai;
 
-import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.component.TwentyOneTable;
-import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.bot.entity.twentyOne.TwentyOnePlayer;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotUser;
-import com.tilitili.common.entity.SortObject;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-//@Component
+@Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
-	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
-	private final List<String> cardTypeList = Arrays.asList("♤️", "♧", "♢", "♡");
-	private final List<String> cardList = IntStream.range(0, 52).mapToObj(index -> cardTypeList.get(index / 13) + "" + index % 13).flatMap(i -> IntStream.rangeClosed(1, 4).mapToObj((j)->i)).collect(Collectors.toList());
-	private final static String numListKey = "playGameHandle.numListKey";
-	private final static String lastSendTimeKey = "playGameHandle.last_send_time";
-	private final static String lockKey = "playGameHandle.lock";
-	private final static int waitTime = 3;
-	public final Map<String, String> replaceMap;
-	public final String calRegix;
-	private final static Random random = new Random(System.currentTimeMillis());
-	@Value("${mirai.bot-qq}")
-	private String BOT_QQ;
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
+	public static final Map<Long, Long> playerLock = new HashMap<>();
 
-	private final BotManager botManager;
 	private final BotUserMapper botUserMapper;
 
 	@Autowired
-	public PlayTwentyOneHandle(BotManager botManager, BotUserMapper botUserMapper) {
-		this.botManager = botManager;
+	public PlayTwentyOneHandle(BotUserMapper botUserMapper) {
 		this.botUserMapper = botUserMapper;
-		replaceMap = ImmutableMap.<String, String>builder()
-				.put("÷", "/")
-				.put("＋", "+")
-				.put("×", "*")
-				.put("x", "*")
-				.put("X", "*")
-				.put("乘", "*")
-				.put("除", "/")
-				.put("加", "+")
-				.put("减", "-")
-				.put("等于", "=")
-				.put("＝", "=")
-				.put("（", "(")
-				.put("）", ")")
-				.put(" ", "")
-				.put("\t", "").build();
-		Set<String> charSet = new HashSet<>(replaceMap.keySet());
-		charSet.addAll(replaceMap.values());
-		calRegix = String.format("([%s]+)", String.join("", charSet));
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
+		Long tableId = messageAction.getQqOrGroupOrChannelId();
+		Long playerId = messageAction.getQqOrTinyId();
+		TwentyOneTable twentyOneTable = tableMap.get(tableId);
+
+		if (!this.checkKeyValid(key, twentyOneTable, playerId)) {
+			return null;
+		}
+
+		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		switch (key) {
 			case "玩21点": case "w21": return startGame(messageAction);
 			case "加入21点": case "jr21": return prepareGame(messageAction);
-			case "回答24点": case "hd24": return handleGame(messageAction);
-			case "放弃24点": case "fq24": return endGame(messageAction);
+			case "加牌": case "jp": return addCard(botUser, twentyOneTable);
+			case "停牌": case "tp": return stopCard(botUser, twentyOneTable);
+			case "加倍": case "jb": return doubleAddCard(botUser, twentyOneTable);
 			default: return null;
 		}
+	}
+
+	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
+		// 是开始指令则有效
+		boolean isStartGame = Arrays.asList("玩21点", "w21").contains(key);
+		if (isStartGame) {
+			return true;
+		}
+
+		// 不是开始指令，游戏还没开始，无效
+		boolean notGaming = twentyOneTable == null;
+		if (notGaming) {
+			return false;
+		}
+
+		// 不是开始指令，游戏已经开始了，是当前轮到的玩家，有效
+		TwentyOnePlayer lastPlayer = twentyOneTable.getLastPlayer();
+		if (lastPlayer == null) {
+			return false;
+		}
+		boolean isLastPlayer = Objects.equals(lastPlayer.getPlayerId(), playerId);
+		if (isLastPlayer) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private BotMessage doubleAddCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+		boolean doubleAddCardSuccess = twentyOneTable.doubleAddCard(botUser);
+		Asserts.isTrue(doubleAddCardSuccess, "啊嘞，不对劲");
+
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+
+		return BotMessage.simpleListMessage(resp);
+	}
+
+	private BotMessage stopCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+		boolean stopCardSuccess = twentyOneTable.stopCard(botUser);
+		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
+
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+
+		return BotMessage.simpleListMessage(resp);
+	}
+
+	private BotMessage addCard(BotUser botUser, TwentyOneTable twentyOneTable) {
+		boolean addCardSuccess = twentyOneTable.addCard(botUser);
+		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
+
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage();
+
+		return BotMessage.simpleListMessage(resp);
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {
@@ -101,6 +122,14 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) return null;
 
+		if (playerLock.containsKey(playerId)) {
+			if (Objects.equals(playerLock.get(playerId), tableId)) {
+				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
+			} else {
+				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
+			}
+		}
+
 		Asserts.isNumber(scoreStr, "格式错啦(积分数)");
 		int score = Integer.parseInt(scoreStr);
 
@@ -108,6 +137,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (score > botUser.getScore()) return BotMessage.simpleTextMessage("积分好像不够惹。").setQuote(messageAction.getMessageId());
 
 		twentyOneTable.addGame(botUser, score);
+		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - score));
+		playerLock.put(playerId, tableId);
 
 		boolean ready = twentyOneTable.isReady();
 		if (ready) {
@@ -124,83 +155,4 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 	}
 
-	public String isThisTask(BotMessageAction botMessageAction) {
-		String text = botMessageAction.getText();
-		BotSessionService.MiraiSession session = botMessageAction.getSession();
-		if (! session.containsKey(numListKey)) {
-			return null;
-		}
-		if (Objects.equals(StringUtils.patten1(calRegix, text), text)) {
-			if (StringUtils.pattenAll("(\\d+)", text).size() == 4) {
-				return "回答24点";
-			}
-		}
-		return null;
-	}
-
-	private BotMessage endGame(BotMessageAction messageAction) {
-		BotSessionService.MiraiSession session = messageAction.getSession();
-		session.remove(numListKey);
-		session.remove(lastSendTimeKey);
-		return BotMessage.simpleTextMessage("游戏结束了！");
-	}
-
-	private BotMessage handleGame(BotMessageAction messageAction) {
-		BotSessionService.MiraiSession session = messageAction.getSession();
-		String result = messageAction.getValue();
-		if (Objects.equals(session.remove(lockKey), 0)) return null;
-		try {
-			if (!session.containsKey(numListKey)) return null;
-			Asserts.notBlank(result, "你想答什么。");
-			String resultAfterReplace = result;
-			for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
-				String key = entry.getKey();
-				String value = entry.getValue();
-				resultAfterReplace = resultAfterReplace.replace(key, value);
-			}
-			if (resultAfterReplace.contains("=")) resultAfterReplace = resultAfterReplace.split("=")[0];
-			String resultAfterClean = resultAfterReplace.replaceAll("[^0-9+\\-*/()]", "");
-			CalculateObject calculateObject = new CalculateObject(resultAfterClean);
-			int resultNum = calculateObject.getResult();
-			String calculateStr = calculateObject.toString();
-			Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
-
-			String numListStr = session.get(numListKey);
-			String[] numList = numListStr.split(",");
-			String[] calNumList = StringUtils.pattenAll("(\\d+)", calculateStr).stream().filter(Predicate.isEqual("0").negate()).toArray(String[]::new);
-			Arrays.sort(numList);
-			Arrays.sort(calNumList);
-			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
-		} finally {
-			session.put(lockKey, "lock");
-		}
-		session.remove(lockKey);
-		session.remove(numListKey);
-		session.remove(lastSendTimeKey);
-		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
-	}
-
-	private Queue<String> newCardList() {
-		return IntStream.range(0, 208).mapToObj(index -> cardTypeList.get((index % 52) / 13) + "" + index % 13)
-				.map(item -> new SortObject<>(random.nextInt(Integer.MAX_VALUE), item))
-				.sorted().map(SortObject::getT).collect(Collectors.toCollection(LinkedList::new));
-	}
-
-	private Date getLimitDate() {
-		Calendar calstart = Calendar.getInstance();
-		calstart.setTime(new Date());
-		calstart.add(Calendar.MINUTE, -waitTime);
-		return calstart.getTime();
-	}
-
-
-
-//	private List<BotMessageChain> getNoticeMessage(List<TwentyOnePlayer> table) {
-//		return table.entrySet().stream().peek(entry -> entry.getKey().equals(Long.valueOf(BOT_QQ))? entry.getValue().set(0, "*"))
-//				.flatMap(entry -> Stream.of(
-//				BotMessageChain.ofAt(entry.getKey()),
-//				BotMessageChain.ofPlain(String.join(",", entry.getValue())),
-//				BotMessageChain.ofPlain("\n")
-//		)).collect(Collectors.toList());
-//	}
 }
