@@ -98,7 +98,7 @@ public class TwentyOneTable {
 		}
 
 		if (playerResult.equals(FIVE_CARD)) {
-			return score * 3;
+			return score * 4;
 		}
 
 		if (playerResult.equals(BLACK_JACK)) {
