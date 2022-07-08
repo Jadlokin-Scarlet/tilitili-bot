@@ -83,6 +83,23 @@ public class TwentyOneTable {
 		return true;
 	}
 
+	public List<BotMessageChain> getWaitMessage() {
+		List<String> allPlayer = new ArrayList<>();
+		List<String> preparePlayer = new ArrayList<>();
+		List<String> notPreparePlayer = new ArrayList<>();
+		for (TwentyOnePlayer player : playerList) {
+			String name = player.getBotUser().getName();
+			allPlayer.add(name);
+			if (player.getScore() == null) {
+				notPreparePlayer.add(name);
+			} else {
+				preparePlayer.add(name);
+			}
+		}
+		String message = String.format("此桌参与人员：%s\n已准备：%s\n未准备：%s\n", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
+		return Lists.newArrayList(BotMessageChain.ofPlain(message));
+	}
+
 	public List<BotMessageChain> getNoticeMessage(String sendType) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
 		if (nowPlayer.needEnd(this.getCardResult(nowPlayer.getCardList(), "player"))) {

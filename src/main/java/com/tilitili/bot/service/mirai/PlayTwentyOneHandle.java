@@ -215,7 +215,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
 			return BotMessage.simpleListMessage(resp);
 		} else {
-			return BotMessage.emptyMessage();
+			List<BotMessageChain> resp = twentyOneTable.getWaitMessage();
+			return BotMessage.simpleListMessage(resp);
 		}
 	}
 
