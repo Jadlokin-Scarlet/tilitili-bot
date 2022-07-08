@@ -4,6 +4,7 @@ import com.tilitili.common.entity.BotUser;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TwentyOnePlayer {
@@ -88,6 +89,6 @@ public class TwentyOnePlayer {
 	}
 
 	public boolean needEnd(String cardResult) {
-		return !NumberUtils.isDigits(cardResult);
+		return !NumberUtils.isDigits(cardResult) || Objects.equals(cardResult, "21");
 	}
 }
