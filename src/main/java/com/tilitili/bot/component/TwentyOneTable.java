@@ -220,7 +220,7 @@ public class TwentyOneTable {
 		if (playerResult.compareTo(adminResult) > 0) {
 			return score;
 		} else {
-			return 0;
+			return - score;
 		}
 	}
 
