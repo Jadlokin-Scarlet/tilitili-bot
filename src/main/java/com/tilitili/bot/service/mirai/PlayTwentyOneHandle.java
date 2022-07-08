@@ -209,6 +209,16 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) return null;
 
+		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
+		if (playerLock.containsKey(playerId)) {
+			if (player != null && player.getScore() != null) {
+				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
+			} else if (!Objects.equals(playerLock.get(playerId), tableId)) {
+				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
+			}
+		} else {
+			playerLock.put(playerId, tableId);
+		}
 		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
 
 		Asserts.isNumber(scoreStr, "格式错啦(积分数)");
