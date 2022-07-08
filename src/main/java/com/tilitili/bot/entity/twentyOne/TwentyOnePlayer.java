@@ -88,6 +88,6 @@ public class TwentyOnePlayer {
 	}
 
 	public boolean needEnd(String cardResult) {
-		return NumberUtils.isDigits(cardResult);
+		return !NumberUtils.isDigits(cardResult);
 	}
 }

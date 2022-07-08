@@ -185,7 +185,12 @@ public class TwentyOneTable {
 		int aCnt = 0;
 		for (TwentyOneCard card : cardList) {
 			sum += card.getPoint();
-			aCnt += card.getPoint() == 1? 1: 0;
+			if (card.getPoint() == 1) {
+				sum += 10;
+				aCnt += 1;
+			} else {
+				aCnt += 0;
+			}
 			if (sum > 21 && aCnt > 0) {
 				sum -=10;
 				aCnt --;
