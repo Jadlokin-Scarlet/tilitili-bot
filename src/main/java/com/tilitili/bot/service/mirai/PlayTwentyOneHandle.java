@@ -194,6 +194,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) return null;
 
+		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
+
 		Asserts.isNumber(scoreStr, "格式错啦(积分数)");
 		int score = Integer.parseInt(scoreStr);
 		Asserts.isTrue(score > 0, "想白嫖积分？");

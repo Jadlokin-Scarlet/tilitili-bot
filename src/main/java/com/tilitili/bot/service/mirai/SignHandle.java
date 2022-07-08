@@ -56,7 +56,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			if (hour > 18) time = "晚上";
 
 			String talk = "今天也是充满希望的一天";
-			return BotMessage.simpleTextMessage(String.format("%s好，%s(分数+100)", time, talk));
+			return BotMessage.simpleTextMessage(String.format("%s好，%s(分数+100)", time, talk)).setQuote(messageAction.getMessageId());
 		} finally {
 			session.remove(externalIdLockKey + externalId);
 		}
