@@ -194,7 +194,7 @@ public class TwentyOneTable {
 	private int compareCard(String adminResult, String playerResult, TwentyOnePlayer player) {
 		Integer score = player.getScore();
 		if (Objects.equals(playerResult, adminResult)) {
-			return score;
+			return 0;
 		}
 
 		if (playerResult.equals(FIVE_CARD)) {
