@@ -224,7 +224,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
 
-		Asserts.isNumber(scoreStr, "格式错啦(积分数)");
+		Asserts.isDigits(scoreStr, "格式错啦(积分数)");
 		int score = Integer.parseInt(scoreStr);
 		Asserts.isTrue(score > 0, "想白嫖积分？");
 
