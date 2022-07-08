@@ -85,6 +85,12 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(String sendType) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
+		if (nowPlayer.needEnd(this.getCardResult(nowPlayer.getCardList(), "player"))) {
+			this.stopCard(nowPlayer);
+			if (this.isEnd()) return this.getEndMessage();
+			nowPlayer = this.getLastPlayer();
+		}
+
 		Asserts.notNull(nowPlayer, "啊嘞，似乎不对劲");
 
 		String adminStr = this.admin.toString() + "\n";
@@ -202,6 +208,10 @@ public class TwentyOneTable {
 	public boolean addCard(BotUser botUser) {
 		Long playerId = botUser.getExternalId();
 		TwentyOnePlayer player = this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
+		return this.addCard(player);
+	}
+
+	public boolean addCard(TwentyOnePlayer player) {
 		Asserts.notNull(player, "啊嘞，有点不对劲");
 		player.addCard(cardList.poll());
 		return true;
@@ -210,6 +220,10 @@ public class TwentyOneTable {
 	public boolean stopCard(BotUser botUser) {
 		Long playerId = botUser.getExternalId();
 		TwentyOnePlayer player = this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
+		return this.stopCard(player);
+	}
+
+	public boolean stopCard(TwentyOnePlayer player) {
 		Asserts.notNull(player, "啊嘞，有点不对劲");
 		player.setStatus(1);
 		return true;

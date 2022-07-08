@@ -126,7 +126,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		player.setIsDouble(true);
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
 
-		boolean doubleAddCardSuccess = twentyOneTable.addCard(botUser);
+		boolean doubleAddCardSuccess = twentyOneTable.addCard(player);
 		Asserts.isTrue(doubleAddCardSuccess, "啊嘞，不对劲");
 
 		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
