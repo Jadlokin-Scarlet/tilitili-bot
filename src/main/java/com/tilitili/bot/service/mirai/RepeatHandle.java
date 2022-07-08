@@ -6,6 +6,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.QQUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class RepeatHandle extends ExceptionRespMessageHandle {
         BotSessionService.MiraiSession session = messageAction.getSession();
         List<BotMessageChain> messageChainList = messageAction.getBotMessage().getBotMessageChainList();
         String key = getKey(messageChainList);
+        if (StringUtils.isBlank(key)) return null;
 
         String oldKey = session.getOrDefault(KeyKey, "");
         int oldNumber = Integer.parseInt(session.getOrDefault(numberKey, "0"));

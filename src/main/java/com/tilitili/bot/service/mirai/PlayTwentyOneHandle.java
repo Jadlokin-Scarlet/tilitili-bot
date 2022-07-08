@@ -180,6 +180,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			twentyOneTable = new TwentyOneTable(botUserMapper, tableId);
 			tableMap.put(tableId, twentyOneTable);
 		}
+		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
 
 		if (playerLock.containsKey(playerId)) {
 			if (Objects.equals(playerLock.get(playerId), tableId)) {
@@ -244,5 +245,4 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			return BotMessage.simpleListMessage(resp);
 		}
 	}
-
 }

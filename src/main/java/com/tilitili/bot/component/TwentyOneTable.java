@@ -40,6 +40,10 @@ public class TwentyOneTable {
 		this.admin = new TwentyOneAdmin();
 	}
 
+	public void waitPeoplePrepare() {
+
+	}
+
 	public boolean addGame(BotUser botUser, Integer score) {
 		TwentyOnePlayer player = playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, botUser.getExternalId())).findFirst().orElse(null);
 		if (player == null) {
