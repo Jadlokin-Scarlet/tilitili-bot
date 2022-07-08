@@ -80,4 +80,9 @@ public class TwentyOnePlayer {
 	public boolean getIsDouble() {
 		return isDouble;
 	}
+
+	public TwentyOnePlayer setIsDouble(boolean isDouble) {
+		this.isDouble = isDouble;
+		return this;
+	}
 }

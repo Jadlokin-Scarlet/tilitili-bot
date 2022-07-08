@@ -215,20 +215,6 @@ public class TwentyOneTable {
 		return true;
 	}
 
-	public boolean doubleAddCard(BotUser botUser) {
-		Long playerId = botUser.getExternalId();
-		Integer hasScore = botUser.getScore();
-		TwentyOnePlayer player = this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
-		Asserts.notNull(player, "啊嘞，有点不对劲");
-		Asserts.isFalse(player.getIsDouble(), "你已经双倍过了，不能再双倍了哦");
-		Integer useScore = player.getScore();
-		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
-		player.setScore(useScore * 2);
-		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
-		player.addCard(cardList.poll());
-		return true;
-	}
-
 	public TwentyOnePlayer getPlayer(Long playerId) {
 		return playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
 	}
