@@ -146,7 +146,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 
 		return BotMessage.simpleListMessage(resp);
 	}
@@ -155,10 +155,10 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean stopCardSuccess = twentyOneTable.stopCard(botUser);
 		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
 		if (twentyOneTable.isEnd()) {
-			List<BotMessageChain> resp = twentyOneTable.getEndMessage();
+			List<BotMessageChain> resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
 			return BotMessage.simpleListMessage(resp);
 		} else {
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 			return BotMessage.simpleListMessage(resp);
 		}
 	}
@@ -167,7 +167,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean addCardSuccess = twentyOneTable.addCard(botUser);
 		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 
 		return BotMessage.simpleListMessage(resp);
 	}
@@ -177,7 +177,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Long playerId = messageAction.getQqOrTinyId();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, tableId);
+			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
@@ -196,7 +196,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		playerLock.put(playerId, tableId);
 
 		switch (twentyOneTable.getStatus()) {
-			case TwentyOneTable.STATUS_WAIT: return BotMessage.simpleTextMessage("入场成功！请提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
+			case TwentyOneTable.STATUS_WAIT: return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
 			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("入场成功！请等待下一局吧。").setQuote(messageAction.getMessageId());
 			default: throw new AssertException("啊嘞，似乎不对劲");
 		}
@@ -238,7 +238,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (ready) {
 			boolean flashCardSuccess = twentyOneTable.flashCard();
 			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage().getSendType());
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 			return BotMessage.simpleListMessage(resp);
 		} else {
 			List<BotMessageChain> resp = twentyOneTable.getWaitMessage();
