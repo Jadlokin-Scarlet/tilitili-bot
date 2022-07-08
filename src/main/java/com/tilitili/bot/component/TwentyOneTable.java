@@ -149,6 +149,7 @@ public class TwentyOneTable {
 			player.setScore(null);
 			player.setStatus(0);
 			player.setCardList(null);
+			player.setIsDouble(false);
 		}
 		return resp;
 	}
@@ -283,5 +284,9 @@ public class TwentyOneTable {
 
 	public Long getTableId() {
 		return tableId;
+	}
+
+	public List<TwentyOnePlayer> getPlayerList() {
+		return playerList;
 	}
 }

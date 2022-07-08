@@ -12,6 +12,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,6 +22,10 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
 	public static final Map<Long, Long> playerLock = new HashMap<>();
 
+	@Value("${mirai.master-qq}")
+	private Long MASTER_QQ;
+	@Value("${mirai.master-guild-qq}")
+	private Long MASTER_GUILD_QQ;
 	private final BotUserMapper botUserMapper;
 	private final BotManager botManager;
 
@@ -49,8 +54,18 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "停牌": case "tp": return stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return doubleAddCard(messageAction, botUser, twentyOneTable);
 			case "退出": return quitGame(messageAction, botUser);
+			case "掀桌": return removeGame(messageAction, botUser, twentyOneTable);
 			default: return null;
 		}
+	}
+
+	private BotMessage removeGame(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
+		boolean hasJurisdiction = Objects.equals(messageAction.getBotMessage().getQq(), MASTER_QQ) || Objects.equals(messageAction.getBotMessage().getTinyId(), MASTER_GUILD_QQ);
+		if (!hasJurisdiction) return null;
+		if (twentyOneTable == null) return null;
+		tableMap.remove(twentyOneTable.getTableId());
+		twentyOneTable.getPlayerList().stream().map(TwentyOnePlayer::getPlayerId).forEach(playerLock::remove);
+		return BotMessage.simpleTextMessage("(╯‵□′)╯︵┻━┻");
 	}
 
 	private BotMessage quitGame(BotMessageAction messageAction, BotUser botUser) {
@@ -78,7 +93,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21点", "w21").contains(key);
+		boolean isStartGame = Arrays.asList("玩21点", "w21", "掀桌").contains(key);
 		if (isStartGame) {
 			return true;
 		}
