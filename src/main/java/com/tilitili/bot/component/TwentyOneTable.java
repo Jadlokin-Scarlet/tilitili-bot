@@ -75,7 +75,7 @@ public class TwentyOneTable {
 				List<BotMessageChain> resp = this.getNoticeMessage(botMessage);
 				botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
 			}
-		}, 20L, TimeUnit.SECONDS);
+		}, 1, TimeUnit.MINUTES);
 	}
 
 	public boolean addGame(BotUser botUser, Integer score) {
