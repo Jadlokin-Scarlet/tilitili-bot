@@ -184,6 +184,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		Asserts.isNumber(scoreStr, "格式错啦(积分数)");
 		int score = Integer.parseInt(scoreStr);
+		Asserts.isTrue(score > 0, "想白嫖积分？");
 
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		if (score > botUser.getScore()) return BotMessage.simpleTextMessage("积分好像不够惹。").setQuote(messageAction.getMessageId());

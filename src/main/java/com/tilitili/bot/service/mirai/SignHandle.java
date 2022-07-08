@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
-import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
@@ -32,8 +31,8 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotSender botSender = messageAction.getBotSender();
-		Long externalId = botSender.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botSender.getTinyId(): botSender.getQq();
+		BotMessage botMessage = messageAction.getBotMessage();
+		Long externalId = botMessage.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botMessage.getTinyId(): botMessage.getQq();
 		Asserts.notNull(externalId, "似乎哪里不对劲");
 		if (! session.putIfAbsent(externalIdLockKey + externalId, "lock")) {
 			log.info("别签到刷屏");

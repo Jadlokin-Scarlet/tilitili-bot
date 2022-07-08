@@ -1,5 +1,6 @@
 package com.tilitili.bot.entity.twentyOne;
 
+import com.tilitili.bot.component.TwentyOneTable;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
@@ -27,6 +28,9 @@ public class TwentyOneAdmin {
 	}
 
 	public boolean needAddCard(String cardResult) {
+		if (cardResult.equals(TwentyOneTable.BOOM_CARD)) {
+			return false;
+		}
 		if (NumberUtils.isDigits(cardResult)) {
 			return cardResult.compareTo("17") < 0;
 		}

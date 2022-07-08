@@ -90,10 +90,11 @@ public class TwentyOneTable {
 		String adminStr = this.admin.toString() + "\n";
 		String playerStr = this.getGamingPlayerList().stream().map(TwentyOnePlayer::toString).collect(Collectors.joining("\n"));
 		List<BotMessageChain> result = Lists.newArrayList(BotMessageChain.ofPlain(adminStr), BotMessageChain.ofPlain(playerStr));
+		result.add(BotMessageChain.ofPlain("\n"));
 		if (!Objects.equals(sendType, SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		result.add(BotMessageChain.ofPlain("\n请选择：加牌、停牌、加倍(加倍积分并加牌)"));
+		result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌)"));
 		return result;
 	}
 
