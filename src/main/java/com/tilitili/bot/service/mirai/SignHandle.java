@@ -5,7 +5,9 @@ import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.query.BotUserQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -14,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 @Slf4j
@@ -30,6 +34,35 @@ public class SignHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		String key = messageAction.getKeyWithoutPrefix();
+
+		switch (key) {
+			case "签到": case "qd": return handleSignMessage(messageAction);
+			case "积分排行": case "jfph": return handleQueryRankMessage(messageAction);
+			case "积分查询": case "jfcx": return handleQueryScoreMessage(messageAction);
+			default: return null;
+		}
+	}
+
+	private BotMessage handleQueryScoreMessage(BotMessageAction messageAction) {
+		BotUser botUser = botUserMapper.getBotUserByExternalId(messageAction.getQqOrTinyId());
+		Asserts.notNull(botUser, "啊嘞，似乎不对劲");
+		return BotMessage.simpleTextMessage(String.format("当前积分为%s分。", botUser.getScore()));
+	}
+
+	private BotMessage handleQueryRankMessage(BotMessageAction messageAction) {
+		List<BotUser> userList = botUserMapper.getBotUserByCondition(new BotUserQuery().setStatus(0).setSorter("score").setSorted("desc").setPageSize(10));
+		List<BotMessageChain> result = new ArrayList<>();
+		result.add(BotMessageChain.ofPlain("排序:分数\t名称"));
+		for (int index = 0; index < userList.size(); index++) {
+			BotUser botUser = userList.get(index);
+			if (botUser.getScore() == 0) continue;
+			result.add(BotMessageChain.ofPlain(String.format("\n%s:%s\t%s", index + 1, botUser.getScore(), botUser.getName())));
+		}
+		return BotMessage.simpleListMessage(result);
+	}
+
+	public BotMessage handleSignMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
 		Long externalId = botMessage.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botMessage.getTinyId(): botMessage.getQq();

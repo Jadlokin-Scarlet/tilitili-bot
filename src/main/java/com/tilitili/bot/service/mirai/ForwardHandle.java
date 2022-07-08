@@ -1,14 +1,16 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class ForwardHandle extends ExceptionRespMessageHandle {
+public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final BotSender baGroup;
 
 	public ForwardHandle(BotSenderMapper botSenderMapper) {

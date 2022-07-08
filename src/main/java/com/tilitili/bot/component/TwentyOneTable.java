@@ -138,11 +138,11 @@ public class TwentyOneTable {
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
 			String playerResult = this.getCardResult(player.getCardList(), "player");
 			int subScore = this.compareCard(adminCardResult, playerResult, player);
-			String playerStr = String.format("%s (%s) (+%d分)%n", player.toString(), playerResult, subScore);
+			String playerStr = String.format("%s (%s) (%s分)%n", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
 			resp.add(BotMessageChain.ofPlain("\n"));
 			resp.add(BotMessageChain.ofPlain(playerStr));
 			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
-			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore));
+			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + player.getScore()));
 		}
 		status = STATUS_WAIT;
 		for (TwentyOnePlayer player : playerList) {
@@ -161,27 +161,27 @@ public class TwentyOneTable {
 		}
 
 		if (playerResult.equals(FIVE_CARD)) {
-			return score * 4;
+			return score * 3;
 		}
 
 		if (playerResult.equals(BLACK_JACK)) {
-			return score * 5 / 2;
+			return score * 3 / 2;
 		}
 
 		if (adminResult.equals(BLACK_JACK)) {
-			return 0;
+			return - score * 3 / 2;
 		}
 
 		if (playerResult.equals(BOOM_CARD)) {
-			return 0;
+			return - score;
 		}
 
 		if (adminResult.equals(BOOM_CARD)) {
-			return score * 2;
+			return score;
 		}
 
 		if (playerResult.compareTo(adminResult) > 0) {
-			return score * 2;
+			return score;
 		} else {
 			return 0;
 		}
