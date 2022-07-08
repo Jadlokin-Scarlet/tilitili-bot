@@ -175,7 +175,7 @@ public class TwentyOneTable {
 			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
 			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + player.getScore()));
 		}
-		resp.add(BotMessageChain.ofPlain("\n下一局将在20s后开始，未准备将自动离席哦。"));
+		resp.add(BotMessageChain.ofPlain("\n下一局将在1m后开始，未准备将自动离席哦。"));
 		this.initData();
 		this.waitPeoplePrepare(botMessage);
 		return resp;
