@@ -16,11 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 @Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
-	public static final Map<Long, Long> playerLock = new HashMap<>();
 
 	@Value("${mirai.master-qq}")
 	private Long MASTER_QQ;
@@ -64,17 +64,14 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (!hasJurisdiction) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());
-		twentyOneTable.getPlayerList().stream().map(TwentyOnePlayer::getPlayerId).forEach(playerLock::remove);
 		return BotMessage.simpleTextMessage("(╯‵□′)╯︵┻━┻");
 	}
 
 	private BotMessage quitGame(BotMessageAction messageAction, BotUser botUser) {
 		Long playerId = botUser.getExternalId();
-		Long tableId = playerLock.get(playerId);
-		Asserts.notNull(tableId, "你好像还没加入哦，没东西退");
-		playerLock.remove(playerId);
+		TwentyOneTable twentyOneTable = this.getTableByPlayer(playerId);
+		Asserts.notNull(twentyOneTable, "你好像还没加入哦，没东西退");
 
-		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
 		String status = twentyOneTable.getStatus();
 
@@ -89,6 +86,12 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		} else {
 			return BotMessage.simpleTextMessage("退出成功啦。");
 		}
+	}
+
+	private TwentyOneTable getTableByPlayer(Long playerId) {
+		return tableMap.values().stream().filter(table ->
+					table.getPlayerList().stream().map(TwentyOnePlayer::getPlayerId).anyMatch(Predicate.isEqual(playerId))
+			).findFirst().orElse(null);
 	}
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
@@ -182,8 +185,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
 
-		if (playerLock.containsKey(playerId)) {
-			if (Objects.equals(playerLock.get(playerId), tableId)) {
+		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
+		if (otherTable != null) {
+			if (Objects.equals(otherTable.getTableId(), tableId)) {
 				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
 			} else {
 				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
@@ -193,7 +197,6 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		boolean addGameSuccess = twentyOneTable.addGame(botUser);
 		Asserts.isTrue(addGameSuccess, "加入失败惹。");
-		playerLock.put(playerId, tableId);
 
 		switch (twentyOneTable.getStatus()) {
 			case TwentyOneTable.STATUS_WAIT: return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
@@ -211,14 +214,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (twentyOneTable == null) return null;
 
 		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
-		if (playerLock.containsKey(playerId)) {
+		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
+		if (otherTable != null) {
 			if (player != null && player.getScore() != null) {
 				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
-			} else if (!Objects.equals(playerLock.get(playerId), tableId)) {
+			} else if (!Objects.equals(otherTable.getTableId(), tableId)) {
 				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
 			}
-		} else {
-			playerLock.put(playerId, tableId);
 		}
 		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
 
