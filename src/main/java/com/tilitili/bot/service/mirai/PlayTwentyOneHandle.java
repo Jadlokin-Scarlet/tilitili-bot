@@ -147,7 +147,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean doubleAddCardSuccess = twentyOneTable.addCard(player);
 		Asserts.isTrue(doubleAddCardSuccess, "啊嘞，不对劲");
 
-		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
+//		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
 		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 
@@ -234,7 +234,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		twentyOneTable.addGame(botUser, score);
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - score));
 
-		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("准备完毕，使用积分%d，剩余%d积分。", score, botUser.getScore() - score), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
+//		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("准备完毕，使用积分%d，剩余%d积分。", score, botUser.getScore() - score), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
 		boolean ready = twentyOneTable.isReady();
 		if (ready) {
