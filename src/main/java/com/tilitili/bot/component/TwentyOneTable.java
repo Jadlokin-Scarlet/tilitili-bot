@@ -36,7 +36,7 @@ public class TwentyOneTable {
 	private final Long tableId;
 	private String status;
 	private List<TwentyOnePlayer> playerList;
-	private final Queue<TwentyOneCard> cardList;
+	private Queue<TwentyOneCard> cardList;
 	private final TwentyOneAdmin admin;
 	private Long waitPeoplePrepareId;
 
@@ -189,6 +189,7 @@ public class TwentyOneTable {
 			player.setCardList(null);
 			player.setIsDouble(false);
 		}
+		this.cardList = this.newCardList();
 	}
 
 	private int compareCard(String adminResult, String playerResult, TwentyOnePlayer player) {
