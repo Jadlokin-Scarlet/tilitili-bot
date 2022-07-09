@@ -53,6 +53,7 @@ public class TwentyOneTable {
 	}
 
 	public void waitPeoplePrepare(BotMessage botMessage) {
+		if (waitPeoplePrepareId != null) return;
 		final long theWaitPeoplePrepareId = random.nextLong();
 		this.waitPeoplePrepareId = theWaitPeoplePrepareId;
 		scheduled.schedule(() -> {
@@ -75,7 +76,12 @@ public class TwentyOneTable {
 				List<BotMessageChain> resp = this.getNoticeMessage(botMessage);
 				botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
 			}
+			this.endWait();
 		}, 1, TimeUnit.MINUTES);
+	}
+
+	public void endWait() {
+		this.waitPeoplePrepareId = null;
 	}
 
 	public boolean addGame(BotUser botUser, Integer score) {
@@ -114,7 +120,7 @@ public class TwentyOneTable {
 		return true;
 	}
 
-	public List<BotMessageChain> getWaitMessage() {
+	public List<BotMessageChain> getWaitMessage(BotMessage botMessage) {
 		List<String> allPlayer = new ArrayList<>();
 		List<String> preparePlayer = new ArrayList<>();
 		List<String> notPreparePlayer = new ArrayList<>();
@@ -127,6 +133,7 @@ public class TwentyOneTable {
 				preparePlayer.add(name);
 			}
 		}
+		this.waitPeoplePrepare(botMessage);
 		String message = String.format("此桌参与人员：%s\n已准备：%s\n未准备：%s\n", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
 		return Lists.newArrayList(BotMessageChain.ofPlain(message));
 	}
@@ -148,6 +155,7 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
+		this.endWait();
 		result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌)"));
 		return result;
 	}
