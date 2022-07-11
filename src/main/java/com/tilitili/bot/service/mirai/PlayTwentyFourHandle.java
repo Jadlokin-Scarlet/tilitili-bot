@@ -11,6 +11,7 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.MathUtil;
 import com.tilitili.common.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Component
 public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
@@ -131,7 +133,12 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		String numListStr = session.get(numListKey);
 		Asserts.checkNull(numListStr, "先玩完这一局吧："+numListStr);
 
-		List<Integer> numList = getNumList();
+		List<Integer> numList;
+		String answer;
+		while ((answer = this.hasAnswer(numList = MathUtil.getNThingFromList(cardList, 4))) == null) {
+			String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
+			log.debug("problem={} is haven't answer", newNumListStr);
+		}
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
@@ -150,8 +157,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleTextMessage("试试看这道题吧("+newNumListStr+")，时限"+waitTime+"分钟哦~");
 	}
 
-	private List<Integer> getNumList() {
-		return MathUtil.getNThingFromList(cardList, 4);
+	private String hasAnswer(List<Integer> numList) {
+		return "null";
 	}
 
 	private Date getLimitDate() {

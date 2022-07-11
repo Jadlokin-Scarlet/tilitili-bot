@@ -26,7 +26,7 @@ public class TwentyOneCard {
 	@Override
 	public String toString() {
 		if (hidden) return "**";
-		return type + value;
+		return value;
 	}
 
 	public Integer getPoint() {
