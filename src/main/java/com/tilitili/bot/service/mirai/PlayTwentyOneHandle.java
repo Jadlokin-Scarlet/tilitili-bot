@@ -86,9 +86,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.getScore() != null) {
 			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getPlayerId()).setScore(botUser.getScore() + player.getScore()));
-			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分", player.getScore(), botUser.getScore() + player.getScore())));
+			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分。\n", player.getScore(), botUser.getScore() + player.getScore())));
 		} else {
-			resp.add(BotMessageChain.ofPlain("退出成功啦。"));
+			resp.add(BotMessageChain.ofPlain("退出成功啦。\n"));
 		}
 
 		boolean ready = twentyOneTable.isReady();

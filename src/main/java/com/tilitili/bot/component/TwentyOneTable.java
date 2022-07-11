@@ -141,8 +141,18 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(BotMessage botMessage) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
-		if (nowPlayer.needEnd(this.getCardResult(nowPlayer.getCardList(), "player"))) {
+		CardResult playerCardResult = this.getCardResult(nowPlayer.getCardList(), "player");
+		CardResult adminCardResult = this.getCardResult(this.admin.getCardList(), "admin");
+		if (nowPlayer.needEnd(playerCardResult)) {
 			this.stopCard(nowPlayer);
+			if (this.isEnd()) return this.getEndMessage(botMessage);
+			nowPlayer = this.getLastPlayer();
+		}
+
+		if (Objects.equals(adminCardResult.getSuperCard(), BLACK_JACK)) {
+			for (TwentyOnePlayer player : playerList) {
+				this.stopCard(player);
+			}
 			if (this.isEnd()) return this.getEndMessage(botMessage);
 			nowPlayer = this.getLastPlayer();
 		}
