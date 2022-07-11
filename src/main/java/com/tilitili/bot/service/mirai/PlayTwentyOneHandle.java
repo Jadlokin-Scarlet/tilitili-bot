@@ -96,26 +96,14 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21点", "w21", "掀桌").contains(key);
+		boolean isStartGame = Arrays.asList("玩21点", "w21", "掀桌", "加入21点", "准备", "退出").contains(key);
 		if (isStartGame) {
-			return true;
-		}
-
-		// 不是开始指令，游戏还不存在，无效
-		boolean notGaming = twentyOneTable == null;
-		if (notGaming) {
-			return false;
-		}
-
-		// 游戏已经存在了，是准备指令，有效
-		boolean isJoinGame = Arrays.asList("加入21点", "准备", "退出").contains(key);
-		if (isJoinGame) {
 			return true;
 		}
 
 		// 不是准备和开始指令，游戏还没开始，，
 		String status = twentyOneTable.getStatus();
-		if (status == TwentyOneTable.STATUS_WAIT) {
+		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT)) {
 			return false;
 		}
 
@@ -152,9 +140,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
-
-		return BotMessage.simpleListMessage(resp);
+		if (twentyOneTable.isEnd()) {
+			List<BotMessageChain> resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
+			return BotMessage.simpleListMessage(resp);
+		} else {
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+			return BotMessage.simpleListMessage(resp);
+		}
 	}
 
 	private BotMessage stopCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
@@ -214,7 +206,11 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		String scoreStr = messageAction.getValue();
 
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
-		if (twentyOneTable == null) return null;
+		if (twentyOneTable == null) {
+			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
+			tableMap.put(tableId, twentyOneTable);
+		}
+		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
 
 		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
 		TwentyOneTable otherTable = this.getTableByPlayer(playerId);

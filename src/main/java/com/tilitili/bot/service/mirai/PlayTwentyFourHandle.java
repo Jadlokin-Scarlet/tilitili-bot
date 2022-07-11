@@ -131,7 +131,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		String numListStr = session.get(numListKey);
 		Asserts.checkNull(numListStr, "先玩完这一局吧："+numListStr);
 
-		List<Integer> numList = MathUtil.getNThingFromList(cardList, 4);
+		List<Integer> numList = getNumList();
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
@@ -148,6 +148,10 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}, waitTime, TimeUnit.MINUTES);
 		return BotMessage.simpleTextMessage("试试看这道题吧("+newNumListStr+")，时限"+waitTime+"分钟哦~");
+	}
+
+	private List<Integer> getNumList() {
+		return MathUtil.getNThingFromList(cardList, 4);
 	}
 
 	private Date getLimitDate() {
