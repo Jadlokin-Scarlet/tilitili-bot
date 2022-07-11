@@ -1,10 +1,8 @@
 package com.tilitili.bot.entity.twentyOne;
 
 import com.tilitili.common.entity.BotUser;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TwentyOnePlayer {
@@ -88,7 +86,7 @@ public class TwentyOnePlayer {
 		return this;
 	}
 
-	public boolean needEnd(String cardResult) {
-		return !NumberUtils.isDigits(cardResult) || Objects.equals(cardResult, "21");
+	public boolean needEnd(CardResult cardResult) {
+		return cardResult.getSuperCard() != null || (cardResult.getSum() == 21 && cardResult.getaCnt() == 0);
 	}
 }

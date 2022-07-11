@@ -2,6 +2,7 @@ package com.tilitili.bot.component;
 
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.entity.twentyOne.CardResult;
 import com.tilitili.bot.entity.twentyOne.TwentyOneAdmin;
 import com.tilitili.bot.entity.twentyOne.TwentyOneCard;
 import com.tilitili.bot.entity.twentyOne.TwentyOnePlayer;
@@ -155,8 +156,11 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌)"));
-//		if (nowPlayer.getpl)
+		if (nowPlayer.getCardList().size() == 2) {
+			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌并停牌)"));
+		} else {
+			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌"));
+		}
 		this.endWait();
 		return result;
 	}
@@ -167,7 +171,7 @@ public class TwentyOneTable {
 		admin.getCardList().get(0).setHidden(false);
 
 		// 抽牌
-		String adminCardResult;
+		CardResult adminCardResult;
 		while (admin.needAddCard(adminCardResult = this.getCardResult(admin.getCardList(), "admin"))) {
 			admin.addCard(cardList.poll());
 		}
@@ -176,7 +180,7 @@ public class TwentyOneTable {
 		resp.add(BotMessageChain.ofPlain(adminStr));
 		// 对比
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
-			String playerResult = this.getCardResult(player.getCardList(), "player");
+			CardResult playerResult = this.getCardResult(player.getCardList(), "player");
 			int subScore = this.compareCard(adminCardResult, playerResult, player);
 			String playerStr = String.format("%s (%s) (%s分)", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
 			resp.add(BotMessageChain.ofPlain("\n"));
@@ -201,48 +205,58 @@ public class TwentyOneTable {
 		this.cardList = this.newCardList();
 	}
 
-	private int compareCard(String adminResult, String playerResult, TwentyOnePlayer player) {
+	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOnePlayer player) {
 		Integer score = player.getScore();
-		if (Objects.equals(playerResult, adminResult)) {
-			return 0;
+		String playerSuperCard = playerResult.getSuperCard();
+		String adminSuperCard = adminResult.getSuperCard();
+
+
+		if (playerSuperCard != null && adminSuperCard != null) {
+			if (Objects.equals(playerSuperCard, adminSuperCard)) {
+				return 0;
+			}
+		} else if (playerSuperCard == null && adminSuperCard == null) {
+			if (playerResult.getSum() == adminResult.getSum()) {
+				return 0;
+			}
 		}
 
-		if (playerResult.equals(FIVE_CARD)) {
+		if (Objects.equals(playerSuperCard, FIVE_CARD)) {
 			return score * 3;
 		}
 
-		if (playerResult.equals(BLACK_JACK)) {
+		if (Objects.equals(playerSuperCard, BLACK_JACK)) {
 			return score * 3 / 2;
 		}
 
-		if (adminResult.equals(BLACK_JACK)) {
+		if (Objects.equals(adminSuperCard, BLACK_JACK)) {
 			return - score * 3 / 2;
 		}
 
-		if (playerResult.equals(BOOM_CARD)) {
+		if (Objects.equals(playerSuperCard, BOOM_CARD)) {
 			return - score;
 		}
 
-		if (adminResult.equals(BOOM_CARD)) {
+		if (Objects.equals(adminSuperCard, BOOM_CARD)) {
 			return score;
 		}
 
-		if (playerResult.compareTo(adminResult) > 0) {
+		if (playerResult.getSum() > adminResult.getSum()) {
 			return score;
 		} else {
 			return - score;
 		}
 	}
 
-	public String getCardResult(List<TwentyOneCard> cardList, String type) {
+	public CardResult getCardResult(List<TwentyOneCard> cardList, String type) {
 		if (cardList.size() == 2) {
 			TwentyOneCard card1 = cardList.get(0);
 			TwentyOneCard card2 = cardList.get(1);
 			if (card1.getPoint() == 1 && card2.getPoint() == 10) {
-				return BLACK_JACK;
+				return new CardResult(21, 1, BLACK_JACK);
 			}
 			if (card1.getPoint() == 10 && card2.getPoint() == 1) {
-				return BLACK_JACK;
+				return new CardResult(21, 1, BLACK_JACK);
 			}
 		}
 
@@ -264,15 +278,14 @@ public class TwentyOneTable {
 
 		if (type.equals("player")) {
 			if (cardList.size() >= 5 && sum <= 21) {
-				return FIVE_CARD;
+				return new CardResult(sum, aCnt, FIVE_CARD);
 			}
 		}
 
 		if (sum > 21) {
-			return BOOM_CARD;
+			return new CardResult(sum, aCnt, BOOM_CARD);
 		}
-
-		return String.format("%02d", sum);
+		return new CardResult(sum, aCnt, null);
 	}
 
 	public boolean addCard(BotUser botUser) {

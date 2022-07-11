@@ -80,7 +80,10 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				log.info("已经签到过了");
 				return null;
 			}
-			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + 100).setLastSignTime(now));
+			int addScore = Math.max(100 - botUser.getScore(), 0);
+			BotUser updBotUser = new BotUser().setId(botUser.getId()).setLastSignTime(now);
+			if (addScore != 0) updBotUser.setScore(botUser.getScore() + addScore);
+			botUserMapper.updateBotUserSelective(updBotUser);
 
 			int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
 			String time = "早上";
@@ -89,7 +92,10 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			if (hour > 18) time = "晚上";
 
 			String talk = "今天也是充满希望的一天";
-			return BotMessage.simpleTextMessage(String.format("%s好，%s(分数+100)", time, talk)).setQuote(messageAction.getMessageId());
+			String message1 = String.format("%s好，%s", time, talk);
+			String message2 = String.format("(分数+%d)", addScore);
+			String message = message1 + (addScore == 0? "": message2);
+			return BotMessage.simpleTextMessage(message).setQuote(messageAction.getMessageId());
 		} finally {
 			session.remove(externalIdLockKey + externalId);
 		}

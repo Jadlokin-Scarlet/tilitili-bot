@@ -1,8 +1,5 @@
 package com.tilitili.bot.entity.twentyOne;
 
-import com.tilitili.bot.component.TwentyOneTable;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,12 +24,9 @@ public class TwentyOneAdmin {
 		return this;
 	}
 
-	public boolean needAddCard(String cardResult) {
-		if (cardResult.equals(TwentyOneTable.BOOM_CARD)) {
-			return false;
-		}
-		if (NumberUtils.isDigits(cardResult)) {
-			return cardResult.compareTo("17") < 0;
+	public boolean needAddCard(CardResult cardResult) {
+		if (cardResult.getSuperCard() == null) {
+			return cardResult.getSum() < 17;
 		}
 		return false;
 	}

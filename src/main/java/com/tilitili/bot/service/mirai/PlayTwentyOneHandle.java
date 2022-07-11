@@ -137,15 +137,18 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Integer hasScore = botUser.getScore();
 		TwentyOnePlayer player = twentyOneTable.getPlayer(botUser.getExternalId());
 		Asserts.notNull(player, "啊嘞，有点不对劲");
-		Asserts.isFalse(player.getIsDouble(), "你已经双倍过了，不能再双倍了哦");
+		Asserts.isTrue(player.getCardList().size() == 2, "已经不能双倍了哦");
 		Integer useScore = player.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
 		player.setScore(useScore * 2);
 		player.setIsDouble(true);
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
 
-		boolean doubleAddCardSuccess = twentyOneTable.addCard(player);
-		Asserts.isTrue(doubleAddCardSuccess, "啊嘞，不对劲");
+		boolean addCardSuccess = twentyOneTable.addCard(player);
+		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
+
+		boolean stopCardSuccess = twentyOneTable.stopCard(player);
+		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
@@ -231,7 +234,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		if (score > botUser.getScore()) return BotMessage.simpleTextMessage("积分好像不够惹。").setQuote(messageAction.getMessageId());
 
-		twentyOneTable.addGame(botUser, score);
+		boolean addGameSuccess = twentyOneTable.addGame(botUser, score);
+		Asserts.isTrue(addGameSuccess, "啊嘞，不对劲");
+
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - score));
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("准备完毕，使用积分%d，剩余%d积分。", score, botUser.getScore() - score), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
