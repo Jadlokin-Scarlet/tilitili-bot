@@ -22,4 +22,9 @@ public class CardResult {
 	public String getSuperCard() {
 		return superCard;
 	}
+
+	@Override
+	public String toString() {
+		return superCard == null? String.format("%02d", sum): superCard;
+	}
 }
