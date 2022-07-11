@@ -225,12 +225,16 @@ public class TwentyOneTable {
 			return score * 3;
 		}
 
+		if (Objects.equals(adminSuperCard, FIVE_CARD)) {
+			return - score;
+		}
+
 		if (Objects.equals(playerSuperCard, BLACK_JACK)) {
 			return score * 3 / 2;
 		}
 
 		if (Objects.equals(adminSuperCard, BLACK_JACK)) {
-			return - score * 3 / 2;
+			return - score;
 		}
 
 		if (Objects.equals(playerSuperCard, BOOM_CARD)) {
