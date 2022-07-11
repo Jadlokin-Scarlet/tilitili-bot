@@ -155,8 +155,9 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		this.endWait();
 		result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌)"));
+//		if (nowPlayer.getpl)
+		this.endWait();
 		return result;
 	}
 
