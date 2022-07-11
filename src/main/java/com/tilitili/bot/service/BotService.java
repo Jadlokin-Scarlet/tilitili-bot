@@ -93,14 +93,18 @@ public class BotService {
                     botMessageAction.setQuoteMessage(quoteMessage);
                 } else {
                     BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
-                    BotMessage quoteMessage;
+                    BotMessage quoteMessage = null;
                     if (quoteMessageRecord != null) {
                         quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
                     } else {
                         BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
-                        quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                        if (sendMessageRecord != null) {
+                            quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                        }
                     }
-                    botMessageAction.setQuoteMessage(quoteMessage);
+                    if (quoteMessage != null) {
+                        botMessageAction.setQuoteMessage(quoteMessage);
+                    }
                 }
             }
 
