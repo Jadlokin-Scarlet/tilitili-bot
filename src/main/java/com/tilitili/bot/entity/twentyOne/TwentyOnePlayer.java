@@ -10,17 +10,9 @@ public class TwentyOnePlayer {
 	private Integer score;
 	private List<TwentyOneCard> cardList;
 	private int status;
-	private boolean isDouble;
 
 	public TwentyOnePlayer() {
 		status = 0;
-		isDouble = false;
-	}
-
-	public TwentyOnePlayer(BotUser botUser, List<TwentyOneCard> cardList) {
-		this();
-		this.botUser = botUser;
-		this.cardList = cardList;
 	}
 
 	@Override
@@ -74,15 +66,6 @@ public class TwentyOnePlayer {
 
 	public TwentyOnePlayer setStatus(int status) {
 		this.status = status;
-		return this;
-	}
-
-	public boolean getIsDouble() {
-		return isDouble;
-	}
-
-	public TwentyOnePlayer setIsDouble(boolean isDouble) {
-		this.isDouble = isDouble;
 		return this;
 	}
 

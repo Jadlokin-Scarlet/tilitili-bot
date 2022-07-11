@@ -111,11 +111,11 @@ public class TwentyOneTable {
 	}
 
 	public boolean flashCard() {
-		TwentyOneCard hiddenCard = cardList.poll();
+		TwentyOneCard hiddenCard = cardList.remove();
 		Asserts.notNull(hiddenCard, "啊嘞，不对劲。");
-		admin.setCardList(Lists.newArrayList(hiddenCard.setHidden(true), cardList.poll()));
+		admin.setCardList(Lists.newArrayList(hiddenCard.setHidden(true), cardList.remove()));
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
-			player.setCardList(Lists.newArrayList(cardList.poll(), cardList.poll()));
+			player.setCardList(Lists.newArrayList(cardList.remove(), cardList.remove()));
 		}
 		status = STATUS_PLAYING;
 		return true;
@@ -173,7 +173,7 @@ public class TwentyOneTable {
 		// 抽牌
 		CardResult adminCardResult;
 		while (admin.needAddCard(adminCardResult = this.getCardResult(admin.getCardList(), "admin"))) {
-			admin.addCard(cardList.poll());
+			admin.addCard(cardList.remove());
 		}
 		List<BotMessageChain> resp = new ArrayList<>();
 		String adminStr = String.format("%s (%s)", admin.toString(), adminCardResult);
@@ -200,7 +200,6 @@ public class TwentyOneTable {
 			player.setScore(null);
 			player.setStatus(0);
 			player.setCardList(null);
-			player.setIsDouble(false);
 		}
 		this.cardList = this.newCardList();
 	}
@@ -300,7 +299,7 @@ public class TwentyOneTable {
 
 	public boolean addCard(TwentyOnePlayer player) {
 		Asserts.notNull(player, "啊嘞，有点不对劲");
-		player.addCard(cardList.poll());
+		player.addCard(cardList.remove());
 		return true;
 	}
 

@@ -78,13 +78,28 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean removePlayerSuccess = twentyOneTable.removePlayer(playerId);
 		Asserts.isTrue(removePlayerSuccess, "啊嘞，不太对劲");
 
+		if (Objects.equals(status, TwentyOneTable.STATUS_PLAYING)) {
+			return BotMessage.simpleTextMessage("退出成功啦，游戏已经开始，不返还积分。");
+		}
+
+		List<BotMessageChain> resp = new ArrayList<>();
+
 		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.getScore() != null) {
 			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getPlayerId()).setScore(botUser.getScore() + player.getScore()));
-			return BotMessage.simpleTextMessage(String.format("退出成功啦。返还积分%d，剩余%d积分", player.getScore(), botUser.getScore() + player.getScore()));
-		} else if (Objects.equals(status, TwentyOneTable.STATUS_PLAYING)) {
-			return BotMessage.simpleTextMessage("退出成功啦，游戏已经开始，不返还积分。");
+			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分", player.getScore(), botUser.getScore() + player.getScore())));
 		} else {
-			return BotMessage.simpleTextMessage("退出成功啦。");
+			resp.add(BotMessageChain.ofPlain("退出成功啦。"));
+		}
+
+		boolean ready = twentyOneTable.isReady();
+		if (ready) {
+			boolean flashCardSuccess = twentyOneTable.flashCard();
+			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
+			resp.addAll(twentyOneTable.getNoticeMessage(messageAction.getBotMessage()));
+			return BotMessage.simpleListMessage(resp);
+		} else {
+			resp.addAll(twentyOneTable.getWaitMessage(messageAction.getBotMessage()));
+			return BotMessage.simpleListMessage(resp);
 		}
 	}
 
@@ -129,7 +144,6 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Integer useScore = player.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
 		player.setScore(useScore * 2);
-		player.setIsDouble(true);
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
 
 		boolean addCardSuccess = twentyOneTable.addCard(player);
