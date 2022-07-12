@@ -42,7 +42,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		}
 		String url = messageAction.getValueOrDefault(session.get(hostKey));
 		Asserts.notBlank(url, "没有地址");
-		Asserts.isTrue(url.contains(":"), "地址格式不对");
+		if (!url.contains(":")) url += ":25565";
+//		Asserts.isTrue(url.contains(":"), "地址格式不对");
 		String host = url.substring(0, url.indexOf(":"));
 		String port = url.substring(url.indexOf(":") + 1);
 		McPingResponse response;
