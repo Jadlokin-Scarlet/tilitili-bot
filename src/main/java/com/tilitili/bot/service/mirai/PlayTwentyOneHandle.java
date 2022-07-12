@@ -11,6 +11,8 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Predicate;
 
+@Slf4j
 @Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
@@ -48,13 +51,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		switch (key) {
-			case "玩21点": case "w21": return startGame(messageAction);
-			case "加入21点": case "准备": return prepareGame(messageAction);
-			case "加牌": case "jp": return addCard(messageAction, botUser, twentyOneTable);
-			case "停牌": case "tp": return stopCard(messageAction, botUser, twentyOneTable);
-			case "加倍": case "jb": return doubleAddCard(messageAction, botUser, twentyOneTable);
-			case "退出": return quitGame(messageAction, botUser);
-			case "掀桌": return removeGame(messageAction, botUser, twentyOneTable);
+			case "玩21点": case "w21": return this.startGame(messageAction);
+			case "准备": return this.prepareGame(messageAction);
+			case "加牌": case "jp": return this.addCard(messageAction, botUser, twentyOneTable);
+			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
+			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
+			case "退出": return this.quitGame(messageAction, botUser);
+			case "掀桌": return this.removeGame(messageAction, botUser, twentyOneTable);
 			default: return null;
 		}
 	}
@@ -117,10 +120,21 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21点", "w21", "掀桌", "加入21点", "准备", "退出").contains(key);
+		boolean isStartGame = Arrays.asList("玩21点", "w21", "准备").contains(key);
 		if (isStartGame) {
 			return true;
 		}
+
+		boolean notGaming = twentyOneTable == null;
+		if (notGaming) {
+			return false;
+		}
+
+		boolean isEndGame = Arrays.asList("掀桌", "退出").contains(key);
+		if (isEndGame) {
+			return true;
+		}
+
 
 		// 不是准备和开始指令，游戏还没开始，，
 		String status = twentyOneTable.getStatus();
@@ -224,8 +238,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Long playerId = messageAction.getQqOrTinyId();
 		Long tableId = messageAction.getQqOrGroupOrChannelId();
 		String scoreStr = messageAction.getValue();
-
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
+
+		if (twentyOneTable == null && StringUtils.isNotDigits(scoreStr)) {
+			log.info("格式错啦(积分数)");
+			return null;
+		}
+
 		if (twentyOneTable == null) {
 			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
@@ -243,7 +262,6 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
 
-		Asserts.isDigits(scoreStr, "格式错啦(积分数)");
 		int score = Integer.parseInt(scoreStr);
 		Asserts.isTrue(score > 0, "想白嫖积分？");
 
