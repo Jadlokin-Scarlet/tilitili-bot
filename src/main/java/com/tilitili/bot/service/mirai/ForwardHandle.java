@@ -34,6 +34,11 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			}
 			return BotMessage.simpleListMessage(botMessageChainList).setSender(baGroup);
 		}
+		if (messageAction.getBotSender().getId() == 4351L) {
+			List<BotMessageChain> botMessageChainList = messageAction.getBotMessage().getBotMessageChainList().stream()
+					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_SOURCE).negate()).collect(Collectors.toList());
+			return BotMessage.simpleListMessage(botMessageChainList).setSender(baGroup);
+		}
 		return null;
 	}
 }
