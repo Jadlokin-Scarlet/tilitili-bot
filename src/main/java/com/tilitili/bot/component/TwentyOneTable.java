@@ -339,12 +339,12 @@ public class TwentyOneTable {
 	private boolean needAddCard(List<TwentyOnePlayer> playerList, CardResult cardResult) {
 		int scoreSum = playerList.stream().mapToInt(TwentyOnePlayer::getHaveScore).sum();
 		int scoreAvg = scoreSum / playerList.size();
-		if (scoreAvg <= 100) {
-			if (cardResult.getSuperCard() == null) {
-				return cardResult.getSum() < 17;
-			}
-			return false;
-		} else {
+//		if (scoreAvg <= 100) {
+//			if (cardResult.getSuperCard() == null) {
+//				return cardResult.getSum() < 17;
+//			}
+//			return false;
+//		} else {
 			TwentyOnePlayer firstPlayer = playerList.stream().max(Comparator.comparing(TwentyOnePlayer::getHaveScore)).orElse(null);
 			Asserts.notNull(firstPlayer, "啊嘞，不对劲");
 			int typeCnt = 13;
@@ -372,7 +372,7 @@ public class TwentyOneTable {
 			}
 
 			return (lastExpect * 1.0 / typeCnt / typeCnt) < (nowExpect * 1.0 / typeCnt);
-		}
+//		}
 	}
 
 	private Queue<TwentyOneCard> newCardList() {
