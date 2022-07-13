@@ -52,7 +52,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		switch (key) {
 			case "玩21点": case "w21": return this.startGame(messageAction);
-			case "准备": return this.prepareGame(messageAction);
+			case "准备": case "zb": return this.prepareGame(messageAction);
 			case "加牌": case "jp": return this.addCard(messageAction, botUser, twentyOneTable);
 			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
@@ -120,7 +120,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21点", "w21", "准备").contains(key);
+		boolean isStartGame = Arrays.asList("玩21点", "w21", "准备", "zb").contains(key);
 		if (isStartGame) {
 			return true;
 		}
