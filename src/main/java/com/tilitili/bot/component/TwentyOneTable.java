@@ -141,8 +141,8 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(BotMessage botMessage) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
-		CardResult playerCardResult = this.getCardResult(nowPlayer.getCardList(), "player");
-		CardResult adminCardResult = this.getCardResult(this.admin.getCardList(), "admin");
+		CardResult playerCardResult = this.getCardResult(nowPlayer.getCardList());
+		CardResult adminCardResult = this.getCardResult(this.admin.getCardList());
 		if (nowPlayer.needEnd(playerCardResult)) {
 			this.stopCard(nowPlayer);
 			if (this.isEnd()) return this.getEndMessage(botMessage);
@@ -182,15 +182,16 @@ public class TwentyOneTable {
 
 		// 抽牌
 		CardResult adminCardResult;
-		while (admin.needAddCard(adminCardResult = this.getCardResult(admin.getCardList(), "admin"))) {
+		List<TwentyOnePlayer> gamingPlayerList = this.getGamingPlayerList();
+		while (this.needAddCard(gamingPlayerList, adminCardResult = this.getCardResult(admin.getCardList()))) {
 			admin.addCard(cardList.remove());
 		}
 		List<BotMessageChain> resp = new ArrayList<>();
 		String adminStr = String.format("%s (%s)", admin.toString(), adminCardResult);
 		resp.add(BotMessageChain.ofPlain(adminStr));
 		// 对比
-		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
-			CardResult playerResult = this.getCardResult(player.getCardList(), "player");
+		for (TwentyOnePlayer player : gamingPlayerList) {
+			CardResult playerResult = this.getCardResult(player.getCardList());
 			int subScore = this.compareCard(adminCardResult, playerResult, player);
 			String playerStr = String.format("%s (%s) (%s分)", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
 			resp.add(BotMessageChain.ofPlain("\n"));
@@ -261,7 +262,7 @@ public class TwentyOneTable {
 		}
 	}
 
-	public CardResult getCardResult(List<TwentyOneCard> cardList, String type) {
+	public CardResult getCardResult(List<TwentyOneCard> cardList) {
 		if (cardList.size() == 2) {
 			TwentyOneCard card1 = cardList.get(0);
 			TwentyOneCard card2 = cardList.get(1);
@@ -289,10 +290,8 @@ public class TwentyOneTable {
 			}
 		}
 
-		if (type.equals("player")) {
-			if (cardList.size() >= 5 && sum <= 21) {
-				return new CardResult(sum, aCnt, FIVE_CARD);
-			}
+		if (cardList.size() >= 5 && sum <= 21) {
+			return new CardResult(sum, aCnt, FIVE_CARD);
 		}
 
 		if (sum > 21) {
@@ -337,8 +336,47 @@ public class TwentyOneTable {
 		return this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getStatus, 0)).findFirst().orElse(null);
 	}
 
+	private boolean needAddCard(List<TwentyOnePlayer> playerList, CardResult cardResult) {
+		int scoreSum = playerList.stream().mapToInt(TwentyOnePlayer::getHaveScore).sum();
+		int scoreAvg = scoreSum / playerList.size();
+		if (scoreAvg <= 100) {
+			if (cardResult.getSuperCard() == null) {
+				return cardResult.getSum() < 17;
+			}
+			return false;
+		} else {
+			TwentyOnePlayer firstPlayer = playerList.stream().max(Comparator.comparing(TwentyOnePlayer::getHaveScore)).orElse(null);
+			Asserts.notNull(firstPlayer, "啊嘞，不对劲");
+			int typeCnt = 13;
+			List<TwentyOneCard> adminLastCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
+			List<TwentyOneCard> playerHiddenCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
+
+			long lastExpect = 0;
+			for (TwentyOneCard adminLastCard : adminLastCardList) {
+				List<TwentyOneCard> adminCardList = adminLastCard == null? Lists.newArrayList(): Lists.newArrayList(adminLastCard);
+				adminCardList.addAll(admin.getCardList());
+				for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
+					List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
+					playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
+
+					lastExpect += this.compareCard(this.getCardResult(adminCardList), this.getCardResult(playerCardList), firstPlayer);
+				}
+			}
+
+			long nowExpect = 0;
+			for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
+				List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
+				playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
+
+				nowExpect += this.compareCard(cardResult, this.getCardResult(playerCardList), firstPlayer);
+			}
+
+			return (lastExpect * 1.0 / typeCnt / typeCnt) < (nowExpect * 1.0 / typeCnt);
+		}
+	}
+
 	private Queue<TwentyOneCard> newCardList() {
-		return IntStream.range(0, 208).mapToObj(TwentyOneCard::new)
+		return IntStream.range(0, 52).mapToObj(TwentyOneCard::new)
 				.map(item -> new SortObject<>(random.nextInt(Integer.MAX_VALUE), item))
 				.sorted().map(SortObject::getT).collect(Collectors.toCollection(LinkedList::new));
 	}

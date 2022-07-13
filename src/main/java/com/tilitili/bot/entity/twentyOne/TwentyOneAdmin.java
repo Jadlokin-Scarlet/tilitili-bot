@@ -23,11 +23,4 @@ public class TwentyOneAdmin {
 		this.cardList = cardList;
 		return this;
 	}
-
-	public boolean needAddCard(CardResult cardResult) {
-		if (cardResult.getSuperCard() == null) {
-			return cardResult.getSum() < 17;
-		}
-		return false;
-	}
 }

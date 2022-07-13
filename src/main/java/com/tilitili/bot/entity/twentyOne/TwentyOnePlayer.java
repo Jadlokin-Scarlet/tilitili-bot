@@ -24,6 +24,10 @@ public class TwentyOnePlayer {
 		return botUser == null? null: botUser.getExternalId();
 	}
 
+	public Integer getHaveScore() {
+		return botUser == null? null: botUser.getScore();
+	}
+
 	public void addCard(TwentyOneCard card) {
 		this.cardList.add(card);
 	}
