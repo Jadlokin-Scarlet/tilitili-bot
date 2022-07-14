@@ -340,38 +340,38 @@ public class TwentyOneTable {
 		int scoreSum = playerList.stream().mapToInt(TwentyOnePlayer::getHaveScore).sum();
 		int scoreAvg = scoreSum / playerList.size();
 //		if (scoreAvg <= 100) {
-//			if (cardResult.getSuperCard() == null) {
-//				return cardResult.getSum() < 17;
-//			}
-//			return false;
+			if (cardResult.getSuperCard() == null) {
+				return cardResult.getSum() < 17;
+			}
+			return false;
 //		} else {
-			TwentyOnePlayer firstPlayer = playerList.stream().max(Comparator.comparing(TwentyOnePlayer::getHaveScore)).orElse(null);
-			Asserts.notNull(firstPlayer, "啊嘞，不对劲");
-			int typeCnt = 13;
-			List<TwentyOneCard> adminLastCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
-			List<TwentyOneCard> playerHiddenCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
-
-			long lastExpect = 0;
-			for (TwentyOneCard adminLastCard : adminLastCardList) {
-				List<TwentyOneCard> adminCardList = adminLastCard == null? Lists.newArrayList(): Lists.newArrayList(adminLastCard);
-				adminCardList.addAll(admin.getCardList());
-				for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
-					List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
-					playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
-
-					lastExpect += this.compareCard(this.getCardResult(adminCardList), this.getCardResult(playerCardList), firstPlayer);
-				}
-			}
-
-			long nowExpect = 0;
-			for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
-				List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
-				playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
-
-				nowExpect += this.compareCard(cardResult, this.getCardResult(playerCardList), firstPlayer);
-			}
-
-			return (lastExpect * 1.0 / typeCnt / typeCnt) < (nowExpect * 1.0 / typeCnt);
+//			TwentyOnePlayer firstPlayer = playerList.stream().max(Comparator.comparing(TwentyOnePlayer::getHaveScore)).orElse(null);
+//			Asserts.notNull(firstPlayer, "啊嘞，不对劲");
+//			int typeCnt = 13;
+//			List<TwentyOneCard> adminLastCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
+//			List<TwentyOneCard> playerHiddenCardList = IntStream.range(0, typeCnt).mapToObj(TwentyOneCard::new).collect(Collectors.toList());
+//
+//			long lastExpect = 0;
+//			for (TwentyOneCard adminLastCard : adminLastCardList) {
+//				List<TwentyOneCard> adminCardList = adminLastCard == null? Lists.newArrayList(): Lists.newArrayList(adminLastCard);
+//				adminCardList.addAll(admin.getCardList());
+//				for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
+//					List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
+//					playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
+//
+//					lastExpect += this.compareCard(this.getCardResult(adminCardList), this.getCardResult(playerCardList), firstPlayer);
+//				}
+//			}
+//
+//			long nowExpect = 0;
+//			for (TwentyOneCard playerHiddenCard : playerHiddenCardList) {
+//				List<TwentyOneCard> playerCardList = Lists.newArrayList(playerHiddenCard);
+//				playerCardList.addAll(firstPlayer.getCardList().subList(1, firstPlayer.getCardList().size()));
+//
+//				nowExpect += this.compareCard(cardResult, this.getCardResult(playerCardList), firstPlayer);
+//			}
+//
+//			return (lastExpect * 1.0 / typeCnt / typeCnt) < (nowExpect * 1.0 / typeCnt);
 //		}
 	}
 
