@@ -16,6 +16,7 @@ import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
+import com.tilitili.common.mapper.mysql.TwentyFourAnswerMapper;
 import com.tilitili.common.utils.RedisCache;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,5 +154,33 @@ class StartApplicationTest {
         redisCache.addMapValue("test", "test", "lock");
         System.out.println(redisCache.removeMapValue("test", "test"));
         System.out.println(redisCache.removeMapValue("test", "test"));
+    }
+
+    @Resource
+    private TwentyFourAnswerMapper twentyFourAnswerMapper;
+    private static final Random random = new Random(System.currentTimeMillis());
+    private final int n = 4;
+    public static void main(String[] args) {
+        List<Integer> numList = Arrays.asList(
+                random.nextInt(13) + 1,
+                random.nextInt(13) + 1,
+                random.nextInt(13) + 1,
+                random.nextInt(13) + 1
+        );
+        for (int index = 0; index < 256; index++) {
+            List<Integer> indexList = Arrays.asList(
+                    index / 4 / 4 / 4,
+                    index / 4 / 4 % 4,
+                    index / 4 % (4 * 4),
+                    index % (4 * 4 * 4)
+            );
+            if (new HashSet<>(indexList).size() != indexList.size()) {
+                continue;
+            }
+            List<Integer> reIndexNumList = indexList.stream().map(numList::get).collect(Collectors.toList());
+
+
+//            new CalculateObject()
+        }
     }
 }
