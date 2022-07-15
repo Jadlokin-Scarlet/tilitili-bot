@@ -1,9 +1,14 @@
 package com.tilitili.bot.config;
 
+import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
+import com.tilitili.common.mapper.rank.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.jms.core.JmsTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -27,5 +32,10 @@ public class WebSocketConfig {
                 log.error("异常", e);
             }
         }
+    }
+
+    @Bean
+    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment) {
+        return new MinecraftReceive(jmsTemplate, taskMapper, environment);
     }
 }

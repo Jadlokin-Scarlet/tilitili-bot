@@ -365,24 +365,24 @@ public class PixivService {
 	public FindImageResult findImage(String url) {
 		Asserts.notBlank(url, "找不到图片");
 		String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
-		Asserts.notBlank(html, "没要到图😇\n"+url);
+		Asserts.notBlank(html, "网络出问题惹");
 		Document document = Jsoup.parse(html);
 		Elements imageList = document.select(".result:not(.hidden):not(#result-hidden-notification)");
-		Asserts.isFalse(imageList.isEmpty(), "没找到🤕\n"+url);
+		Asserts.isFalse(imageList.isEmpty(), "没找到🤕");
 		Element image = imageList.get(0);
 
 		String rate = image.select(".resultsimilarityinfo").text();
 		String imageUrl = image.select(".resulttableimage img").attr("src");
-		Elements linkList = image.select(".resultcontentcolumn a.linkify");
-		Asserts.notBlank(rate, "没找到😑\n"+url);
-		Asserts.notBlank(imageUrl, "没找到😑\n"+url);
-		Asserts.isFalse(linkList.isEmpty(), "没找到😑\n"+url);
+		Elements linkList = image.select(".resultcontentcolumn a");
+		Asserts.notBlank(rate, "没找到😑");
+		Asserts.notBlank(imageUrl, "没找到😑");
+		Asserts.isFalse(linkList.isEmpty(), "没找到😑");
 
 		String link = linkList.get(0).attr("href");
 		String rateStr = rate.replace("%", "");
 		if (StringUtils.isNumber(rateStr)) {
-			Asserts.isTrue(Double.parseDouble(rateStr) > 40.0, "相似度过低(怪图警告)\n"+link);
-			Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低\n"+link);
+			Asserts.isTrue(Double.parseDouble(rateStr) > 40.0, "相似度过低["+rateStr+"](怪图警告)\n"+link);
+			Asserts.isTrue(Double.parseDouble(rateStr) > 60.0, "相似度过低["+rateStr+"]\n"+link);
 		}
 
 		return new FindImageResult().setLink(link).setRate(rate).setImageUrl(imageUrl);

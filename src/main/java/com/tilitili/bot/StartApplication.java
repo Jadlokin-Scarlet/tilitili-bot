@@ -9,10 +9,12 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableAsync
 @EnableRetry
 @EnableCaching
+@EnableScheduling
 @ComponentScan(basePackages = "com.tilitili")
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class StartApplication {
