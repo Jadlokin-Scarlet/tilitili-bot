@@ -28,6 +28,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -360,6 +361,7 @@ public class PixivService {
 		}
 	}
 
+	@Retryable(value= {AssertException.class},maxAttempts = 2)
 	public FindImageResult findImage(String url) {
 		Asserts.notBlank(url, "找不到图片");
 		String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());

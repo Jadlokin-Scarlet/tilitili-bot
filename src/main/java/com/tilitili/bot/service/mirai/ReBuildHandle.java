@@ -3,13 +3,10 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.gitlab.GitlabTrigger;
 import com.tilitili.common.manager.GitlabManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class ReBuildHandle extends ExceptionRespMessageHandle {
@@ -46,11 +43,7 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 			name = "tilitili-" + name;
 		}
 
-		Long projectId = gitlabManager.getProjectIdByProjectName(name);
-		Asserts.notNull(projectId, "找不到项目");
-		List<GitlabTrigger> triggerList = gitlabManager.getProjectTrigger(projectId);
-		Asserts.notEmpty(triggerList, "找不到构建token");
-		gitlabManager.reBuild(projectId, triggerList.get(0).getToken(), branches);
+		gitlabManager.reBuildByName(name, branches);
 		return BotMessage.simpleTextMessage("重启中");
 	}
 }
