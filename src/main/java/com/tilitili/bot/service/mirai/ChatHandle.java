@@ -98,7 +98,13 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final static Map<String, String> header = ImmutableMap.of("Api-Key", "g1cpoxzjnw6teqjr", "Api-Secret", "7bmdopdk");
 	private List<BotMessageChain> reqMoLiReply(String text, BotMessage botMessage) {
 		int type = Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR) ? 1 : 2;
-		String json = gson.toJson(ImmutableMap.of("content", text, "type", type, "from", botMessage.getQq(), "fromName", botMessage.getGroupNickName(), "to", botMessage.getGroup(), "toName", botMessage.getGroupName()));
+		ImmutableMap.Builder<Object, Object> param = ImmutableMap.builder().put("content", text)
+				.put("type", type)
+				.put("from", botMessage.getQq())
+				.put("fromName", botMessage.getGroupNickName())
+				.put("to", botMessage.getGroup());
+		if (botMessage.getGroupName() != null) param.put("toName", botMessage.getGroupName());
+		String json = gson.toJson(param.build());
 		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);
 		JSONObject resp = JSONObject.parseObject(respStr);
 		log.debug("请求茉莉 req={} result={}", json, respStr);
