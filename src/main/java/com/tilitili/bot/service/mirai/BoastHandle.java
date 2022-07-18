@@ -16,12 +16,11 @@ import java.util.function.Predicate;
 
 @Component
 public class BoastHandle extends ExceptionRespMessageHandle {
-	@Value("${mirai.bot-qq}")
-	private String BOT_QQ;
 	@Value("${mirai.bot-guild-qq}")
 	private String BOT_GUILD_QQ;
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
+		Long botQQ = messageAction.getBotSender().getBot();
 		String key = messageAction.getKeyWithoutPrefix();
 		boolean isOther = Arrays.asList("夸夸他", "kkt").contains(key);
 		List<Long> atList = messageAction.getAtList();
@@ -30,7 +29,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		String text = JSONPath.read(result, "$.data.text", String.class);
 		Asserts.notBlank(text, "网络异常");
 		if (isOther) {
-			Long firstAt = atList.stream().filter(Predicate.isEqual(Long.valueOf(BOT_QQ)).or(Predicate.isEqual(BOT_GUILD_QQ)).negate()).findFirst().orElse(null);
+			Long firstAt = atList.stream().filter(Predicate.isEqual(botQQ).or(Predicate.isEqual(BOT_GUILD_QQ)).negate()).findFirst().orElse(null);
 			Asserts.notNull(firstAt, "想我夸谁鸭");
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(firstAt),

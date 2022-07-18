@@ -20,7 +20,6 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +31,6 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class BotService {
-    @Value("${mirai.bot-qq}")
-    private String BOT_QQ;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSessionService botSessionService;
     private final BotManager botManager;
@@ -87,7 +84,7 @@ public class BotService {
             String quoteMessageId = botMessageAction.getQuoteMessageId();
             Long quoteSenderId = botMessageAction.getQuoteSenderId();
             if (quoteMessageId != null) {
-                if (Objects.equals(String.valueOf(quoteSenderId), BOT_QQ)) {
+                if (Objects.equals(quoteSenderId, botSender.getBot())) {
                     BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
                     BotMessage quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
                     botMessageAction.setQuoteMessage(quoteMessage);

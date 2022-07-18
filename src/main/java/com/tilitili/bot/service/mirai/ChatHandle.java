@@ -33,8 +33,6 @@ import java.util.*;
 @Slf4j
 @Component
 public class ChatHandle extends ExceptionRespMessageHandle {
-	@Value("${mirai.bot-qq}")
-	private String BOT_QQ;
 	@Value("${mirai.bot-guild-qq}")
 	private String BOT_GUILD_QQ;
 	private final static Random random = new Random(System.currentTimeMillis());
@@ -48,6 +46,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		Long botQQ = messageAction.getBotSender().getBot();
 		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tencent";
 		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getHead();
@@ -55,7 +54,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 		List<Long> atList = messageAction.getAtList();
 		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
-		boolean hasAtBot = atList.contains(Long.valueOf(BOT_QQ)) || atList.contains(Long.valueOf(BOT_GUILD_QQ));
+		boolean hasAtBot = atList.contains(botQQ) || atList.contains(Long.valueOf(BOT_GUILD_QQ));
 		boolean isRandomReply = random == 0 && messageAction.getBotMessage().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
