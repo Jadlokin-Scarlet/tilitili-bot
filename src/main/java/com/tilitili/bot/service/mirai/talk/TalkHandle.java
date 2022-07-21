@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TalkHandle extends ExceptionRespMessageHandle {
@@ -52,10 +53,15 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		}
 
 		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
-		Asserts.checkEquals(botTalkList.size(), 0, "已经有了。");
+		botTalkList.forEach(botTalk -> botTalkMapper.deleteBotTalkByPrimary(botTalk.getId()));
+		String respList = botTalkList.stream().map(BotTalk::getResp).collect(Collectors.joining(" 或 "));
 
 		BotTalk addBotTalk = new BotTalk().setType(type).setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
 		botTalkMapper.addBotTalkSelective(addBotTalk);
-		return BotMessage.simpleTextMessage("学废了！");
+		if (botTalkList.isEmpty()) {
+			return BotMessage.simpleTextMessage("学废了！"+resp);
+		} else {
+			return BotMessage.simpleTextMessage("覆盖了！原本是"+respList);
+		}
 	}
 }
