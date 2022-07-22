@@ -46,6 +46,12 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 			req = QQUtil.getImageUrl(imageList.get(0));
 			resp = QQUtil.getImageUrl(imageList.get(1));
 			type = 1;
+		} else if (StringUtils.isBlank(req) && imageList.size() == 1) {
+			req = QQUtil.getImageUrl(imageList.get(0));
+			type = 0;
+		} else if (StringUtils.isBlank(resp) && imageList.size() == 1) {
+			resp = QQUtil.getImageUrl(imageList.get(0));
+			type = 1;
 		} else {
 			Asserts.notBlank(req, "格式不对(提问)");
 			Asserts.notBlank(resp, "格式不对(回答)");
