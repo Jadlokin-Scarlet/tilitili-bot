@@ -69,20 +69,20 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 				type = 2;
 			}
 		} else if (StringUtils.isNotBlank(reqStr) && StringUtils.isNotBlank(respStr)) {
-			req = gson.toJson(Collections.singleton(BotMessageChain.ofPlain(reqStr)));
-			resp = gson.toJson(Collections.singleton(BotMessageChain.ofPlain(respStr)));
+			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(reqStr))));
+			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(respStr))));
 			type = 2;
 		} else if (StringUtils.isBlank(reqStr) && imageList.size() == 1) {
-			req = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
-			resp = gson.toJson(Collections.singleton(BotMessageChain.ofPlain(respStr)));
+			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
+			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(respStr))));
 			type = 2;
 		} else if (StringUtils.isBlank(respStr) && imageList.size() == 1) {
-			req = gson.toJson(Collections.singleton(BotMessageChain.ofPlain(reqStr)));
-			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
+			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(reqStr))));
+			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
 			type = 2;
 		} else if (StringUtils.isBlank(reqStr) && StringUtils.isBlank(respStr) && imageList.size() == 2) {
-			req = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
-			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1)))));
+			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
+			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1))))));
 			type = 2;
 		} else if (StringUtils.isBlank(value) && ! session.containsKey(senderStatusKey)) {
 			session.remove(senderReqKey);
