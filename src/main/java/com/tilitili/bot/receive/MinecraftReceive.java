@@ -75,7 +75,13 @@ public class MinecraftReceive {
 	}
 
 	private TaskMessage getTaskMessage() {
-		TaskMessage taskMessage = (TaskMessage) jmsTemplate.receiveAndConvert(TaskReason.MINECRAFT_MESSAGE.destination);
+		TaskMessage taskMessage;
+		try {
+			taskMessage = (TaskMessage) jmsTemplate.receiveAndConvert(TaskReason.MINECRAFT_MESSAGE.destination);
+		} catch (Exception e) {
+			log.warn("消息接收异常", e);
+			return null;
+		}
 		if (taskMessage == null) {
 			return null;
 		}

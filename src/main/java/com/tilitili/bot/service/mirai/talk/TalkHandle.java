@@ -124,7 +124,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		Long qqOrTinyId = botMessageAction.getQqOrTinyId();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();
 		String senderStatusKey = statusKey + qqOrTinyId;
-		if (! session.containsKey(senderStatusKey)) {
+		if (session.containsKey(senderStatusKey)) {
 			return "对话";
 		}
 		return null;
