@@ -54,7 +54,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String senderStatusKey = statusKey + qqOrTinyId;
 
 		String value = messageAction.getValueOrDefault("");
-		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);
+		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
 		int type = -1;
@@ -68,15 +68,15 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		} else if (StringUtils.isBlank(resp) && imageList.size() == 1) {
 			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
 			type = 2;
-		} else if (StringUtils.isBlank(req) && StringUtils.isBlank(resp) && StringUtils.isBlank(value)) {
-			if (! session.containsKey(senderStatusKey)) {
+		} else if (StringUtils.isBlank(req) && StringUtils.isBlank(resp)) {
+			if (StringUtils.isBlank(value) && ! session.containsKey(senderStatusKey)) {
 				session.remove(senderReqKey);
 				session.put(senderStatusKey, "1");
 				return BotMessage.simpleTextMessage("请告诉我关键词吧");
 			} else if (! session.containsKey(senderReqKey)) {
 				session.put(senderReqKey, gson.toJson(botMessage));
 				return BotMessage.simpleTextMessage("请告诉我回复吧");
-			} else {
+			} else if (session.containsKey(senderReqKey)) {
 				BotMessage reqBotMessage = gson.fromJson(session.get(senderReqKey), BotMessage.class);
 				req = this.convertMessageToString(reqBotMessage);
 				resp = this.convertMessageToString(botMessage);
