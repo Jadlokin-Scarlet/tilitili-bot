@@ -7,13 +7,11 @@ import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
-import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,18 +32,11 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
-        List<String> imageList = messageAction.getImageList();
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
         Long group = botMessage.getGroup();
-        List<BotTalk> botTalkList;
-        if (StringUtils.isBlank(text) && imageList.size() == 1) {
-            botTalkList = botTalkManager.getBotTalkByBotMessage(QQUtil.getImageUrl(imageList.get(0)), botMessage);
-        } else {
-            botTalkList = botTalkManager.getBotTalkByBotMessage(text, botMessage);
-        }
-        if (!botTalkList.isEmpty()) {
-            BotTalk botTalk = botTalkList.get(0);
+        BotTalk botTalk = botTalkManager.getJsonTalkOrOtherTalk(TalkHandle.convertMessageToString(botMessage), botMessage);
+        if (botTalk != null) {
             if (botTalk.getType().equals(0)) {
                 return BotMessage.simpleTextMessage(botTalk.getResp());
             } else if (botTalk.getType() == 1) {

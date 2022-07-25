@@ -10,7 +10,6 @@ import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
@@ -53,17 +52,8 @@ public class BotService {
         boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
         try {
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session);
-            botMessageAction.setBotSender(botSender);
-            String actionKey = botMessageAction.getKey();
-
-            String prefix = "";
-            if (Objects.equals(sendType, SendTypeEmum.GUILD_MESSAGE.sendType)) {
-                prefix = ".";
-                actionKey = actionKey.replaceAll("^[.。]", prefix);
-            }
-
-            List<BotTask> botTaskDTOList = botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender);
+            List<BotTask> botTaskDTOList = this.getBotTalkDtoList(botMessageAction);
 
             // 尝试智能匹配key
             boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
@@ -74,9 +64,8 @@ public class BotService {
                     // 尝试匹配回答24点
                     key = messageHandle.isThisTask(botMessageAction);
                     if (key != null) {
-                        botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(prefix + key + " "));
-                        syncHandleTextMessage(botMessage, botSender);
-                        return;
+                        botMessageAction.setVirtualKey(key);
+                        botTaskDTOList.add(botTask);
                     }
                 }
             }
@@ -170,6 +159,20 @@ public class BotService {
             }
             default: throw new AssertException("未知发送类型："+sendType);
         }
+    }
+
+    private List<BotTask> getBotTalkDtoList(BotMessageAction botMessageAction) {
+        String actionKey = botMessageAction.getKey();
+        BotSender botSender = botMessageAction.getBotSender();
+        String sendType = botSender.getSendType();
+
+        String prefix = "";
+        if (Objects.equals(sendType, SendTypeEmum.GUILD_MESSAGE.sendType)) {
+            prefix = ".";
+            actionKey = actionKey.replaceAll("^[.。]", prefix);
+        }
+
+        return botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
     }
 
 }

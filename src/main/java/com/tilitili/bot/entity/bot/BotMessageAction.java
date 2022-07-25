@@ -20,6 +20,7 @@ import static com.tilitili.common.utils.StringUtils.isNotBlank;
 public class BotMessageAction {
     private final BotSessionService.MiraiSession session;
     private final BotMessage botMessage;
+    private final BotSender botSender;
     private final List<String> imageList;
     private final List<Long> atList;
     private final String text;
@@ -33,12 +34,13 @@ public class BotMessageAction {
     private String keyWithoutPrefix;
     private String key;
     private String value;
-    private BotSender botSender;
     private String quoteMessageId;
     private Long quoteSenderId;
     private BotMessage quoteMessage;
+    private String virtualKey;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender) {
+        this.botSender = botSender;
         this.botMessage = botMessage;
         this.session = session;
         this.paramMap = new HashMap<>();
@@ -186,11 +188,6 @@ public class BotMessageAction {
         return botSender;
     }
 
-    public BotMessageAction setBotSender(BotSender botSender) {
-        this.botSender = botSender;
-        return this;
-    }
-
     public String getQuoteMessageId() {
         return quoteMessageId;
     }
@@ -218,5 +215,14 @@ public class BotMessageAction {
 
     public Long getQqOrTinyId() {
         return qqOrTinyId;
+    }
+
+    public String getVirtualKey() {
+        return virtualKey;
+    }
+
+    public BotMessageAction setVirtualKey(String virtualKey) {
+        this.virtualKey = virtualKey;
+        return this;
     }
 }

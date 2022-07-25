@@ -64,7 +64,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
-		switch (key) {
+		String virtualKey = messageAction.getVirtualKey();
+		switch (virtualKey != null? virtualKey: key) {
 			case "玩24点": case "w24": return startGame(messageAction);
 			case "回答24点": case "hd24": return handleGame(messageAction);
 			case "放弃24点": case "fq24": return endGame(messageAction);

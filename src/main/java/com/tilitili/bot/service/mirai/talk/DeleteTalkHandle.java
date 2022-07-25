@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai.talk;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -9,6 +10,7 @@ import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import java.util.List;
 public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 	private final BotTalkMapper botTalkMapper;
 	private final BotTalkManager botTalkManager;
+	private static final String statusKey = "DeleteTalkHandle.statusKey";
 
 	@Autowired
 	public DeleteTalkHandle(BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
@@ -27,17 +30,34 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
-		String req = messageAction.getBodyOrDefault("提问", messageAction.getValue());
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotMessage botMessage = messageAction.getBotMessage();
+		String value = messageAction.getValue();
+		String req = messageAction.getBodyOrDefault("提问", value);
+		Long qqOrTinyId = messageAction.getQqOrTinyId();
+
+		String senderStatusKey = statusKey + qqOrTinyId;
+
 		List<String> imageList = messageAction.getImageList();
-		if (StringUtils.isBlank(req)) {
-			Asserts.notEmpty(imageList, "格式错啦(提问)");
-			req = QQUtil.getImageUrl(imageList.get(0));
+		BotTalk botTalk = null;
+		if (session.containsKey(senderStatusKey)) {
+			req = TalkHandle.convertMessageToString(botMessage);
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(req, botMessage);
+		} else if (StringUtils.isNotBlank(req)) {
+			List<BotTalk> talkList = botTalkManager.getBotTalkByBotMessage(req, 0, botMessage);
+			Asserts.notEmpty(talkList, "没找到");
+			botTalk = talkList.get(0);
+		} else if (CollectionUtils.isNotEmpty(imageList)) {
+			List<BotTalk> talkList = botTalkManager.getBotTalkByBotMessage(QQUtil.getImageUrl(imageList.get(0)), 1, botMessage);
+			Asserts.notEmpty(talkList, "没找到");
+			botTalk = talkList.get(0);
+		} else if (! session.containsKey(senderStatusKey)) {
+			session.put(senderStatusKey, "1");
+			return BotMessage.simpleTextMessage("请告诉我关键词吧");
 		}
-
-		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, messageAction.getBotMessage());
-		Asserts.notEquals(botTalkList.size(), 0, "没找到。");
-
-		BotTalk botTalk = botTalkList.get(0);
+//		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, botMessage);
+		Asserts.notNull(botTalk, "没找到。");
+		session.remove(senderStatusKey);
 		botTalkMapper.updateBotTalkSelective(new BotTalk().setId(botTalk.getId()).setStatus(-1));
 		return BotMessage.simpleTextMessage("移除了。");
 	}
