@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +59,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		int type = -1;
 
 		if (session.containsKey(senderStatusKey)) {
-			if (session.containsKey(senderReqKey)) {
+			if (!session.containsKey(senderReqKey)) {
 				session.put(senderReqKey, TalkHandle.convertMessageToString(botMessage));
 				return BotMessage.simpleTextMessage("请告诉我回复吧");
 			} else if (session.containsKey(senderReqKey)) {
@@ -69,20 +68,20 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 				type = 2;
 			}
 		} else if (StringUtils.isNotBlank(reqStr) && StringUtils.isNotBlank(respStr)) {
-			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(reqStr))));
-			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(respStr))));
+			req = gson.toJson(BotMessage.simpleTextMessage(reqStr));
+			resp = gson.toJson(BotMessage.simpleTextMessage(respStr));
 			type = 2;
 		} else if (StringUtils.isBlank(reqStr) && imageList.size() == 1) {
-			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
-			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(respStr))));
+			req = gson.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(0))));
+			resp = gson.toJson(BotMessage.simpleTextMessage(respStr));
 			type = 2;
 		} else if (StringUtils.isBlank(respStr) && imageList.size() == 1) {
-			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofPlain(reqStr))));
-			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
+			req = gson.toJson(BotMessage.simpleTextMessage(reqStr));
+			resp = gson.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(0))));
 			type = 2;
 		} else if (StringUtils.isBlank(reqStr) && StringUtils.isBlank(respStr) && imageList.size() == 2) {
-			req = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0))))));
-			resp = gson.toJson(BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1))))));
+			req = gson.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(0))));
+			resp = gson.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(1))));
 			type = 2;
 		} else if (StringUtils.isBlank(value) && ! session.containsKey(senderStatusKey)) {
 			session.remove(senderReqKey);
@@ -99,8 +98,6 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		if (oldTalk != null) {
 			botTalkMapper.deleteBotTalkByPrimary(oldTalk.getId());
 		}
-//		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, type, messageAction.getBotMessage());
-//		botTalkList.forEach(botTalk -> botTalkMapper.deleteBotTalkByPrimary(botTalk.getId()));
 
 		BotTalk addBotTalk = new BotTalk().setType(type).setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
 		botTalkMapper.addBotTalkSelective(addBotTalk);

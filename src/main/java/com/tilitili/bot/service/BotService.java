@@ -65,7 +65,7 @@ public class BotService {
                     key = messageHandle.isThisTask(botMessageAction);
                     if (key != null) {
                         botMessageAction.setVirtualKey(key);
-                        botTaskDTOList.add(botTask);
+                        botTaskDTOList.add(0, botTask);
                     }
                 }
             }
