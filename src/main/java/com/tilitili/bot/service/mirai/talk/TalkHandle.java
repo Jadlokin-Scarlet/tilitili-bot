@@ -84,7 +84,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 			req = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
 			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1)))));
 			type = 2;
-		} else if (! session.containsKey(senderStatusKey)) {
+		} else if (StringUtils.isBlank(value) && ! session.containsKey(senderStatusKey)) {
 			session.remove(senderReqKey);
 			session.put(senderStatusKey, "1");
 			return BotMessage.simpleTextMessage("请告诉我关键词吧");
