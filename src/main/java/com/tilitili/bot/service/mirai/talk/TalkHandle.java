@@ -57,7 +57,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
-		int type = -1;
+		int type = 0;
 		if (StringUtils.isBlank(req) && StringUtils.isBlank(resp) && imageList.size() == 2) {
 			req = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
 			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1)))));
