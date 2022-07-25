@@ -8,6 +8,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -41,16 +42,11 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 		List<String> imageList = messageAction.getImageList();
 		BotTalk botTalk = null;
 		if (session.containsKey(senderStatusKey)) {
-			req = TalkHandle.convertMessageToString(botMessage);
-			botTalk = botTalkManager.getJsonTalkOrOtherTalk(req, botMessage);
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(TalkHandle.convertMessageToString(botMessage), botMessage);
 		} else if (StringUtils.isNotBlank(req)) {
-			List<BotTalk> talkList = botTalkManager.getBotTalkByBotMessage(req, 0, botMessage);
-			Asserts.notEmpty(talkList, "没找到");
-			botTalk = talkList.get(0);
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(Gsons.toJson(BotMessage.simpleTextMessage(req)), botMessage);
 		} else if (CollectionUtils.isNotEmpty(imageList)) {
-			List<BotTalk> talkList = botTalkManager.getBotTalkByBotMessage(QQUtil.getImageUrl(imageList.get(0)), 1, botMessage);
-			Asserts.notEmpty(talkList, "没找到");
-			botTalk = talkList.get(0);
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(Gsons.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(0)))), botMessage);
 		} else if (! session.containsKey(senderStatusKey)) {
 			session.put(senderStatusKey, "1");
 			return BotMessage.simpleTextMessage("请告诉我关键词吧");
