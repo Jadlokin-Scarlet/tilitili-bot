@@ -13,4 +13,9 @@ public abstract class BaseMessageHandleAdapt implements BaseMessageHandle {
 	public BotMessage handleAssertException(BotMessageAction messageAction, AssertException e) {
 		return null;
 	}
+
+	@Override
+	public String isThisTask(BotMessageAction botMessageAction) {
+		return null;
+	}
 }

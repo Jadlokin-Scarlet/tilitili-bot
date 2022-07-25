@@ -2,7 +2,6 @@ package com.tilitili.bot.service;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.PlayTwentyFourHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
@@ -35,16 +34,14 @@ public class BotService {
     private final BotSessionService botSessionService;
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
-    private final PlayTwentyFourHandle playTwentyFourHandle;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final Gson gson;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, PlayTwentyFourHandle playTwentyFourHandle, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
         this.botTaskMapper = botTaskMapper;
-        this.playTwentyFourHandle = playTwentyFourHandle;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         gson = new Gson();
     }
@@ -72,12 +69,15 @@ public class BotService {
             boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
             if (isNoKey) {
                 String key;
-                // 尝试匹配回答24点
-                key = playTwentyFourHandle.isThisTask(botMessageAction);
-                if (key != null) {
-                    botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(prefix + key + " "));
-                    syncHandleTextMessage(botMessage, botSender);
-                    return;
+                for (BotTask botTask : botTaskDTOList) {
+                    BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
+                    // 尝试匹配回答24点
+                    key = messageHandle.isThisTask(botMessageAction);
+                    if (key != null) {
+                        botMessage.getBotMessageChainList().add(0, BotMessageChain.ofPlain(prefix + key + " "));
+                        syncHandleTextMessage(botMessage, botSender);
+                        return;
+                    }
                 }
             }
 

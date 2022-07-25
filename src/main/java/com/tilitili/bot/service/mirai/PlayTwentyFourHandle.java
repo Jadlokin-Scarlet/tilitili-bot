@@ -72,6 +72,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		}
 	}
 
+	@Override
 	public String isThisTask(BotMessageAction botMessageAction) {
 		String text = botMessageAction.getText();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();

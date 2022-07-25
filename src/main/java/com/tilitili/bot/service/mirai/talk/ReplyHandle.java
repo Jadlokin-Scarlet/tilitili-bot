@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai.talk;
 
+import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.GroupEmum;
@@ -22,9 +23,11 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final BotTalkManager botTalkManager;
+    private final Gson gson;
 
     @Autowired
     public ReplyHandle(BotTalkManager botTalkManager) {
+        this.gson = new Gson();
         this.botTalkManager = botTalkManager;
     }
 
@@ -35,8 +38,6 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         BotMessage botMessage = messageAction.getBotMessage();
         Long qq = botMessage.getQq();
         Long group = botMessage.getGroup();
-        Long guildId = botMessage.getGuildId();
-        String sendType = botMessage.getSendType();
         List<BotTalk> botTalkList;
         if (StringUtils.isBlank(text) && imageList.size() == 1) {
             botTalkList = botTalkManager.getBotTalkByBotMessage(QQUtil.getImageUrl(imageList.get(0)), botMessage);
@@ -47,8 +48,10 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             BotTalk botTalk = botTalkList.get(0);
             if (botTalk.getType().equals(0)) {
                 return BotMessage.simpleTextMessage(botTalk.getResp());
-            } else {
+            } else if (botTalk.getType() == 1) {
                 return BotMessage.simpleImageMessage(botTalk.getResp());
+            } else if (botTalk.getType() == 2) {
+                return BotMessage.simpleListMessage(gson.fromJson(botTalk.getResp(), BotMessage.class).getBotMessageChainList());
             }
         }
 
