@@ -8,7 +8,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
@@ -58,7 +57,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String req = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): null);
 		String resp = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 
-		int type;
+		int type = -1;
 		if (StringUtils.isBlank(req) && StringUtils.isBlank(resp) && imageList.size() == 2) {
 			req = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
 			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(1)))));
@@ -69,7 +68,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		} else if (StringUtils.isBlank(resp) && imageList.size() == 1) {
 			resp = gson.toJson(Collections.singleton(BotMessageChain.ofImage(QQUtil.getImageUrl(imageList.get(0)))));
 			type = 2;
-		} else if (StringUtils.isBlank(value)) {
+		} else if (StringUtils.isBlank(req) && StringUtils.isBlank(resp) && StringUtils.isBlank(value)) {
 			if (! session.containsKey(senderStatusKey)) {
 				session.remove(senderReqKey);
 				session.put(senderStatusKey, "1");
@@ -83,8 +82,6 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 				resp = this.convertMessageToString(botMessage);
 				type = 2;
 			}
-		} else {
-			throw new AssertException("啊嘞，不对劲");
 		}
 		Asserts.notBlank(req, "格式不对(提问)");
 		Asserts.notBlank(resp, "格式不对(回答)");
