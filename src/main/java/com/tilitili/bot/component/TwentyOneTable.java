@@ -54,6 +54,11 @@ public class TwentyOneTable {
 	}
 
 	public void waitPeoplePrepare(BotMessage botMessage) {
+		if (playerList.isEmpty()) {
+			this.initData();
+			botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+			return;
+		}
 		if (waitPeoplePrepareId != null) return;
 		final long theWaitPeoplePrepareId = random.nextLong();
 		this.waitPeoplePrepareId = theWaitPeoplePrepareId;
