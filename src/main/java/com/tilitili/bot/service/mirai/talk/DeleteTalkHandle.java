@@ -33,7 +33,7 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
-		String value = messageAction.getValue();
+		String value = messageAction.getValueOrVirtualValue();
 		String req = messageAction.getBodyOrDefault("提问", value);
 		Long qqOrTinyId = messageAction.getQqOrTinyId();
 
@@ -57,4 +57,17 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 		botTalkMapper.updateBotTalkSelective(new BotTalk().setId(botTalk.getId()).setStatus(-1));
 		return BotMessage.simpleTextMessage("移除了。");
 	}
+
+
+	@Override
+	public String isThisTask(BotMessageAction botMessageAction) {
+		Long qqOrTinyId = botMessageAction.getQqOrTinyId();
+		BotSessionService.MiraiSession session = botMessageAction.getSession();
+		String senderStatusKey = statusKey + qqOrTinyId;
+		if (session.containsKey(senderStatusKey)) {
+			return "移除对话";
+		}
+		return null;
+	}
+
 }

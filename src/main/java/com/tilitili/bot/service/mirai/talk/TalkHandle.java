@@ -50,7 +50,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String senderReqKey = reqKey + qqOrTinyId;
 		String senderStatusKey = statusKey + qqOrTinyId;
 
-		String value = messageAction.getValueOrDefault("");
+		String value = messageAction.getValueOrVirtualValue();
 		String reqStr = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
 		String respStr = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 

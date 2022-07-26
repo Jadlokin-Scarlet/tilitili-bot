@@ -124,6 +124,10 @@ public class BotMessageAction {
         }
     }
 
+    public String getValueOrVirtualValue() {
+        return virtualKey == null? text: value;
+    }
+
     public String getParam(String paramKey) {
         return paramMap.get(paramKey);
     }
