@@ -9,6 +9,7 @@ import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
@@ -59,7 +60,8 @@ public class BotService {
             boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
             if (isNoKey) {
                 String key;
-                for (BotTask botTask : botTaskDTOList) {
+                List<BotTask> allBotTask = botTaskMapper.getBotTaskByCondition(new BotTaskQuery().setStatus(0));
+                for (BotTask botTask : allBotTask) {
                     BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
                     // 尝试匹配回答24点
                     key = messageHandle.isThisTask(botMessageAction);
