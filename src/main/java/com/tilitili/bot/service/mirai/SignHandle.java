@@ -56,7 +56,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		result.add(BotMessageChain.ofPlain("排序:分数\t名称"));
 		for (int index = 0; index < userList.size(); index++) {
 			BotUser botUser = userList.get(index);
-			if (botUser.getScore() == 0) continue;
+			if (botUser.getScore() <= 100) continue;
 			result.add(BotMessageChain.ofPlain(String.format("\n%s:%s\t%s", index + 1, botUser.getScore(), botUser.getName())));
 		}
 		return BotMessage.simpleListMessage(result);
