@@ -113,7 +113,12 @@ public class PixivService {
 		try {
 			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
 			// step 2 爬热门
-			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L);
+			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L, r18);
+			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18);
+			if (messageId != null) {
+				return messageId;
+			}
+			proDataList = pixivManager.searchProProxy(searchKey, 2L, r18);
 			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18);
 			if (messageId != null) {
 				return messageId;

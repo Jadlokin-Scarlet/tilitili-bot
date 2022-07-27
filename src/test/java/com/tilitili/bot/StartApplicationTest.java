@@ -1,5 +1,6 @@
 package com.tilitili.bot;
 
+import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.GuildEmum;
@@ -167,20 +168,38 @@ class StartApplicationTest {
                 random.nextInt(13) + 1,
                 random.nextInt(13) + 1
         );
+        System.out.println(getResult(numList));
+    }
+
+    public static String getResult(List<Integer> numList) {
         for (int index = 0; index < 256; index++) {
             List<Integer> indexList = Arrays.asList(
                     index / 4 / 4 / 4,
                     index / 4 / 4 % 4,
-                    index / 4 % (4 * 4),
-                    index % (4 * 4 * 4)
+                    index / 4 % 4,
+                    index % 4
             );
             if (new HashSet<>(indexList).size() != indexList.size()) {
                 continue;
             }
             List<Integer> reIndexNumList = indexList.stream().map(numList::get).collect(Collectors.toList());
+            List<String> opList = Arrays.asList("+", "-", "*", "/");
+            for (int jndex = 0; jndex < 64; jndex++) {
+                List<Integer> jndexList = Arrays.asList(
+                        jndex / 4 / 4,
+                        jndex / 4 % 4,
+                        jndex % 4
+                );
+                List<String> reIndexOpList = jndexList.stream().map(opList::get).collect(Collectors.toList());
 
-
-//            new CalculateObject()
+                CalculateObject calculateObject = new CalculateObject(reIndexNumList.get(0) + reIndexOpList.get(0)
+                        + reIndexNumList.get(1) + reIndexOpList.get(1)
+                        + reIndexNumList.get(2) + reIndexOpList.get(2)
+                        + reIndexNumList.get(3)
+                );
+                if (calculateObject.getResult() == 24) return calculateObject.toString();
+            }
         }
+        return null;
     }
 }
