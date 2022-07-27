@@ -182,7 +182,7 @@ public class PixivService {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		List<String> pidList = dataList.stream().map(PixivSearchIllust::getId).collect(Collectors.toList());
 		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(pidList).setSource(source));
-		Map<String, PixivImage> oldPixivImageMap = oldPixivImageList.stream().collect(Collectors.toMap(PixivImage::getPid, Function.identity()));
+		Map<String, PixivImage> oldPixivImageMap = oldPixivImageList.stream().collect(Collectors.toMap(PixivImage::getPid, Function.identity(), (a, b) -> a));
 		List<PixivTag> tagList = pixivTagMapper.getPixivTagByPidList(pidList);
 		Map<String, Long> tagCountMap = tagList.stream().collect(Collectors.groupingBy(PixivTag::getPid, Collectors.counting()));
 
