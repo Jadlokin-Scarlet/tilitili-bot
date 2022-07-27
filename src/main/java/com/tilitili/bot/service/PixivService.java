@@ -179,14 +179,20 @@ public class PixivService {
 		List<String> pidList = dataList.stream().map(PixivSearchIllust::getId).collect(Collectors.toList());
 		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(pidList).setSource(source));
 		Map<String, PixivImage> oldPixivImageMap = oldPixivImageList.stream().collect(Collectors.toMap(PixivImage::getPid, Function.identity()));
+		List<PixivTag> tagList = pixivTagMapper.getPixivTagByPidList(pidList);
+		Map<String, Long> tagCountMap = tagList.stream().collect(Collectors.groupingBy(PixivTag::getPid, Collectors.counting()));
 
 		String messageId = null;
 		for (PixivSearchIllust data : dataList) {
 			try {
 				String pid = data.getId();
-				supplePixivTag(data, searchTagList);
 				PixivImage oldPixivImage = oldPixivImageMap.get(pid);
-				if (oldPixivImage != null) continue;
+				// 只补充有info的图片
+				if (oldPixivImage != null) {
+					Long tagCount = tagCountMap.get(pid);
+					supplePixivTag(data, searchTagList, tagCount);
+					continue;
+				}
 				saveImageFromPixiv(pid, searchKey, searchTagList);
 
 				if (messageId == null) {
@@ -343,14 +349,10 @@ public class PixivService {
 		}
 	}
 
-	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList) {
+	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList, Long tagCount) {
 		String pid = data.getId();
-		// 只补充有info的图片
-		List<PixivImage> oldDataList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid).setSource(source));
-		if (oldDataList.isEmpty()) return;
 		// 只补充没tag的图片
-		boolean hasTag = pixivTagMapper.countPixivTagByCondition(new PixivTagQuery().setPid(pid)) > 0;
-		if (hasTag) return;
+		if (tagCount > 0) return;
 
 		// p站tag 搜索词tag列表 去重作为最终tag列表
 		List<String> tagList = new ArrayList<>(data.getTags());
