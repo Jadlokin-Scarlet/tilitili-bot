@@ -92,6 +92,7 @@ public class TwentyOneTable {
 	public boolean addGame(BotUser botUser, Integer score) {
 		TwentyOnePlayer player = playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, botUser.getExternalId())).findFirst().orElse(null);
 		if (player == null) {
+			Asserts.isTrue(playerList.size() < 4, "人数爆满啦，稍后再来吧。");
 			playerList.add(new TwentyOnePlayer().setBotUser(botUser).setScore(score));
 		} else {
 			player.setScore(score);
