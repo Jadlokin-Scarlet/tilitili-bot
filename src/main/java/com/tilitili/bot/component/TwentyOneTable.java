@@ -56,7 +56,6 @@ public class TwentyOneTable {
 	public void waitPeoplePrepare(BotMessage botMessage) {
 		if (playerList.isEmpty()) {
 			this.initData();
-			botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
 			return;
 		}
 		if (waitPeoplePrepareId != null) return;
@@ -204,6 +203,15 @@ public class TwentyOneTable {
 			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
 			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + player.getScore()));
 		}
+		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();
+		for (TwentyOnePlayer player : this.playerList) {
+			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
+			if (botUser.getScore() > 0) newPlayerList.add(player);
+		}
+		if (newPlayerList.isEmpty()) {
+			botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+		}
+		this.playerList = newPlayerList;
 		resp.add(BotMessageChain.ofPlain("\n下一局将在1m后开始，未准备将自动离席哦。"));
 		this.initData();
 		this.waitPeoplePrepare(botMessage);

@@ -224,6 +224,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
+		Asserts.isTrue(botUser.getScore() > 0, "你没有积分啦！");
 		boolean addGameSuccess = twentyOneTable.addGame(botUser);
 		Asserts.isTrue(addGameSuccess, "加入失败惹。");
 
