@@ -241,7 +241,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		String scoreStr = messageAction.getValue();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 
-		if (twentyOneTable == null && StringUtils.isNotDigits(scoreStr)) {
+		if (StringUtils.isNotDigits(scoreStr)) {
 			log.info("格式错啦(积分数)");
 			return null;
 		}
