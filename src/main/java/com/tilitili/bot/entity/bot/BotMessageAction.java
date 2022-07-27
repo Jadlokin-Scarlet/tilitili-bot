@@ -58,6 +58,7 @@ public class BotMessageAction {
         head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
 
         key = "";
+        value = "";
         if (isNotBlank(head)) {
             if (head.contains(" ")) {
                 int splitIndex = head.indexOf(" ");
@@ -125,7 +126,7 @@ public class BotMessageAction {
     }
 
     public String getValueOrVirtualValue() {
-        return virtualKey == null? text: value;
+        return virtualKey != null? text: value;
     }
 
     public String getParam(String paramKey) {
