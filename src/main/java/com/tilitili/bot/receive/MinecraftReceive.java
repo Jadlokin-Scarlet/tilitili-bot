@@ -10,14 +10,11 @@ import com.tilitili.common.entity.view.request.MinecraftWebHooksRequest;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -47,13 +44,9 @@ public class MinecraftReceive {
 			log.debug("Message Received [{}]",taskMessage);
 			Long taskId = taskMessage.getId();
 			List<String> valueList = taskMessage.getValueList();
-			Asserts.isTrue(valueList.size() == 3, "参数异常");
+			Asserts.isTrue(valueList.size() == 2, "参数异常");
 			String requestStr = valueList.get(0);
-			String sendTime = valueList.get(1);
-			String serverName = valueList.get(2);
-
-			String limitTime = DateUtils.addTime(new Date(), Calendar.MINUTE, -1);
-			Asserts.isTrue(DateUtils.caculateTime(limitTime, sendTime) > 0, "消息超时, message=%s", taskMessage);
+			String serverName = valueList.get(1);
 
 			MinecraftServerEmum serverEmum = MinecraftServerEmum.getByName(serverName);
 			Asserts.notNull(serverEmum, "找不到服务器配置");
