@@ -148,11 +148,11 @@ public class TwentyOneTable {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
 		CardResult playerCardResult = this.getCardResult(nowPlayer.getCardList());
 		CardResult adminCardResult = this.getCardResult(this.admin.getCardList());
-		if (nowPlayer.needEnd(playerCardResult)) {
+		while (nowPlayer != null && nowPlayer.needEnd(playerCardResult)) {
 			this.stopCard(nowPlayer);
-			if (this.isEnd()) return this.getEndMessage(botMessage);
 			nowPlayer = this.getLastPlayer();
 		}
+		if (this.isEnd()) return this.getEndMessage(botMessage);
 
 		if (Objects.equals(adminCardResult.getSuperCard(), BLACK_JACK)) {
 			for (TwentyOnePlayer player : playerList) {
