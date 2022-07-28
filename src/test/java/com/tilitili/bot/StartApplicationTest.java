@@ -12,6 +12,7 @@ import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpChannel;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpGuild;
 import com.tilitili.common.entity.view.bot.mirai.MiraiFriend;
 import com.tilitili.common.entity.view.bot.mirai.MiraiGroup;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
@@ -20,6 +21,7 @@ import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.TwentyFourAnswerMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import static com.tilitili.common.emnus.ChannelEmum.*;
 import static com.tilitili.common.emnus.GroupEmum.RANK_GROUP;
 import static com.tilitili.common.emnus.GroupEmum.TEST_GROUP;
 
+@Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 class StartApplicationTest {
@@ -160,50 +163,6 @@ class StartApplicationTest {
 
     @Resource
     private TwentyFourAnswerMapper twentyFourAnswerMapper;
-    private static final Random random = new Random(System.currentTimeMillis());
-    private final int n = 4;
-    public static void main(String[] args) {
-        List<Integer> numList = Arrays.asList(
-                random.nextInt(13) + 1,
-                random.nextInt(13) + 1,
-                random.nextInt(13) + 1,
-                random.nextInt(13) + 1
-        );
-        System.out.println(numList);
-        CalculateObject result = getResult(numList);
-        Asserts.notNull(result, "?");
-        System.out.println(result.toString()+"="+result.getResult());
-    }
 
-    public static CalculateObject getResult(List<Integer> numList) {
-        for (int index = 0; index < 256; index++) {
-            List<Integer> indexList = Arrays.asList(
-                    index / 4 / 4 / 4,
-                    index / 4 / 4 % 4,
-                    index / 4 % 4,
-                    index % 4
-            );
-            if (new HashSet<>(indexList).size() != indexList.size()) {
-                continue;
-            }
-            List<Integer> reIndexNumList = indexList.stream().map(numList::get).collect(Collectors.toList());
-            List<String> opList = Arrays.asList("+", "-", "*", "/");
-            for (int jndex = 0; jndex < 64; jndex++) {
-                List<Integer> jndexList = Arrays.asList(
-                        jndex / 4 / 4,
-                        jndex / 4 % 4,
-                        jndex % 4
-                );
-                List<String> reIndexOpList = jndexList.stream().map(opList::get).collect(Collectors.toList());
 
-                CalculateObject calculateObject = new CalculateObject(reIndexNumList.get(0) + reIndexOpList.get(0)
-                        + reIndexNumList.get(1) + reIndexOpList.get(1)
-                        + reIndexNumList.get(2) + reIndexOpList.get(2)
-                        + reIndexNumList.get(3)
-                );
-                if (calculateObject.getResult() == 24) return calculateObject;
-            }
-        }
-        return null;
-    }
 }

@@ -6,6 +6,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -141,6 +142,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 			log.debug("problem={} is haven't answer", newNumListStr);
 		}
+		String answerTmp = answer;
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
@@ -150,7 +152,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			String lastSendTime2Str = session.get(lastSendTimeKey);
 			boolean needEnd = lastSendTime2Str != null && DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
 			if (needEnd) {
-				botManager.sendMessage(BotMessage.simpleTextMessage("时间到啦！没有人能答出来吗？", messageAction.getBotMessage()));
+				botManager.sendMessage(BotMessage.simpleTextMessage("戳啦，答案是"+answerTmp, messageAction.getBotMessage()));
 				session.remove(numListKey);
 				session.remove(lastSendTimeKey);
 				session.remove(lockKey);
@@ -160,7 +162,9 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private String hasAnswer(List<Integer> numList) {
-		return "null";
+		CalculateObject result = this.getResult(numList);
+		if (result == null) return null;
+		return result.toString();
 	}
 
 	private Date getLimitDate() {
@@ -168,5 +172,46 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		calstart.setTime(new Date());
 		calstart.add(Calendar.MINUTE, -waitTime);
 		return calstart.getTime();
+	}
+
+	private final List<String> protectTypeList = Arrays.asList("((%s%s%s)%s%s)%s%s", "%s%s(%s%s(%s%s%s))", "(%s%s%s)%s(%s%s%s)", "(%s%s(%s%s%s))%s%s", "%s%s((%s%s%s)%s%s)");
+	private CalculateObject getResult(List<Integer> numList) {
+		for (int index = 0; index < 256; index++) {
+			List<Integer> indexList = Arrays.asList(
+					index / 4 / 4 / 4,
+					index / 4 / 4 % 4,
+					index / 4 % 4,
+					index % 4
+			);
+			if (new HashSet<>(indexList).size() != indexList.size()) {
+				continue;
+			}
+			List<Integer> reIndexNumList = indexList.stream().map(numList::get).collect(Collectors.toList());
+			List<String> opList = Arrays.asList("+", "-", "*", "/");
+			for (int jndex = 0; jndex < 64; jndex++) {
+				List<Integer> jndexList = Arrays.asList(
+						jndex / 4 / 4,
+						jndex / 4 % 4,
+						jndex % 4
+				);
+				List<String> reIndexOpList = jndexList.stream().map(opList::get).collect(Collectors.toList());
+
+				for (String protectType : protectTypeList) {
+					String calStr = String.format(protectType, reIndexNumList.get(0), reIndexOpList.get(0)
+							, reIndexNumList.get(1), reIndexOpList.get(1)
+							, reIndexNumList.get(2), reIndexOpList.get(2)
+							, reIndexNumList.get(3));
+					CalculateObject calculateObject = new CalculateObject(calStr);
+					try {
+						if (calculateObject.getResult() == 24) return calculateObject;
+					} catch (AssertException e) {
+						if (!e.getMessage().equals("好像便乘小数惹")) {
+							log.warn("numList="+numList, e);
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }

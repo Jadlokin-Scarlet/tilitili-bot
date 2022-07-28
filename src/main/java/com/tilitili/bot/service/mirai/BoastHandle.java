@@ -33,6 +33,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 			Asserts.notNull(firstAt, "想我夸谁鸭");
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(firstAt),
+					BotMessageChain.ofPlain(" "),
 					BotMessageChain.ofPlain(text)
 			));
 		} else {
