@@ -91,9 +91,12 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage endGame(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
+		String numListStr = session.get(numListKey);
+		List<Integer> numList = Arrays.stream(numListStr.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+		String answer = this.hasAnswer(numList);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
-		return BotMessage.simpleTextMessage("游戏结束了！");
+		return BotMessage.simpleTextMessage("戳啦，答案是"+answer, messageAction.getBotMessage());
 	}
 
 	private BotMessage handleGame(BotMessageAction messageAction) {
@@ -114,7 +117,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			CalculateObject calculateObject = new CalculateObject(resultAfterClean);
 			int resultNum = calculateObject.getResult();
 			String calculateStr = calculateObject.toString();
-			Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s]吗？", calculateStr);
+			Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s=%s]吗？", calculateStr, resultNum);
 
 			String numListStr = session.get(numListKey);
 			String[] numList = numListStr.split(",");
