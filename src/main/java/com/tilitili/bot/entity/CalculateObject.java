@@ -79,7 +79,8 @@ public class CalculateObject {
 				case "+": return leftResult + rightResult;
 				case "-": return leftResult - rightResult;
 				case "*": return leftResult * rightResult;
-				case "/": return rightResult == 0? 0: leftResult / rightResult;
+				case "/": Asserts.notEquals(rightResult, 0, "不能除0啦");
+					return leftResult / rightResult;
 				default: throw new AssertException("好像哪里不对劲");
 			}
 		} else {

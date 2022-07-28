@@ -18,6 +18,7 @@ import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.TwentyFourAnswerMapper;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -168,10 +169,13 @@ class StartApplicationTest {
                 random.nextInt(13) + 1,
                 random.nextInt(13) + 1
         );
-        System.out.println(getResult(numList));
+        System.out.println(numList);
+        CalculateObject result = getResult(numList);
+        Asserts.notNull(result, "?");
+        System.out.println(result.toString()+"="+result.getResult());
     }
 
-    public static String getResult(List<Integer> numList) {
+    public static CalculateObject getResult(List<Integer> numList) {
         for (int index = 0; index < 256; index++) {
             List<Integer> indexList = Arrays.asList(
                     index / 4 / 4 / 4,
@@ -197,7 +201,7 @@ class StartApplicationTest {
                         + reIndexNumList.get(2) + reIndexOpList.get(2)
                         + reIndexNumList.get(3)
                 );
-                if (calculateObject.getResult() == 24) return calculateObject.toString();
+                if (calculateObject.getResult() == 24) return calculateObject;
             }
         }
         return null;
