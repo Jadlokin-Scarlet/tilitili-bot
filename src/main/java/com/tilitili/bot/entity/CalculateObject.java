@@ -109,10 +109,6 @@ public class CalculateObject {
 					PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("*", "/", "-")
 			)
 	);
-	private static final Map<String, List<String>> addNeedProtectOperate = ImmutableMap.of(
-			PARENT_OPERATE_TYPE_LEFT, Arrays.asList("*", "/"),
-			PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("*", "/", "-")
-	);
 	private static final List<String> addLeftNeedProtectOperate = Arrays.asList("*", "/");
 	private static final List<String> addRightNeedProtectOperate = Arrays.asList("*", "/", "-");
 	private String _toString(String parentOperate, String type) {
@@ -138,7 +134,7 @@ public class CalculateObject {
 	}
 
 	private String concatResult(String parentOperate, String type, String leftResult, String operate, String rightResult) {
-		if (needProtectOperateMap.get(operate).get(type).contains(parentOperate)) {
+		if (parentOperate != null && type != null && needProtectOperateMap.get(operate).get(type).contains(parentOperate)) {
 			return "(" + leftResult + operate + rightResult + ")";
 		} else {
 				return leftResult + operate + rightResult;

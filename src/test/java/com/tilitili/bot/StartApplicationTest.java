@@ -12,14 +12,12 @@ import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpChannel;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpGuild;
 import com.tilitili.common.entity.view.bot.mirai.MiraiFriend;
 import com.tilitili.common.entity.view.bot.mirai.MiraiGroup;
-import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.TwentyFourAnswerMapper;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -29,7 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
@@ -164,5 +165,10 @@ class StartApplicationTest {
     @Resource
     private TwentyFourAnswerMapper twentyFourAnswerMapper;
 
+
+    public static void main(String[] args) {
+        CalculateObject calculateObject = new CalculateObject("2*(13-6)+10");
+        System.out.println(calculateObject.toString() + "=" + calculateObject.getResult());
+    }
 
 }
