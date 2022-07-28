@@ -52,8 +52,8 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("请告诉我关键词吧");
 		}
 //		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, botMessage);
-		Asserts.notNull(botTalk, "没找到。");
 		session.remove(senderStatusKey);
+		Asserts.notNull(botTalk, "没找到。");
 		botTalkMapper.updateBotTalkSelective(new BotTalk().setId(botTalk.getId()).setStatus(-1));
 		return BotMessage.simpleTextMessage("移除了。");
 	}
