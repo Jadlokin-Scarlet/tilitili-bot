@@ -1,13 +1,16 @@
 package com.tilitili.bot.receive;
 
 import com.google.gson.Gson;
+import com.tilitili.bot.service.BotService;
 import com.tilitili.common.emnus.MinecraftServerEmum;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.emnus.TaskStatus;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.message.TaskMessage;
 import com.tilitili.common.entity.view.request.MinecraftWebHooksRequest;
 import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +27,12 @@ public class MinecraftReceive {
 	private final JmsTemplate jmsTemplate;
 	private final TaskMapper taskMapper;
 	private final MinecraftManager minecraftManager;
+	private final BotService botService;
+	private final BotSenderMapper botSenderMapper;
 
-	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager) {
+	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
+		this.botService = botService;
+		this.botSenderMapper = botSenderMapper;
 		gson = new Gson();
 		this.ip = environment.getProperty("ip");
 		this.jmsTemplate = jmsTemplate;
@@ -58,6 +65,9 @@ public class MinecraftReceive {
 
 			BotMessage botMessage = minecraftManager.handleMessage(request, serverEmum);
 			if (botMessage == null) return;
+
+			BotSender botSender = botSenderMapper.getBotSenderById(4407L);
+//			botService.syncHandleTextMessage(botMessage, botSender);
 
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
 		} catch (Exception e) {

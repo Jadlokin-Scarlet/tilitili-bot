@@ -1,8 +1,10 @@
 package com.tilitili.bot.config;
 
 import com.tilitili.bot.receive.MinecraftReceive;
+import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
 import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ public class WebSocketConfig {
     }
 
     @Bean
-    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager) {
-        return new MinecraftReceive(jmsTemplate, taskMapper, environment, minecraftManager);
+    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
+        return new MinecraftReceive(jmsTemplate, taskMapper, environment, minecraftManager, botService, botSenderMapper);
     }
 }
