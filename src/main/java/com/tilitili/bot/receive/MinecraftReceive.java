@@ -44,6 +44,7 @@ public class MinecraftReceive {
 			if (taskMessage == null) {
 				return;
 			}
+			log.debug("Message Received [{}]",taskMessage);
 			Long taskId = taskMessage.getId();
 			List<String> valueList = taskMessage.getValueList();
 			Asserts.isTrue(valueList.size() == 3, "参数异常");

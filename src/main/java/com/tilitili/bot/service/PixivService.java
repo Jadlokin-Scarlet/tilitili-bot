@@ -152,7 +152,7 @@ public class PixivService {
 	}
 
 	public String sendCachePixivUserImage(String quote, String userName, String source, String r18, Long senderId) {
-		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18));
+		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18).setSenderId(senderId));
 		if (noUsedImage != null) {
 			return sendPixivImage(quote, noUsedImage, senderId);
 		} else {
