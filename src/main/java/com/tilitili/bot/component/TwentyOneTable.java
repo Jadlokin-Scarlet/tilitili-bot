@@ -146,9 +146,8 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(BotMessage botMessage) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
-		CardResult playerCardResult = this.getCardResult(nowPlayer.getCardList());
 		CardResult adminCardResult = this.getCardResult(this.admin.getCardList());
-		while (nowPlayer != null && nowPlayer.needEnd(playerCardResult)) {
+		while (nowPlayer != null && nowPlayer.needEnd(this.getCardResult(nowPlayer.getCardList()))) {
 			this.stopCard(nowPlayer);
 			nowPlayer = this.getLastPlayer();
 		}
