@@ -6,9 +6,11 @@ import com.tilitili.common.emnus.MinecraftServerEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +24,12 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final BotSender baGroup;
 	private final List<String> blackList4370 = Arrays.asList("https://gchat.qpic.cn/qmeetpic/49134681639135681/7091721-2888756874-C116108D71E375A0A37E168B6C97889A/0?term");
 	private final MinecraftManager minecraftManager;
+	private final BaiduManager baiduManager;
 
-	public ForwardHandle(BotSenderMapper botSenderMapper, MinecraftManager minecraftManager) {
+	public ForwardHandle(BotSenderMapper botSenderMapper, MinecraftManager minecraftManager, BaiduManager baiduManager) {
 		this.baGroup = botSenderMapper.getBotSenderById(3759L);
 		this.minecraftManager = minecraftManager;
+		this.baiduManager = baiduManager;
 	}
 
 	@Override
@@ -49,7 +53,9 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			String message = messageAction.getBotMessage().getBotMessageChainList().stream().map(chain -> {
 				switch (chain.getType()) {
 					case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
-					case BotMessage.MESSAGE_TYPE_IMAGE: return "[图片]";
+					case BotMessage.MESSAGE_TYPE_IMAGE:
+						String imageText = baiduManager.translateImageIgnoreError(chain.getUrl()).getSumSrc();
+						return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
 					default: return "";
 				}
 			}).collect(Collectors.joining());
