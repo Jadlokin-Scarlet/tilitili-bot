@@ -46,8 +46,13 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			return BotMessage.simpleListMessage(botMessageChainList).setSender(baGroup);
 		}
 		if (senderId == 4407L) {
-			String message = messageAction.getBotMessage().getBotMessageChainList().stream()
-					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_PLAIN)).map(BotMessageChain::getText).collect(Collectors.joining());
+			String message = messageAction.getBotMessage().getBotMessageChainList().stream().map(chain -> {
+				switch (chain.getType()) {
+					case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
+					case BotMessage.MESSAGE_TYPE_IMAGE: return "[图片]";
+					default: return "";
+				}
+			}).collect(Collectors.joining());
 			String sender = messageAction.getBotMessage().getGroupNickName();
 			minecraftManager.sendMessage(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT, String.format("%s：%s", sender, message));
 			return BotMessage.emptyMessage();
