@@ -60,7 +60,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 				}
 			}).collect(Collectors.joining());
 			String sender = messageAction.getBotMessage().getGroupNickName();
-			minecraftManager.sendMessage(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT, String.format("%s：%s", sender, message));
+			minecraftManager.sendMessage(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT, String.format("[虹频]%s：%s", sender, message));
 			return BotMessage.emptyMessage();
 		}
 		return null;
