@@ -10,6 +10,7 @@ import com.tilitili.common.utils.AESUtils;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 import static com.tilitili.common.utils.DateUtils.setDayOfWeekToCalendar;
 import static com.tilitili.common.utils.StringUtils.convertCnNumber;
 import static org.apache.logging.log4j.util.Strings.isBlank;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 @Slf4j
 @Component
@@ -49,7 +49,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         List<String> pattenList = StringUtils.extractList("^(明天|今天|后天|大后天|周(?:\\d|日)|下周(?:\\d|日)|下下周(?:\\d|日)|\\d+号|\\d+天后)?" +
                 "(凌晨|早上|早晨|今早|上午|中午|白天|下午|晚上|今晚)?" +
                 "(\\d+点||\\d+小时后)?" +
-                "(半|1刻|3刻|\\d+时|\\d+分|\\d+分钟后)?" +
+                "(半|1刻|3刻|\\d+分|\\d+分钟后|\\d+)?" +
                 "(叫我|提醒)" +
                 "(.*)", body);
         Asserts.isTrue(pattenList.size() > 1, "格式错啦()");
@@ -75,15 +75,15 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        if (isNotBlank(day)) {
+        if (Strings.isNotBlank(day)) {
             setDayToCalendar(calendar, day);
         }
-        if (isNotBlank(a) || isNotBlank(hour)) {
+        if (Strings.isNotBlank(a) || Strings.isNotBlank(hour)) {
             setHourToCalendar(calendar, a, hour);
         } else if (isBlank(minute)) {
             calendar.set(Calendar.HOUR_OF_DAY, 14);
         }
-        if (isNotBlank(minute)) {
+        if (Strings.isNotBlank(minute)) {
             setMinuteToCalendar(calendar, minute);
         } else {
             calendar.set(Calendar.MINUTE, 0);
@@ -117,13 +117,17 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
     // (凌晨|早上|上午|中午|下午|晚上)?(\d+点||d+小时后)?
     private void setHourToCalendar(Calendar calendar, String a, String hourStr) {
+        int nowHour = calendar.get(Calendar.HOUR_OF_DAY);
         if (hourStr.contains("小时后")) {
-            calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + Integer.parseInt(hourStr.split("小时后")[0]));
+            calendar.set(Calendar.HOUR_OF_DAY, nowHour + Integer.parseInt(hourStr.split("小时后")[0]));
             return;
         }
 
-        boolean hasHour = isNotBlank(hourStr);
+        boolean hasHour = Strings.isNotBlank(hourStr);
         int hour = hasHour? Integer.parseInt(hourStr.split("点")[0]) : 0;
+        if (StringUtils.isBlank(a) && nowHour > hour) {
+            a = "下午";
+        }
         switch (a) {
             case "凌晨": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 4); break;
             case "早上": case "上午": case "早晨": case "今早": calendar.set(Calendar.HOUR_OF_DAY, hasHour? hour: 10); break;
@@ -134,13 +138,14 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
     }
 
-    // (半|1刻|3刻|\d+时)?
+    // (半|1刻|3刻|\d+分|\d+分钟后|\d+)?
     private void setMinuteToCalendar(Calendar calendar, String minute) {
         switch (minute.replaceAll("\\d+", "")) {
             case "半": calendar.set(Calendar.MINUTE, 30); break;
             case "刻": calendar.set(Calendar.MINUTE, 15 * Integer.parseInt(minute.split("刻")[0])); break;
-            case "分": case "时": calendar.set(Calendar.MINUTE, Integer.parseInt(minute.split("[时分]")[0])); break;
             case "分钟后": calendar.add(Calendar.MINUTE, Integer.parseInt(minute.split("分钟后")[0])); break;
+            case "分":
+            default: calendar.set(Calendar.MINUTE, Integer.parseInt(StringUtils.patten("\\d+", minute))); break;
         }
     }
 
