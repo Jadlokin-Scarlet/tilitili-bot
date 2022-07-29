@@ -233,6 +233,9 @@ public class TwentyOneTable {
 		String playerSuperCard = playerResult.getSuperCard();
 		String adminSuperCard = adminResult.getSuperCard();
 
+		if (Objects.equals(playerSuperCard, BOOM_CARD)) {
+			return - score;
+		}
 
 		if (playerSuperCard != null && adminSuperCard != null) {
 			if (Objects.equals(playerSuperCard, adminSuperCard)) {
