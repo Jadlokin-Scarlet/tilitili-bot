@@ -62,7 +62,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             for (Map.Entry<String, List<String>> entry : wordMap.entrySet()) {
                 String key = entry.getKey();
                 List<String> valueList = entry.getValue();
-                if (text.length() - 2 <= key.length() && text.contains(key)) {
+                if (text.length() - 3 <= key.length() && text.contains(key)) {
                     String resp = valueList.get(random.nextInt(valueList.size()));
                     return BotMessage.simpleTextMessage(resp);
                 }
