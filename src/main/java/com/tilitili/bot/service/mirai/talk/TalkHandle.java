@@ -8,6 +8,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
@@ -32,6 +33,20 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	public TalkHandle(BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
 		this.botTalkMapper = botTalkMapper;
 		this.botTalkManager = botTalkManager;
+	}
+
+	@Override
+	public BotMessage handleAssertException(BotMessageAction messageAction, AssertException e) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		Long qqOrTinyId = messageAction.getQqOrTinyId();
+
+		String senderReqKey = reqKey + qqOrTinyId;
+		String senderStatusKey = statusKey + qqOrTinyId;
+
+		session.remove(senderStatusKey);
+		session.remove(senderReqKey);
+
+		return super.handleAssertException(messageAction, e);
 	}
 
 	@Override
@@ -60,10 +75,12 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 
 		if (session.containsKey(senderStatusKey)) {
 			if (!session.containsKey(senderReqKey)) {
+				Asserts.notEmpty(botMessage.getBotMessageChainList(), "关键词怎么是空的，不理你了。");
 				session.put(senderReqKey, TalkHandle.convertMessageToString(botMessage));
 				return BotMessage.simpleTextMessage("请告诉我回复吧");
 			} else if (session.containsKey(senderReqKey)) {
 				req = session.get(senderReqKey);
+				Asserts.notEmpty(botMessage.getBotMessageChainList(), "回复怎么是空的，不理你了。");
 				resp = TalkHandle.convertMessageToString(botMessage);
 				type = 2;
 			}
@@ -88,8 +105,8 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 			session.put(senderStatusKey, "1");
 			return BotMessage.simpleTextMessage("请告诉我关键词吧");
 		}
-		Asserts.notBlank(req, "格式不对(提问)");
-		Asserts.notBlank(resp, "格式不对(回答)");
+		Asserts.notBlank(req, "格式不对啦(提问)");
+		Asserts.notBlank(resp, "格式不对啦(回答)");
 
 		session.remove(senderStatusKey);
 		session.remove(senderReqKey);
@@ -135,7 +152,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 				.filter(TalkHandle::needChain).collect(Collectors.toList())));
 	}
 
-	private static final List<String> needChainTypeList = Arrays.asList(BotMessage.MESSAGE_TYPE_PLAIN,BotMessage.MESSAGE_TYPE_IMAGE);
+	private static final List<String> needChainTypeList = Arrays.asList(BotMessage.MESSAGE_TYPE_PLAIN,BotMessage.MESSAGE_TYPE_IMAGE,BotMessage.MESSAGE_TYPE_AT,BotMessage.MESSAGE_TYPE_FACE);
 	private static boolean needChain(BotMessageChain botMessageChain) {
 		return needChainTypeList.contains(botMessageChain.getType());
 	}
