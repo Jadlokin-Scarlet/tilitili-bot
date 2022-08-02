@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -149,12 +150,18 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 
 	public static String convertMessageToString(BotMessage botMessage) {
 		return gson.toJson(BotMessage.simpleListMessage(botMessage.getBotMessageChainList().stream()
-				.filter(TalkHandle::needChain).collect(Collectors.toList())));
+				.filter(TalkHandle::needChain).peek(TalkHandle::suppleChain).collect(Collectors.toList())));
 	}
 
 	private static final List<String> needChainTypeList = Arrays.asList(BotMessage.MESSAGE_TYPE_PLAIN,BotMessage.MESSAGE_TYPE_IMAGE,BotMessage.MESSAGE_TYPE_AT,BotMessage.MESSAGE_TYPE_FACE);
 	private static boolean needChain(BotMessageChain botMessageChain) {
 		return needChainTypeList.contains(botMessageChain.getType());
+	}
+
+	private static void suppleChain(BotMessageChain botMessageChain) {
+		if (Objects.equals(botMessageChain.getType(), BotMessage.MESSAGE_TYPE_IMAGE)) {
+			botMessageChain.setUrl(QQUtil.getImageUrl(botMessageChain.getUrl()));
+		}
 	}
 
 }
