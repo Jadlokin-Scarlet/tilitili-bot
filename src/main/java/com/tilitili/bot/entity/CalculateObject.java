@@ -107,10 +107,20 @@ public class CalculateObject {
 			"+", ImmutableMap.of(
 					PARENT_OPERATE_TYPE_LEFT, Arrays.asList("*", "/"),
 					PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("*", "/", "-")
+			),
+			"-", ImmutableMap.of(
+					PARENT_OPERATE_TYPE_LEFT, Arrays.asList("*", "/"),
+					PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("*", "/", "-")
+			),
+			"*", ImmutableMap.of(
+					PARENT_OPERATE_TYPE_LEFT, Arrays.asList(),
+					PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("/")
+			),
+			"/", ImmutableMap.of(
+					PARENT_OPERATE_TYPE_LEFT, Arrays.asList(),
+					PARENT_OPERATE_TYPE_RIGHT, Arrays.asList("/")
 			)
 	);
-	private static final List<String> addLeftNeedProtectOperate = Arrays.asList("*", "/");
-	private static final List<String> addRightNeedProtectOperate = Arrays.asList("*", "/", "-");
 	private String _toString(String parentOperate, String type) {
 		if (left != null && right != null && operate != null) {
 			String leftResult = left._toString(operate, PARENT_OPERATE_TYPE_LEFT);
@@ -121,11 +131,11 @@ public class CalculateObject {
 				case "+": {
 					if (Objects.equals(leftResult, "0")) return rightResult;
 					if (Objects.equals(rightResult, "0")) return leftResult;
-					return this.concatResult(parentOperate, type, leftResult, operate, rightResult);
 				}
-				case "-": return "(" + leftResult + "-" + rightResult + ")";
-				case "*": return this.concatResult(Objects.equals(parentOperate, "/") && Objects.equals(type, PARENT_OPERATE_TYPE_RIGHT), leftResult + "*" + rightResult);
-				case "/": return leftResult + "/" + rightResult;
+				case "-":
+				case "*":
+				case "/":
+					return this.concatResult(parentOperate, type, leftResult, operate, rightResult);
 				default: throw new AssertException("好像哪里不对劲");
 			}
 		} else {
@@ -137,11 +147,7 @@ public class CalculateObject {
 		if (parentOperate != null && type != null && needProtectOperateMap.get(operate).get(type).contains(parentOperate)) {
 			return "(" + leftResult + operate + rightResult + ")";
 		} else {
-				return leftResult + operate + rightResult;
+			return leftResult + operate + rightResult;
 		}
-	}
-
-	private String concatResult(boolean needProtect, String content) {
-		return needProtect? "(" + content + ")": content;
 	}
 }
