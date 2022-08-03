@@ -67,37 +67,43 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		BotMessage botMessage = messageAction.getBotMessage();
 		Long externalId = botMessage.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botMessage.getTinyId(): botMessage.getQq();
 		Asserts.notNull(externalId, "似乎哪里不对劲");
+		Date now = new Date();
 		if (! session.putIfAbsent(externalIdLockKey + externalId, "lock")) {
 			log.info("别签到刷屏");
 			return null;
 		}
 
+		int addScore;
 		try {
-			Date now = new Date();
 			BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
 			Asserts.notNull(botUser, "似乎有什么不对劲");
+			if (botUser.getScore() >= 100) {
+				log.info("积分满了");
+				return null;
+			}
 			if (botUser.getLastSignTime() != null && botUser.getLastSignTime().after(DateUtils.getCurrentDay())) {
 				log.info("已经签到过了");
 				return null;
 			}
-			int addScore = Math.max(100 - botUser.getScore(), 0);
+			addScore = Math.max(100 - botUser.getScore(), 0);
 			BotUser updBotUser = new BotUser().setId(botUser.getId()).setLastSignTime(now);
 			if (addScore != 0) updBotUser.setScore(botUser.getScore() + addScore);
 			botUserMapper.updateBotUserSelective(updBotUser);
-
-			int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
-			String time = "早上";
-			if (hour > 9) time = "中午";
-			if (hour > 12) time = "下午";
-			if (hour > 18) time = "晚上";
-
-			String talk = "今天也是充满希望的一天";
-			String message1 = String.format("%s好，%s", time, talk);
-			String message2 = String.format("(分数+%d)", addScore);
-			String message = message1 + (addScore == 0? "": message2);
-			return BotMessage.simpleTextMessage(message).setQuote(messageAction.getMessageId());
 		} finally {
 			session.remove(externalIdLockKey + externalId);
 		}
+
+
+		int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
+		String time = "早上";
+		if (hour > 9) time = "中午";
+		if (hour > 12) time = "下午";
+		if (hour > 18) time = "晚上";
+
+		String talk = "今天也是充满希望的一天";
+		String message1 = String.format("%s好，%s", time, talk);
+		String message2 = String.format("(分数+%d)", addScore);
+		String message = message1 + (addScore == 0? "": message2);
+		return BotMessage.simpleTextMessage(message).setQuote(messageAction.getMessageId());
 	}
 }
