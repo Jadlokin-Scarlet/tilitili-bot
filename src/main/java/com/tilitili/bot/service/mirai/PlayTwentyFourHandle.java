@@ -92,7 +92,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage endGame(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String numListStr = session.get(numListKey);
-		List<Integer> numList = Arrays.stream(numListStr.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+		List<Integer> numList = Arrays.stream(numListStr.split("，")).map(Integer::valueOf).collect(Collectors.toList());
 		String answer = this.hasAnswer(numList);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
@@ -120,11 +120,11 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.checkEquals(resultNum, 24, "好像不对呢，你的回答是[%s=%s]吗？", calculateStr, resultNum);
 
 			String numListStr = session.get(numListKey);
-			String[] numList = numListStr.split(",");
+			String[] numList = numListStr.split("，");
 			String[] calNumList = StringUtils.pattenAll("(\\d+)", calculateStr).stream().filter(Predicate.isEqual("0").negate()).toArray(String[]::new);
 			Arrays.sort(numList);
 			Arrays.sort(calNumList);
-			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join(",", calNumList));
+			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join("，", calNumList));
 		} finally {
 			session.put(lockKey, "lock");
 		}
@@ -142,11 +142,11 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		List<Integer> numList;
 		String answer;
 		while ((answer = this.hasAnswer(numList = MathUtil.getNThingFromList(cardList, 4))) == null) {
-			String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
+			String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining("，"));
 			log.debug("problem={} is haven't answer", newNumListStr);
 		}
 		String answerTmp = answer;
-		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining(","));
+		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining("，"));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
 		session.put(lockKey, "lock");
