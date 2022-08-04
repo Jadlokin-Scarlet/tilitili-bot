@@ -115,7 +115,8 @@ public class PixivService {
 			return messageId;
 		}
 		try {
-			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
+//			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
+			Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
 			// step 2 爬热门
 			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L, r18);
 			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, senderId);
