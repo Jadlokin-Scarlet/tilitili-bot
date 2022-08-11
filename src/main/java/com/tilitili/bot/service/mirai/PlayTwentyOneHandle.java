@@ -62,8 +62,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 	}
 
+	private final List<Long> adminList = Arrays.asList(MASTER_QQ, MASTER_GUILD_QQ, 782036280L);
 	private BotMessage removeGame(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
-		boolean hasJurisdiction = Objects.equals(messageAction.getBotMessage().getQq(), MASTER_QQ) || Objects.equals(messageAction.getBotMessage().getTinyId(), MASTER_GUILD_QQ);
+		boolean hasJurisdiction = adminList.contains(messageAction.getQqOrTinyId());
 		if (!hasJurisdiction) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());
