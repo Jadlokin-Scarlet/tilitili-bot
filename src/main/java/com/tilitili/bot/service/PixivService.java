@@ -57,6 +57,7 @@ public class PixivService {
 	private final PixivManager pixivManager;
 	private final BotManager botManager;
 	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
+	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
 
 	@Autowired
 	public PixivService(RedisCache redisCache, BotPixivSendRecordMapper botPixivSendRecordMapper, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
@@ -110,9 +111,15 @@ public class PixivService {
 
 	public String sendPixivImage(String quote, String searchKey, String source, String r18, Long senderId) {
 		// step 1 有缓存直接读缓存
-		String messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
-		if (messageId != null) {
-			return messageId;
+		String messageId;
+		try {
+			Asserts.isTrue(lock2Flag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
+			messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
+			if (messageId != null) {
+				return messageId;
+			}
+		} finally {
+			lock2Flag.set(false);
 		}
 		try {
 //			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
@@ -192,12 +199,13 @@ public class PixivService {
 			try {
 				String pid = data.getId();
 				PixivImage oldPixivImage = oldPixivImageMap.get(pid);
-				// 只补充有info的图片
-				if (oldPixivImage != null) {
-					Long tagCount = tagCountMap.get(pid);
-					supplePixivTag(data, searchTagList, tagCount);
-					continue;
+				Long tagCount = tagCountMap.getOrDefault(pid, 0L);
+				// 只补充有info, 没tag的图片
+				if (oldPixivImage != null && tagCount == 0L) {
+					supplePixivTag(data, searchTagList);
 				}
+				// 图片去重
+				if (oldPixivImage != null) continue;
 				saveImageFromPixiv(pid, searchKey, searchTagList);
 
 				if (messageId == null) {
@@ -356,10 +364,8 @@ public class PixivService {
 		}
 	}
 
-	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList, Long tagCount) {
+	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList) {
 		String pid = data.getId();
-		// 只补充没tag的图片
-		if (tagCount > 0) return;
 
 		// p站tag 搜索词tag列表 去重作为最终tag列表
 		List<String> tagList = new ArrayList<>(data.getTags());
