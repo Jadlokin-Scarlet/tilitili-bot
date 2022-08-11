@@ -15,6 +15,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -24,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 public class TwentyOneTable {
 	public static final String STATUS_WAIT = "wait";
 	public static final String STATUS_PLAYING = "playing";
@@ -74,12 +76,20 @@ public class TwentyOneTable {
 			this.playerList = this.getGamingPlayerList();
 			if (playerList.isEmpty()) {
 				this.initData();
-				botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+				try {
+					botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+				} catch (Exception e) {
+					log.error("21点提示异常",e);
+				}
 			} else {
 				boolean flashCardSuccess = this.flashCard();
 				Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
 				List<BotMessageChain> resp = this.getNoticeMessage(botMessage);
-				botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
+				try {
+					botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
+				} catch (Exception e) {
+					log.error("21点提示异常", e);
+				}
 			}
 			this.endWait();
 		}, 1, TimeUnit.MINUTES);
@@ -209,7 +219,11 @@ public class TwentyOneTable {
 			if (botUser.getScore() > 0) newPlayerList.add(player);
 		}
 		if (newPlayerList.isEmpty()) {
-			botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+			try {
+				botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+			} catch (Exception e) {
+				log.error("21点提示异常", e);
+			}
 		}
 		this.playerList = newPlayerList;
 		resp.add(BotMessageChain.ofPlain("\n下一局将在1m后开始，未准备将自动离席哦。"));
