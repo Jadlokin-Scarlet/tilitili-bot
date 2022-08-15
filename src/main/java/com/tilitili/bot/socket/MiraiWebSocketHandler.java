@@ -48,8 +48,8 @@ public class MiraiWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        super.onClose(code, reason, remote);
         botManager.sendMessage(BotMessage.simpleTextMessage("连接已断开，请检查。").setSenderId(4380L));
+        super.onClose(code, reason, remote);
     }
 
 }

@@ -31,7 +31,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.error("连接关闭，code ={}, reason={}, remote={}", code, reason, remote);
+        log.error("连接关闭，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
         TimeUtil.millisecondsSleep(1000 * 10);
         this.reconnect();
     }

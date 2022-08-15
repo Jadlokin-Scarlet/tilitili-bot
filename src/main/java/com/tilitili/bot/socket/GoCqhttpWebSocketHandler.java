@@ -52,10 +52,10 @@ public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        super.onClose(code, reason, remote);
         botManager.sendMessage(BotMessage.simpleListMessage(Arrays.asList(
                 BotMessageChain.ofPlain("连接已断开，请检查。"),
                 BotMessageChain.ofAtAll()
         )).setSenderId(3777L));
+        super.onClose(code, reason, remote);
     }
 }
