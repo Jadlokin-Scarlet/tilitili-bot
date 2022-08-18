@@ -50,7 +50,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Long senderId = messageAction.getBotSender().getId();
 		if (senderId == 4407L) {
 			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT);
-			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).collect(Collectors.joining("，"));
+			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
 		return null;
