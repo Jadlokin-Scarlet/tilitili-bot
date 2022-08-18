@@ -3,11 +3,14 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.MinecraftServerEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
+import com.tilitili.common.entity.view.request.MinecraftPlayer;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.McPingManager;
+import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,14 +27,36 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final String hostKey = "hostKey";
 
 	private final McPingManager mcPingManager;
+	private final MinecraftManager minecraftManager;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager) {
 		this.mcPingManager = mcPingManager;
+		this.minecraftManager = minecraftManager;
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws IOException {
+		String key = messageAction.getKeyWithoutPrefix();
+		String virtualKey = messageAction.getVirtualKey();
+		switch (virtualKey != null? virtualKey: key) {
+			case "mcp": case "mcpd": case "mcm": return handleMcp(messageAction);
+			case "mcl": return handelMcList(messageAction);
+			default: return null;
+		}
+	}
+
+	private BotMessage handelMcList(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
+		if (senderId == 4407L) {
+			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT);
+			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).collect(Collectors.joining("，"));
+			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
+		}
+		return null;
+	}
+
+	private BotMessage handleMcp(BotMessageAction messageAction) throws IOException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String key = messageAction.getKeyWithoutPrefix();
 		Asserts.notBlank(key, "key是啥");
