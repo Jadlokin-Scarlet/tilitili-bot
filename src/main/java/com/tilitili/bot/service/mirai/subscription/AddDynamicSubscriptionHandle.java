@@ -33,8 +33,8 @@ public class AddDynamicSubscriptionHandle extends ExceptionRespMessageHandle {
 
         Long qq = botMessage.getQq();
         Long group = botMessage.getGroup();
-        Long guildId = botMessage.getChannel() == null? botMessage.getGuildId(): botMessage.getChannel().guildId;
-        Long channelId = botMessage.getChannel() == null? botMessage.getChannelId(): botMessage.getChannel().channelId;
+        Long guildId = botMessage.getGuildId();
+        Long channelId = botMessage.getChannelId();
         String sendType = botMessage.getSendType();
 
         Asserts.notBlank(key, "格式错啦(key)");
