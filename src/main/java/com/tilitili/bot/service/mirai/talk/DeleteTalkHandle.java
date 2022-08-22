@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
@@ -33,9 +34,10 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
+		BotUser botUser = messageAction.getBotUser();
 		String value = messageAction.getValueOrVirtualValue();
 		String req = messageAction.getBodyOrDefault("提问", value);
-		Long qqOrTinyId = messageAction.getQqOrTinyId();
+		Long qqOrTinyId = botUser.getExternalId();
 
 		String senderStatusKey = statusKey + qqOrTinyId;
 
@@ -61,7 +63,8 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public String isThisTask(BotMessageAction botMessageAction) {
-		Long qqOrTinyId = botMessageAction.getQqOrTinyId();
+		BotUser botUser = botMessageAction.getBotUser();
+		Long qqOrTinyId = botUser.getExternalId();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();
 		String senderStatusKey = statusKey + qqOrTinyId;
 		if (session.containsKey(senderStatusKey)) {

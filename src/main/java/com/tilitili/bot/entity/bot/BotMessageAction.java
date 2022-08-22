@@ -1,8 +1,8 @@
 package com.tilitili.bot.entity.bot;
 
 import com.tilitili.bot.service.BotSessionService;
-import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
@@ -21,6 +21,7 @@ public class BotMessageAction {
     private final BotSessionService.MiraiSession session;
     private final BotMessage botMessage;
     private final BotSender botSender;
+    private final BotUser botUser;
     private final List<String> imageList;
     private final List<Long> atList;
     private final String text;
@@ -29,8 +30,6 @@ public class BotMessageAction {
     private final String messageId;
     private final Map<String, String> paramMap;
     private final Map<String, String> bodyMap;
-    private final Long qqOrGroupOrChannelId;
-    private final Long qqOrTinyId;
     private String keyWithoutPrefix;
     private String key;
     private String value;
@@ -39,8 +38,9 @@ public class BotMessageAction {
     private BotMessage quoteMessage;
     private String virtualKey;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender) {
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender, BotUser botUser) {
         this.botSender = botSender;
+        this.botUser = botUser;
         this.botMessage = botMessage;
         this.session = session;
         this.paramMap = new HashMap<>();
@@ -100,28 +100,6 @@ public class BotMessageAction {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
             quoteMessageId = quoteMessageChain.getId();
             quoteSenderId = quoteMessageChain.getSenderId();
-        }
-
-        switch (botMessage.getSendType()) {
-            case SendTypeEmum.FRIEND_MESSAGE_STR: {
-                qqOrTinyId = botMessage.getQq();
-                qqOrGroupOrChannelId = botMessage.getQq();
-                break;
-            }
-            case SendTypeEmum.GROUP_MESSAGE_STR: {
-                qqOrTinyId = botMessage.getQq();
-                qqOrGroupOrChannelId = botMessage.getGroup();
-                break;
-            }
-            case SendTypeEmum.GUILD_MESSAGE_STR: {
-                qqOrTinyId = botMessage.getTinyId();
-                qqOrGroupOrChannelId = botMessage.getChannelId();
-                break;
-            }
-            default: {
-                qqOrTinyId = null;
-                qqOrGroupOrChannelId = null;
-            }
         }
     }
 
@@ -214,14 +192,6 @@ public class BotMessageAction {
         return head;
     }
 
-    public Long getQqOrGroupOrChannelId() {
-        return qqOrGroupOrChannelId;
-    }
-
-    public Long getQqOrTinyId() {
-        return qqOrTinyId;
-    }
-
     public String getVirtualKey() {
         return virtualKey;
     }
@@ -229,5 +199,9 @@ public class BotMessageAction {
     public BotMessageAction setVirtualKey(String virtualKey) {
         this.virtualKey = virtualKey;
         return this;
+    }
+
+    public BotUser getBotUser() {
+        return botUser;
     }
 }

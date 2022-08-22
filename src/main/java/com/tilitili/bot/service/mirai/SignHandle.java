@@ -45,7 +45,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleQueryScoreMessage(BotMessageAction messageAction) {
-		BotUser botUser = botUserMapper.getBotUserByExternalId(messageAction.getQqOrTinyId());
+		BotUser botUser = messageAction.getBotUser();
 		Asserts.notNull(botUser, "啊嘞，似乎不对劲");
 		return BotMessage.simpleTextMessage(String.format("当前积分为%s分。", botUser.getScore()));
 	}

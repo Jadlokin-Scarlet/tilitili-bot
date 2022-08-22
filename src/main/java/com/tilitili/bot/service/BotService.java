@@ -3,18 +3,16 @@ package com.tilitili.bot.service;
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
-import com.tilitili.common.emnus.ChannelEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
-import com.tilitili.common.entity.BotMessageRecord;
-import com.tilitili.common.entity.BotSendMessageRecord;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
+import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,14 +33,18 @@ public class BotService {
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
+    private final BotUserManager botUserManager;
     private final Gson gson;
+    private final BotUserMapper botUserMapper;
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
         this.botTaskMapper = botTaskMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
+        this.botUserManager = botUserManager;
+        this.botUserMapper = botUserMapper;
         gson = new Gson();
     }
 
@@ -52,49 +54,16 @@ public class BotService {
         List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType);
         boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
         try {
+            // 保存user消息
+            BotUser botUser = this.updateBotUser(botMessage);
+            // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender);
-            List<BotTask> botTaskDTOList = this.getBotTalkDtoList(botMessageAction);
-
-            // 尝试智能匹配key
-            boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
-            if (isNoKey) {
-                String key;
-                List<BotTask> allBotTask = botTaskMapper.getBotTaskByCondition(new BotTaskQuery().setStatus(0));
-                for (BotTask botTask : allBotTask) {
-                    BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
-                    // 尝试匹配回答24点
-                    key = messageHandle.isThisTask(botMessageAction);
-                    if (key != null) {
-                        botMessageAction.setVirtualKey(key);
-                        botTaskDTOList.add(0, botTask);
-                    }
-                }
-            }
-
-            String quoteMessageId = botMessageAction.getQuoteMessageId();
-            Long quoteSenderId = botMessageAction.getQuoteSenderId();
-            if (quoteMessageId != null) {
-                if (Objects.equals(quoteSenderId, botSender.getBot())) {
-                    BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
-                    BotMessage quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
-                    botMessageAction.setQuoteMessage(quoteMessage);
-                } else {
-                    BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
-                    BotMessage quoteMessage = null;
-                    if (quoteMessageRecord != null) {
-                        quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
-                    } else {
-                        BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
-                        if (sendMessageRecord != null) {
-                            quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
-                        }
-                    }
-                    if (quoteMessage != null) {
-                        botMessageAction.setQuoteMessage(quoteMessage);
-                    }
-                }
-            }
+            // 解析指令
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender, botUser);
+            // 查询匹配任务列表
+            List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
+            // 查询回复消息
+            botMessageAction.setQuoteMessage(this.queryQuoteMessage(botSender, botMessageAction));
 
 
             BotMessage respMessage = null;
@@ -145,6 +114,60 @@ public class BotService {
         }
     }
 
+    private List<BotTask> queryBotTasks(BotMessageAction botMessageAction) {
+        List<BotTask> botTaskDTOList = this.getBotTalkDtoList(botMessageAction);
+
+        // 尝试智能匹配key
+        boolean isNoKey = botTaskDTOList.stream().noneMatch(StreamUtil.isEqual(BotTask::getSort, 0));
+        if (isNoKey) {
+            String key;
+            List<BotTask> allBotTask = botTaskMapper.getBotTaskByCondition(new BotTaskQuery().setStatus(0));
+            for (BotTask botTask : allBotTask) {
+                BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
+                // 尝试匹配回答24点
+                key = messageHandle.isThisTask(botMessageAction);
+                if (key != null) {
+                    botMessageAction.setVirtualKey(key);
+                    botTaskDTOList.add(0, botTask);
+                }
+            }
+        }
+        return botTaskDTOList;
+    }
+
+    private BotMessage queryQuoteMessage(BotSender botSender, BotMessageAction botMessageAction) {
+        String quoteMessageId = botMessageAction.getQuoteMessageId();
+        Long quoteSenderId = botMessageAction.getQuoteSenderId();
+        if (quoteMessageId == null) return null;
+        if (Objects.equals(quoteSenderId, botSender.getBot())) {
+            BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
+            return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+        } else {
+            BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
+            BotMessage quoteMessage = null;
+            if (quoteMessageRecord != null) {
+                quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+            } else {
+                BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
+                if (sendMessageRecord != null) {
+                    quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
+                }
+            }
+            return quoteMessage;
+        }
+    }
+
+    private BotUser updateBotUser(BotMessage botMessage) {
+        BotUser botUser = botUserMapper.getBotUserByExternalId(SendTypeEmum.GUILD_MESSAGE_STR.equals(botMessage.getSendType())? botMessage.getTinyId(): botMessage.getQq());
+        if (botUser != null) {
+            botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setName(botMessage.getGroupNickName()));
+        } else {
+            botUser = botUserManager.convertBotUserByBotMessage(botMessage);
+            botUserMapper.addBotUserSelective(botUser);
+        }
+        return botUser;
+    }
+
     public String getSessionKey(BotMessage botMessage) {
         String sendType = botMessage.getSendType();
         switch (sendType) {
@@ -152,9 +175,8 @@ public class BotService {
             case SendTypeEmum.FRIEND_MESSAGE_STR: Asserts.notNull(botMessage.getQq(), "找不到发送对象"); return SendTypeEmum.FRIEND_MESSAGE_STR + "-" + botMessage.getQq();
             case SendTypeEmum.GROUP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象"); return SendTypeEmum.GROUP_MESSAGE_STR + "-" + botMessage.getGroup();
             case SendTypeEmum.GUILD_MESSAGE_STR: {
-                ChannelEmum channel = botMessage.getChannel();
-                Long guildId = channel != null? channel.guildId: botMessage.getGuildId();
-                Long channelId = channel != null? channel.channelId: botMessage.getChannelId();
+                Long guildId = botMessage.getGuildId();
+                Long channelId = botMessage.getChannelId();
                 Asserts.notNull(guildId, "找不到发送对象");
                 Asserts.notNull(channelId, "找不到发送对象");
                 return SendTypeEmum.GUILD_MESSAGE_STR + "-" + guildId + "-" + channelId;

@@ -39,17 +39,17 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	@Override
-	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+	public BotMessage handleMessage(BotMessageAction messageAction) {
 		String key = messageAction.getKeyWithoutPrefix();
-		Long tableId = messageAction.getQqOrGroupOrChannelId();
-		Long playerId = messageAction.getQqOrTinyId();
+		Long tableId = messageAction.getBotSender().getId();
+		BotUser botUser = messageAction.getBotUser();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
+		Long playerId = botUser.getExternalId();
 
 		if (!this.checkKeyValid(key, twentyOneTable, playerId)) {
 			return null;
 		}
 
-		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		switch (key) {
 			case "玩21点": case "w21": return this.startGame(messageAction);
 			case "准备": case "zb": return this.prepareGame(messageAction);
@@ -57,14 +57,14 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
-			case "掀桌": return this.removeGame(messageAction, botUser, twentyOneTable);
+			case "掀桌": return this.removeGame(botUser, twentyOneTable);
 			default: return null;
 		}
 	}
 
 	private final List<Long> adminList = Arrays.asList(MASTER_QQ, MASTER_GUILD_QQ, 782036280L);
-	private BotMessage removeGame(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
-		boolean hasJurisdiction = adminList.contains(messageAction.getQqOrTinyId());
+	private BotMessage removeGame(BotUser botUser, TwentyOneTable twentyOneTable) {
+		boolean hasJurisdiction = adminList.contains(botUser.getExternalId());
 		if (!hasJurisdiction) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());
@@ -206,8 +206,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {
-		Long tableId = messageAction.getQqOrGroupOrChannelId();
-		Long playerId = messageAction.getQqOrTinyId();
+		Long tableId = messageAction.getBotSender().getId();
+		BotUser botUser = messageAction.getBotUser();
+		Long playerId = botUser.getExternalId();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) {
 			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
@@ -224,7 +225,6 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}
 
-		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		Asserts.isTrue(botUser.getScore() > 0, "你没有积分啦！");
 		boolean addGameSuccess = twentyOneTable.addGame(botUser);
 		Asserts.isTrue(addGameSuccess, "加入失败惹。");
@@ -237,8 +237,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage prepareGame(BotMessageAction messageAction) {
-		Long playerId = messageAction.getQqOrTinyId();
-		Long tableId = messageAction.getQqOrGroupOrChannelId();
+		BotUser botUser = messageAction.getBotUser();
+		Long playerId = botUser.getExternalId();
+		Long tableId = messageAction.getBotSender().getId();
 		String scoreStr = messageAction.getValue();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 
@@ -265,8 +266,6 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		int score = Integer.parseInt(scoreStr);
 		Asserts.isTrue(score > 0, "想白嫖积分？");
-
-		BotUser botUser = botUserMapper.getBotUserByExternalId(playerId);
 		if (score > botUser.getScore()) return BotMessage.simpleTextMessage("积分好像不够惹。").setQuote(messageAction.getMessageId());
 
 		boolean addGameSuccess = twentyOneTable.addGame(botUser, score);

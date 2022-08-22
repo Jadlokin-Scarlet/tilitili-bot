@@ -46,7 +46,7 @@ public class TwentyOneTable {
 	public TwentyOneTable(BotUserMapper botUserMapper, BotManager botManager, BotMessageAction messageAction) {
 		this.botUserMapper = botUserMapper;
 		this.botManager = botManager;
-		this.tableId = messageAction.getQqOrGroupOrChannelId();
+		this.tableId = messageAction.getBotSender().getId();
 		this.status = STATUS_WAIT;
 		this.playerList = new ArrayList<>();
 		this.cardList = this.newCardList();

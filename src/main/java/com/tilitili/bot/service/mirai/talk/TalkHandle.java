@@ -6,6 +6,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotTalk;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -39,7 +40,8 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleAssertException(BotMessageAction messageAction, AssertException e) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		Long qqOrTinyId = messageAction.getQqOrTinyId();
+		BotUser botUser = messageAction.getBotUser();
+		Long qqOrTinyId = botUser.getExternalId();
 
 		String senderReqKey = reqKey + qqOrTinyId;
 		String senderStatusKey = statusKey + qqOrTinyId;
@@ -53,6 +55,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotUser botUser = messageAction.getBotUser();
 		BotMessage botMessage = messageAction.getBotMessage();
 		List<String> imageList = messageAction.getImageList();
 		String sendType = botMessage.getSendType();
@@ -61,7 +64,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		Long guildId = botMessage.getGuildId();
 		Long channelId = botMessage.getChannelId();
 		Long tinyId = botMessage.getTinyId();
-		Long qqOrTinyId = messageAction.getQqOrTinyId();
+		Long qqOrTinyId = botUser.getExternalId();
 
 		String senderReqKey = reqKey + qqOrTinyId;
 		String senderStatusKey = statusKey + qqOrTinyId;
@@ -139,7 +142,8 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public String isThisTask(BotMessageAction botMessageAction) {
-		Long qqOrTinyId = botMessageAction.getQqOrTinyId();
+		BotUser botUser = botMessageAction.getBotUser();
+		Long qqOrTinyId = botUser.getExternalId();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();
 		String senderStatusKey = statusKey + qqOrTinyId;
 		if (session.containsKey(senderStatusKey)) {
