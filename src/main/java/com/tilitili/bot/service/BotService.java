@@ -61,15 +61,13 @@ public class BotService {
         BotMessage botMessage = null;
         // 是否总是回复消息
         boolean alwaysReply = false;
-        // 用户id锁
-        Long externalId = null;
         try {
             // 解析message
             botMessage = this.getBotMessageFromStr(message, botEmum);
             if (botMessage == null) return;
             botMessageRecordManager.asyncLogRecord(message, botMessage);
             alwaysReply = SendTypeEmum.FRIEND_MESSAGE.sendType.equals(botMessage.getSendType());
-            externalId = botMessage.getExternalId();
+            Long externalId = botMessage.getExternalId();
 
             // 获取sender
             BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
@@ -80,7 +78,7 @@ public class BotService {
 //            if (!userIdLockMap.putIfAbsent(externalId, Boolean.TRUE)) {
 //
 //            }
-            Asserts.isTrue(userIdLockMap.put(externalId, Boolean.TRUE), "听我说你先别急。");
+            Asserts.isTrue(userIdLockMap.putIfAbsent(externalId, Boolean.TRUE), "听我说你先别急。");
             BotUser botUser = this.updateBotUser(botMessage);
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
@@ -129,17 +127,17 @@ public class BotService {
             botManager.sendMessage(respMessage);
         } catch (AssertException e) {
             log.debug("异步消息处理断言异常, message=" + e.getMessage(), e);
-            if (alwaysReply && botMessage != null) {
+            if (alwaysReply) {
                 botManager.sendMessage(BotMessage.simpleImageMessage("http://m.qpic.cn/psc?/V53UUlnk2IehYn4WcXfY2dBFO92OvB1L/TmEUgtj9EK6.7V8ajmQrEPBYbjL66rmGmhZeULQk5K23cRElRpiBGW67YBgbgQxSQQ*jZ1sT2lB3FSogwc0t5DyuSeiAT17yAwmaSTNULPo!/b&bo=aABPAAAAAAABFxc!&rf=viewer_4", botMessage));
             }
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
-            if (alwaysReply && botMessage != null) {
+            if (alwaysReply) {
                 botManager.sendMessage(BotMessage.simpleImageMessage("http://m.qpic.cn/psc?/V53UUlnk2IehYn4WcXfY2dBFO92OvB1L/TmEUgtj9EK6.7V8ajmQrENdFC7iq*X8AsvjACl.g*DjfOPu0Ohw4r47052XDpNQGtOBy0dw5ZNtRggzAZvOvUBGBlTjwCDv4o3k*J7IWang!/b&bo=eABcAAAAAAABFxQ!&rf=viewer_4", botMessage));
             }
         } finally {
-            if (externalId != null) {
-                userIdLockMap.remove(externalId);
+            if (botMessage != null) {
+                userIdLockMap.remove(botMessage.getExternalId());
             }
         }
     }
