@@ -78,7 +78,7 @@ public class BotService {
 //            if (!userIdLockMap.putIfAbsent(externalId, Boolean.TRUE)) {
 //
 //            }
-//            Asserts.isTrue(userIdLockMap.putIfAbsent(externalId, true), "听我说你先别急。");
+            Asserts.checkNull(userIdLockMap.putIfAbsent(externalId, true), "听我说你先别急。");
             BotUser botUser = this.updateBotUser(botMessage);
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
