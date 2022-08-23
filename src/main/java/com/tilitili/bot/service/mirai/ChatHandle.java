@@ -15,6 +15,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
@@ -105,7 +106,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				break;
 			}
 			case "qy": reply = reqQingYunReply(text); break;
-			case "ml": chainList = reqMoLiReply(text, messageAction.getBotMessage()); break;
+			case "ml": chainList = reqMoLiReply(text, messageAction); break;
 		}
 
 //		if (Objects.equals(group, 674446384L)) {
@@ -124,13 +125,23 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	}
 
 	private final static Map<String, String> header = ImmutableMap.of("Api-Key", "g1cpoxzjnw6teqjr", "Api-Secret", "7bmdopdk");
-	private List<BotMessageChain> reqMoLiReply(String text, BotMessage botMessage) {
-		int type = Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR) ? 1 : 2;
-		ImmutableMap.Builder<Object, Object> param = ImmutableMap.builder().put("content", text)
-				.put("type", type)
-				.put("from", botMessage.getQq())
-				.put("fromName", botMessage.getGroupNickName())
-				.put("to", botMessage.getGroup());
+	private List<BotMessageChain> reqMoLiReply(String text, BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
+		BotSender botSender = messageAction.getBotSender();
+		ImmutableMap.Builder<Object, Object> param;
+		if (Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
+			param = ImmutableMap.builder().put("content", text)
+					.put("type", 1)
+					.put("from", botMessage.getQq())
+					.put("fromName", botMessage.getGroupNickName());
+		} else {
+			param = ImmutableMap.builder().put("content", text)
+					.put("type", 2)
+					.put("from", botMessage.getQq())
+					.put("fromName", botMessage.getGroupNickName())
+					.put("to", botMessage.getGroup())
+					.put("toName", botSender.getName());
+		}
 		if (botMessage.getGroupName() != null) param.put("toName", botMessage.getGroupName());
 		String json = gson.toJson(param.build());
 		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);
