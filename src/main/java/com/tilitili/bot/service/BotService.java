@@ -3,13 +3,13 @@ package com.tilitili.bot.service;
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
@@ -20,10 +20,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -36,8 +34,13 @@ public class BotService {
     private final BotUserManager botUserManager;
     private final Gson gson;
     private final BotUserMapper botUserMapper;
+    private final BotMessageRecordManager botMessageRecordManager;
+    private final BotSenderManager botSenderManager;
+    private final MiraiManager miraiManager;
+    private final GoCqhttpManager goCqhttpManager;
+    private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
@@ -45,16 +48,39 @@ public class BotService {
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botUserManager = botUserManager;
         this.botUserMapper = botUserMapper;
+        this.botMessageRecordManager = botMessageRecordManager;
+        this.botSenderManager = botSenderManager;
+        this.miraiManager = miraiManager;
+        this.goCqhttpManager = goCqhttpManager;
         gson = new Gson();
     }
 
     @Async
-    public void syncHandleTextMessage(BotMessage botMessage, BotSender botSender) {
-        String sendType = botMessage.getSendType();
-        List<String> alwaysReplySendTypeList = Arrays.asList(SendTypeEmum.FRIEND_MESSAGE.sendType);
-        boolean alwaysReply = alwaysReplySendTypeList.contains(sendType);
+    public void syncHandleTextMessage(String message, BotEmum botEmum) {
+        log.debug("Message Received [{}]",message);
+        BotMessage botMessage = null;
+        // 是否总是回复消息
+        boolean alwaysReply = false;
+        // 用户id锁
+        Long externalId = null;
         try {
-            // 保存user消息
+            // 解析message
+            botMessage = this.getBotMessageFromStr(message, botEmum);
+            if (botMessage == null) return;
+            botMessageRecordManager.asyncLogRecord(message, botMessage);
+            alwaysReply = SendTypeEmum.FRIEND_MESSAGE.sendType.equals(botMessage.getSendType());
+            externalId = botMessage.getExternalId();
+
+            // 获取sender
+            BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
+            if (!Objects.equals(botSender.getBot(), botEmum.value)) return;
+
+            // 获取用户锁，并保存user消息
+//            userIdLockMap.putIfAbsent()
+//            if (!userIdLockMap.putIfAbsent(externalId, Boolean.TRUE)) {
+//
+//            }
+            Asserts.isTrue(userIdLockMap.put(externalId, Boolean.TRUE), "听我说你先别急。");
             BotUser botUser = this.updateBotUser(botMessage);
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
@@ -65,7 +91,7 @@ public class BotService {
             // 查询回复消息
             botMessageAction.setQuoteMessage(this.queryQuoteMessage(botSender, botMessageAction));
 
-
+            // 匹配并执行指令
             BotMessage respMessage = null;
             for (BotTask botTask : botTaskDTOList) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
@@ -93,7 +119,7 @@ public class BotService {
             }
             // 如果最后是消息，则回复
             if (respMessage.getSendType() == null) {
-                respMessage.setSendType(sendType);
+                respMessage.setSendType(botMessage.getSendType());
                 respMessage.setQq(botMessage.getQq());
                 respMessage.setGroup(botMessage.getGroup());
                 respMessage.setGuildId(botMessage.getGuildId());
@@ -103,14 +129,28 @@ public class BotService {
             botManager.sendMessage(respMessage);
         } catch (AssertException e) {
             log.debug("异步消息处理断言异常, message=" + e.getMessage(), e);
-            if (alwaysReply) {
+            if (alwaysReply && botMessage != null) {
                 botManager.sendMessage(BotMessage.simpleImageMessage("http://m.qpic.cn/psc?/V53UUlnk2IehYn4WcXfY2dBFO92OvB1L/TmEUgtj9EK6.7V8ajmQrEPBYbjL66rmGmhZeULQk5K23cRElRpiBGW67YBgbgQxSQQ*jZ1sT2lB3FSogwc0t5DyuSeiAT17yAwmaSTNULPo!/b&bo=aABPAAAAAAABFxc!&rf=viewer_4", botMessage));
             }
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
-            if (alwaysReply) {
+            if (alwaysReply && botMessage != null) {
                 botManager.sendMessage(BotMessage.simpleImageMessage("http://m.qpic.cn/psc?/V53UUlnk2IehYn4WcXfY2dBFO92OvB1L/TmEUgtj9EK6.7V8ajmQrENdFC7iq*X8AsvjACl.g*DjfOPu0Ohw4r47052XDpNQGtOBy0dw5ZNtRggzAZvOvUBGBlTjwCDv4o3k*J7IWang!/b&bo=eABcAAAAAAABFxQ!&rf=viewer_4", botMessage));
             }
+        } finally {
+            if (externalId != null) {
+                userIdLockMap.remove(externalId);
+            }
+        }
+    }
+
+    private BotMessage getBotMessageFromStr(String message, BotEmum botEmum) {
+        if (botEmum.type.equals(BotEmum.TYPE_MIRAI)) {
+            return miraiManager.handleMiraiWsMessageToBotMessage(message);
+        } else {
+            if (message.contains("post_type\":\"meta_event")) return null;
+            if (message.contains("post_type\":\"notice")) return null;
+            return goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
         }
     }
 
@@ -158,7 +198,7 @@ public class BotService {
     }
 
     private BotUser updateBotUser(BotMessage botMessage) {
-        BotUser botUser = botUserMapper.getBotUserByExternalId(SendTypeEmum.GUILD_MESSAGE_STR.equals(botMessage.getSendType())? botMessage.getTinyId(): botMessage.getQq());
+        BotUser botUser = botUserMapper.getBotUserByExternalId(botMessage.getExternalId());
         if (botUser != null) {
             botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setName(botMessage.getGroupNickName()));
         } else {

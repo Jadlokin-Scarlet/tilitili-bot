@@ -12,8 +12,8 @@ import com.tencentcloudapi.nlp.v20190408.NlpClient;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -38,6 +38,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final Gson gson = new Gson();
 	private final BotManager botManager;
+	private final List<String> nameList = Arrays.asList("tx", "qy", "ml");
+	private final String nameKey = "ChatHandle.nameKey";
 
 	@Autowired
 	public ChatHandle(BotManager botManager) {
@@ -46,10 +48,36 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		String key = messageAction.getKey();
+		switch (key) {
+			case "换人": return handleChange(messageAction);
+			default: return handleChat(messageAction);
+		}
+	}
+
+	private BotMessage handleChange(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		String name = messageAction.getValue();
+		Asserts.isTrue(nameList.contains(name), "你要换谁鸭");
+
+		String redisKey = nameKey + messageAction.getBotSender().getId();
+		if ("tx".equals(name)) {
+			session.remove(redisKey);
+		} else {
+			session.put(redisKey, name);
+		}
+		return BotMessage.simpleTextMessage("√");
+	}
+
+	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		String redisKey = nameKey + messageAction.getBotSender().getId();
+		String source = session.getOrDefault(redisKey, "tx");
+
 		Long botQQ = messageAction.getBotSender().getBot();
-		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tencent";
-		String source = messageAction.getParamOrDefault("source", defaultSource);
-		String text = messageAction.getHead();
+//		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
+//		String source = messageAction.getParamOrDefault("source", defaultSource);
+		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList();
@@ -60,7 +88,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			return null;
 		}
 
-		Long group = messageAction.getBotSender().getGroup();
+//		Long group = messageAction.getBotSender().getGroup();
 		if (StringUtils.isBlank(text)) {
 			return null;
 		}
@@ -68,7 +96,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String reply = null;
 		List<BotMessageChain> chainList = null;
 		switch (source) {
-			case "tencent": {
+			case "tx": {
 				for (int index = 0; index < 10; index++) {
 					reply = reqReply(text);
 					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;

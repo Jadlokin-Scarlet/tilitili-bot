@@ -30,7 +30,7 @@ public class MiraiEventWebSocketHandler extends BaseWebSocketHandler {
         log.debug("Message Received [{}]",message);
 //        BotMessage botMessage = miraiManager.handleMiraiWsMessageToBotMessage(message);
 //        if (botMessage == null) return;
-//        botMessageRecordManager.logRecord(message, botMessage);
+//        botMessageRecordManager.asyncLogRecord(message, botMessage);
 //        botService.syncHandleTextMessage(botMessage);
     }
 

@@ -4,8 +4,7 @@ import com.tilitili.bot.entity.FishPlayer;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUser;
-import com.tilitili.common.entity.BotUserItemMapping;
-import com.tilitili.common.entity.query.BotUserItemMappingQuery;
+import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
@@ -16,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -59,7 +59,11 @@ public class FishGame {
 		BotSender botSender = messageAction.getBotSender();
 		BotUser botUser = messageAction.getBotUser();
 
-		List<BotUserItemMapping> itemMappingList = botUserItemMappingMapper.getBotUserItemMappingByCondition(new BotUserItemMappingQuery().setUserId(botUser.getId()));
+		List<BotItemDTO> botItemList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
+		List<Long> botItemNameList = botItemList.stream().map(BotItemDTO::getItemId).collect(Collectors.toList());
+		if (!botItemNameList.contains(BotItemDTO.FISH_TOOL)) {
+
+		}
 
 
 		FishPlayer newPlayer = new FishPlayer(botSender, botUser).setStatus(FishPlayer.STATUS_FISHING);

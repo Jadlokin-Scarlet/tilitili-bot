@@ -1,6 +1,5 @@
 package com.tilitili.bot;
 
-import com.tilitili.bot.entity.CalculateObject;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.GuildEmum;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
@@ -165,10 +165,33 @@ class StartApplicationTest {
     @Resource
     private TwentyFourAnswerMapper twentyFourAnswerMapper;
 
-
+    private static int a = 0;
+    private static final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
     public static void main(String[] args) {
-        CalculateObject calculateObject = new CalculateObject("2*(13-6)+10");
-        System.out.println(calculateObject.toString() + "=" + calculateObject.getResult());
+        Long userId = 1L;
+
+
+        for(int i=0;i<1000;i++){
+            new Thread(() -> {
+                try {
+                    Boolean lock = userIdLockMap.putIfAbsent(userId, true);
+                    if (lock != null && lock) {
+                        for (int j = 0; j < 100; j++) {
+                            a++;
+                        }
+                        System.out.println("yes");
+                    } else {
+                        System.out.println("no");
+                    }
+                } finally {
+                    userIdLockMap.remove(userId);
+                }
+            }).start();
+        }
+
+        while(Thread.activeCount()>1)  //保证前面的线程都执行完
+            Thread.yield();
+        System.out.println("a="+a);
     }
 
 }
