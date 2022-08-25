@@ -65,7 +65,7 @@ public class BotService {
     @Async
     public void syncHandleEvent(String message) {
         try {
-            String eventType = StringUtils.patten1("\"type\":\"\\w+\"", message);
+            String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
             log.debug("eventType=" + eventType);
             Asserts.notBlank(eventType, "");
             String handleName = eventType.substring(0, 1).toLowerCase() + eventType.substring(1);
