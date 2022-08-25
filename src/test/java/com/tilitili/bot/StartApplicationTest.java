@@ -1,7 +1,7 @@
 package com.tilitili.bot;
 
 import com.google.gson.reflect.TypeToken;
-import com.tilitili.bot.entity.mirai.event.BotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupRequestEvent;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.GuildEmum;

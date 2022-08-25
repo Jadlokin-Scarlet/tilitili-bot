@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai.event;
 
-import com.tilitili.bot.entity.mirai.event.NewFriendRequestEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.NewFriendRequestEvent;
 import com.tilitili.bot.service.mirai.base.AutoEventHandle;
 import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.view.bot.BotMessage;

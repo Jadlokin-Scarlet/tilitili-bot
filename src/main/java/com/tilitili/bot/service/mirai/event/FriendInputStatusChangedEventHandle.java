@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai.event;
 
-import com.tilitili.bot.entity.mirai.event.FriendInputStatusChangedEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.FriendInputStatusChangedEvent;
 import com.tilitili.bot.service.mirai.base.AutoEventHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
