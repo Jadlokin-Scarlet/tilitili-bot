@@ -17,6 +17,7 @@ public class BotInvitedJoinGroupRequestEventHandle extends AutoEventHandle<BotIn
 
 	@Autowired
 	public BotInvitedJoinGroupRequestEventHandle(RedisCache redisCache, BotManager botManager) {
+		super(BotInvitedJoinGroupRequestEvent.class);
 		this.redisCache = redisCache;
 		this.botManager = botManager;
 	}

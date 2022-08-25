@@ -1,5 +1,7 @@
 package com.tilitili.bot;
 
+import com.google.gson.reflect.TypeToken;
+import com.tilitili.bot.entity.mirai.event.BotInvitedJoinGroupRequestEvent;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.emnus.GuildEmum;
@@ -9,6 +11,7 @@ import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpChannel;
 import com.tilitili.common.entity.view.bot.gocqhttp.GoCqhttpGuild;
+import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.entity.view.bot.mirai.MiraiFriend;
 import com.tilitili.common.entity.view.bot.mirai.MiraiGroup;
 import com.tilitili.common.manager.GoCqhttpManager;
@@ -16,7 +19,8 @@ import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
-import com.tilitili.common.mapper.mysql.TwentyFourAnswerMapper;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -25,12 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.tilitili.common.emnus.ChannelEmum.*;
@@ -161,37 +163,15 @@ class StartApplicationTest {
         System.out.println(redisCache.removeMapValue("test", "test"));
         System.out.println(redisCache.removeMapValue("test", "test"));
     }
-
-    @Resource
-    private TwentyFourAnswerMapper twentyFourAnswerMapper;
-
-    private static int a = 0;
-    private static final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
     public static void main(String[] args) {
-        Long userId = 1L;
+        String s = "{\"syncId\":\"-1\",\"data\":{\"type\":\"BotInvitedJoinGroupRequestEvent\",\"eventId\":1661416058802410,\"message\":\"\",\"fromId\":545459363,\"groupId\":458232866,\"groupName\":\"【东方恋迷踪】超异域恋恋连结\",\"nick\":\"Jadlokin_Scarlet\"}}";
+        StartApplicationTest.<BotInvitedJoinGroupRequestEvent>run(s);
+    }
 
-
-        for(int i=0;i<1000;i++){
-            new Thread(() -> {
-                try {
-                    Boolean lock = userIdLockMap.putIfAbsent(userId, true);
-                    if (lock != null && lock) {
-                        for (int j = 0; j < 100; j++) {
-                            a++;
-                        }
-                        System.out.println("yes");
-                    } else {
-                        System.out.println("no");
-                    }
-                } finally {
-                    userIdLockMap.remove(userId);
-                }
-            }).start();
-        }
-
-        while(Thread.activeCount()>1)  //保证前面的线程都执行完
-            Thread.yield();
-        System.out.println("a="+a);
+    private static <T> T run(String s) {
+        MiraiBaseRequest<T> request = Gsons.fromJson(s, new TypeToken<MiraiBaseRequest<T>>(){}.getType());
+        Asserts.isTrue(request.getData() instanceof BotInvitedJoinGroupRequestEvent, "?");
+        return null;
     }
 
 }

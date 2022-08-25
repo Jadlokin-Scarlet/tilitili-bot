@@ -5,10 +5,16 @@ import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.utils.Gsons;
 
 public abstract class AutoEventHandle<T> implements BaseEventHandle {
+	private final TypeToken<?> type;
+
+	public AutoEventHandle(Class<T> clazz) {
+		this.type = TypeToken.getParameterized(MiraiBaseRequest.class, clazz);
+	}
+
 	@Override
 	public void handleEventStr(String eventMessage) throws Exception {
-		MiraiBaseRequest<T> request = Gsons.fromJson(eventMessage, new TypeToken<MiraiBaseRequest<T>>(){}.getType());
-		handleEvent(request.getData());
+		MiraiBaseRequest<T> request = Gsons.fromJson(eventMessage, type.getType());
+		this.handleEvent(request.getData());
 	}
 
 	public abstract void handleEvent(T event) throws Exception;

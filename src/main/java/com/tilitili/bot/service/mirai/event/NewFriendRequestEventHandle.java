@@ -17,6 +17,7 @@ public class NewFriendRequestEventHandle extends AutoEventHandle<NewFriendReques
 
 	@Autowired
 	public NewFriendRequestEventHandle(BotManager botManager, RedisCache redisCache) {
+		super(NewFriendRequestEvent.class);
 		this.botManager = botManager;
 		this.redisCache = redisCache;
 	}

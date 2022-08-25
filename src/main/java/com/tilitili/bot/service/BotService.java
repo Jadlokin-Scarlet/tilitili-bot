@@ -67,9 +67,9 @@ public class BotService {
         try {
             String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
             log.debug("eventType=" + eventType);
-            Asserts.notBlank(eventType, "");
-            String handleName = eventType.substring(0, 1).toLowerCase() + eventType.substring(1);
-            Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件");
+            Asserts.notBlank(eventType, "获取事件类型失败");
+            String handleName = eventType.substring(0, 1).toLowerCase() + eventType.substring(1) + "Handle";
+            Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件=%s", handleName);
             BaseEventHandle messageHandle = eventHandleMap.get(handleName);
             messageHandle.handleEventStr(message);
         } catch (AssertException e) {
