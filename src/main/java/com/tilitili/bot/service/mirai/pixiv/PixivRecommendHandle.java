@@ -68,8 +68,12 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			Asserts.notEquals(mode, "r18", "不准色色");
 		}
 
+		String pixivImageRedisKey = pixivImageKey + sender;
+		String pixivImageListRedisKey = pixivImageListKey + sender + mode;
+		String pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
+
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
-		if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageKey + sender)) {
+		if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageRedisKey)) {
 			log.info("无可收藏的pid");
 			return null;
 		}
@@ -79,7 +83,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle bookmark");
 		if (isBookmark) {
-			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender);
+			String pidAndMode = (String) redisCache.getValue(pixivImageRedisKey);
 			String pid = pidAndMode.split("_")[0];
 			mode = pidAndMode.split("_")[1];
 			if (pid != null) {
@@ -88,29 +92,29 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			} else {
 				return null;
 			}
-			redisCache.delete(pixivImageListKey+sender + mode);
-			redisCache.delete(pixivImageListPageNoKey + sender + mode);
+			redisCache.delete(pixivImageListRedisKey);
+			redisCache.delete(pixivImageListPageNoRedisKey);
 		}
 		if (isNoBookmark) {
-			String pidAndMode = (String) redisCache.getValue(pixivImageKey + sender);
+			String pidAndMode = (String) redisCache.getValue(pixivImageRedisKey);
 			mode = pidAndMode.split("_")[1];
 		}
 
 		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust;
 		while (true) {
-			int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender + mode)) - 1;
+			int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoRedisKey)) - 1;
 			if (pageNo >= 60) {
-				redisCache.delete(pixivImageListKey + sender + mode);
-				redisCache.delete(pixivImageListPageNoKey + sender + mode);
-				pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoKey + sender + mode)) - 1;
+				redisCache.delete(pixivImageListRedisKey);
+				redisCache.delete(pixivImageListPageNoRedisKey);
+				pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoRedisKey)) - 1;
 			}
 			List<PixivRecommendIllust> illustList;
-			if (redisCache.exists(pixivImageListKey + sender + mode)) {
-				illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListKey + sender + mode);
+			if (redisCache.exists(pixivImageListRedisKey)) {
+				illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListRedisKey);
 			} else {
 				illustList = pixivManager.getRecommendImageByCookie(cookie, mode);
-				redisCache.setValue(pixivImageListKey + sender + mode, illustList);
+				redisCache.setValue(pixivImageListRedisKey, illustList);
 			}
 			if (illustList == null || pageNo >= illustList.size()) {
 				return BotMessage.simpleTextMessage("啊嘞，怎么会找不到呢。");
@@ -146,7 +150,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle save result");
-		redisCache.setValue(pixivImageKey + sender, pid + "_" + mode, 120);
+		redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);
 		log.debug("PixivRecommendHandle send");
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
