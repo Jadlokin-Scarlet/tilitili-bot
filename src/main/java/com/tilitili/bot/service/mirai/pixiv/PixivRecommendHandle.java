@@ -43,7 +43,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		this.botTaskMapper = botTaskMapper;
 	}
 
-	private final Map<String, String> keyModeMap = ImmutableMap.of("推荐色图", "all", "推荐色色", "r18", "推荐不色", "safe");
+	private final Map<String, String> keyModeMap = ImmutableMap.of("推荐色图", "all", "推荐色色", "r18", "推荐不色", "safe", "tjst", "all", "tjss", "r18", "tjbs", "safe");
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
