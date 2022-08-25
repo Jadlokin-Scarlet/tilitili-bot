@@ -2,7 +2,9 @@ package com.tilitili.bot.service;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
@@ -15,18 +17,22 @@ import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 public class BotService {
     private final Map<String, BaseMessageHandle> messageHandleMap;
+    private final Map<String, BaseEventHandle> eventHandleMap;
     private final BotSessionService botSessionService;
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
@@ -40,9 +46,10 @@ public class BotService {
     private final GoCqhttpManager goCqhttpManager;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
+        this.eventHandleMap = eventHandleMap;
         this.botSessionService = botSessionService;
         this.botTaskMapper = botTaskMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
@@ -56,8 +63,24 @@ public class BotService {
     }
 
     @Async
+    public void syncHandleEvent(String message) {
+        try {
+            String eventType = StringUtils.patten1("\"type\":\"\\w+\"", message);
+            log.debug("eventType=" + eventType);
+            Asserts.notBlank(eventType, "");
+            String handleName = eventType.substring(0, 1).toLowerCase() + eventType.substring(1);
+            Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件");
+            BaseEventHandle messageHandle = eventHandleMap.get(handleName);
+            messageHandle.handleEventStr(message);
+        } catch (AssertException e) {
+            log.warn(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("处理事件异常", e);
+        }
+    }
+
+    @Async
     public void syncHandleTextMessage(String message, BotEmum botEmum) {
-        log.debug("Message Received [{}]",message);
         BotMessage botMessage = null;
         // 是否总是回复消息
         boolean alwaysReply = false;
@@ -99,7 +122,9 @@ public class BotService {
                     respMessage = messageHandle.handleMessage(botMessageAction);
                 } catch (AssertException e) {
                     log.debug(e.getMessage(), e);
-                    respMessage = messageHandle.handleAssertException(botMessageAction, e);
+                    if (messageHandle instanceof ExceptionRespMessageHandleAdapt) {
+                        respMessage = ((ExceptionRespMessageHandleAdapt)messageHandle).handleAssertException(botMessageAction, e);
+                    }
                 }
                 if (respMessage != null) {
                     break;
