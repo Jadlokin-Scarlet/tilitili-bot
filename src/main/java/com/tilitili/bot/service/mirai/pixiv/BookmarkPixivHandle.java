@@ -15,6 +15,8 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 @Component
 public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 	private final BotMessageService botMessageService;
@@ -61,8 +63,10 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 		String token = pixivManager.getPixivToken(sender, cookie);
 		pixivManager.bookmarkImageForCookie(pid, cookie, token);
 
-		redisCache.delete(PixivRecommendHandle.pixivImageListKey + sender);
-		redisCache.delete(PixivRecommendHandle.pixivImageListPageNoKey + sender);
+		for (String mode : Arrays.asList("all", "safe", "r18")) {
+			redisCache.delete(PixivRecommendHandle.pixivImageListKey + sender + mode);
+			redisCache.delete(PixivRecommendHandle.pixivImageListPageNoKey + sender + mode);
+		}
 		return BotMessage.simpleTextMessage("搞定！");
 	}
 }
