@@ -101,6 +101,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			mode = pidAndMode.split("_")[1];
 		}
 
+		pixivImageListRedisKey = pixivImageListKey + sender + mode;
+		pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
+
 		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust;
 		while (true) {
