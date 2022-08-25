@@ -16,6 +16,7 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -103,21 +104,22 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust;
 		while (true) {
-			int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoRedisKey)) - 1;
-			if (pageNo >= 60) {
-				redisCache.delete(pixivImageListRedisKey);
-				redisCache.delete(pixivImageListPageNoRedisKey);
-				pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoRedisKey)) - 1;
-			}
 			List<PixivRecommendIllust> illustList;
 			if (redisCache.exists(pixivImageListRedisKey)) {
 				illustList = (List<PixivRecommendIllust>) redisCache.getValue(pixivImageListRedisKey);
 			} else {
+				redisCache.delete(pixivImageListPageNoRedisKey);
 				illustList = pixivManager.getRecommendImageByCookie(cookie, mode);
 				redisCache.setValue(pixivImageListRedisKey, illustList);
 			}
-			if (illustList == null || pageNo >= illustList.size()) {
+			if (CollectionUtils.isEmpty(illustList)) {
 				return BotMessage.simpleTextMessage("啊嘞，怎么会找不到呢。");
+			}
+			int pageNo = Math.toIntExact(redisCache.increment(pixivImageListPageNoRedisKey)) - 1;
+			if (pageNo >= illustList.size()) {
+				redisCache.delete(pixivImageListRedisKey);
+				redisCache.delete(pixivImageListPageNoRedisKey);
+				continue;
 			}
 			illust = illustList.get(pageNo);
 			if (!canSS && illust.getSl() > 4) {
