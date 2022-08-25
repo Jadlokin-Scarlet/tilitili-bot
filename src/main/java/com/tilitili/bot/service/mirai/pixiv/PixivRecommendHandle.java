@@ -70,8 +70,6 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		String pixivImageRedisKey = pixivImageKey + sender;
-		String pixivImageListRedisKey = pixivImageListKey + sender + mode;
-		String pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
 		if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageRedisKey)) {
@@ -93,16 +91,16 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			} else {
 				return null;
 			}
-			redisCache.delete(pixivImageListRedisKey);
-			redisCache.delete(pixivImageListPageNoRedisKey);
+			redisCache.delete(pixivImageListKey + sender + mode);
+			redisCache.delete(pixivImageListPageNoKey + sender + mode);
 		}
 		if (isNoBookmark) {
 			String pidAndMode = (String) redisCache.getValue(pixivImageRedisKey);
 			mode = pidAndMode.split("_")[1];
 		}
 
-		pixivImageListRedisKey = pixivImageListKey + sender + mode;
-		pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
+		String pixivImageListRedisKey = pixivImageListKey + sender + mode;
+		String pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
 
 		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust;
