@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static com.tilitili.common.constant.BotUserConstant.*;
+
 @Slf4j
 @Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
@@ -62,9 +64,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 	}
 
-	private final List<Long> adminList = Arrays.asList(MASTER_QQ, MASTER_GUILD_QQ, 782036280L);
+	private final List<Long> adminUserIdList = Arrays.asList(MASTER_USER_ID, MASTER_GUILD_USER_ID, WEIWEI_USER_ID);
 	private BotMessage removeGame(BotUser botUser, TwentyOneTable twentyOneTable) {
-		boolean hasJurisdiction = adminList.contains(botUser.getExternalId());
+		boolean hasJurisdiction = adminUserIdList.contains(botUser.getId());
 		if (!hasJurisdiction) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());
