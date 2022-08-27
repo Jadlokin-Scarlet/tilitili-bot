@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,19 +50,22 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_SOURCE).negate()).collect(Collectors.toList());
 			return BotMessage.simpleListMessage(botMessageChainList).setSender(baGroup);
 		}
-		if (senderId == 4407L) {
-			String message = messageAction.getBotMessage().getBotMessageChainList().stream().map(chain -> {
-				switch (chain.getType()) {
-					case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
-					case BotMessage.MESSAGE_TYPE_IMAGE:
-						String imageText = baiduManager.translateImageIgnoreError(chain.getUrl()).getSumSrc();
-						return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
-					default: return "";
-				}
-			}).collect(Collectors.joining());
-			String sender = messageAction.getBotMessage().getGroupNickName();
-			minecraftManager.sendMessage(MinecraftServerEmum.NIJISANJI_CHANNEL_MINECRAFT, String.format("[虹频]%s：%s", sender, message));
-			return BotMessage.emptyMessage();
+
+		for (MinecraftServerEmum server : MinecraftServerEmum.values()) {
+			if (Objects.equals(senderId, server.getSenderId())) {
+				String message = messageAction.getBotMessage().getBotMessageChainList().stream().map(chain -> {
+					switch (chain.getType()) {
+						case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
+						case BotMessage.MESSAGE_TYPE_IMAGE:
+							String imageText = baiduManager.translateImageIgnoreError(chain.getUrl()).getSumSrc();
+							return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
+						default: return "";
+					}
+				}).collect(Collectors.joining());
+				String sender = messageAction.getBotMessage().getGroupNickName();
+				minecraftManager.sendMessage(server, String.format("[%s]%s：%s", server.getPrefix(), sender, message));
+				return BotMessage.emptyMessage();
+			}
 		}
 		return null;
 	}
