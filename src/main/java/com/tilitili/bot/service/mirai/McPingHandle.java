@@ -53,6 +53,11 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
+		if (senderId == 3758L) {
+			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(MinecraftServerEmum.RANK_CHANNEL_MINECRAFT);
+			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
+			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
+		}
 		return null;
 	}
 
