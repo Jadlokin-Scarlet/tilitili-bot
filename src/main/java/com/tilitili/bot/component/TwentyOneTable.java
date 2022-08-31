@@ -31,7 +31,7 @@ public class TwentyOneTable {
 	public static final String STATUS_PLAYING = "playing";
 	public static final String FIVE_CARD = "五龙";
 	public static final String BLACK_JACK = "黑杰克";
-	public static final String BOOM_CARD = "爆牌";
+	public static final String BOOM_CARD = "爆pai";
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final BotUserMapper botUserMapper;
@@ -232,7 +232,7 @@ public class TwentyOneTable {
 		return resp;
 	}
 
-	private void initData() {
+	public void initData() {
 		status = STATUS_WAIT;
 		for (TwentyOnePlayer player : playerList) {
 			player.setScore(null);

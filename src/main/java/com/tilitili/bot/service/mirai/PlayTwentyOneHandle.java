@@ -98,6 +98,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (twentyOneTable.getPlayerList().isEmpty()) {
+			twentyOneTable.initData();
 			return BotMessage.simpleListMessage(resp);
 		} else {
 			resp.add(BotMessageChain.ofPlain("\n"));
@@ -232,7 +233,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.isTrue(addGameSuccess, "加入失败惹。");
 
 		switch (twentyOneTable.getStatus()) {
-			case TwentyOneTable.STATUS_WAIT: return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
+			case TwentyOneTable.STATUS_WAIT:
+				twentyOneTable.waitPeoplePrepare(messageAction.getBotMessage());
+				return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
 			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("入场成功！请等待下一局吧。").setQuote(messageAction.getMessageId());
 			default: throw new AssertException("啊嘞，似乎不对劲");
 		}
