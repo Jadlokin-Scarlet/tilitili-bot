@@ -8,7 +8,7 @@ public class TwentyOneAdmin {
 
 	@Override
 	public String toString() {
-		return "庄家：" + cardList.stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
+		return "东家：" + cardList.stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
 	}
 
 	public void addCard(TwentyOneCard card) {
