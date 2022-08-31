@@ -181,7 +181,7 @@ public class TwentyOneTable {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
 		if (nowPlayer.getCardList().size() == 2) {
-			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌、加倍(加倍积分并加牌并停牌)"));
+			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍(加倍积分并加排并停牌)"));
 		} else {
 			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌"));
 		}
