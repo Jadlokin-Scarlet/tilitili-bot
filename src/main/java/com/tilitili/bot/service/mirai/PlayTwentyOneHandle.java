@@ -55,7 +55,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		switch (key) {
 			case "玩21点": case "w21": return this.startGame(messageAction);
 			case "准备": case "zb": return this.prepareGame(messageAction);
-			case "加牌": case "jp": return this.addCard(messageAction, botUser, twentyOneTable);
+			case "加牌": case "jp": case "加排": return this.addCard(messageAction, botUser, twentyOneTable);
 			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);

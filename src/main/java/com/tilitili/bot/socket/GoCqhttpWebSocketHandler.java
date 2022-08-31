@@ -30,6 +30,7 @@ public class GoCqhttpWebSocketHandler extends BaseWebSocketHandler {
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
+//        if (message.contains("10450780"))
         botService.syncHandleTextMessage(message, BotEmum.CIRNO);
     }
 
