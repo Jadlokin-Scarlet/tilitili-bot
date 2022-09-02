@@ -14,7 +14,6 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -27,10 +26,6 @@ import static com.tilitili.common.constant.BotUserConstant.*;
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
 
-	@Value("${mirai.master-qq}")
-	private Long MASTER_QQ;
-	@Value("${mirai.master-guild-qq}")
-	private Long MASTER_GUILD_QQ;
 	private final BotUserMapper botUserMapper;
 	private final BotManager botManager;
 
