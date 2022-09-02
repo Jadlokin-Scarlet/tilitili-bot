@@ -142,11 +142,11 @@ public class BotService {
             }
             // 如果最后是消息，则回复
             if (respMessage.getSendType() == null) {
-                respMessage.setSendType(botMessage.getSendType());
-                respMessage.setQq(botMessage.getQq());
-                respMessage.setGroup(botMessage.getGroup());
-                respMessage.setGuildId(botMessage.getGuildId());
-                respMessage.setChannelId(botMessage.getChannelId());
+                respMessage.setSendType(botSender.getSendType());
+                respMessage.setQq(botSender.getQq());
+                respMessage.setGroup(botSender.getGroup());
+                respMessage.setGuildId(botSender.getGuildId());
+                respMessage.setChannelId(botSender.getChannelId());
             }
 
             botManager.sendMessage(respMessage);

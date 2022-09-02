@@ -55,7 +55,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
         Asserts.isTrue(slkFile.exists(), "转码slk失败");
 
-        String voiceId = botManager.uploadVoice(slkFile);
+        String voiceId = botManager.uploadVoice(wavFile);
         Asserts.notBlank(voiceId, "上传失败");
 
         return BotMessage.simpleVoiceIdMessage(voiceId);
