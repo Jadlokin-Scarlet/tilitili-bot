@@ -17,7 +17,7 @@ public class BotMessageService {
 	public String getQuotePid(BotMessageAction messageAction) {
 		if (messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null, null);
 			String text = quoteMessageAction.getText();
 			return StringUtils.patten1("https://pixiv.moe/illust/(\\d+)", text);
 		}
@@ -29,7 +29,7 @@ public class BotMessageService {
 
 		if (CollectionUtils.isEmpty(imageUrlList) && messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null, null);
 			imageUrlList = quoteMessageAction.getImageList();
 		}
 

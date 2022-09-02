@@ -106,7 +106,7 @@ public class BotService {
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
             // 解析指令
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender, botUser);
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender, botUser, botEmum);
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
             // 查询回复消息

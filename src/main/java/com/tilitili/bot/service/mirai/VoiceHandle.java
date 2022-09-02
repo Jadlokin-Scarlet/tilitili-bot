@@ -32,10 +32,10 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         String speed = messageAction.getParamOrDefault("speed", "1.2");
 
         File wavFile = new File("/home/admin/silk/voice.wav");
-        File slkFile = new File("/home/admin/silk/voice.slk");
+//        File slkFile = new File("/home/admin/silk/voice.slk");
 
         if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
-        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
+//        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
         String text = messageAction.getValueOrDefault(messageAction.getBody());
 
@@ -48,12 +48,12 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 //        url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
         HttpClientUtil.downloadFile(url, wavFile);
 
-        String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
-        Runtime.getRuntime().exec(speakShell);
+//        String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
+//        Runtime.getRuntime().exec(speakShell);
 
-        Thread.sleep(1000);
+//        Thread.sleep(1000);
 
-        Asserts.isTrue(slkFile.exists(), "转码slk失败");
+//        Asserts.isTrue(slkFile.exists(), "转码slk失败");
 
         String voiceId = botManager.uploadVoice(wavFile);
         Asserts.notBlank(voiceId, "上传失败");

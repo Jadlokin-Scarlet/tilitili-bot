@@ -3,9 +3,13 @@ package com.tilitili.bot.config;
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
+import com.tilitili.bot.socket.BotWebSocketHandler;
+import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
+import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,20 +18,37 @@ import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 
 import javax.annotation.PostConstruct;
+import java.net.URI;
 import java.util.List;
 
 @Slf4j
 @Configuration
 public class WebSocketConfig {
     final List<BaseWebSocketHandler> webSocketHandlerList;
+    private final BotService botService;
+    private final BotManager botManager;
 
     @Autowired
-    public WebSocketConfig(List<BaseWebSocketHandler> webSocketHandlerList) {
+    public WebSocketConfig(List<BaseWebSocketHandler> webSocketHandlerList, BotService botService, BotManager botManager) {
         this.webSocketHandlerList = webSocketHandlerList;
+        this.botService = botService;
+        this.botManager = botManager;
     }
 
     @PostConstruct
     public void webSocketConnectionManager() {
+        for (BotEmum bot : BotEmum.values()) {
+            try {
+                String wsUrl = botManager.getWebSocketUrl(bot);
+                Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.value);
+                BotWebSocketHandler botWebSocketHandler = new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+                botWebSocketHandler.connect();
+            } catch (Exception e) {
+                log.error("异常", e);
+            }
+        }
+
+
         for (BaseWebSocketHandler webSocketHandler : webSocketHandlerList) {
             try {
                 webSocketHandler.connect();

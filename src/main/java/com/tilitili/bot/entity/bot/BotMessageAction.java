@@ -1,6 +1,7 @@
 package com.tilitili.bot.entity.bot;
 
 import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -22,6 +23,7 @@ public class BotMessageAction {
     private final BotMessage botMessage;
     private final BotSender botSender;
     private final BotUser botUser;
+    private final BotEmum bot;
     private final List<String> imageList;
     private final List<Long> atList;
     private final String text;
@@ -38,10 +40,11 @@ public class BotMessageAction {
     private BotMessage quoteMessage;
     private String virtualKey;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender, BotUser botUser) {
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender, BotUser botUser, BotEmum botEmum) {
         this.botSender = botSender;
         this.botUser = botUser;
         this.botMessage = botMessage;
+        this.bot = botEmum;
         this.session = session;
         this.paramMap = new HashMap<>();
         this.bodyMap = new HashMap<>();
