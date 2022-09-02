@@ -4,8 +4,8 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.VitsOPManager;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.BaiduUtil;
 import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,22 +13,23 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 
 @Slf4j
 @Component
 public class VoiceHandle extends ExceptionRespMessageHandle {
     private final BotManager botManager;
+    private final VitsOPManager vitsOPManager;
 
     @Autowired
-    public VoiceHandle(BotManager botManager) {
+    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager) {
         this.botManager = botManager;
+        this.vitsOPManager = vitsOPManager;
     }
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
-        String speaker = messageAction.getParamOrDefault("who", "cyangfp");
-        String speed = messageAction.getParamOrDefault("speed", "1");
+        String speaker = messageAction.getParamOrDefault("who", "派蒙");
+        String speed = messageAction.getParamOrDefault("speed", "1.2");
 
         File wavFile = new File("/home/admin/silk/voice.wav");
         File slkFile = new File("/home/admin/silk/voice.slk");
@@ -42,7 +43,9 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
             return null;
         }
 
-        String url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
+        Asserts.isTrue(VitsOPManager.nameList.contains(speaker), "%s是谁啊。", speaker);
+        String url = vitsOPManager.getVoiceUrl(text, speaker, speed);
+//        url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
         HttpClientUtil.downloadFile(url, wavFile);
 
         String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
