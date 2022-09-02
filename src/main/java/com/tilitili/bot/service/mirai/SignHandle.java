@@ -24,8 +24,8 @@ import java.util.Locale;
 @Slf4j
 @Component
 public class SignHandle extends ExceptionRespMessageHandle {
-	private final BotUserMapper botUserMapper;
 	private final static String externalIdLockKey = "signHandle.externalIdLockKey";
+	private final BotUserMapper botUserMapper;
 
 	@Autowired
 	public SignHandle(BotUserMapper botUserMapper) {
