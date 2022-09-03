@@ -314,7 +314,7 @@ public class TwentyOneTable {
 			} else {
 				aCnt += 0;
 			}
-			if (sum > 21 && aCnt > 0) {
+			while (sum > 21 && aCnt > 0) {
 				sum -=10;
 				aCnt --;
 			}
