@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.GroupEmum;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
@@ -46,8 +47,9 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
         BotMessage botMessage = messageAction.getBotMessage();
-        Long qq = botMessage.getQq();
-        Long group = botMessage.getGroup();
+        BotSender botSender = messageAction.getBotSender();
+        Long qq = botSender.getQq();
+        Long group = botSender.getGroup();
         BotTalk botTalk = botTalkManager.getJsonTalkOrOtherTalk(TalkHandle.convertMessageToString(botMessage), botMessage);
         if (botTalk != null) {
             if (botTalk.getType().equals(0)) {
@@ -58,7 +60,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
                 return BotMessage.simpleListMessage(gson.fromJson(botTalk.getResp(), BotMessage.class).getBotMessageChainList());
             }
         }
-        if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value)) {
+        if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value) || Objects.equals(qq, MASTER_QQ)) {
             for (Map.Entry<String, List<String>> entry : wordMap.entrySet()) {
                 String key = entry.getKey();
                 List<String> valueList = entry.getValue();
