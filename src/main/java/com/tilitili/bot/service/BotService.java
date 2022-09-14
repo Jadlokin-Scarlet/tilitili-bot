@@ -215,6 +215,7 @@ public class BotService {
         if (quoteMessageRecord != null) {
             return botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
         }
+        log.warn("messageId={}找不到", quoteMessageId);
         return null;
     }
 
