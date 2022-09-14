@@ -122,6 +122,7 @@ public class BotService {
                     respMessage = messageHandle.handleMessage(botMessageAction);
                 } catch (AssertException e) {
                     log.debug(e.getMessage(), e);
+                    // 如果继承了实现了全局异常处理的基类，则调用异常处理方法
                     if (messageHandle instanceof ExceptionRespMessageHandleAdapt) {
                         respMessage = ((ExceptionRespMessageHandleAdapt)messageHandle).handleAssertException(botMessageAction, e);
                     }
@@ -202,22 +203,19 @@ public class BotService {
         String quoteMessageId = botMessageAction.getQuoteMessageId();
         Long quoteSenderId = botMessageAction.getQuoteSenderId();
         if (quoteMessageId == null) return null;
+
         if (Objects.equals(quoteSenderId, botSender.getBot())) {
             BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
-            return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
-        } else {
-            BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
-            BotMessage quoteMessage = null;
-            if (quoteMessageRecord != null) {
-                quoteMessage = botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
-            } else {
-                BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
-                if (sendMessageRecord != null) {
-                    quoteMessage = gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
-                }
+            if (sendMessageRecord != null) {
+                return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
             }
-            return quoteMessage;
         }
+
+        BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
+        if (quoteMessageRecord != null) {
+            return botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
+        }
+        return null;
     }
 
     private BotUser updateBotUser(BotMessage botMessage) {

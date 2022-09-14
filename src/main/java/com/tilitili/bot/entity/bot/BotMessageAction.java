@@ -107,7 +107,7 @@ public class BotMessageAction {
     }
 
     public String getValueOrVirtualValue() {
-        return virtualKey != null? text: value;
+        return virtualKey != null? head: value;
     }
 
     public String getParam(String paramKey) {

@@ -157,6 +157,10 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 				.filter(TalkHandle::needChain).peek(TalkHandle::suppleChain).collect(Collectors.toList())));
 	}
 
+	public static BotMessage convertStringToMessage(String botMessageStr) {
+		return gson.fromJson(botMessageStr, BotMessage.class);
+	}
+
 	private static final List<String> needChainTypeList = Arrays.asList(BotMessage.MESSAGE_TYPE_PLAIN,BotMessage.MESSAGE_TYPE_IMAGE,BotMessage.MESSAGE_TYPE_AT,BotMessage.MESSAGE_TYPE_FACE);
 	private static boolean needChain(BotMessageChain botMessageChain) {
 		return needChainTypeList.contains(botMessageChain.getType());
