@@ -406,7 +406,7 @@ public class TwentyOneTable {
 	}
 
 	private Queue<TwentyOneCard> newCardList() {
-		return IntStream.range(0, 52).mapToObj(TwentyOneCard::new)
+		return IntStream.range(0, 52 * 3).mapToObj(TwentyOneCard::new)
 				.map(item -> new SortObject<>(random.nextInt(Integer.MAX_VALUE), item))
 				.sorted().map(SortObject::getT).collect(Collectors.toCollection(LinkedList::new));
 	}
