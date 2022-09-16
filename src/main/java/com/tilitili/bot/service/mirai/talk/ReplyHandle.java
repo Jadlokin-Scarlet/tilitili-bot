@@ -60,16 +60,6 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
                 return BotMessage.simpleListMessage(gson.fromJson(botTalk.getResp(), BotMessage.class).getBotMessageChainList());
             }
         }
-        if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value) || Objects.equals(qq, MASTER_QQ)) {
-            for (Map.Entry<String, List<String>> entry : wordMap.entrySet()) {
-                String key = entry.getKey();
-                List<String> valueList = entry.getValue();
-                if (text.length() - 3 <= key.length() && text.contains(key)) {
-                    String resp = valueList.get(random.nextInt(valueList.size()));
-                    return BotMessage.simpleTextMessage(resp);
-                }
-            }
-        }
 
         if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value)) {
             int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);

@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
@@ -12,6 +13,7 @@ import com.tencentcloudapi.nlp.v20190408.NlpClient;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotRequest;
 import com.tencentcloudapi.nlp.v20190408.models.ChatBotResponse;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
@@ -39,12 +41,14 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final Gson gson = new Gson();
 	private final BotManager botManager;
+	private final AnimeWordsService animeWordsService;
 	private final List<String> nameList = Arrays.asList("tx", "qy", "ml");
 	private final String nameKey = "ChatHandle.nameKey";
 
 	@Autowired
-	public ChatHandle(BotManager botManager) {
+	public ChatHandle(BotManager botManager, AnimeWordsService animeWordsService) {
 		this.botManager = botManager;
+		this.animeWordsService = animeWordsService;
 	}
 
 	@Override
@@ -119,13 +123,21 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 //		}
 		if (chainList != null) {
 			return BotMessage.simpleListMessage(chainList);
-		} else {
+		} else if (StringUtils.isNotBlank(reply)) {
 			return BotMessage.simpleTextMessage(reply);
+		} else {
+			return null;
 		}
 	}
 
 	private final static Map<String, String> header = ImmutableMap.of("Api-Key", "g1cpoxzjnw6teqjr", "Api-Secret", "7bmdopdk");
 	private List<BotMessageChain> reqMoLiReply(String text, BotMessageAction messageAction) {
+		// 假装吧词库导进了茉莉云
+		String wordReply = animeWordsService.getRespByShortContain(text);
+		if (StringUtils.isNotBlank(wordReply)) {
+			return Lists.newArrayList(BotMessageChain.ofPlain(wordReply));
+		}
+
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		ImmutableMap.Builder<Object, Object> param;
