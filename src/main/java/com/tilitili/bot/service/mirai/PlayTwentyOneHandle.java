@@ -72,7 +72,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notNull(player, "啊嘞，有点不对劲");
 		Asserts.isTrue(player.isPrepare(), "你还没准备呢。");
 		Asserts.checkEquals(player.getCardListList().size(), 1, "现在不能投降了哦。");
-		Asserts.checkEquals(player.getFirstNoEndCardList().getCardList(), 2, "现在不能投降了哦。");
+		Asserts.checkEquals(player.getFirstNoEndCardList().getCardList().size(), 2, "现在不能投降了哦。");
 
 		int score = 0;
 		for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
