@@ -12,6 +12,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (!this.checkKeyValid(key, twentyOneTable, playerId)) {
 			return null;
 		}
+
+		log.info(Gsons.toJson(twentyOneTable.getPlayerList()));
 
 		switch (key) {
 			case "玩21点": case "w21": return this.startGame(messageAction);
