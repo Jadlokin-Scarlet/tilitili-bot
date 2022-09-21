@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.component.TwentyOneTable;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.entity.twentyOne.TwentyOneCardList;
 import com.tilitili.bot.entity.twentyOne.TwentyOnePlayer;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotUser;
@@ -53,10 +54,40 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "加牌": case "jp": case "加排": return this.addCard(messageAction, botUser, twentyOneTable);
 			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
+			case "分牌": case "fp": return this.splitCard(messageAction, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
 			case "掀桌": return this.removeGame(botUser, twentyOneTable);
 			default: return null;
 		}
+	}
+
+	private BotMessage splitCard(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
+//		BotUser botUser = messageAction.getBotUser();
+//		Integer hasScore = botUser.getScore();
+//		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
+//		Asserts.notNull(player, "啊嘞，有点不对劲");
+//		Asserts.isTrue(player.getCardList().size() == 2, "已经不能双倍了哦");
+//		Integer useScore = player.getScore();
+//		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
+//		player.setScore(useScore * 2);
+//		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
+//
+//		boolean addCardSuccess = twentyOneTable.addCard(player);
+//		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
+//
+//		boolean stopCardSuccess = twentyOneTable.stopCard(player);
+//		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
+//
+////		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
+//
+//		if (twentyOneTable.isEnd()) {
+//			List<BotMessageChain> resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
+//			return BotMessage.simpleListMessage(resp);
+//		} else {
+//			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+//			return BotMessage.simpleListMessage(resp);
+//		}
+		return null;
 	}
 
 	private final List<Long> adminUserIdList = Arrays.asList(MASTER_USER_ID, MASTER_GUILD_USER_ID, WEIWEI_USER_ID);
@@ -73,7 +104,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable twentyOneTable = this.getTableByPlayer(playerId);
 		Asserts.notNull(twentyOneTable, "你好像还没加入哦，没东西退");
 
-		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
+		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(playerId);
 		String status = twentyOneTable.getStatus();
 
 		boolean removePlayerSuccess = twentyOneTable.removePlayer(playerId);
@@ -85,9 +116,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		List<BotMessageChain> resp = new ArrayList<>();
 
-		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.getScore() != null) {
-			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + player.getScore()));
-			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分。", player.getScore(), botUser.getScore() + player.getScore())));
+		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.isPrepare() != null) {
+			int sum = 0;
+			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+				sum += twentyOneCardList.getScore();
+				botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + twentyOneCardList.getScore()));
+			}
+			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分。", sum, botUser.getScore() + sum)));
 		} else {
 			resp.add(BotMessageChain.ofPlain("退出成功啦。"));
 		}
@@ -157,12 +192,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage doubleAddCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {
 		Integer hasScore = botUser.getScore();
-		TwentyOnePlayer player = twentyOneTable.getPlayer(botUser.getExternalId());
+		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
 		Asserts.notNull(player, "啊嘞，有点不对劲");
-		Asserts.isTrue(player.getCardList().size() == 2, "已经不能双倍了哦");
-		Integer useScore = player.getScore();
+		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
+		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能双倍了哦");
+		Integer useScore = twentyOneCardList.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
-		player.setScore(useScore * 2);
+		twentyOneCardList.setScore(useScore * 2);
 		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
 
 		boolean addCardSuccess = twentyOneTable.addCard(player);
@@ -253,10 +289,10 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			tableMap.put(tableId, twentyOneTable);
 		}
 
-		TwentyOnePlayer player = twentyOneTable.getPlayer(playerId);
+		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(playerId);
 		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
 		if (otherTable != null) {
-			if (player != null && player.getScore() != null) {
+			if (player != null && player.isPrepare()) {
 				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
 			} else if (!Objects.equals(otherTable.getTableId(), tableId)) {
 				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());

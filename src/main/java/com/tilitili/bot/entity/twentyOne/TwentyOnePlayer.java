@@ -1,23 +1,18 @@
 package com.tilitili.bot.entity.twentyOne;
 
 import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.utils.StreamUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class TwentyOnePlayer {
 	private BotUser botUser;
-	private Integer score;
-	private List<TwentyOneCard> cardList;
-	private int status;
-
-	public TwentyOnePlayer() {
-		status = 0;
-	}
+	private List<TwentyOneCardList> cardListList;
 
 	@Override
 	public String toString() {
-		return String.format("%s：%s", botUser.getName(), cardList.stream().map(TwentyOneCard::toString).collect(Collectors.joining(",")));
+		return cardListList.stream().map(cardList -> String.format("%s：%s", botUser.getName(), cardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(",")))).collect(Collectors.joining("\n"));
 	}
 
 	public Long getPlayerId() {
@@ -28,30 +23,25 @@ public class TwentyOnePlayer {
 		return botUser == null? null: botUser.getScore();
 	}
 
+	public Boolean isPrepare() {
+		return this.cardListList.stream().allMatch(StreamUtil.isNotNull(TwentyOneCardList::getScore));
+	}
+
 	public void addCard(TwentyOneCard card) {
-		this.cardList.add(card);
+		this.getFirstNoEndCardList().getCardList().add(card);
+	}
+
+	public TwentyOneCardList getFirstNoEndCardList() {
+		return cardListList.stream().filter(StreamUtil.isEqual(TwentyOneCardList::getStatus, 0)).findFirst().orElse(null);
 	}
 
 
-
-
-
-
-	public List<TwentyOneCard> getCardList() {
-		return cardList;
+	public List<TwentyOneCardList> getCardListList() {
+		return cardListList;
 	}
 
-	public TwentyOnePlayer setCardList(List<TwentyOneCard> cardList) {
-		this.cardList = cardList;
-		return this;
-	}
-
-	public Integer getScore() {
-		return score;
-	}
-
-	public TwentyOnePlayer setScore(Integer score) {
-		this.score = score;
+	public TwentyOnePlayer setCardListList(List<TwentyOneCardList> cardListList) {
+		this.cardListList = cardListList;
 		return this;
 	}
 
@@ -61,15 +51,6 @@ public class TwentyOnePlayer {
 
 	public TwentyOnePlayer setBotUser(BotUser botUser) {
 		this.botUser = botUser;
-		return this;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public TwentyOnePlayer setStatus(int status) {
-		this.status = status;
 		return this;
 	}
 

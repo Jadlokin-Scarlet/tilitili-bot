@@ -2,10 +2,7 @@ package com.tilitili.bot.component;
 
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.entity.twentyOne.CardResult;
-import com.tilitili.bot.entity.twentyOne.TwentyOneAdmin;
-import com.tilitili.bot.entity.twentyOne.TwentyOneCard;
-import com.tilitili.bot.entity.twentyOne.TwentyOnePlayer;
+import com.tilitili.bot.entity.twentyOne.*;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.SortObject;
@@ -100,18 +97,20 @@ public class TwentyOneTable {
 	}
 
 	public boolean addGame(BotUser botUser, Integer score) {
-		TwentyOnePlayer player = playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, botUser.getExternalId())).findFirst().orElse(null);
+		TwentyOnePlayer player = getPlayerByPlayerId(playerList, botUser.getExternalId());
 		if (player == null) {
 			Asserts.isTrue(playerList.size() < 4, "人数爆满啦，稍后再来吧。");
-			playerList.add(new TwentyOnePlayer().setBotUser(botUser).setScore(score));
+			playerList.add(new TwentyOnePlayer().setBotUser(botUser).setCardListList(Lists.newArrayList(
+					new TwentyOneCardList().setScore(score)
+			)));
 		} else {
-			player.setScore(score);
+			player.getFirstNoEndCardList().setScore(score);
 		}
 		return true;
 	}
 
 	public boolean addGame(BotUser botUser) {
-		TwentyOnePlayer player = playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, botUser.getExternalId())).findFirst().orElse(null);
+		TwentyOnePlayer player = getPlayerByPlayerId(playerList, botUser.getExternalId());
 		if (player == null) {
 			playerList.add(new TwentyOnePlayer().setBotUser(botUser));
 			return true;
@@ -130,7 +129,9 @@ public class TwentyOneTable {
 		Asserts.notNull(hiddenCard, "啊嘞，不对劲。");
 		admin.setCardList(Lists.newArrayList(hiddenCard.setHidden(true), cardList.remove()));
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
-			player.setCardList(Lists.newArrayList(cardList.remove(), cardList.remove()));
+			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+				twentyOneCardList.setCardList(Lists.newArrayList(cardList.remove(), cardList.remove()));
+			}
 		}
 		status = STATUS_PLAYING;
 		return true;
@@ -141,12 +142,14 @@ public class TwentyOneTable {
 		List<String> preparePlayer = new ArrayList<>();
 		List<String> notPreparePlayer = new ArrayList<>();
 		for (TwentyOnePlayer player : playerList) {
-			String name = player.getBotUser().getName();
-			allPlayer.add(name);
-			if (player.getScore() == null) {
-				notPreparePlayer.add(name);
-			} else {
-				preparePlayer.add(name);
+			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+				String name = player.getBotUser().getName();
+				allPlayer.add(name);
+				if (twentyOneCardList.getScore() == null) {
+					notPreparePlayer.add(name);
+				} else {
+					preparePlayer.add(name);
+				}
 			}
 		}
 		this.waitPeoplePrepare(botMessage);
@@ -156,8 +159,9 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(BotMessage botMessage) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
+		TwentyOneCardList twentyOneCardList = nowPlayer.getFirstNoEndCardList();
 		CardResult adminCardResult = this.getCardResult(this.admin.getCardList());
-		while (nowPlayer != null && nowPlayer.needEnd(this.getCardResult(nowPlayer.getCardList()))) {
+		while (nowPlayer != null && nowPlayer.needEnd(this.getCardResult(twentyOneCardList.getCardList()))) {
 			this.stopCard(nowPlayer);
 			nowPlayer = this.getLastPlayer();
 		}
@@ -180,7 +184,7 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		if (nowPlayer.getCardList().size() == 2) {
+		if (twentyOneCardList.getCardList().size() == 2) {
 			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍(加倍积分并加排并停牌)"));
 		} else {
 			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌"));
@@ -205,13 +209,15 @@ public class TwentyOneTable {
 		resp.add(BotMessageChain.ofPlain(adminStr));
 		// 对比
 		for (TwentyOnePlayer player : gamingPlayerList) {
-			CardResult playerResult = this.getCardResult(player.getCardList());
-			int subScore = this.compareCard(adminCardResult, playerResult, player);
-			String playerStr = String.format("%s (%s) (%s分)", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
-			resp.add(BotMessageChain.ofPlain("\n"));
-			resp.add(BotMessageChain.ofPlain(playerStr));
-			BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
-			botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + player.getScore()));
+			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+				CardResult playerResult = this.getCardResult(twentyOneCardList.getCardList());
+				int subScore = this.compareCard(adminCardResult, playerResult, player, twentyOneCardList);
+				String playerStr = String.format("%s (%s) (%s分)", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
+				resp.add(BotMessageChain.ofPlain("\n"));
+				resp.add(BotMessageChain.ofPlain(playerStr));
+				BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
+				botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + twentyOneCardList.getScore()));
+			}
 		}
 		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();
 		for (TwentyOnePlayer player : this.playerList) {
@@ -235,15 +241,13 @@ public class TwentyOneTable {
 	public void initData() {
 		status = STATUS_WAIT;
 		for (TwentyOnePlayer player : playerList) {
-			player.setScore(null);
-			player.setStatus(0);
-			player.setCardList(null);
+			player.setCardListList(null);
 		}
 		this.cardList = this.newCardList();
 	}
 
-	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOnePlayer player) {
-		Integer score = player.getScore();
+	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOnePlayer player, TwentyOneCardList twentyOneCardList) {
+		Integer score = twentyOneCardList.getScore();
 		String playerSuperCard = playerResult.getSuperCard();
 		String adminSuperCard = adminResult.getSuperCard();
 
@@ -332,7 +336,7 @@ public class TwentyOneTable {
 
 	public boolean addCard(BotUser botUser) {
 		Long playerId = botUser.getExternalId();
-		TwentyOnePlayer player = this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
+		TwentyOnePlayer player = getPlayerByPlayerId(this.getGamingPlayerList(), playerId);
 		return this.addCard(player);
 	}
 
@@ -344,26 +348,38 @@ public class TwentyOneTable {
 
 	public boolean stopCard(BotUser botUser) {
 		Long playerId = botUser.getExternalId();
-		TwentyOnePlayer player = this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
+		TwentyOnePlayer player = getPlayerByPlayerId(this.getGamingPlayerList(), playerId);
 		return this.stopCard(player);
 	}
 
 	public boolean stopCard(TwentyOnePlayer player) {
 		Asserts.notNull(player, "啊嘞，有点不对劲");
-		player.setStatus(1);
+		player.getFirstNoEndCardList().setStatus(1);
 		return true;
 	}
 
-	public TwentyOnePlayer getPlayer(Long playerId) {
-		return playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
+	public TwentyOnePlayer getPlayerByPlayerId(Long playerId) {
+		return this.getPlayerByPlayerId(this.playerList, playerId);
 	}
 
 	public List<TwentyOnePlayer> getGamingPlayerList() {
-		return playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getScore, null).negate()).collect(Collectors.toList());
+		return playerList.stream().filter(TwentyOnePlayer::isPrepare).collect(Collectors.toList());
 	}
 
 	public TwentyOnePlayer getLastPlayer() {
-		return this.getGamingPlayerList().stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getStatus, 0)).findFirst().orElse(null);
+		return this.getGamingPlayerList().stream().filter(StreamUtil.isNotNull(TwentyOnePlayer::getFirstNoEndCardList)).findFirst().orElse(null);
+	}
+
+	public boolean isEnd() {
+		return this.getGamingPlayerList().stream().flatMap(player -> player.getCardListList().stream()).map(TwentyOneCardList::getStatus).allMatch(Predicate.isEqual(1));
+	}
+
+	public boolean isReady() {
+		return playerList.stream().flatMap(player -> player.getCardListList().stream()).map(TwentyOneCardList::getScore).allMatch(Objects::nonNull);
+	}
+
+	private TwentyOnePlayer getPlayerByPlayerId(List<TwentyOnePlayer> playerList, Long playerId) {
+		return playerList.stream().filter(StreamUtil.isEqual(TwentyOnePlayer::getPlayerId, playerId)).findFirst().orElse(null);
 	}
 
 	private boolean needAddCard(List<TwentyOnePlayer> playerList, CardResult cardResult) {
@@ -406,17 +422,9 @@ public class TwentyOneTable {
 	}
 
 	private Queue<TwentyOneCard> newCardList() {
-		return IntStream.range(0, 52 * 3).mapToObj(TwentyOneCard::new)
+		return IntStream.range(0, 52 * 4).mapToObj(TwentyOneCard::new)
 				.map(item -> new SortObject<>(random.nextInt(Integer.MAX_VALUE), item))
 				.sorted().map(SortObject::getT).collect(Collectors.toCollection(LinkedList::new));
-	}
-
-	public boolean isEnd() {
-		return this.getGamingPlayerList().stream().map(TwentyOnePlayer::getStatus).allMatch(Predicate.isEqual(1));
-	}
-
-	public boolean isReady() {
-		return playerList.stream().map(TwentyOnePlayer::getScore).allMatch(Objects::nonNull);
 	}
 
 	public String getStatus() {
