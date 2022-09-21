@@ -114,7 +114,7 @@ public class TwentyOneTable {
 		if (player == null) {
 			playerList.add(new TwentyOnePlayer().setBotUser(botUser).setCardListList(Lists.newArrayList(
 					new TwentyOneCardList()
-			));
+			)));
 			return true;
 		} else {
 			return false;
