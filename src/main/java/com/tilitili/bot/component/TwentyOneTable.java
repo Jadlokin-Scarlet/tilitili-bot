@@ -280,7 +280,6 @@ public class TwentyOneTable {
 		));
 	}
 
-	private static final List<String> bigCardType = Arrays.asList(FIVE_CARD, BLACK_JACK);
 	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOneCardList twentyOneCardList) {
 		Integer score = twentyOneCardList.getScore();
 		String playerSuperCard = playerResult.getSuperCard();
@@ -291,7 +290,7 @@ public class TwentyOneTable {
 		}
 
 		if (playerSuperCard != null && adminSuperCard != null) {
-			if (bigCardType.contains(playerSuperCard) && bigCardType.contains(adminSuperCard)) {
+			if (Objects.equals(playerSuperCard, adminSuperCard)) {
 				return 0;
 			}
 		} else if (playerSuperCard == null && adminSuperCard == null) {
@@ -300,19 +299,19 @@ public class TwentyOneTable {
 			}
 		}
 
-		if (Objects.equals(playerSuperCard, FIVE_CARD)) {
-			return score * 3;
-		}
-
-		if (Objects.equals(adminSuperCard, FIVE_CARD)) {
-			return - score;
-		}
-
 		if (Objects.equals(playerSuperCard, BLACK_JACK)) {
 			return score * 3 / 2;
 		}
 
 		if (Objects.equals(adminSuperCard, BLACK_JACK)) {
+			return - score;
+		}
+
+		if (Objects.equals(playerSuperCard, FIVE_CARD)) {
+			return score * 3;
+		}
+
+		if (Objects.equals(adminSuperCard, FIVE_CARD)) {
 			return - score;
 		}
 
