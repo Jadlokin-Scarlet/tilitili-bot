@@ -137,7 +137,7 @@ public class TwentyOneTable {
 		}
 		if (playerList.get(0).getPlayerId().equals(545459363L)) {
 			List<TwentyOneCard> cardList = playerList.get(0).getCardListList().get(0).getCardList();
-			cardList.set(1, new TwentyOneCard(cardList.get(0).getPoint()));
+			cardList.set(1, new TwentyOneCard(cardList.get(0).getPoint() - 1));
 		}
 		status = STATUS_PLAYING;
 		return true;
