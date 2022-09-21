@@ -175,9 +175,8 @@ public class TwentyOneTable {
 
 	public List<BotMessageChain> getNoticeMessage(BotMessage botMessage) {
 		TwentyOnePlayer nowPlayer = this.getLastPlayer();
-		TwentyOneCardList twentyOneCardList = nowPlayer.getFirstNoEndCardList();
 		CardResult adminCardResult = this.getCardResult(this.admin.getCardList());
-		while (nowPlayer != null && nowPlayer.needEnd(this.getCardResult(twentyOneCardList.getCardList()))) {
+		while (nowPlayer != null && nowPlayer.needEnd(this.getCardResult(nowPlayer.getFirstNoEndCardList().getCardList()))) {
 			this.stopCard(nowPlayer);
 			nowPlayer = this.getLastPlayer();
 		}
@@ -192,6 +191,7 @@ public class TwentyOneTable {
 		}
 
 		Asserts.notNull(nowPlayer, "啊嘞，似乎不对劲");
+		TwentyOneCardList twentyOneCardList = nowPlayer.getFirstNoEndCardList();
 
 		String adminStr = this.admin.toString() + "\n";
 		String playerStr = this.getGamingPlayerList().stream().map(TwentyOnePlayer::toString).collect(Collectors.joining("\n"));
@@ -200,13 +200,17 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		if (twentyOneCardList.getCardList().size() == 2 && Objects.equals(twentyOneCardList.getCardList().get(0).getPoint(), twentyOneCardList.getCardList().get(1).getPoint())) {
-			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍、分牌"));
-		} else if (twentyOneCardList.getCardList().size() == 2) {
-			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍"));
-		} else {
-			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌"));
+		List<String> chooseList = Lists.newArrayList("加排", "停牌");
+		if (twentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
+			chooseList.add("放弃");
 		}
+		if (twentyOneCardList.getCardList().size() == 2 && Objects.equals(twentyOneCardList.getCardList().get(0).getPoint(), twentyOneCardList.getCardList().get(1).getPoint())) {
+			chooseList.add("分牌");
+		}
+		if (twentyOneCardList.getCardList().size() == 2) {
+			chooseList.add("加倍");
+		}
+		result.add(BotMessageChain.ofPlain("请选择："+String.join("、", chooseList)));
 		this.endWait();
 		return result;
 	}
@@ -259,11 +263,15 @@ public class TwentyOneTable {
 	public void initData() {
 		status = STATUS_WAIT;
 		for (TwentyOnePlayer player : playerList) {
-			player.setCardListList(Lists.newArrayList(
-					new TwentyOneCardList()
-			));
+			this.initPlayer(player);
 		}
 		this.cardList = this.newCardList();
+	}
+
+	public void initPlayer(TwentyOnePlayer player) {
+		player.setCardListList(Lists.newArrayList(
+				new TwentyOneCardList()
+		));
 	}
 
 	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOnePlayer player, TwentyOneCardList twentyOneCardList) {

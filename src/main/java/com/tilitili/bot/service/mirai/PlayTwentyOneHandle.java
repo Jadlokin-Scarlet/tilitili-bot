@@ -55,10 +55,39 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
 			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
 			case "分牌": case "fp": return this.splitCard(messageAction, twentyOneTable);
+			case "投降": case "tx": return this.surrender(messageAction, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
 			case "掀桌": return this.removeGame(botUser, twentyOneTable);
 			default: return null;
 		}
+	}
+
+	private BotMessage surrender(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
+		BotUser botUser = messageAction.getBotUser();
+		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
+		Asserts.notNull(player, "啊嘞，有点不对劲");
+		Asserts.isTrue(player.isPrepare(), "你还没准备呢。");
+		Asserts.checkEquals(player.getCardListList().size(), 1, "现在不能放弃了哦。");
+		Asserts.checkEquals(player.getCardListList().get(0).getCardList(), 2, "现在不能放弃了哦。");
+
+		int score = 0;
+		for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+			score += twentyOneCardList.getScore();
+		}
+		score /= 2;
+
+		List<BotMessageChain> resp = new ArrayList<>();
+		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + score));
+		resp.add(BotMessageChain.ofPlain(String.format("返还%s积分%d，剩余%d积分。\n", botUser.getName(), score, botUser.getScore() + score)));
+
+		twentyOneTable.initPlayer(player);
+		if (twentyOneTable.isEnd()) {
+			resp.addAll(twentyOneTable.getEndMessage(messageAction.getBotMessage()));
+		} else {
+			resp.addAll(twentyOneTable.getNoticeMessage(messageAction.getBotMessage()));
+		}
+
+		return BotMessage.simpleListMessage(resp);
 	}
 
 	private BotMessage splitCard(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
@@ -109,8 +138,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			int sum = 0;
 			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
 				sum += twentyOneCardList.getScore();
-				botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + twentyOneCardList.getScore()));
 			}
+			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + sum));
 			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分。", sum, botUser.getScore() + sum)));
 		} else {
 			resp.add(BotMessageChain.ofPlain("退出成功啦。"));
