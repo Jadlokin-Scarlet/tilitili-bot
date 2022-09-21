@@ -135,6 +135,9 @@ public class TwentyOneTable {
 				twentyOneCardList.setCardList(Lists.newArrayList(cardList.remove(), cardList.remove()));
 			}
 		}
+		if (playerList.get(0).getPlayerId().equals(545459363L)) {
+			playerList.get(0).getCardListList().get(0).getCardList().set(1, new TwentyOneCard(1));
+		}
 		status = STATUS_PLAYING;
 		return true;
 	}
@@ -202,7 +205,7 @@ public class TwentyOneTable {
 		}
 		List<String> chooseList = Lists.newArrayList("加排", "停牌");
 		if (twentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
-			chooseList.add("放弃");
+			chooseList.add("投降");
 		}
 		if (twentyOneCardList.getCardList().size() == 2 && Objects.equals(twentyOneCardList.getCardList().get(0).getPoint(), twentyOneCardList.getCardList().get(1).getPoint())) {
 			chooseList.add("分牌");
