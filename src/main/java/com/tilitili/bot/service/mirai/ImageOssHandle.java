@@ -6,7 +6,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.OSSUtil;
-import jdk.internal.joptsimple.internal.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +35,6 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 				resultList.add("上传失败？");
 			}
 		}
-		return BotMessage.simpleTextMessage(Strings.join(resultList, "\n"));
+		return BotMessage.simpleTextMessage(String.join("\n", resultList));
 	}
 }
