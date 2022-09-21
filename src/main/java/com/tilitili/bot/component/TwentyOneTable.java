@@ -280,6 +280,7 @@ public class TwentyOneTable {
 		));
 	}
 
+	private static final List<String> bigCardType = Arrays.asList(FIVE_CARD, BLACK_JACK);
 	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOneCardList twentyOneCardList) {
 		Integer score = twentyOneCardList.getScore();
 		String playerSuperCard = playerResult.getSuperCard();
@@ -290,7 +291,7 @@ public class TwentyOneTable {
 		}
 
 		if (playerSuperCard != null && adminSuperCard != null) {
-			if (Objects.equals(playerSuperCard, adminSuperCard)) {
+			if (bigCardType.contains(playerSuperCard) && bigCardType.contains(adminSuperCard)) {
 				return 0;
 			}
 		} else if (playerSuperCard == null && adminSuperCard == null) {
