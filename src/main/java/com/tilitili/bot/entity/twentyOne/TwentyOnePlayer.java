@@ -24,7 +24,7 @@ public class TwentyOnePlayer {
 	}
 
 	public Boolean isPrepare() {
-		return this.cardListList.stream().allMatch(StreamUtil.isNotNull(TwentyOneCardList::getScore));
+		return this.cardListList != null && this.cardListList.stream().allMatch(StreamUtil.isNotNull(TwentyOneCardList::getScore));
 	}
 
 	public void addCard(TwentyOneCard card) {
