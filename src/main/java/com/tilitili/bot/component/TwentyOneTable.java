@@ -245,7 +245,7 @@ public class TwentyOneTable {
 		for (TwentyOnePlayer player : playerList) {
 			player.setCardListList(Lists.newArrayList(
 					new TwentyOneCardList()
-			);
+			));
 		}
 		this.cardList = this.newCardList();
 	}
