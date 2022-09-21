@@ -112,7 +112,9 @@ public class TwentyOneTable {
 	public boolean addGame(BotUser botUser) {
 		TwentyOnePlayer player = getPlayerByPlayerId(playerList, botUser.getExternalId());
 		if (player == null) {
-			playerList.add(new TwentyOnePlayer().setBotUser(botUser));
+			playerList.add(new TwentyOnePlayer().setBotUser(botUser).setCardListList(Lists.newArrayList(
+					new TwentyOneCardList()
+			));
 			return true;
 		} else {
 			return false;
@@ -241,7 +243,9 @@ public class TwentyOneTable {
 	public void initData() {
 		status = STATUS_WAIT;
 		for (TwentyOnePlayer player : playerList) {
-			player.setCardListList(null);
+			player.setCardListList(Lists.newArrayList(
+					new TwentyOneCardList()
+			);
 		}
 		this.cardList = this.newCardList();
 	}
