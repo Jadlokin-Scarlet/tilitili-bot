@@ -195,23 +195,29 @@ public class TwentyOneTable {
 		}
 
 		Asserts.notNull(nowPlayer, "啊嘞，似乎不对劲");
-		TwentyOneCardList twentyOneCardList = nowPlayer.getFirstNoEndCardList();
+		TwentyOneCardList nowTwentyOneCardList = nowPlayer.getFirstNoEndCardList();
 
-		String adminStr = this.admin.toString() + "\n";
-		String playerStr = this.getGamingPlayerList().stream().map(TwentyOnePlayer::toString).collect(Collectors.joining("\n"));
-		List<BotMessageChain> result = Lists.newArrayList(BotMessageChain.ofPlain(adminStr), BotMessageChain.ofPlain(playerStr));
+		String adminStr = this.admin.toString();
+
+		List<BotMessageChain> result = Lists.newArrayList(BotMessageChain.ofPlain(adminStr));
+		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
+			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
+				String cardListStr = twentyOneCardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
+				result.add(BotMessageChain.ofPlain(String.format("\n%s：%s", player.getBotUser().getName(), cardListStr)));
+			}
+		}
 		result.add(BotMessageChain.ofPlain("\n"));
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
 		List<String> chooseList = Lists.newArrayList("加排", "停牌");
-		if (twentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
+		if (nowTwentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
 			chooseList.add("投降");
 		}
-		if (twentyOneCardList.getCardList().size() == 2 && Objects.equals(twentyOneCardList.getCardList().get(0).getPoint(), twentyOneCardList.getCardList().get(1).getPoint())) {
+		if (nowTwentyOneCardList.getCardList().size() == 2 && Objects.equals(nowTwentyOneCardList.getCardList().get(0).getPoint(), nowTwentyOneCardList.getCardList().get(1).getPoint())) {
 			chooseList.add("分牌");
 		}
-		if (twentyOneCardList.getCardList().size() == 2) {
+		if (nowTwentyOneCardList.getCardList().size() == 2) {
 			chooseList.add("加倍");
 		}
 		result.add(BotMessageChain.ofPlain("请选择："+String.join("、", chooseList)));
