@@ -151,10 +151,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 					.put("type", 2)
 					.put("from", botMessage.getQq())
 					.put("fromName", botMessage.getGroupNickName())
-					.put("to", botMessage.getGroup())
-					.put("toName", botSender.getName());
+					.put("to", botMessage.getGroup());
+			if (botMessage.getGroupName() != null) param.put("toName", botMessage.getGroupName());
 		}
-		if (botMessage.getGroupName() != null) param.put("toName", botMessage.getGroupName());
 		String json = gson.toJson(param.build());
 		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);
 		JSONObject resp = JSONObject.parseObject(respStr);
