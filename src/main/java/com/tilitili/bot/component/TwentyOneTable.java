@@ -237,9 +237,9 @@ public class TwentyOneTable {
 		for (TwentyOnePlayer player : gamingPlayerList) {
 			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
 				CardResult playerResult = this.getCardResult(twentyOneCardList.getCardList());
-				int subScore = this.compareCard(adminCardResult, playerResult, player, twentyOneCardList);
-				String playerStr = String.format("%s (%s) (%s分)", player.toString(), playerResult, subScore > 0? "+" + subScore: "" + subScore);
-				resp.add(BotMessageChain.ofPlain("\n"));
+				int subScore = this.compareCard(adminCardResult, playerResult, twentyOneCardList);
+				String cardListStr = twentyOneCardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
+				String playerStr = String.format("\n%s：%s (%s) (%s分)", player.getBotUser().getName(), cardListStr, playerResult, subScore > 0? "+" + subScore: "" + subScore);
 				resp.add(BotMessageChain.ofPlain(playerStr));
 				BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
 				botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + twentyOneCardList.getScore()));
@@ -278,7 +278,7 @@ public class TwentyOneTable {
 		));
 	}
 
-	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOnePlayer player, TwentyOneCardList twentyOneCardList) {
+	private int compareCard(CardResult adminResult, CardResult playerResult, TwentyOneCardList twentyOneCardList) {
 		Integer score = twentyOneCardList.getScore();
 		String playerSuperCard = playerResult.getSuperCard();
 		String adminSuperCard = adminResult.getSuperCard();

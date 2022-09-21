@@ -4,16 +4,10 @@ import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.utils.StreamUtil;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TwentyOnePlayer {
 	private BotUser botUser;
 	private List<TwentyOneCardList> cardListList;
-
-	@Override
-	public String toString() {
-		return cardListList.stream().map(cardList -> String.format("%s：%s", botUser.getName(), cardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(",")))).collect(Collectors.joining("\n"));
-	}
 
 	public Long getPlayerId() {
 		return botUser == null? null: botUser.getExternalId();
