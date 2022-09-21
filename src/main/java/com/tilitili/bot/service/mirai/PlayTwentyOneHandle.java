@@ -62,32 +62,21 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage splitCard(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
-//		BotUser botUser = messageAction.getBotUser();
-//		Integer hasScore = botUser.getScore();
-//		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
-//		Asserts.notNull(player, "啊嘞，有点不对劲");
-//		Asserts.isTrue(player.getCardList().size() == 2, "已经不能双倍了哦");
-//		Integer useScore = player.getScore();
-//		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
-//		player.setScore(useScore * 2);
-//		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
-//
-//		boolean addCardSuccess = twentyOneTable.addCard(player);
-//		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
-//
-//		boolean stopCardSuccess = twentyOneTable.stopCard(player);
-//		Asserts.isTrue(stopCardSuccess, "啊嘞，不对劲");
-//
-////		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
-//
-//		if (twentyOneTable.isEnd()) {
-//			List<BotMessageChain> resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
-//			return BotMessage.simpleListMessage(resp);
-//		} else {
-//			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
-//			return BotMessage.simpleListMessage(resp);
-//		}
-		return null;
+		BotUser botUser = messageAction.getBotUser();
+		Integer hasScore = botUser.getScore();
+		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
+		Asserts.notNull(player, "啊嘞，有点不对劲");
+		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
+		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能双倍了哦");
+		Integer useScore = twentyOneCardList.getScore();
+		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
+		boolean splitCardSuccess = twentyOneTable.splitCard(player);
+		Asserts.isTrue(splitCardSuccess, "啊嘞，不对劲");
+
+		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
+
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+		return BotMessage.simpleListMessage(resp);
 	}
 
 	private final List<Long> adminUserIdList = Arrays.asList(MASTER_USER_ID, MASTER_GUILD_USER_ID, WEIWEI_USER_ID);
@@ -209,13 +198,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
-		if (twentyOneTable.isEnd()) {
-			List<BotMessageChain> resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
-			return BotMessage.simpleListMessage(resp);
-		} else {
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
-			return BotMessage.simpleListMessage(resp);
-		}
+		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+		return BotMessage.simpleListMessage(resp);
 	}
 
 	private BotMessage stopCard(BotMessageAction messageAction, BotUser botUser, TwentyOneTable twentyOneTable) {

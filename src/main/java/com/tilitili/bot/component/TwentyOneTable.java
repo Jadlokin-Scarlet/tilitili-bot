@@ -139,6 +139,20 @@ public class TwentyOneTable {
 		return true;
 	}
 
+	public boolean splitCard(TwentyOnePlayer player) {
+		Asserts.checkEquals(player.getCardListList().size(), 1, "你已经分过啦。");
+		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
+		List<TwentyOneCard> firstCardList = twentyOneCardList.getCardList();
+		TwentyOneCard firstRemoveCard = firstCardList.get(1);
+		Asserts.checkEquals(firstCardList.get(0).getPoint(), firstRemoveCard.getPoint(), "要一样的才能分哦。");
+		firstCardList.remove(1);
+		firstCardList.add(cardList.remove());
+		player.getCardListList().add(new TwentyOneCardList().setScore(twentyOneCardList.getScore()).setCardList(
+				Lists.newArrayList(firstRemoveCard, cardList.remove())
+		));
+		return true;
+	}
+
 	public List<BotMessageChain> getWaitMessage(BotMessage botMessage) {
 		List<String> allPlayer = new ArrayList<>();
 		List<String> preparePlayer = new ArrayList<>();
@@ -186,8 +200,10 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		if (twentyOneCardList.getCardList().size() == 2) {
-			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍(加倍积分并加排并停牌)"));
+		if (twentyOneCardList.getCardList().size() == 2 && Objects.equals(twentyOneCardList.getCardList().get(0).getPoint(), twentyOneCardList.getCardList().get(1).getPoint())) {
+			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍、分牌"));
+		} else if (twentyOneCardList.getCardList().size() == 2) {
+			result.add(BotMessageChain.ofPlain("请选择：加排、停牌、加倍"));
 		} else {
 			result.add(BotMessageChain.ofPlain("请选择：加牌、停牌"));
 		}
