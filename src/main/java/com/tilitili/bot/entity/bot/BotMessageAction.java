@@ -207,4 +207,8 @@ public class BotMessageAction {
     public BotUser getBotUser() {
         return botUser;
     }
+
+    public BotEmum getBot() {
+        return bot;
+    }
 }
