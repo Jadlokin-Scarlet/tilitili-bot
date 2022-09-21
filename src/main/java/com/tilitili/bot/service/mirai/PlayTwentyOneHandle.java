@@ -198,7 +198,12 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("加倍完毕，当前积分总和%d，剩余%d积分。", useScore * 2, hasScore - useScore), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 
-		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+		List<BotMessageChain> resp;
+		if (twentyOneTable.isEnd()) {
+			resp = twentyOneTable.getEndMessage(messageAction.getBotMessage());
+		} else {
+			resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+		}
 		return BotMessage.simpleListMessage(resp);
 	}
 
