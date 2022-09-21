@@ -48,8 +48,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (!this.checkKeyValid(key, twentyOneTable, playerId)) {
 			return null;
 		}
-
-		log.info(Gsons.toJson(twentyOneTable.getPlayerList()));
+		if (twentyOneTable != null) {
+			log.info(Gsons.toJson(twentyOneTable.getPlayerList()));
+		}
 
 		switch (key) {
 			case "玩21点": case "w21": return this.startGame(messageAction);
