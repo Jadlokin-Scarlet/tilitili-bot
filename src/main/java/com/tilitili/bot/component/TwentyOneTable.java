@@ -169,7 +169,7 @@ public class TwentyOneTable {
 			}
 		}
 		this.waitPeoplePrepare(botMessage);
-		String message = String.format("此桌参与人员：%s\n已准备：%s\n未准备：%s\n", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
+		String message = String.format("此桌参与人员：%s\n已准备：%s\n未准备：%s", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
 		return Lists.newArrayList(BotMessageChain.ofPlain(message));
 	}
 
