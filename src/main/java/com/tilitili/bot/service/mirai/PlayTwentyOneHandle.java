@@ -138,7 +138,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		List<BotMessageChain> resp = new ArrayList<>();
 
-		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.isPrepare() != null) {
+		if (Objects.equals(status, TwentyOneTable.STATUS_WAIT) && player.isPrepare()) {
 			int sum = 0;
 			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
 				sum += twentyOneCardList.getScore();
