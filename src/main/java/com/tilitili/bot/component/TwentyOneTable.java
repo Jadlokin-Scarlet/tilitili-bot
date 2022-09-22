@@ -144,7 +144,7 @@ public class TwentyOneTable {
 		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
 		List<TwentyOneCard> firstCardList = twentyOneCardList.getCardList();
 		TwentyOneCard firstRemoveCard = firstCardList.get(1);
-		Asserts.checkEquals(firstCardList.get(0).getPoint(), firstRemoveCard.getPoint(), "要一样的才能分哦。");
+		Asserts.checkEquals(firstCardList.get(0).getValue(), firstRemoveCard.getValue(), "要一样的才能分哦。");
 		firstCardList.remove(1);
 		firstCardList.add(cardList.remove());
 		player.getCardListList().add(new TwentyOneCardList().setScore(twentyOneCardList.getScore()).setCardList(
@@ -210,7 +210,7 @@ public class TwentyOneTable {
 		if (nowTwentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
 			chooseList.add("投降");
 		}
-		if (nowTwentyOneCardList.getCardList().size() == 2 && Objects.equals(nowTwentyOneCardList.getCardList().get(0).getPoint(), nowTwentyOneCardList.getCardList().get(1).getPoint())) {
+		if (nowTwentyOneCardList.getCardList().size() == 2 && Objects.equals(nowTwentyOneCardList.getCardList().get(0).getValue(), nowTwentyOneCardList.getCardList().get(1).getValue())) {
 			chooseList.add("分牌");
 		}
 		if (nowTwentyOneCardList.getCardList().size() == 2) {
