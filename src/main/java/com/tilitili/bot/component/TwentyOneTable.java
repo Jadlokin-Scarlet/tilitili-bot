@@ -417,8 +417,8 @@ public class TwentyOneTable {
 	}
 
 	private boolean needAddCard(List<TwentyOnePlayer> playerList, CardResult cardResult) {
-		int scoreSum = playerList.stream().mapToInt(TwentyOnePlayer::getHaveScore).sum();
-		int scoreAvg = scoreSum / playerList.size();
+//		int scoreSum = playerList.stream().mapToInt(TwentyOnePlayer::getHaveScore).sum();
+//		int scoreAvg = scoreSum / playerList.size();
 //		if (scoreAvg <= 100) {
 			if (cardResult.getSuperCard() == null) {
 				return cardResult.getSum() < 17;
