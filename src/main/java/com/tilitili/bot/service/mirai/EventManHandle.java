@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.event.BotInvitedJoinGroupRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.NewFriendRequestEventHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.NewFriendRequestEvent;
@@ -34,9 +35,10 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleNewFriendEvent(BotMessageAction messageAction) {
+		BotEmum bot = messageAction.getBot();
 		if (redisCache.exists(NewFriendRequestEventHandle.newFriendKey)) {
 			NewFriendRequestEvent event = (NewFriendRequestEvent) redisCache.getValue(NewFriendRequestEventHandle.newFriendKey);
-			miraiManager.handleNewFriendRequestEvent(event);
+			miraiManager.handleNewFriendRequestEvent(bot, event);
 			redisCache.delete(NewFriendRequestEventHandle.newFriendKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
@@ -44,9 +46,10 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleGroupInviteEvent(BotMessageAction messageAction) {
+		BotEmum bot = messageAction.getBot();
 		if (redisCache.exists(BotInvitedJoinGroupRequestEventHandle.newGroupKey)) {
 			BotInvitedJoinGroupRequestEvent event = (BotInvitedJoinGroupRequestEvent) redisCache.getValue(BotInvitedJoinGroupRequestEventHandle.newGroupKey);
-			miraiManager.handleBotInvitedJoinGroupRequestEvent(event);
+			miraiManager.handleBotInvitedJoinGroupRequestEvent(bot, event);
 			redisCache.delete(BotInvitedJoinGroupRequestEventHandle.newGroupKey);
 			return BotMessage.simpleTextMessage("好的");
 		}

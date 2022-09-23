@@ -194,12 +194,17 @@ public class TwentyOneTable {
 		TwentyOneCardList nowTwentyOneCardList = nowPlayer.getFirstNoEndCardList();
 
 		String adminStr = this.admin.toString();
-
+		String nowIndex = "→ ";
 		List<BotMessageChain> result = Lists.newArrayList(BotMessageChain.ofPlain(adminStr));
 		for (TwentyOnePlayer player : this.getGamingPlayerList()) {
 			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
 				String cardListStr = twentyOneCardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
-				result.add(BotMessageChain.ofPlain(String.format("\n%s：%s", player.getBotUser().getName(), cardListStr)));
+				if (twentyOneCardList.getStatus() == 1) {
+					result.add(BotMessageChain.ofPlain(String.format("\n%s：%s", player.getBotUser().getName(), cardListStr)));
+				} else {
+					result.add(BotMessageChain.ofPlain(String.format("\n%s%s：%s", nowIndex, player.getBotUser().getName(), cardListStr)));
+					nowIndex = "";
+				}
 			}
 		}
 		result.add(BotMessageChain.ofPlain("\n"));

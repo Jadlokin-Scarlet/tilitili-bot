@@ -71,10 +71,10 @@ public class WebSocketConfig implements DisposableBean {
     @Override
     public void destroy() throws Exception {
         for (BotWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
-            botWebSocketHandler.close();
+            botWebSocketHandler.closeBlocking();
         }
         for (BaseWebSocketHandler baseWebSocketHandler : webSocketHandlerList) {
-            baseWebSocketHandler.close();
+            baseWebSocketHandler.closeBlocking();
         }
     }
 }

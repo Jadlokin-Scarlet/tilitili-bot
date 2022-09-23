@@ -82,7 +82,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		try {
 			response = mcPingManager.mcPing(new InetSocketAddress(host, Integer.parseInt(port)));
 		} catch (SocketTimeoutException | ConnectException e) {
-			throw new AssertException("网络异常");
+			throw new AssertException("网络异常", e);
 		}
 		Asserts.notNull(response, "服务器不在线");
 		Integer onlinePlayerCnt = response.getPlayers().getOnline();

@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
@@ -37,6 +38,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
+        BotEmum bot = messageAction.getBot();
         BotSessionService.MiraiSession session = messageAction.getSession();
         Long group = messageAction.getBotMessage().getGroup();
         Long qq = messageAction.getBotMessage().getQq();
@@ -47,10 +49,10 @@ public class RenameHandle extends ExceptionRespMessageHandle {
             String lastSendTimeStr = session.get(lastSendTimeKey);
             boolean isUp = lastSendTimeStr == null || DateUtils.parseDateYMDHMS(lastSendTimeStr).before(getLimitDate());
             if (status.equals("冒泡！") && !isUp) {
-                botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 水群ing");
+                botManager.changeGroupNick(bot, listenGroup, MASTER_QQ, name + " | 水群ing");
                 session.put(statusKey, "水群ing");
             } else if (isUp) {
-                botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 冒泡！");
+                botManager.changeGroupNick(bot, listenGroup, MASTER_QQ, name + " | 冒泡！");
                 session.put(statusKey, "冒泡！");
             }
 
@@ -58,7 +60,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
                 String lastSendTime2Str = session.get(lastSendTimeKey);
                 boolean isDown = lastSendTime2Str == null || DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
                 if (isDown) {
-                    botManager.changeGroupNick(listenGroup, MASTER_QQ, name + " | 潜水。");
+                    botManager.changeGroupNick(bot, listenGroup, MASTER_QQ, name + " | 潜水。");
                     session.put(statusKey, "潜水。");
                 }
             }, waitTime, TimeUnit.MINUTES);

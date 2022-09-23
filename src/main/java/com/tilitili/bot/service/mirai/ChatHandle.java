@@ -16,6 +16,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -137,7 +138,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isNotBlank(wordReply)) {
 			return Lists.newArrayList(BotMessageChain.ofPlain(wordReply));
 		}
-
+		BotEmum bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		ImmutableMap.Builder<Object, Object> param;
@@ -172,7 +173,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				case 1: chainList.add(BotMessageChain.ofPlain(content)); break;
 				case 2: chainList.add(BotMessageChain.ofImage("https://files.molicloud.com/" + content)); break;
 				case 3: log.error("记录文档, content={}", content);
-				case 4: chainList.add(BotMessageChain.ofVoice(botManager.uploadVoice("https://files.molicloud.com/" + content)));
+				case 4: chainList.add(BotMessageChain.ofVoice(botManager.uploadVoice(bot, "https://files.molicloud.com/" + content)));
 				case 8: log.error("记录json, json={}", content);
 				case 9: log.error("记录其他文件, content={}", content);
 				default: log.error("记录其他情况, content={}", content);
