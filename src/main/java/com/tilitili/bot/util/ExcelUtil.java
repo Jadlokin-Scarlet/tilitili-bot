@@ -70,7 +70,7 @@ public class ExcelUtil {
 	}
 
 	private static <T> ExcelResult<T> readExcelFile(File file) {
-		ExcelResult<T> result = new ExcelResult<>().setTitle(file.getName());
+		ExcelResult<T> result = new ExcelResult<>();
 		List<List<String>> data = new ArrayList<>();
 		try (FileInputStream stream = new FileInputStream(file); Workbook workbook = new XSSFWorkbook(stream);) {
 			Sheet sheet = workbook.getSheetAt(0);

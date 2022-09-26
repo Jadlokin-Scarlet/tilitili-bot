@@ -13,11 +13,12 @@ import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
 
-//@Component
+@Component
 public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotTalkMapper botTalkMapper;
 	private final BotManager botManager;
