@@ -28,7 +28,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final BaiduManager baiduManager;
 
 	public ForwardHandle(BotSenderMapper botSenderMapper, MinecraftManager minecraftManager, BaiduManager baiduManager) {
-		this.baGroup = botSenderMapper.getBotSenderById(3759L);
+		this.baGroup = botSenderMapper.getBotSenderById(4454L);
 		this.minecraftManager = minecraftManager;
 		this.baiduManager = baiduManager;
 	}
