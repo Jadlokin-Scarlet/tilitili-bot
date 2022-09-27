@@ -13,14 +13,12 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.PixivManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -98,18 +96,7 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+recommendPid));
-		for (String url : urlList) {
-			String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-			messageChainList.add(BotMessageChain.ofPlain("\n"));
-			if (sl == null || sl < 5) {
-				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(BotMessageChain.ofImage(ossUrl));
-			} else {
-				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null ? ossUrl : url));
-			}
-		}
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(botSender, illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
 		return BotMessage.simpleListMessage(messageChainList, botMessage);
 	}
 }

@@ -103,6 +103,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		List<BotMessageChain> chainList = null;
 		switch (source) {
 			case "tx": {
+				if ("签到".equals(text.trim())) {
+					break;
+				}
 				for (int index = 0; index < 10; index++) {
 					reply = reqReply(text);
 					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;

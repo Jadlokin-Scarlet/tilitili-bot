@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
@@ -13,14 +14,12 @@ import com.tilitili.common.manager.PixivManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,13 +34,15 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	private final PixivManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
 	private final BotTaskMapper botTaskMapper;
+	private final PixivService pixivService;
 
 	@Autowired
-	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivManager pixivManager, BotTaskMapper botTaskMapper) {
+	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivManager pixivManager, BotTaskMapper botTaskMapper, PixivService pixivService) {
 		this.redisCache = redisCache;
 		this.pixivManager = pixivManager;
 		this.pixivLoginUserMapper = pixivLoginUserMapper;
 		this.botTaskMapper = botTaskMapper;
+		this.pixivService = pixivService;
 	}
 
 	private final Map<String, String> keyModeMap = ImmutableMap.of("推荐色图", "all", "推荐色色", "r18", "推荐不色", "safe", "tjst", "all", "tjss", "r18", "tjbs", "safe");
@@ -139,18 +140,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("https://pixiv.moe/illust/"+pid));
-		for (String url : urlList) {
-			String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-			messageChainList.add(BotMessageChain.ofPlain("\n"));
-			if (sl == null || sl < 5) {
-				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(BotMessageChain.ofImage(ossUrl));
-			} else {
-				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null ? ossUrl : url));
-			}
-		}
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(botSender, illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
 
 		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);

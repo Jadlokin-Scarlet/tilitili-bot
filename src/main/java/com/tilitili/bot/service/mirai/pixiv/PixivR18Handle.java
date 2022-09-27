@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.PixivService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class PixivR18Handle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
+        BotSender botSender = messageAction.getBotSender();
         String pro = messageAction.getParamOrDefault("pro", "0");
         String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
         String user = messageAction.getParam("u");
@@ -35,9 +37,8 @@ public class PixivR18Handle extends ExceptionRespMessageHandle {
         BotMessage botMessage = messageAction.getBotMessage();
         String titleKey = messageAction.getKeyWithoutPrefix();
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
-        Long senderId = messageAction.getBotSender().getId();
 
-        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num, senderId);
+        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num, botSender);
         return BotMessage.emptyMessage();
     }
 

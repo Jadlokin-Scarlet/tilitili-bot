@@ -13,13 +13,12 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -63,26 +62,8 @@ public class PidHandle extends ExceptionRespMessageHandle {
 
 		Integer sl = pixivImage.getSl();
 		String[] urlList = pixivImage.getUrlList().split(",");
-		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("标题: "+pixivImage.getTitle()));
-		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+pixivImage.getUserName()));
-		messageChainList.add(BotMessageChain.ofPlain("\n镜像站: https://pixiv.moe/illust/"+pid));
-		if (sl == null || sl < 5) {
-			for (String url : urlList) {
-				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofImage(ossUrl));
-			}
-		} else {
-			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-			Asserts.isTrue(canSS, "不准色色");
-			for (String url : urlList) {
-				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
-			}
-		}
+
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(botSender, pixivImage.getTitle(), pixivImage.getUserName(), pid, sl, Arrays.asList(urlList), canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}
 }

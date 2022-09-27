@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.common.emnus.RedisKeyEnum;
 import com.tilitili.common.entity.BotPixivSendRecord;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PixivImage;
 import com.tilitili.common.entity.PixivTag;
 import com.tilitili.common.entity.query.PixivImageQuery;
@@ -11,6 +12,7 @@ import com.tilitili.common.entity.query.PixivTagQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
+import com.tilitili.common.entity.view.bot.mirai.MiraiUploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoTag;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoTagTranslation;
@@ -34,7 +36,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -58,6 +62,7 @@ public class PixivService {
 	private final BotManager botManager;
 	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
+	private final Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
 
 	@Autowired
 	public PixivService(RedisCache redisCache, BotPixivSendRecordMapper botPixivSendRecordMapper, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
@@ -70,17 +75,17 @@ public class PixivService {
 		this.pixivTagMapper = pixivTagMapper;
 	}
 
-	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num, Long senderId) throws UnsupportedEncodingException, InterruptedException {
+	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num, BotSender sender) throws UnsupportedEncodingException, InterruptedException {
 		String messageId;
 		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
-			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18); break;
+			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18, sender); break;
 			case "pixiv": {
-				if (isNotBlank(user)) messageId = sendPixivUserImage(sendMessageId, user, source, r18, senderId);
+				if (isNotBlank(user)) messageId = sendPixivUserImage(sendMessageId, user, source, r18, sender);
 				else {
 					String goodSearchKey = searchKeyOrDefault.contains("users入り") ? searchKeyOrDefault : searchKeyOrDefault + " " + goodTag;
-					messageId = sendPixivImage(sendMessageId, goodSearchKey, source, r18, senderId);
-					if (StringUtils.isBlank(messageId) && !searchKeyOrDefault.contains("users入り")) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18, senderId);
+					messageId = sendPixivImage(sendMessageId, goodSearchKey, source, r18, sender);
+					if (StringUtils.isBlank(messageId) && !searchKeyOrDefault.contains("users入り")) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18, sender);
 				}
 				break;
 			}
@@ -92,9 +97,9 @@ public class PixivService {
 		redisCache.setValue(messageIdKey, messageId);
 	}
 
-	public String sendPixivUserImage(String quote, String userName, String source, String r18, Long senderId) {
+	public String sendPixivUserImage(String quote, String userName, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
-		String messageId = sendCachePixivUserImage(quote, userName, source, r18, senderId);
+		String messageId = sendCachePixivUserImage(quote, userName, source, r18, sender);
 		if (messageId != null) {
 			return messageId;
 		}
@@ -102,19 +107,19 @@ public class PixivService {
 			// step 2 爬取作者所有插画
 			spiderPixivUserImage(userName);
 			// step 3 从缓存中取
-			messageId = sendCachePixivUserImage(quote, userName, source, r18, senderId);
+			messageId = sendCachePixivUserImage(quote, userName, source, r18, sender);
 			return messageId;
 		} finally {
 			lockFlag.set(false);
 		}
 	}
 
-	public String sendPixivImage(String quote, String searchKey, String source, String r18, Long senderId) {
+	public String sendPixivImage(String quote, String searchKey, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
 		String messageId;
 		try {
 			Asserts.isTrue(lock2Flag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
-			messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
+			messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
@@ -126,18 +131,18 @@ public class PixivService {
 			Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
 			// step 2 爬热门
 			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L, r18);
-			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, senderId);
+			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
 			proDataList = pixivManager.searchProProxy(searchKey, 2L, r18);
-			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, senderId);
+			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
 			// step 3 爬第一页
 			List<PixivSearchIllust> firstDataList = pixivManager.searchProxy(searchKey, 1L);
-			messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18, senderId);
+			messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
@@ -148,10 +153,10 @@ public class PixivService {
 				List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
 				if (dataList.isEmpty()) {
 					// step 5 爬到底了，再次检查缓存
-					messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
+					messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 					return messageId;
 				}
-				messageId = handleSearchDataList(dataList, quote, searchKey, source, r18, senderId);
+				messageId = handleSearchDataList(dataList, quote, searchKey, source, r18, sender);
 			}
 			return messageId;
 		} finally {
@@ -159,32 +164,32 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivUserImage(String quote, String userName, String source, String r18, Long senderId) {
-		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18).setSenderId(senderId));
+	public String sendCachePixivUserImage(String quote, String userName, String source, String r18, BotSender sender) {
+		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18).setSenderId(sender.getId()));
 		if (noUsedImage != null) {
-			return sendPixivImage(quote, noUsedImage, senderId);
+			return sendPixivImage(quote, noUsedImage, sender);
 		} else {
 			return null;
 		}
 	}
 
-	public String sendCachePixivImage(String quote, String searchKey, String source, String r18, Long senderId) {
+	public String sendCachePixivImage(String quote, String searchKey, String source, String r18, BotSender sender) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		boolean isFilterBookmark = ! searchKey.contains("goodTag");
 		PixivImage noUsedImage;
 		if (isFilterBookmark) {
-			noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18).setSenderId(senderId));
+			noUsedImage = pixivImageMapper.getNoUsedImage(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18).setSenderId(sender.getId()));
 		} else {
-			noUsedImage = pixivImageMapper.getNoUsedImageWithoutLimit(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18).setSenderId(senderId));
+			noUsedImage = pixivImageMapper.getNoUsedImageWithoutLimit(new PixivImageQuery().setTagList(searchTagList).setSource(source).setR18(r18).setSenderId(sender.getId()));
 		}
 		if (noUsedImage != null) {
-			return sendPixivImage(quote, noUsedImage, senderId);
+			return sendPixivImage(quote, noUsedImage, sender);
 		} else {
 			return null;
 		}
 	}
 
-	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18, Long senderId) {
+	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18, BotSender sender) {
 		if (CollectionUtils.isEmpty(dataList)) return null;
 
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
@@ -209,14 +214,14 @@ public class PixivService {
 				saveImageFromPixiv(pid, searchKey, searchTagList);
 
 				if (messageId == null) {
-					messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
+					messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 				}
 			} catch (AssertException e) {
 				log.error("搜索结果保存失败, pid={}, message={}", data.getId(), e.getMessage());
 			}
 		}
 		if (messageId == null) {
-			messageId = sendCachePixivImage(quote, searchKey, source, r18, senderId);
+			messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 		}
 		return messageId;
 	}
@@ -238,39 +243,47 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivImage(String quote, PixivImage noUsedImage, Long senderId) {
+	public String sendPixivImage(String quote, PixivImage noUsedImage, BotSender sender) {
+		String title = noUsedImage.getTitle();
+		String userName = noUsedImage.getUserName();
 		String pid = noUsedImage.getPid();
 		Integer sl = noUsedImage.getSl();
 		String[] urlList = noUsedImage.getUrlList().split(",");
 
-		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("标题: "+noUsedImage.getTitle()));
-		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+noUsedImage.getUserName()));
-		messageChainList.add(BotMessageChain.ofPlain("\n镜像站: https://pixiv.moe/illust/"+pid));
-		messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-//		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
-		if (sl == null || sl < 5) {
-			for (String url : urlList) {
-				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofImage(ossUrl));
-			}
-		} else {
-			for (String url : urlList) {
-				String ossUrl = OSSUtil.uploadSOSSByUrl(url);
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
-			}
-		}
+		List<BotMessageChain> messageChainList = this.getImageChainList(sender, title, userName, pid, sl, Arrays.asList(urlList), true);
 //		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
-		botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(senderId));
+		botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(sender.getId()));
 		String messageId = botManager.sendMessage(BotMessage.simpleListMessage(messageChainList).setQuote(quote));
 		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setMessageId(messageId));
 		return messageId;
 	}
 
-	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18) throws UnsupportedEncodingException, InterruptedException {
+	public List<BotMessageChain> getImageChainList(BotSender sender, String title, String userName, String pid, Integer sl, List<String> urlList, Boolean canSS) {
+		List<BotMessageChain> messageChainList = new ArrayList<>();
+		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
+		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
+		messageChainList.add(BotMessageChain.ofPlain("\n镜像站: https://pixiv.moe/illust/"+pid));
+//		messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
+//		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
+		if (sl == null || sl < 5) {
+			for (String url : urlList) {
+				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(sender, url);
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
+			}
+		} else {
+			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
+			Asserts.isTrue(canSS, "不准色色");
+			for (String url : urlList) {
+				String ossUrl = this.downloadPixivImageAndUploadToOSS(url);
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
+			}
+		}
+		return messageChainList;
+	}
+
+	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18, BotSender sender) throws UnsupportedEncodingException, InterruptedException {
 		List<SetuData> dataList = loliconManager.getAImage(searchKey, num, r18);
 		Asserts.notEmpty(dataList, "没库存啦！");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
@@ -282,13 +295,15 @@ public class PixivService {
 			if (i != 0) {
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 			}
-			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
+
+//			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 			if (isSese) {
+				String ossUrl = this.downloadPixivImageAndUploadToOSS(imageUrl);
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: imageUrl));
 			} else {
 				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
-				Asserts.notNull(ossUrl, "上传OSS失败");
-				messageChainList.add(BotMessageChain.ofImage(ossUrl));
+				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(sender, imageUrl);
+				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
 			}
 		}
 
@@ -414,5 +429,61 @@ public class PixivService {
 		String pid = StringUtils.patten1("&illust_id=(\\d+)", link);
 		Asserts.isNumber(pid, "似乎不是Pixiv图片。");
 		return pid;
+	}
+
+	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(BotSender sender, String url) {
+		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
+		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
+		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
+		Path path = null;
+		try {
+			path = Files.createTempFile("pixiv", fileType);
+			log.debug("缓存文件："+path.toString());
+			File file = path.toFile();
+			pixivManager.downloadPixivImage(url, file);
+			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(sender.getBot(), file);
+			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
+			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
+			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
+			return uploadImageResult;
+		} catch (IOException e) {
+			throw new AssertException("啊嘞，不对劲", e);
+		} finally {
+			if (path != null) {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException e) {
+					log.error("清理缓存失败", e);
+				}
+			}
+		}
+	}
+
+	private String downloadPixivImageAndUploadToOSS(String url) {
+		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
+		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
+		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".") + 1): null;
+		Path path = null;
+		try {
+			path = Files.createTempFile("pixiv", "." + fileType);
+			File file = path.toFile();
+			pixivManager.downloadPixivImage(url, file);
+			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			Asserts.notEquals(file.length(), 0, "啊嘞，下载失败了。");
+			String ossUrl = OSSUtil.uploadOSSByFileWithType(file, fileType);
+			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
+			return ossUrl;
+		} catch (IOException e) {
+			throw new AssertException("啊嘞，不对劲", e);
+		} finally {
+			if (path != null) {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException e) {
+					log.error("清理缓存失败", e);
+				}
+			}
+		}
 	}
 }
