@@ -124,7 +124,11 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 				continue;
 			}
 			illust = illustList.get(pageNo);
-			if (!canSS && illust.getSl() > 4) {
+			boolean isSese = illust.getSl() > 4;
+			// 推荐无法完全过滤色色和不色
+			if ("safe".equals(mode) && isSese) {
+				continue;
+			} else if ("r18".equals(mode) && !isSese) {
 				continue;
 			}
 			break;
