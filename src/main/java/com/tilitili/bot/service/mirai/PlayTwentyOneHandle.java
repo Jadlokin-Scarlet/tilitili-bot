@@ -262,6 +262,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
 		Long tableId = messageAction.getBotSender().getId();
 		BotUser botUser = messageAction.getBotUser();
 		Long playerId = botUser.getExternalId();
@@ -275,9 +276,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
 		if (otherTable != null) {
 			if (Objects.equals(otherTable.getTableId(), tableId)) {
-				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("你已经参与啦！", botMessage).setQuote(messageAction.getMessageId());
 			} else {
-				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！", botMessage).setQuote(messageAction.getMessageId());
 			}
 		}
 
@@ -287,14 +288,15 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 		switch (twentyOneTable.getStatus()) {
 			case TwentyOneTable.STATUS_WAIT:
-				twentyOneTable.waitPeoplePrepare(messageAction.getBotMessage());
-				return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)").setQuote(messageAction.getMessageId());
-			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("入场成功！请等待下一局吧。").setQuote(messageAction.getMessageId());
+				twentyOneTable.waitPeoplePrepare(botMessage);
+				return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)", botMessage).setQuote(messageAction.getMessageId());
+			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("入场成功！请等待下一局吧。", botMessage).setQuote(messageAction.getMessageId());
 			default: throw new AssertException("啊嘞，似乎不对劲");
 		}
 	}
 
 	private BotMessage prepareGame(BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
 		BotUser botUser = messageAction.getBotUser();
 		Long playerId = botUser.getExternalId();
 		Long tableId = messageAction.getBotSender().getId();
@@ -315,16 +317,18 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
 		if (otherTable != null) {
 			if (player != null && player.isPrepare()) {
-				return BotMessage.simpleTextMessage("你已经参与啦！").setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("你已经参与啦！", botMessage).setQuote(messageAction.getMessageId());
 			} else if (!Objects.equals(otherTable.getTableId(), tableId)) {
-				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！").setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("你已经在别的地方参与啦！", botMessage).setQuote(messageAction.getMessageId());
 			}
 		}
 		Asserts.checkEquals(twentyOneTable.getStatus(), TwentyOneTable.STATUS_WAIT, "游戏进行中哦，请稍等。");
 
 		int score = Integer.parseInt(scoreStr);
 		Asserts.isTrue(score > 0, "想白嫖积分？");
-		if (score > botUser.getScore()) return BotMessage.simpleTextMessage("积分好像不够惹。").setQuote(messageAction.getMessageId());
+		if (score > botUser.getScore()) {
+			return BotMessage.simpleTextMessage("积分好像不够惹。", botMessage).setQuote(messageAction.getMessageId());
+		}
 
 		boolean addGameSuccess = twentyOneTable.addGame(botUser, score);
 		Asserts.isTrue(addGameSuccess, "啊嘞，不对劲");
@@ -337,10 +341,10 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		if (ready) {
 			boolean flashCardSuccess = twentyOneTable.flashCard();
 			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
-			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
+			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(botMessage);
 			return BotMessage.simpleListMessage(resp);
 		} else {
-			List<BotMessageChain> resp = twentyOneTable.getWaitMessage(messageAction.getBotMessage());
+			List<BotMessageChain> resp = twentyOneTable.getWaitMessage(botMessage);
 			return BotMessage.simpleListMessage(resp);
 		}
 	}

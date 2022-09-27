@@ -106,6 +106,6 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		String message1 = String.format("%s好，%s", time, talk);
 		String message2 = String.format("(分数+%d)", addScore);
 		String message = message1 + (addScore == 0? "": message2);
-		return BotMessage.simpleTextMessage(message).setQuote(messageAction.getMessageId());
+		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId());
 	}
 }

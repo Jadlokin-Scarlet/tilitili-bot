@@ -100,6 +100,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleGame(BotMessageAction messageAction) {
+		BotMessage botMessage = messageAction.getBotMessage();
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValueOrVirtualValue();
 		if (Objects.equals(session.remove(lockKey), 0)) return null;
@@ -131,7 +132,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		session.remove(lockKey);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
-		return BotMessage.simpleTextMessage("恭喜你回答正确！").setQuote(messageAction.getMessageId());
+		return BotMessage.simpleTextMessage("恭喜你回答正确！", botMessage).setQuote(messageAction.getMessageId());
 	}
 
 	private BotMessage startGame(BotMessageAction messageAction) {

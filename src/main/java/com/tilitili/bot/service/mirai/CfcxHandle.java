@@ -22,6 +22,7 @@ public class CfcxHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String sendMessageId = messageAction.getMessageId();
+        BotMessage botMessage = messageAction.getBotMessage();
 
         String titleValue = messageAction.getValue();
         if (TextUtils.isBlank(titleValue)) {
@@ -38,6 +39,6 @@ public class CfcxHandle extends ExceptionRespMessageHandle {
         String nameListStr = data.getList().stream().map(CfcxItem::getUname).collect(Collectors.joining(","));
         String message = String.format("关注的VUP有：%n%s%n查询时间：%s%n数据来源：ProJectASF", nameListStr, DateUtils.formatDateYMDHMS(new Date()));
 
-        return BotMessage.simpleTextMessage(message).setQuote(sendMessageId);
+        return BotMessage.simpleTextMessage(message, botMessage).setQuote(sendMessageId);
     }
 }

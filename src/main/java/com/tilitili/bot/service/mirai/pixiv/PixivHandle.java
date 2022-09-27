@@ -35,7 +35,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         BotMessage botMessage = messageAction.getBotMessage();
         String r18 = "0";
 
-        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num, botSender);
+        pixivService.handlePixiv(botMessage, source, searchKey, user, r18, num, botSender);
         return BotMessage.emptyMessage();
     }
 

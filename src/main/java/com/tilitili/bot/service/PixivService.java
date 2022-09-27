@@ -75,17 +75,17 @@ public class PixivService {
 		this.pixivTagMapper = pixivTagMapper;
 	}
 
-	public void handlePixiv(BotMessage botMessage, String sendMessageId, String source, String searchKey, String user, String r18, String num, BotSender sender) throws UnsupportedEncodingException, InterruptedException {
+	public void handlePixiv(BotMessage botMessage, String source, String searchKey, String user, String r18, String num, BotSender sender) throws UnsupportedEncodingException, InterruptedException {
 		String messageId;
 		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
 			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18, sender); break;
 			case "pixiv": {
-				if (isNotBlank(user)) messageId = sendPixivUserImage(sendMessageId, user, source, r18, sender);
+				if (isNotBlank(user)) messageId = sendPixivUserImage(botMessage, user, source, r18, sender);
 				else {
 					String goodSearchKey = searchKeyOrDefault.contains("users入り") ? searchKeyOrDefault : searchKeyOrDefault + " " + goodTag;
-					messageId = sendPixivImage(sendMessageId, goodSearchKey, source, r18, sender);
-					if (StringUtils.isBlank(messageId) && !searchKeyOrDefault.contains("users入り")) messageId = sendPixivImage(sendMessageId, searchKeyOrDefault, source, r18, sender);
+					messageId = sendPixivImage(botMessage, goodSearchKey, source, r18, sender);
+					if (StringUtils.isBlank(messageId) && !searchKeyOrDefault.contains("users入り")) messageId = sendPixivImage(botMessage, searchKeyOrDefault, source, r18, sender);
 				}
 				break;
 			}
@@ -97,7 +97,7 @@ public class PixivService {
 		redisCache.setValue(messageIdKey, messageId);
 	}
 
-	public String sendPixivUserImage(String quote, String userName, String source, String r18, BotSender sender) {
+	public String sendPixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
 		String messageId = sendCachePixivUserImage(quote, userName, source, r18, sender);
 		if (messageId != null) {
@@ -114,7 +114,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivImage(String quote, String searchKey, String source, String r18, BotSender sender) {
+	public String sendPixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
 		String messageId;
 		try {
@@ -164,7 +164,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivUserImage(String quote, String userName, String source, String r18, BotSender sender) {
+	public String sendCachePixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
 		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18).setSenderId(sender.getId()));
 		if (noUsedImage != null) {
 			return sendPixivImage(quote, noUsedImage, sender);
@@ -173,7 +173,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivImage(String quote, String searchKey, String source, String r18, BotSender sender) {
+	public String sendCachePixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		boolean isFilterBookmark = ! searchKey.contains("goodTag");
 		PixivImage noUsedImage;
@@ -189,7 +189,7 @@ public class PixivService {
 		}
 	}
 
-	public String handleSearchDataList(List<PixivSearchIllust> dataList, String quote, String searchKey, String source, String r18, BotSender sender) {
+	public String handleSearchDataList(List<PixivSearchIllust> dataList, BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		if (CollectionUtils.isEmpty(dataList)) return null;
 
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
@@ -243,7 +243,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivImage(String quote, PixivImage noUsedImage, BotSender sender) {
+	public String sendPixivImage(BotMessage quote, PixivImage noUsedImage, BotSender sender) {
 		String title = noUsedImage.getTitle();
 		String userName = noUsedImage.getUserName();
 		String pid = noUsedImage.getPid();
@@ -253,7 +253,7 @@ public class PixivService {
 		List<BotMessageChain> messageChainList = this.getImageChainList(sender, title, userName, pid, sl, Arrays.asList(urlList), true);
 //		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
 		botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(sender.getId()));
-		String messageId = botManager.sendMessage(BotMessage.simpleListMessage(messageChainList).setQuote(quote));
+		String messageId = botManager.sendMessage(BotMessage.simpleListMessage(messageChainList, quote).setQuote(quote.getMessageId()));
 		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setMessageId(messageId));
 		return messageId;
 	}

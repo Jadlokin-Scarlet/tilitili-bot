@@ -7,6 +7,6 @@ import com.tilitili.common.exception.AssertException;
 public abstract class ExceptionRespMessageToSenderHandle extends ExceptionRespMessageHandleAdapt {
 	@Override
 	public BotMessage handleAssertException(BotMessageAction messageAction, AssertException e) {
-		return BotMessage.simpleTextMessage(e.getMessage()).setQuote(messageAction.getMessageId());
+		return BotMessage.simpleTextMessage(e.getMessage(), messageAction.getBotMessage()).setQuote(messageAction.getMessageId());
 	}
 }

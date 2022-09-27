@@ -38,7 +38,7 @@ public class PixivR18Handle extends ExceptionRespMessageHandle {
         String titleKey = messageAction.getKeyWithoutPrefix();
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
 
-        pixivService.handlePixiv(botMessage, sendMessageId, source, searchKey, user, r18, num, botSender);
+        pixivService.handlePixiv(botMessage, source, searchKey, user, r18, num, botSender);
         return BotMessage.emptyMessage();
     }
 
