@@ -46,6 +46,11 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_SOURCE).negate()).collect(Collectors.toList());
 			return BotMessage.simpleListMessage(botMessageChainList).setSenderId(3759L);
 		}
+		if (senderId == 3746L) {
+			List<BotMessageChain> botMessageChainList = messageAction.getBotMessage().getBotMessageChainList().stream()
+					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_SOURCE).negate()).collect(Collectors.toList());
+			return BotMessage.simpleListMessage(botMessageChainList).setSenderId(3384L);
+		}
 
 		for (MinecraftServerEmum server : MinecraftServerEmum.values()) {
 			if (Objects.equals(senderId, server.getSenderId())) {
