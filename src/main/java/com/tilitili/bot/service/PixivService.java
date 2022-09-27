@@ -471,7 +471,7 @@ public class PixivService {
 			pixivManager.downloadPixivImage(url, file);
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0, "啊嘞，下载失败了。");
-			String ossUrl = OSSUtil.uploadOSSByFileWithType(file, fileType);
+			String ossUrl = OSSUtil.uploadOSSByImageWithType(file, fileType);
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
 			return ossUrl;
 		} catch (IOException e) {
