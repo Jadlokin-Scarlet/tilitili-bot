@@ -14,7 +14,7 @@ public class ExecutorConfig {
 		if (taskExecutor instanceof ThreadPoolTaskExecutor) {
 			ThreadPoolTaskExecutor executor = (ThreadPoolTaskExecutor) taskExecutor;
 			executor.setWaitForTasksToCompleteOnShutdown(true);
-			executor.setAwaitTerminationSeconds(10);
+			executor.setAwaitTerminationSeconds(20);
 		}
 	}
 }

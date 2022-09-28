@@ -11,10 +11,11 @@ import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 
@@ -25,7 +26,7 @@ import java.util.List;
 
 @Slf4j
 @Configuration
-public class WebSocketConfig implements DisposableBean {
+public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final List<BaseWebSocketHandler> webSocketHandlerList;
     private final List<BotWebSocketHandler> botWebSocketHandlerList;
     private final BotService botService;
@@ -69,12 +70,16 @@ public class WebSocketConfig implements DisposableBean {
     }
 
     @Override
-    public void destroy() throws Exception {
-        for (BotWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
-            botWebSocketHandler.closeBlocking();
-        }
-        for (BaseWebSocketHandler baseWebSocketHandler : webSocketHandlerList) {
-            baseWebSocketHandler.closeBlocking();
+    public void onApplicationEvent(ContextClosedEvent event) {
+        try {
+            for (BotWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
+                botWebSocketHandler.closeBlocking();
+            }
+            for (BaseWebSocketHandler baseWebSocketHandler : webSocketHandlerList) {
+                baseWebSocketHandler.closeBlocking();
+            }
+        } catch (InterruptedException e) {
+            log.error("优雅停机异常");
         }
     }
 }

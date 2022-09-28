@@ -62,7 +62,6 @@ public class PixivService {
 	private final BotManager botManager;
 	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
-	private final Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
 
 	@Autowired
 	public PixivService(RedisCache redisCache, BotPixivSendRecordMapper botPixivSendRecordMapper, PixivImageMapper pixivImageMapper, LoliconManager loliconManager, PixivManager pixivManager, BotManager botManager, PixivTagMapper pixivTagMapper) {
@@ -118,6 +117,7 @@ public class PixivService {
 		// step 1 有缓存直接读缓存
 		String messageId;
 		try {
+			log.info("searchKey={} r18={} 检查缓存", searchKey, r18);
 			Asserts.isTrue(lock2Flag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
 			messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 			if (messageId != null) {
@@ -130,17 +130,20 @@ public class PixivService {
 //			Asserts.isTrue(lockFlag.compareAndSet(false, true), "出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
 			Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
 			// step 2 爬热门
+			log.info("searchKey={} r18={} 检查热门第一页", searchKey, r18);
 			List<PixivSearchIllust> proDataList = pixivManager.searchProProxy(searchKey, 1L, r18);
 			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
+			log.info("searchKey={} r18={} 检查热门第二页", searchKey, r18);
 			proDataList = pixivManager.searchProProxy(searchKey, 2L, r18);
 			messageId = handleSearchDataList(proDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
 				return messageId;
 			}
 			// step 3 爬第一页
+			log.info("searchKey={} r18={} 检查普通第一页", searchKey, r18);
 			List<PixivSearchIllust> firstDataList = pixivManager.searchProxy(searchKey, 1L);
 			messageId = handleSearchDataList(firstDataList, quote, searchKey, source, r18, sender);
 			if (messageId != null) {
@@ -150,9 +153,11 @@ public class PixivService {
 			while (messageId == null) {
 				Long pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
 				if (pageNo == 1L) pageNo = redisCache.increment(RedisKeyEnum.SPIDER_PIXIV_PAGENO.getKey(), searchKey);
+				log.info("searchKey={} r18={} 检查普通第{}页", searchKey, r18, pageNo);
 				List<PixivSearchIllust> dataList = pixivManager.searchProxy(searchKey, pageNo);
 				if (dataList.isEmpty()) {
 					// step 5 爬到底了，再次检查缓存
+					log.info("searchKey={} r18={} 检查最终缓存", searchKey, r18);
 					messageId = sendCachePixivImage(quote, searchKey, source, r18, sender);
 					return messageId;
 				}

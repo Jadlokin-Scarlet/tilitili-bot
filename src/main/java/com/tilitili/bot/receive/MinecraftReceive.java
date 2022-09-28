@@ -15,6 +15,7 @@ import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -82,8 +83,11 @@ public class MinecraftReceive {
 		TaskMessage taskMessage;
 		try {
 			taskMessage = (TaskMessage) jmsTemplate.receiveAndConvert(TaskReason.MINECRAFT_MESSAGE.destination);
+		} catch (UncategorizedJmsException e) {
+			log.warn("消息等待中断", e);
+			return null;
 		} catch (Exception e) {
-			log.warn("消息接收异常", e);
+			log.error("消息接收异常", e);
 			return null;
 		}
 		if (taskMessage == null) {
