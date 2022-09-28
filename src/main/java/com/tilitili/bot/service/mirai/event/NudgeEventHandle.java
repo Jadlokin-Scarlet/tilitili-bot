@@ -1,30 +1,38 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.AutoEventHandle;
-import com.tilitili.common.constant.BotSenderConstant;
-import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.view.bot.mirai.event.NudgeEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.NudgeSubject;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-//@Component
-public class NudgeEventHandle extends AutoEventHandle<BotInvitedJoinGroupRequestEvent> {
-	public static final String newGroupKey = "BotInvitedJoinGroupRequestEventHandle.newGroup";
-	private final RedisCache redisCache;
+@Component
+public class NudgeEventHandle extends AutoEventHandle<NudgeEvent> {
 	private final BotManager botManager;
+	private final BotSenderMapper botSenderMapper;
 
 	@Autowired
-	public NudgeEventHandle(RedisCache redisCache, BotManager botManager) {
-		super(BotInvitedJoinGroupRequestEvent.class);
-		this.redisCache = redisCache;
+	public NudgeEventHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
+		super(NudgeEvent.class);
 		this.botManager = botManager;
+		this.botSenderMapper = botSenderMapper;
 	}
 
 	@Override
-	public void handleEvent(BotInvitedJoinGroupRequestEvent event) throws Exception {
-		String message = String.format("被[%s][%s]邀请进入群[%s][%s]，是否接受(同意群邀请/拒绝群邀请)", event.getNick(), event.getFromId(), event.getGroupName(), event.getGroupId());
-		redisCache.setValue(newGroupKey, event);
-		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(BotSenderConstant.MASTER_SENDER_ID));
+	public void handleEvent(NudgeEvent event) throws Exception {
+		NudgeSubject subject = event.getSubject();
+		BotSender botSender;
+		if ("Group".equals(subject.getKind())) {
+			botSender = botSenderMapper.getBotSenderByGroup(subject.getId());
+		} else {
+			botSender = botSenderMapper.getBotSenderByQq(subject.getId());
+		}
+		BotEmum bot = BotEmum.getByValue(botSender.getBot());
+
+		botManager.sendNudge(bot, botSender, event.getFromId());
 	}
 }

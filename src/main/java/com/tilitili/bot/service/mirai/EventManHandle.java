@@ -3,10 +3,12 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.event.BotInvitedJoinGroupRequestEventHandle;
+import com.tilitili.bot.service.mirai.event.MemberJoinRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.NewFriendRequestEventHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.MemberJoinRequestEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.NewFriendRequestEvent;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.RedisCache;
@@ -30,6 +32,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 		switch (key) {
 			case "同意群邀请": return handleGroupInviteEvent(messageAction);
 			case "同意好友邀请": return handleNewFriendEvent(messageAction);
+			case "同意加群申请": return handleMemberJoinRequestEvent(messageAction);
 		}
 		return null;
 	}
@@ -51,6 +54,17 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 			BotInvitedJoinGroupRequestEvent event = (BotInvitedJoinGroupRequestEvent) redisCache.getValue(BotInvitedJoinGroupRequestEventHandle.newGroupKey);
 			miraiManager.handleBotInvitedJoinGroupRequestEvent(bot, event);
 			redisCache.delete(BotInvitedJoinGroupRequestEventHandle.newGroupKey);
+			return BotMessage.simpleTextMessage("好的");
+		}
+		return null;
+	}
+
+	private BotMessage handleMemberJoinRequestEvent(BotMessageAction messageAction) {
+		BotEmum bot = messageAction.getBot();
+		if (redisCache.exists(MemberJoinRequestEventHandle.newMemberKey)) {
+			MemberJoinRequestEvent event = (MemberJoinRequestEvent) redisCache.getValue(MemberJoinRequestEventHandle.newMemberKey);
+			miraiManager.handleMemberJoinRequestEvent(bot, event);
+			redisCache.delete(MemberJoinRequestEventHandle.newMemberKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
 		return null;
