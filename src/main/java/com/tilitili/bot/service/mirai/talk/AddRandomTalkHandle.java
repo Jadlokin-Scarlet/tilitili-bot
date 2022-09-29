@@ -17,7 +17,6 @@ import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,8 +71,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
-			String req = Gsons.toJson(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getReq()));
-			String resp = Gsons.toJson(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getResp()));
+			String req = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getReq())));
+			String resp = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
 				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
 				newFunctionTalkList.add(newFunctionTalk);
