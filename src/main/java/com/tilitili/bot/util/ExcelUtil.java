@@ -31,10 +31,12 @@ public class ExcelUtil {
 				fieldMap.put(annotation.value(), field);
 			}
 			ExcelResult<T> result = readExcelFile(file);
-			List<List<String>> data = result.getData();
+			List<List<List<String>>> data = result.getData();
 			log.info("data={}", data);
 			Asserts.notEmpty(data, "啊嘞，怎么是空的。");
-			List<String> headList = data.get(0);
+			List<List<String>> firstPage = data.get(0);
+			Asserts.notEmpty(firstPage, "啊嘞，怎么是空的。");
+			List<String> headList = firstPage.get(0);
 			Map<Integer, Field> indexFieldMap = new HashMap<>();
 			for (int i = 0, headListSize = headList.size(); i < headListSize; i++) {
 				String headName = headList.get(i);
@@ -44,7 +46,7 @@ public class ExcelUtil {
 				}
 				indexFieldMap.put(i, field);
 			}
-			List<List<String>> rowList = data.subList(1, data.size());
+			List<List<String>> rowList = firstPage.subList(1, firstPage.size());
 			Asserts.notEmpty(rowList, "啊嘞，怎么是空的。");
 			List<T> resultList = new ArrayList<>();
 			for (List<String> item : rowList) {
@@ -63,6 +65,18 @@ public class ExcelUtil {
 				resultList.add(newObject);
 			}
 			result.setResultList(resultList);
+
+			if (data.size() > 1) {
+				List<List<String>> configPage = data.get(1);
+				Map<String, String> paramMap = new HashMap<>();
+				for (List<String> config : configPage) {
+					if (config.size() < 2) {
+						continue;
+					}
+					paramMap.put(config.get(0), config.get(1));
+				}
+				result.setParamMap(paramMap);
+			}
 			return result;
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new AssertException("啊嘞，不太对劲。", e);
@@ -71,29 +85,31 @@ public class ExcelUtil {
 
 	private static <T> ExcelResult<T> readExcelFile(File file) {
 		ExcelResult<T> result = new ExcelResult<>();
-		List<List<String>> data = new ArrayList<>();
 		try (FileInputStream stream = new FileInputStream(file); Workbook workbook = new XSSFWorkbook(stream);) {
-			Sheet sheet = workbook.getSheetAt(0);
-
-			for (Row row : sheet) {
-				List<String> item = new ArrayList<>();
-				data.add(item);
-				for (Cell cell : row) {
-					switch (cell.getCellType()) {
-						case STRING: item.add(cell.getRichStringCellValue().getString()); break;
-						case NUMERIC: {
-							if (DateUtil.isCellDateFormatted(cell)) {
-								item.add(cell.getDateCellValue() + "");
-							} else {
-								item.add(cell.getNumericCellValue() + "");
+			List<List<List<String>>> data = new ArrayList<>();
+			for (Sheet sheet : workbook) {
+				List<List<String>> page = new ArrayList<>();
+				for (Row row : sheet) {
+					List<String> item = new ArrayList<>();
+					for (Cell cell : row) {
+						switch (cell.getCellType()) {
+							case STRING: item.add(cell.getRichStringCellValue().getString()); break;
+							case NUMERIC: {
+								if (DateUtil.isCellDateFormatted(cell)) {
+									item.add(cell.getDateCellValue() + "");
+								} else {
+									item.add(cell.getNumericCellValue() + "");
+								}
+								break;
 							}
-							break;
+							case BOOLEAN: item.add(cell.getBooleanCellValue() + ""); break;
+							case FORMULA: item.add(cell.getCellFormula() + ""); break;
+							default: item.add("");
 						}
-						case BOOLEAN: item.add(cell.getBooleanCellValue() + ""); break;
-						case FORMULA: item.add(cell.getCellFormula() + ""); break;
-						default: item.add("");
 					}
+					page.add(item);
 				}
+				data.add(page);
 			}
 			result.setData(data);
 			return result;

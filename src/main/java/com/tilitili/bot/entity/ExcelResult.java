@@ -6,8 +6,12 @@ import java.util.Map;
 public class ExcelResult<T> {
 	private String title;
 	private List<T> resultList;
-	private List<List<String>> data;
+	private List<List<List<String>>> data;
 	private Map<String, String> paramMap;
+
+	public String getParam(Object key) {
+		return paramMap.get(key);
+	}
 
 	public List<T> getResultList() {
 		return resultList;
@@ -36,11 +40,11 @@ public class ExcelResult<T> {
 		return this;
 	}
 
-	public List<List<String>> getData() {
+	public List<List<List<String>>> getData() {
 		return data;
 	}
 
-	public ExcelResult<T> setData(List<List<String>> data) {
+	public ExcelResult<T> setData(List<List<List<String>>> data) {
 		this.data = data;
 		return this;
 	}
