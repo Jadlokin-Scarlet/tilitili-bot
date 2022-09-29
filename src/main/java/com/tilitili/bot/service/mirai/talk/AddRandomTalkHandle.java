@@ -12,10 +12,12 @@ import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,13 +33,15 @@ import java.util.stream.Collectors;
 public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
+	private final GoCqhttpManager goCqhttpManager;
 	private final BotFunctionMapper botFunctionMapper;
 	private final BotFunctionTalkMapper botFunctionTalkMapper;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, GoCqhttpManager goCqhttpManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper) {
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
+		this.goCqhttpManager = goCqhttpManager;
 		this.botFunctionMapper = botFunctionMapper;
 		this.botFunctionTalkMapper = BotFunctionTalkMapper;
 	}
@@ -68,8 +72,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
+			String req = Gsons.toJson(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getReq()));
+			String resp = Gsons.toJson(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getResp()));
 			for (BotSender botSender : botSenderList) {
-				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(randomTalkDTO.getReq()).setResp(randomTalkDTO.getResp()).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
+				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}
