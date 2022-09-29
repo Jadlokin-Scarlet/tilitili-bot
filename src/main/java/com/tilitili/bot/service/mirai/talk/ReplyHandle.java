@@ -49,7 +49,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         Long group = botSender.getGroup();
 
         String req = TalkHandle.convertMessageToString(botMessage);
-        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setReq(req).setSenderId(botSender.getId()).setReq(req));
+        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setReq(req).setSenderId(botSender.getId()).setStatus(0));
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
             return TalkHandle.convertStringToMessage(functionTalk.getResp());
