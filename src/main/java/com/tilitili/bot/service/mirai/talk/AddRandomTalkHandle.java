@@ -78,11 +78,12 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}
+		if (oldFunction != null) {
+			List<BotFunctionTalk> oldFunctionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setFunctionId(oldFunction.getId()));
 
-		List<BotFunctionTalk> oldFunctionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setFunctionId(oldFunction.getId()));
-
-		for (BotFunctionTalk oldFunctionTalk : oldFunctionTalkList) {
-			botFunctionTalkMapper.updateBotFunctionTalkSelective(new BotFunctionTalk().setId(oldFunctionTalk.getId()).setStatus(-1));
+			for (BotFunctionTalk oldFunctionTalk : oldFunctionTalkList) {
+				botFunctionTalkMapper.updateBotFunctionTalkSelective(new BotFunctionTalk().setId(oldFunctionTalk.getId()).setStatus(-1));
+			}
 		}
 		for (BotFunctionTalk newFunctionTalk : newFunctionTalkList) {
 			botFunctionTalkMapper.addBotFunctionTalkSelective(newFunctionTalk);
