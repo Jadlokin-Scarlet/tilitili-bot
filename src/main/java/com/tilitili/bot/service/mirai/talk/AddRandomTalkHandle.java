@@ -63,7 +63,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String function = excelResult.getParam("分组");
 		String groupList = excelResult.getParam("群号");
 
-
+		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
 		BotFunction newFunction = new BotFunction().setFunction(function);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
 		List<BotSender> botSenderList = Arrays.stream(groupList.split(",")).map(Long::valueOf)
@@ -79,7 +79,6 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			}
 		}
 
-		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
 		List<BotFunctionTalk> oldFunctionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setFunctionId(oldFunction.getId()));
 
 		for (BotFunctionTalk oldFunctionTalk : oldFunctionTalkList) {
