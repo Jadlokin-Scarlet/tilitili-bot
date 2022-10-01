@@ -101,7 +101,7 @@ public class BotService {
             Asserts.checkNull(userIdLockMap.putIfAbsent(externalId, true), "听我说你先别急。");
             BotUser botUser = this.updateBotUser(botMessage);
             // 获取session
-            BotSessionService.MiraiSession session = botSessionService.getSession(getSessionKey(botMessage));
+            BotSessionService.MiraiSession session = botSessionService.getSession(botSessionService.getSessionKey(botMessage));
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender, botUser, botEmum);
             // 查询匹配任务列表
@@ -219,23 +219,6 @@ public class BotService {
             botUserMapper.addBotUserSelective(botUser);
         }
         return botUser;
-    }
-
-    public String getSessionKey(BotMessage botMessage) {
-        String sendType = botMessage.getSendType();
-        switch (sendType) {
-            case SendTypeEmum.TEMP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象");
-            case SendTypeEmum.FRIEND_MESSAGE_STR: Asserts.notNull(botMessage.getQq(), "找不到发送对象"); return SendTypeEmum.FRIEND_MESSAGE_STR + "-" + botMessage.getQq();
-            case SendTypeEmum.GROUP_MESSAGE_STR: Asserts.notNull(botMessage.getGroup(), "找不到发送对象"); return SendTypeEmum.GROUP_MESSAGE_STR + "-" + botMessage.getGroup();
-            case SendTypeEmum.GUILD_MESSAGE_STR: {
-                Long guildId = botMessage.getGuildId();
-                Long channelId = botMessage.getChannelId();
-                Asserts.notNull(guildId, "找不到发送对象");
-                Asserts.notNull(channelId, "找不到发送对象");
-                return SendTypeEmum.GUILD_MESSAGE_STR + "-" + guildId + "-" + channelId;
-            }
-            default: throw new AssertException("未知发送类型："+sendType);
-        }
     }
 
     private List<BotTask> getBotTalkDtoList(BotMessageAction botMessageAction) {

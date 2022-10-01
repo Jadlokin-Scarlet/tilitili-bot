@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.event.BotInvitedJoinGroupRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.MemberJoinRequestEventHandle;
@@ -11,7 +12,9 @@ import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupReques
 import com.tilitili.common.entity.view.bot.mirai.event.MemberJoinRequestEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.NewFriendRequestEvent;
 import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,11 +63,15 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleMemberJoinRequestEvent(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotEmum bot = messageAction.getBot();
-		if (redisCache.exists(MemberJoinRequestEventHandle.newMemberKey)) {
-			MemberJoinRequestEvent event = (MemberJoinRequestEvent) redisCache.getValue(MemberJoinRequestEventHandle.newMemberKey);
+		String value = messageAction.getValue();
+		String key = StringUtils.isBlank(value) ? MemberJoinRequestEventHandle.newMemberKey : MemberJoinRequestEventHandle.newMemberKey + "-" + value;
+		if (session.containsKey(key)) {
+			MemberJoinRequestEvent event = Gsons.fromJson(session.get(key), MemberJoinRequestEvent.class);
 			miraiManager.handleMemberJoinRequestEvent(bot, event);
-			redisCache.delete(MemberJoinRequestEventHandle.newMemberKey);
+			session.remove(key);
+			session.remove(MemberJoinRequestEventHandle.newMemberKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
 		return null;
