@@ -51,7 +51,7 @@ public class ExcelUtil {
 			Asserts.notEmpty(rowList, "啊嘞，怎么是空的。");
 			List<T> resultList = new ArrayList<>();
 			for (List<String> item : rowList) {
-				if (item.stream().allMatch(StringUtils::isBlank)) {
+				if (item.isEmpty() || item.stream().allMatch(StringUtils::isBlank)) {
 					continue;
 				}
 				T newObject = clazz.getConstructor().newInstance();
