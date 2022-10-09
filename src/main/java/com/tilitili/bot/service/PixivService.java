@@ -447,6 +447,7 @@ public class PixivService {
 			File file = path.toFile();
 			pixivManager.downloadPixivImage(url, file);
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			Asserts.notEquals(file.length(), 0, "啊嘞，下载失败了。");
 			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(sender.getBot(), file);
 			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
 			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
