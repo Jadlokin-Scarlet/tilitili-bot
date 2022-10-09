@@ -80,7 +80,7 @@ public class FunctionTalkService {
 				case "memberName": {
 					BotFriend botFriend = botManager.getMemberInfo(bot, botSender.getGroup(), botMessageChain.getTarget());
 					Asserts.notNull(botFriend, "啊嘞，不对劲");
-					Asserts.notBlank(botFriend.getMemberName(), "啊嘞，不对劲");
+					Asserts.notNull(botFriend.getMemberName(), "啊嘞，不对劲");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_PLAIN);
 					botMessageChain.setText(botFriend.getMemberName());
 					break;
