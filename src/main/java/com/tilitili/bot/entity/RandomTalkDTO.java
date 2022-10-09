@@ -9,6 +9,8 @@ public class RandomTalkDTO {
 	private String req;
 	@ExcelProperty(value = "回复")
 	private String resp;
+	@ExcelProperty(value = "黑名单")
+	private String blackList;
 
 	public Long getGroup() {
 		return group;
@@ -34,6 +36,15 @@ public class RandomTalkDTO {
 
 	public RandomTalkDTO setResp(String resp) {
 		this.resp = resp;
+		return this;
+	}
+
+	public String getBlackList() {
+		return blackList;
+	}
+
+	public RandomTalkDTO setBlackList(String blackList) {
+		this.blackList = blackList;
 		return this;
 	}
 }

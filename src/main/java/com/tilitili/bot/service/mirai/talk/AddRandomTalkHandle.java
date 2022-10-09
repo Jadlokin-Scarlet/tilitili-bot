@@ -79,7 +79,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
 			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
-				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
+				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}

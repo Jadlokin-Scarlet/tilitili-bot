@@ -9,7 +9,6 @@ import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTalk;
-import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
@@ -55,7 +54,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         Long group = botSender.getGroup();
 
         String req = TalkHandle.convertMessageToString(botMessage);
-        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setReq(req).setSenderId(botSender.getId()).setStatus(0));
+        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botMessage.getQq());
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
