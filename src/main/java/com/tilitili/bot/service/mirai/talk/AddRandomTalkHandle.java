@@ -17,6 +17,7 @@ import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
 			Asserts.notBlank(randomTalkDTO.getResp(), "回复不能为空");
-			String req = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
-			String resp = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
+			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
+			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
 				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
 				newFunctionTalkList.add(newFunctionTalk);

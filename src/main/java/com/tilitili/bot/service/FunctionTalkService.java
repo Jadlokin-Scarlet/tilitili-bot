@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,10 @@ public class FunctionTalkService {
 	@Autowired
 	public FunctionTalkService(BotManager botManager) {
 		this.botManager = botManager;
+	}
+
+	public static String convertMessageToString(BotMessage botMessage) {
+		return Gsons.toJson(BotMessage.simpleListMessage(botMessage.getBotMessageChainList()));
 	}
 
 	public List<BotMessageChain> convertCqToMessageChain(String messageStr) {

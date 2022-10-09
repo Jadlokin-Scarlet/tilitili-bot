@@ -13,6 +13,7 @@ import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +58,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setReq(req).setSenderId(botSender.getId()).setStatus(0));
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
-            BotMessage respMessage = TalkHandle.convertStringToMessage(functionTalk.getResp());
+            BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
             return respMessage.setQuote(messageAction.getMessageId());
         }
