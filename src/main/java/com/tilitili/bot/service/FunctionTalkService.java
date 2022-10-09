@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class FunctionTalkService {
 			}
 			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));
 			case "memberName": botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));
+			case "portrait": botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));
 		}
 	}
 
@@ -77,6 +79,10 @@ public class FunctionTalkService {
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_PLAIN);
 					botMessageChain.setText(botFriend.getMemberName());
 					break;
+				}
+				case "portrait": {
+					botMessageChain.setType(BotMessage.MESSAGE_TYPE_IMAGE);
+					botMessageChain.setUrl(QQUtil.getFriendPortrait(botMessageChain.getTarget()));
 				}
 			}
 		}
