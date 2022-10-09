@@ -2,7 +2,9 @@ package com.tilitili.bot.service.mirai.talk;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
@@ -31,10 +33,12 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     private final BotFunctionTalkMapper botFunctionTalkMapper;
     private final Random random;
     private final Gson gson;
+    private final FunctionTalkService functionTalkService;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper) throws IOException {
+    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService) throws IOException {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
+        this.functionTalkService = functionTalkService;
         this.gson = new Gson();
         this.botTalkManager = botTalkManager;
         this.random = new Random(System.currentTimeMillis());
@@ -43,6 +47,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
+        BotEmum bot = messageAction.getBot();
         BotMessage botMessage = messageAction.getBotMessage();
         BotSender botSender = messageAction.getBotSender();
         Long qq = botSender.getQq();
@@ -52,7 +57,9 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getBotFunctionTalkByCondition(new BotFunctionTalkQuery().setReq(req).setSenderId(botSender.getId()).setStatus(0));
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
-            return TalkHandle.convertStringToMessage(functionTalk.getResp()).setQuote(messageAction.getMessageId());
+            BotMessage respMessage = TalkHandle.convertStringToMessage(functionTalk.getResp());
+            functionTalkService.supplementChain(bot, botSender, respMessage);
+            return respMessage.setQuote(messageAction.getMessageId());
         }
 
         BotTalk botTalk = botTalkManager.getJsonTalkOrOtherTalk(req, botMessage);

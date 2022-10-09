@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai.talk;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.RandomTalkDTO;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.entity.BotFunction;
@@ -12,12 +13,12 @@ import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,21 +29,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
-	private final GoCqhttpManager goCqhttpManager;
 	private final BotFunctionMapper botFunctionMapper;
 	private final BotFunctionTalkMapper botFunctionTalkMapper;
+	private final FunctionTalkService functionTalkService;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, GoCqhttpManager goCqhttpManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService) {
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
-		this.goCqhttpManager = goCqhttpManager;
 		this.botFunctionMapper = botFunctionMapper;
 		this.botFunctionTalkMapper = BotFunctionTalkMapper;
+		this.functionTalkService = functionTalkService;
 	}
 
 	@Override
@@ -73,8 +75,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
 			Asserts.notBlank(randomTalkDTO.getResp(), "回复不能为空");
-			String req = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getReq())));
-			String resp = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getResp())));
+			String req = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
+			String resp = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
 				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId());
 				newFunctionTalkList.add(newFunctionTalk);
