@@ -71,6 +71,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
+			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
+			Asserts.notBlank(randomTalkDTO.getResp(), "回复不能为空");
 			String req = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getReq())));
 			String resp = TalkHandle.convertMessageToString(BotMessage.simpleListMessage(goCqhttpManager.convertCqToMessageChain(randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
@@ -89,6 +91,6 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			botFunctionTalkMapper.addBotFunctionTalkSelective(newFunctionTalk);
 		}
 
-		return BotMessage.simpleTextMessage("搞定√");
+		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，群号%s)", function, newFunctionTalkList.size(), groupList));
 	}
 }

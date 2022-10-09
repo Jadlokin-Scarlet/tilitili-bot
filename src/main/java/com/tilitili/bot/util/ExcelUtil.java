@@ -4,6 +4,7 @@ import com.tilitili.bot.annotation.ExcelProperty;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -50,6 +51,9 @@ public class ExcelUtil {
 			Asserts.notEmpty(rowList, "啊嘞，怎么是空的。");
 			List<T> resultList = new ArrayList<>();
 			for (List<String> item : rowList) {
+				if (item.stream().allMatch(StringUtils::isBlank)) {
+					continue;
+				}
 				T newObject = clazz.getConstructor().newInstance();
 				for (int i = 0; i < item.size(); i++) {
 					String valueStr = item.get(i).trim();
