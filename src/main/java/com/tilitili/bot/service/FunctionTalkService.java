@@ -67,9 +67,9 @@ public class FunctionTalkService {
 				}
 				break;
 			}
-			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));
-			case "memberName": botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));
-			case "portrait": botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));
+			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));break;
+			case "memberName": botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));break;
+			case "portrait": botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));break;
 		}
 	}
 
