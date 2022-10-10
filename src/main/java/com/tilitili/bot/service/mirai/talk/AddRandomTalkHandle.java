@@ -65,9 +65,14 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
 		String groupList = excelResult.getParam("群号");
+		String scoreStr = excelResult.getParamOrDefault("积分", "0");
+		Asserts.notBlank(function, "分组不能为空");
+		Asserts.notBlank(groupList, "群号不能为空");
+		Asserts.isNumber(scoreStr, "积分请输入正整数");
+		int score = Integer.parseInt(scoreStr);
 
 		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
-		BotFunction newFunction = new BotFunction().setFunction(function);
+		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
 		List<BotSender> botSenderList = Arrays.stream(groupList.split(",")).map(Long::valueOf)
 				.map(botSenderMapper::getBotSenderByGroup)

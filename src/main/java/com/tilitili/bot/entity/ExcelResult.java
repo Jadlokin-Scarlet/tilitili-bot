@@ -13,6 +13,10 @@ public class ExcelResult<T> {
 		return paramMap.get(key);
 	}
 
+	public String getParamOrDefault(Object key, String defaultValue) {
+		return paramMap.getOrDefault(key, defaultValue);
+	}
+
 	public List<T> getResultList() {
 		return resultList;
 	}

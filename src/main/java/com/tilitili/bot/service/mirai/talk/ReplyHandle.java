@@ -6,12 +6,12 @@ import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.GroupEmum;
-import com.tilitili.common.entity.BotFunctionTalk;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotTalk;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
+import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
+import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +34,15 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     private final Random random;
     private final Gson gson;
     private final FunctionTalkService functionTalkService;
+    private final BotFunctionMapper botFunctionMapper;
+    private final BotUserMapper botUserMapper;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService) throws IOException {
+    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserMapper botUserMapper) throws IOException {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
         this.functionTalkService = functionTalkService;
+        this.botFunctionMapper = botFunctionMapper;
+        this.botUserMapper = botUserMapper;
         this.gson = new Gson();
         this.botTalkManager = botTalkManager;
         this.random = new Random(System.currentTimeMillis());
@@ -52,13 +56,21 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         Long qq = botSender.getQq();
         Long group = botSender.getGroup();
+        BotUser botUser = messageAction.getBotUser();
 
         String req = TalkHandle.convertMessageToString(botMessage);
         List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botMessage.getQq());
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
+            BotFunction botFunction = botFunctionMapper.getBotFunctionById(functionTalk.getFunctionId());
+            if (botUser.getScore() < botFunction.getScore()) {
+                return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
+            }
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
+            if (botFunction.getScore() > 0) {
+                botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - botFunction.getScore()));
+            }
             return respMessage.setQuote(messageAction.getMessageId());
         }
 
