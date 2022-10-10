@@ -94,7 +94,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if (Objects.equals(group, GroupEmum.TEST_GROUP.value) && Pattern.matches("[笨蛋]+", text)) {
+        if (Pattern.matches("[笨蛋]+", text)) {
             int ddCount = StringUtils.findCount("笨蛋", text);
             if (ddCount > 0) {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "不笨").collect(Collectors.joining());
