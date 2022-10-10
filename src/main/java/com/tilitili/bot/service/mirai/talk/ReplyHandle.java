@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -89,6 +90,14 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
             if (ddCount > 0) {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
+                return BotMessage.simpleTextMessage(repeat);
+            }
+        }
+
+        if (Objects.equals(group, GroupEmum.TEST_GROUP.value) && Pattern.matches("[笨蛋]+", text)) {
+            int ddCount = StringUtils.findCount("笨蛋", text);
+            if (ddCount > 0) {
+                String repeat = IntStream.range(0, ddCount).mapToObj(c -> "不笨").collect(Collectors.joining());
                 return BotMessage.simpleTextMessage(repeat);
             }
         }
