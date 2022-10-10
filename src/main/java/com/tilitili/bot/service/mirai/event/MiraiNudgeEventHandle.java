@@ -1,10 +1,10 @@
 package com.tilitili.bot.service.mirai.event;
 
-import com.tilitili.bot.service.mirai.base.AutoEventHandle;
+import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.view.bot.mirai.event.NudgeEvent;
-import com.tilitili.common.entity.view.bot.mirai.event.NudgeSubject;
+import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeSubject;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
@@ -14,20 +14,20 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-public class NudgeEventHandle extends AutoEventHandle<NudgeEvent> {
+public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent> {
 	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
 
 	@Autowired
-	public NudgeEventHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
-		super(NudgeEvent.class);
+	public MiraiNudgeEventHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
+		super(MiraiNudgeEvent.class);
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 	}
 
 	@Override
-	public void handleEvent(NudgeEvent event) throws Exception {
-		NudgeSubject subject = event.getSubject();
+	public void handleEvent(MiraiNudgeEvent event) throws Exception {
+		MiraiNudgeSubject subject = event.getSubject();
 
 		BotSender botSender;
 		if ("Group".equals(subject.getKind())) {

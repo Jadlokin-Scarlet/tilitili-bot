@@ -26,7 +26,13 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received bot={} message={}", bot.value, message);
-        botService.syncHandleTextMessage(message, this.bot);
+        if (message.contains("post_type\":\"meta_event")
+                || message.contains("post_type\":\"notice")
+                || message.contains("post_type\":\"request")) {
+            botService.syncHandleEvent(bot, message);
+        } else {
+            botService.syncHandleTextMessage(message, this.bot);
+        }
     }
 
     @Override

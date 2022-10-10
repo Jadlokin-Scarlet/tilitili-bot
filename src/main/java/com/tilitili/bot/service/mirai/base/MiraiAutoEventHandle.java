@@ -4,10 +4,10 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.utils.Gsons;
 
-public abstract class AutoEventHandle<T> implements BaseEventHandle {
+public abstract class MiraiAutoEventHandle<T> implements BaseEventHandle {
 	private final TypeToken<?> type;
 
-	public AutoEventHandle(Class<T> clazz) {
+	public MiraiAutoEventHandle(Class<T> clazz) {
 		this.type = TypeToken.getParameterized(MiraiBaseRequest.class, clazz);
 	}
 

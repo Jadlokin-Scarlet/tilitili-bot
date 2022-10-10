@@ -1,5 +1,6 @@
 package com.tilitili.bot.service;
 
+import com.google.common.base.CaseFormat;
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseEventHandle;
@@ -10,12 +11,14 @@ import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -63,12 +66,24 @@ public class BotService {
     }
 
     @Async
-    public void syncHandleEvent(String message) {
+    public void syncHandleEvent(BotEmum bot, String message) {
         try {
-            String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
-            log.debug("eventType=" + eventType);
-            Asserts.notBlank(eventType, "获取事件类型失败");
-            String handleName = eventType.substring(0, 1).toLowerCase() + eventType.substring(1) + "Handle";
+            String handleName;
+            if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
+                String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
+                Asserts.notBlank(eventType, "获取事件类型失败");
+                handleName = "mirai" + eventType + "Handle";
+            } else {
+                GocqhttpBaseEvent baseEvent = Gsons.fromJson(message, GocqhttpBaseEvent.class);
+                String postType = baseEvent.getPostType();
+                String noticeType = baseEvent.getNoticeType();
+                String subType = baseEvent.getSubType();
+                Asserts.notNull(postType, "啊嘞，不对劲");
+                postType = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, postType);
+                noticeType = noticeType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, noticeType);
+                subType = subType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, subType);
+                handleName = "gocq" + postType + noticeType + subType + "Handle";
+            }
             Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件=%s", handleName);
             BaseEventHandle messageHandle = eventHandleMap.get(handleName);
             messageHandle.handleEventStr(message);
@@ -165,6 +180,7 @@ public class BotService {
         } else {
             if (message.contains("post_type\":\"meta_event")) return null;
             if (message.contains("post_type\":\"notice")) return null;
+            if (message.contains("post_type\":\"request")) return null;
             return goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
         }
     }

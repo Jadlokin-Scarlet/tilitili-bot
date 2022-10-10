@@ -1,11 +1,11 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.BotSessionService;
-import com.tilitili.bot.service.mirai.base.AutoEventHandle;
+import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.MemberJoinRequestEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberJoinRequestEvent;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Component
-public class MemberJoinRequestEventHandle extends AutoEventHandle<MemberJoinRequestEvent> {
-	public static final String newMemberKey = "MemberJoinRequestEvent.newMember";
+public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<MiraiMemberJoinRequestEvent> {
+	public static final String newMemberKey = "MiraiMemberJoinRequestEventHandle.newMember";
 	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
 	private final BotSessionService botSessionService;
 	private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
 
 	@Autowired
-	public MemberJoinRequestEventHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotSessionService botSessionService, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
-		super(MemberJoinRequestEvent.class);
+	public MiraiMemberJoinRequestEventHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotSessionService botSessionService, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
+		super(MiraiMemberJoinRequestEvent.class);
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 		this.botSessionService = botSessionService;
@@ -35,7 +35,7 @@ public class MemberJoinRequestEventHandle extends AutoEventHandle<MemberJoinRequ
 	}
 
 	@Override
-	public void handleEvent(MemberJoinRequestEvent event) {
+	public void handleEvent(MiraiMemberJoinRequestEvent event) {
 		String message = String.format("[%s][%s]申请加入[%s][%s]，是否接受(同意加群申请/拒绝加群申请)", event.getNick(), event.getFromId(), event.getGroupName(), event.getGroupId());
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getGroupId());
 

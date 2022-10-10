@@ -1,6 +1,7 @@
 package com.tilitili.bot.socket;
 
 import com.tilitili.bot.service.BotService;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.manager.MiraiManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,14 @@ public class MiraiEventWebSocketHandler extends BaseWebSocketHandler {
 
     @Autowired
     public MiraiEventWebSocketHandler(MiraiManager miraiManager, BotService botService) throws URISyntaxException {
-        super(new URI(miraiManager.getEventWebSocketUrl()));
+        super(new URI(miraiManager.getEventWebSocketUrl(BotEmum.DAI_YOU_SEI)));
         this.botService = botService;
     }
 
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received [{}]",message);
-        botService.syncHandleEvent(message);
+        botService.syncHandleEvent(BotEmum.DAI_YOU_SEI, message);
     }
 
 }

@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
-import com.tilitili.common.entity.view.bot.mirai.event.BotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
@@ -148,12 +148,12 @@ class StartApplicationTest {
     }
     public static void main(String[] args) {
         String s = "{\"syncId\":\"-1\",\"data\":{\"type\":\"BotInvitedJoinGroupRequestEvent\",\"eventId\":1661416058802410,\"message\":\"\",\"fromId\":545459363,\"groupId\":458232866,\"groupName\":\"【东方恋迷踪】超异域恋恋连结\",\"nick\":\"Jadlokin_Scarlet\"}}";
-        StartApplicationTest.<BotInvitedJoinGroupRequestEvent>run(s);
+        StartApplicationTest.<MiraiBotInvitedJoinGroupRequestEvent>run(s);
     }
 
     private static <T> T run(String s) {
         MiraiBaseRequest<T> request = Gsons.fromJson(s, new TypeToken<MiraiBaseRequest<T>>(){}.getType());
-        Asserts.isTrue(request.getData() instanceof BotInvitedJoinGroupRequestEvent, "?");
+        Asserts.isTrue(request.getData() instanceof MiraiBotInvitedJoinGroupRequestEvent, "?");
         return null;
     }
 
