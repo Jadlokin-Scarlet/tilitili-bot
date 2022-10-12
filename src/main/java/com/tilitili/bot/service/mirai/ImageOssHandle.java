@@ -28,7 +28,7 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 		List<String> resultList = new ArrayList<>();
 		for (String url : imageList) {
 			try {
-				String ossUrl = OSSUtil.uploadOSSByUrlAndType(QQUtil.getImageUrl(url), "png");
+				String ossUrl = OSSUtil.getCacheOSSOrUploadByUrlAndType(QQUtil.getImageUrl(url), "png", -1);
 				resultList.add(ossUrl);
 			} catch (AssertException e) {
 				resultList.add(e.getMessage());
