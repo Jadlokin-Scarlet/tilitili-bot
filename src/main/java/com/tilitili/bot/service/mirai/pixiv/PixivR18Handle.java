@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 public class PixivR18Handle extends ExceptionRespMessageHandle {
     private final PixivService pixivService;
-    private final Map<String, String> keyMap = ImmutableMap.of("ss", "1", "st", "2");
+    private final Map<String, String> keyMap = ImmutableMap.of("ss", "1", "st", "2", "色色", "1", "色图", "2");
 
     @Autowired
     public PixivR18Handle(PixivService pixivService) {
