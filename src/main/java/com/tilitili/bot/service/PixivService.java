@@ -78,7 +78,7 @@ public class PixivService {
 		String messageId;
 		String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
 		switch (source) {
-			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18, sender); break;
+			case "lolicon": messageId = sendLoliconImage(botMessage, searchKeyOrDefault, source, num, r18); break;
 			case "pixiv": {
 				if (isNotBlank(user)) messageId = sendPixivUserImage(botMessage, user, source, r18, sender);
 				else {
@@ -255,7 +255,7 @@ public class PixivService {
 		Integer sl = noUsedImage.getSl();
 		String[] urlList = noUsedImage.getUrlList().split(",");
 
-		List<BotMessageChain> messageChainList = this.getImageChainList(sender, title, userName, pid, sl, Arrays.asList(urlList), true);
+		List<BotMessageChain> messageChainList = this.getImageChainList(title, userName, pid, sl, Arrays.asList(urlList), true);
 //		pixivImageMapper.updatePixivImageSelective(new PixivImage().setId(noUsedImage.getId()).setStatus(1));
 		botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(sender.getId()));
 		String messageId = botManager.sendMessage(BotMessage.simpleListMessage(messageChainList, quote).setQuote(quote.getMessageId()));
@@ -263,16 +263,16 @@ public class PixivService {
 		return messageId;
 	}
 
-	public List<BotMessageChain> getImageChainList(BotSender sender, String title, String userName, String pid, Integer sl, List<String> urlList, Boolean canSS) {
+	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Boolean canSS) {
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
 		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
-		messageChainList.add(BotMessageChain.ofPlain("\n镜像站: https://pixiv.moe/illust/"+pid));
+		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 //		messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
 //		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
 		if (sl == null || sl < 5) {
 			for (String url : urlList) {
-				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(sender, url);
+				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
 			}
@@ -288,7 +288,7 @@ public class PixivService {
 		return messageChainList;
 	}
 
-	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18, BotSender sender) throws UnsupportedEncodingException, InterruptedException {
+	private String sendLoliconImage(BotMessage reqBotMessage, String searchKey, String source, String num, String r18) throws UnsupportedEncodingException, InterruptedException {
 		List<SetuData> dataList = loliconManager.getAImage(searchKey, num, r18);
 		Asserts.notEmpty(dataList, "没库存啦！");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
@@ -307,7 +307,7 @@ public class PixivService {
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: imageUrl));
 			} else {
 				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
-				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(sender, imageUrl);
+				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
 				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
 			}
 		}
@@ -436,7 +436,7 @@ public class PixivService {
 		return pid;
 	}
 
-	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(BotSender sender, String url) {
+	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url) {
 		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
 		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
@@ -448,7 +448,7 @@ public class PixivService {
 			pixivManager.downloadPixivImage(url, file);
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file, sender.getSendType());
+			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
 			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
 			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
 			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");

@@ -144,7 +144,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		}
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(botSender, illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
 
 		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);

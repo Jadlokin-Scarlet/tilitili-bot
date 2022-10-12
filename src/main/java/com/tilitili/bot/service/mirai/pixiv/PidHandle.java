@@ -63,7 +63,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		Integer sl = pixivImage.getSl();
 		String[] urlList = pixivImage.getUrlList().split(",");
 
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(botSender, pixivImage.getTitle(), pixivImage.getUserName(), pid, sl, Arrays.asList(urlList), canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(pixivImage.getTitle(), pixivImage.getUserName(), pid, sl, Arrays.asList(urlList), canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}
 }
