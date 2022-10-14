@@ -34,7 +34,7 @@ public class AiImageHandle extends ExceptionRespMessageToSenderHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String tagListStr = messageAction.getValue();
 		Asserts.notBlank(tagListStr, "格式错啦(tag)");
-		String[] tagList = tagListStr.split(",");
+		String[] tagList = tagListStr.split("[,，]");
 		List<String> enTagList = Arrays.stream(tagList).map(aiImageManager::translateUserWord).collect(Collectors.toList());
 		enTagList.addAll(goodTagList);
 		List<String> imageList = aiImageManager.getAiImageByTagList(enTagList);
