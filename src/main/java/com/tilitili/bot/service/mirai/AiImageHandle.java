@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Component
 public class AiImageHandle extends ExceptionRespMessageToSenderHandle {
 	private final AiImageManager aiImageManager;
+	private final List<String> goodTagList = Arrays.asList("绘图 (((masterpiece))),best quality,character design,(detailed),extremely detailed CG unity 8k wallpaper full_body".split(","));
 
 	@Autowired
 	public AiImageHandle(AiImageManager aiImageManager) {
@@ -35,6 +36,7 @@ public class AiImageHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notBlank(tagListStr, "格式错啦(tag)");
 		String[] tagList = tagListStr.split(",");
 		List<String> enTagList = Arrays.stream(tagList).map(aiImageManager::translateUserWord).collect(Collectors.toList());
+		enTagList.addAll(goodTagList);
 		List<String> imageList = aiImageManager.getAiImageByTagList(enTagList);
 		Asserts.notEmpty(imageList, "啊嘞，生成失败了");
 		if (imageList.size() > 1) {
