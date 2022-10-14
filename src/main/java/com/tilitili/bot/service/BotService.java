@@ -195,11 +195,13 @@ public class BotService {
             List<BotTask> allBotTask = botTaskMapper.getBotTaskByCondition(new BotTaskQuery().setStatus(0));
             for (BotTask botTask : allBotTask) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
-                // 尝试匹配回答24点
-                key = messageHandle.isThisTask(botMessageAction);
-                if (key != null) {
-                    botMessageAction.setVirtualKey(key);
-                    botTaskDTOList.add(0, botTask);
+                if (messageHandle != null) {
+                    // 尝试匹配回答24点
+                    key = messageHandle.isThisTask(botMessageAction);
+                    if (key != null) {
+                        botMessageAction.setVirtualKey(key);
+                        botTaskDTOList.add(0, botTask);
+                    }
                 }
             }
         }
