@@ -19,7 +19,7 @@ public class BotMessageService {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
 			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null, null);
 			String text = quoteMessageAction.getText();
-			String pid = StringUtils.patten1("https://pixiv.moe/illust/(\\d+)", text);
+			String pid = StringUtils.patten1("pid: (\\d+)", text);
 			if (StringUtils.isBlank(pid) && text.contains("https://www.pixiv.net")) {
 				pid = StringUtils.patten1("&illust_id=(\\d+)", text);
 			}
