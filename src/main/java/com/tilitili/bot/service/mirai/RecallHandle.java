@@ -50,12 +50,13 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         String quoteMessageId = messageAction.getQuoteMessageId();
         boolean recallAll = Objects.equals(all, "1");
 
+        if (quoteMessageId != null) {
+            Long bot = messageAction.getBotSender().getBot();
+            botManager.recallMessage(quoteMessageId, bot);
+            return BotMessage.emptyMessage();
+        }
+
         if (Objects.equals(qq, MASTER_QQ)) {
-            if (quoteMessageId != null) {
-                Long bot = messageAction.getBotSender().getBot();
-                botManager.recallMessage(quoteMessageId, bot);
-                return BotMessage.emptyMessage();
-            }
 
             if (recallAll) {
                 List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
