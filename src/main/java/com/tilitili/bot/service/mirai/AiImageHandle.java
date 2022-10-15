@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class AiImageHandle extends ExceptionRespMessageToSenderHandle {
 	private final AiImageManager aiImageManager;
 	private final List<String> goodTagList = Arrays.asList("(((masterpiece))),best quality,character design,(detailed),extremely detailed CG unity 8k wallpaper full_body".split(","));
-	private final List<String> bedTagList = Arrays.asList("lowres,bad anatomy,bad hands,text,error,missing fngers,extra digt,fewer digits,cropped,wort quality,low quality,normal quality,jpeg artifacts,signature,watermark,username,blurry,bad feet,r18,nswf".split(","));
+	private final List<String> bedTagList = Arrays.asList("lowres,bad anatomy,bad hands,text,error,missing fngers,extra digt,fewer digits,cropped,wort quality,low quality,normal quality,jpeg artifacts,signature,watermark,username,blurry,bad feet,r18,((nswf)),((nude))".split(","));
 
 	@Autowired
 	public AiImageHandle(AiImageManager aiImageManager) {
