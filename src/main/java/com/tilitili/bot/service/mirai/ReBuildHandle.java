@@ -33,7 +33,7 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 			if (value.contains(" ")) {
 				branches = value.substring(value.indexOf(" ") + 1).trim();
 			} else {
-				branches = "master";
+				branches = "reload";
 			}
 		}
 		Asserts.notBlank(name, "格式错啦(项目)");
