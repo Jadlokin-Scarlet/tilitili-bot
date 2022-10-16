@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Component
 public class RepeatHandle extends ExceptionRespMessageHandle {
     private final String KeyKey = "repeat.key";
-    private final String numberKey = "repeat.number";
     private final String recordKey = "repeat.record";
+    private final String numberKey = "repeat.number";
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
