@@ -3,10 +3,12 @@ package com.tilitili.bot.config;
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
+import com.tilitili.bot.socket.BotEventWebSocketHandler;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -27,15 +29,15 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
-    private final List<BaseWebSocketHandler> webSocketHandlerList;
-    private final List<BotWebSocketHandler> botWebSocketHandlerList;
+    private final List<BaseWebSocketHandler> botWebSocketHandlerList;
     private final BotService botService;
     private final BotManager botManager;
+    private final MiraiManager miraiManager;
 
     @Autowired
-    public WebSocketConfig(List<BaseWebSocketHandler> webSocketHandlerList, BotService botService, BotManager botManager) {
-        this.webSocketHandlerList = webSocketHandlerList;
+    public WebSocketConfig(BotService botService, BotManager botManager, MiraiManager miraiManager) {
         botWebSocketHandlerList = new ArrayList<>();
+        this.miraiManager = miraiManager;
         this.botService = botService;
         this.botManager = botManager;
     }
@@ -49,15 +51,13 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                 BotWebSocketHandler botWebSocketHandler = new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
-            } catch (Exception e) {
-                log.error("异常", e);
-            }
-        }
 
-
-        for (BaseWebSocketHandler webSocketHandler : webSocketHandlerList) {
-            try {
-                webSocketHandler.connect();
+                if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
+                    String eventWsUrl = miraiManager.getEventWebSocketUrl(bot);
+                    BotEventWebSocketHandler botEventWebSocketHandler = new BotEventWebSocketHandler(new URI(eventWsUrl), bot, botService);
+                    botEventWebSocketHandler.connect();
+                    botWebSocketHandlerList.add(botEventWebSocketHandler);
+                }
             } catch (Exception e) {
                 log.error("异常", e);
             }
@@ -72,11 +72,8 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         try {
-            for (BotWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
+            for (BaseWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
                 botWebSocketHandler.closeBlocking();
-            }
-            for (BaseWebSocketHandler baseWebSocketHandler : webSocketHandlerList) {
-                baseWebSocketHandler.closeBlocking();
             }
         } catch (InterruptedException e) {
             log.error("优雅停机异常");
