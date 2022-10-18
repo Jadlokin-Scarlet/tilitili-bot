@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
 public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNotifyPoke> {
@@ -28,7 +26,7 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 	}
 
 	@Override
-	public void handleEvent(GocqNoticeNotifyPoke event) throws Exception {
+	public void handleEvent(BotEmum bot, GocqNoticeNotifyPoke event) throws Exception {
 		log.info(Gsons.toJson(event));
 		BotSender botSender;
 		if (event.getGroupId() != null) {
@@ -36,15 +34,10 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(event.getSenderId());
 		}
-		if (Objects.equals(event.getUserId(), botSender.getBot())) {
-			return;
-		}
-		if (!Objects.equals(event.getTargetId(), botSender.getBot())) {
-			return;
-		}
+		Asserts.checkEquals(botSender.getBot(), bot.getValue(), "bot不匹配，跳过");
+		Asserts.notEquals(event.getUserId(), botSender.getBot(), "发起者为本人，跳过");
+		Asserts.checkEquals(event.getTargetId(), botSender.getBot(), "目标不为bot，跳过");
 
-		BotEmum bot = BotEmum.getByValue(botSender.getBot());
-		Asserts.notNull(bot, "啊咧，不对劲");
 		botManager.sendNudge(bot, botSender, event.getUserId());
 	}
 }

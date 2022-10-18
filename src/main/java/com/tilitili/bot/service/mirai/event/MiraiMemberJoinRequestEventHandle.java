@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -35,7 +36,7 @@ public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<Mira
 	}
 
 	@Override
-	public void handleEvent(MiraiMemberJoinRequestEvent event) {
+	public void handleEvent(BotEmum bot, MiraiMemberJoinRequestEvent event) {
 		String message = String.format("[%s][%s]申请加入[%s][%s]，是否接受(同意加群申请/拒绝加群申请)", event.getNick(), event.getFromId(), event.getGroupName(), event.getGroupId());
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getGroupId());
 

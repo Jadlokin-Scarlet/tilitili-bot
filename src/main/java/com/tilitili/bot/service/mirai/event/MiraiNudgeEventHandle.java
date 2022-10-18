@@ -11,8 +11,6 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent> {
 	private final BotManager botManager;
@@ -26,7 +24,7 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 	}
 
 	@Override
-	public void handleEvent(MiraiNudgeEvent event) throws Exception {
+	public void handleEvent(BotEmum bot, MiraiNudgeEvent event) throws Exception {
 		MiraiNudgeSubject subject = event.getSubject();
 
 		BotSender botSender;
@@ -35,15 +33,10 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(subject.getId());
 		}
-		if (Objects.equals(event.getFromId(), botSender.getBot())) {
-			return;
-		}
-		if (!Objects.equals(event.getTarget(), botSender.getBot())) {
-			return;
-		}
+		Asserts.checkEquals(botSender.getBot(), bot.getValue(), "bot不匹配，跳过");
+		Asserts.notEquals(event.getFromId(), botSender.getBot(), "发起者为本人，跳过");
+		Asserts.checkEquals(event.getTarget(), botSender.getBot(), "目标不为bot，跳过");
 
-		BotEmum bot = BotEmum.getByValue(botSender.getBot());
-		Asserts.notNull(bot, "啊咧，不对劲");
 		botManager.sendNudge(bot, botSender, event.getFromId());
 	}
 }

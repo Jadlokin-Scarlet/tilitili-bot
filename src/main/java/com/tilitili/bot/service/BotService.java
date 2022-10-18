@@ -86,7 +86,7 @@ public class BotService {
             }
             Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件=%s", handleName);
             BaseEventHandle messageHandle = eventHandleMap.get(handleName);
-            messageHandle.handleEventStr(message);
+            messageHandle.handleEventStr(bot, message);
         } catch (AssertException e) {
             log.warn(e.getMessage(), e);
         } catch (Exception e) {
