@@ -292,14 +292,15 @@ public class PixivService {
 		List<SetuData> dataList = loliconManager.getAImage(searchKey, num, r18);
 		Asserts.notEmpty(dataList, "没库存啦！");
 		List<BotMessageChain> messageChainList = new ArrayList<>();
+		if (!dataList.isEmpty()) {
+			messageChainList.add(BotMessageChain.ofPlain("pid：" + dataList.get(0).getPid()));
+		}
 		for (int i = 0; i < dataList.size(); i++) {
 			SetuData data = dataList.get(i);
 			String pid = String.valueOf(data.getPid());
 			String imageUrl = data.getUrls().getOriginal();
 			boolean isSese = data.getTags().contains("R-18") || data.getR18();
-			if (i != 0) {
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-			}
+			messageChainList.add(BotMessageChain.ofPlain("\n"));
 
 //			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 //			if (isSese) {
