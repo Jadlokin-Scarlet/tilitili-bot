@@ -302,14 +302,14 @@ public class PixivService {
 			}
 
 //			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
-			if (isSese) {
+//			if (isSese) {
 				String ossUrl = this.downloadPixivImageAndUploadToOSS(imageUrl);
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: imageUrl));
-			} else {
-				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
-				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
-				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
-			}
+//			} else {
+//				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
+//				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
+//				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
+//			}
 		}
 
 		String messageId = botManager.sendMessage(BotMessage.simpleListMessage(messageChainList, reqBotMessage).setQuote(reqBotMessage.getQuote()));
