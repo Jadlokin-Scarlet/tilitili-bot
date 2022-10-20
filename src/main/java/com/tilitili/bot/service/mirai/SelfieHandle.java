@@ -24,7 +24,7 @@ import java.util.Random;
 public class SelfieHandle extends ExceptionRespMessageHandle {
 	private final AiImageManager aiImageManager;
 	private final Random random;
-	private final List<String> defaultTagList = Arrays.asList("{best quality},{{masterpiece}},{highres},original,extremely detailed 8K wallpaper,1girl,cat ears,green eyes,(cirno),{an extremely delicate and beautiful}".split(","));
+	private final List<String> defaultTagList = Arrays.asList("{best quality},{{masterpiece}},{highres},original,extremely detailed 8K wallpaper,1girl,cat ears,green eyes,sky blue hair,(cirno),{an extremely delicate and beautiful}".split(","));
 	private final List<String> badTagList = Arrays.asList("lowres,bad anatomy,bad hands,text,error,missing fngers,extra digt,fewer digits,cropped,wort quality,low quality,normal quality,jpeg artifacts,signature,watermark,username,blurry,bad feet,r18,((nswf)),((nude))".split(","));
 	private final List<String> ageTagList = Arrays.asList("child", "little girl", "teens");
 
