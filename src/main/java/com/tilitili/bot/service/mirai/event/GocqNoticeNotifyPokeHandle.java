@@ -34,7 +34,7 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(event.getSenderId());
 		}
-		Asserts.checkEquals(botSender.getBot(), bot.getValue(), "bot不匹配，跳过");
+		Asserts.checkEquals(botSender.getBot(), bot.getQq(), "bot不匹配，跳过");
 		Asserts.notEquals(event.getUserId(), botSender.getBot(), "发起者为本人，跳过");
 		Asserts.checkEquals(event.getTargetId(), botSender.getBot(), "目标不为bot，跳过");
 

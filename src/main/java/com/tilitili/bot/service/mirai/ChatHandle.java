@@ -81,6 +81,10 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String source = session.getOrDefault(redisKey, "tx");
 
 		Long botQQ = messageAction.getBotSender().getBot();
+		BotEmum bot = BotEmum.getByValue(botQQ);
+		if (bot == null) {
+			return null;
+		}
 //		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
@@ -88,7 +92,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 		List<Long> atList = messageAction.getAtList();
 		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
-		boolean hasAtBot = atList.contains(botQQ) || atList.contains(Long.valueOf(BOT_GUILD_QQ));
+		boolean hasAtBot = atList.contains(botQQ) || (bot.tinyId != null && atList.contains(bot.tinyId));
 		boolean isRandomReply = random == 0 && messageAction.getBotMessage().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;

@@ -106,7 +106,7 @@ public class BotService {
 
             // 获取sender
             BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
-            if (!Objects.equals(botSender.getBot(), botEmum.value)) return;
+            if (!Objects.equals(botSender.getBot(), botEmum.qq)) return;
 
             // 获取用户锁，并保存user消息
 //            userIdLockMap.putIfAbsent()

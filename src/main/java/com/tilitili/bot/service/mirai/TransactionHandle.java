@@ -3,7 +3,9 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.utils.Asserts;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -11,6 +13,13 @@ import java.util.List;
 
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
+	private final BotItemMapper botItemMapper;
+
+	@Autowired
+	public TransactionHandle(BotItemMapper botItemMapper) {
+		this.botItemMapper = botItemMapper;
+	}
+
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String value = messageAction.getValue();
@@ -19,6 +28,8 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		String itemName = valueList.get(0);
 		String itemNum = valueList.size() > 1 ? valueList.get(1) : "1";
 		Asserts.isNumber(itemNum, "格式错啦(物品数量)");
+
+//		botItemMapper.getBotItemByCondition()
 
 		return null;
 	}

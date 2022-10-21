@@ -19,7 +19,7 @@ public class BotEventWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void handleTextMessage(String message) {
-        log.debug("Message Received bot={} message={}", bot.value, message);
+        log.debug("Message Received bot={} message={}", bot.qq, message);
         botService.syncHandleEvent(bot, message);
     }
 

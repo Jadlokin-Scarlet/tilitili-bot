@@ -47,7 +47,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         for (BotEmum bot : BotEmum.values()) {
             try {
                 String wsUrl = botManager.getWebSocketUrl(bot);
-                Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.value);
+                Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.qq);
                 BotWebSocketHandler botWebSocketHandler = new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
