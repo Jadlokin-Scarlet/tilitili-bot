@@ -33,7 +33,7 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 		Long at = atList.get(0);
 
 		if ("禁言".equals(key)) {
-			String timeStr = messageAction.getValue();
+			String timeStr = messageAction.getValueOrDefault("60");
 			Asserts.isNumber(timeStr, "格式不对喵(秒数)");
 			int time = Integer.parseInt(timeStr);
 			Asserts.isTrue(time <= 60, "最多一分钟喵");
