@@ -41,7 +41,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			String text = cellList.get(1);
 
 			BotUser botUser = botUserMapper.getBotUserByExternalId(senderId);
-			Asserts.checkEquals(cellList.size(), 2, "第%s句找不到人", i);
+			Asserts.notNull(botUser, "第%s句找不到人", i);
 
 			String senderName = botUser.getName();
 			nodeList.add(new BotMessageNode().setSenderId(senderId).setSenderName(senderName).setMessageChain(
