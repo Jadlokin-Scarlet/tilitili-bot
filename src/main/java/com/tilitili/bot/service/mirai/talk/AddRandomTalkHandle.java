@@ -10,6 +10,7 @@ import com.tilitili.common.entity.BotFunction;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
+import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
@@ -19,6 +20,7 @@ import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,7 +63,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
+		String friendList = excelResult.getParam("私聊");
 		String groupList = excelResult.getParam("群号");
+		String guildList = excelResult.getParam("频道");
 		String channelList = excelResult.getParam("子频道");
 		String scoreStr = excelResult.getParamOrDefault("积分", "0");
 		Asserts.notBlank(function, "分组不能为空");
@@ -71,20 +75,35 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
 		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
-		List<BotSender> botSenderList = new ArrayList<>();
-//		if (groupList)
-//		new HashSet<BotSender>().add()
-		botSenderList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
-				.map(botSenderMapper::getBotSenderByGroup)
-				.filter(Objects::nonNull).collect(Collectors.toList()));
+		List<Long> botSenderIdList = new ArrayList<>();
+		if (StringUtils.isNotBlank(friendList)) {
+			botSenderIdList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
+					.map(botSenderMapper::getBotSenderByQq)
+					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+		}
+		if (StringUtils.isNotBlank(groupList)) {
+			botSenderIdList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
+					.map(botSenderMapper::getBotSenderByGroup)
+					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+		}
+		if (StringUtils.isNotBlank(guildList)) {
+			botSenderIdList.addAll(Arrays.stream(guildList.split(",")).map(Long::valueOf)
+					.flatMap(guildId -> botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setGuildId(guildId).setStatus(0)).stream())
+					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+		}
+		if (StringUtils.isNotBlank(channelList)) {
+			botSenderIdList.addAll(Arrays.stream(channelList.split(",")).map(Long::valueOf)
+					.map(botSenderMapper::getBotSenderByChannelId)
+					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+		}
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
 			Asserts.notBlank(randomTalkDTO.getResp(), "回复不能为空");
 			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
 			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
-			for (BotSender botSender : botSenderList) {
-				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
+			for (Long botSenderId : botSenderIdList) {
+				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSenderId).setBlackList(randomTalkDTO.getBlackList());
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}
