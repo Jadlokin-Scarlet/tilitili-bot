@@ -118,7 +118,11 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			botFunctionTalkMapper.addBotFunctionTalkSelective(newFunctionTalk);
 		}
 
+		String senderMessage = (StringUtils.isNotBlank(friendList)? "私聊"+friendList: "") +
+				(StringUtils.isNotBlank(groupList)? "群号"+groupList: "") +
+				(StringUtils.isNotBlank(guildList)? "频道"+guildList: "") +
+				(StringUtils.isNotBlank(channelList)? "子频道"+channelList: "");
 		String scoreMessage = score == 0? "": String.format("，积分%s", score);
-		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，群号%s%s)", function, newFunctionTalkList.size(), groupList, scoreMessage));
+		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage));
 	}
 }
