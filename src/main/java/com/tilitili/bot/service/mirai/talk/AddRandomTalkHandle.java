@@ -69,7 +69,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String channelList = excelResult.getParam("子频道");
 		String scoreStr = excelResult.getParamOrDefault("积分", "0");
 		String timeUnit = excelResult.getParamOrDefault("每", "天");
-		String timeNumStr = excelResult.getParamOrDefault("次数", "0");
+		String timeNumStr = excelResult.getParamOrDefault("次数", "99999999");
 		Asserts.notBlank(function, "分组不能为空");
 		Asserts.isNumber(scoreStr, "积分请输入正整数");
 		Asserts.isNumber(timeNumStr, "次数请输入正整数");
