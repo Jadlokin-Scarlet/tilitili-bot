@@ -127,6 +127,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				(StringUtils.isNotBlank(guildList)? "频道"+guildList: "") +
 				(StringUtils.isNotBlank(channelList)? "子频道"+channelList: "");
 		String scoreMessage = score == 0? "": String.format("，积分%s", score);
-		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage));
+		String timeNumMessage = timeNum == 99999999? "": "，每" + timeUnit + timeNumStr + "次";
+		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage, timeNumMessage));
 	}
 }
