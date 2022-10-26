@@ -24,10 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,18 +62,21 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
 		String groupList = excelResult.getParam("群号");
+		String channelList = excelResult.getParam("子频道");
 		String scoreStr = excelResult.getParamOrDefault("积分", "0");
 		Asserts.notBlank(function, "分组不能为空");
-		Asserts.notBlank(groupList, "群号不能为空");
 		Asserts.isNumber(scoreStr, "积分请输入正整数");
 		int score = Integer.parseInt(scoreStr);
 
 		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
 		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
-		List<BotSender> botSenderList = Arrays.stream(groupList.split(",")).map(Long::valueOf)
+		List<BotSender> botSenderList = new ArrayList<>();
+//		if (groupList)
+//		new HashSet<BotSender>().add()
+		botSenderList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
 				.map(botSenderMapper::getBotSenderByGroup)
-				.filter(Objects::nonNull).collect(Collectors.toList());
+				.filter(Objects::nonNull).collect(Collectors.toList()));
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ImageOssHandle extends ExceptionRespMessageHandle {
@@ -24,7 +25,18 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		String source = messageAction.getParamOrDefault("s", messageAction.getParamOrDefault("source", "qq"));
 		List<String> imageList = botMessageService.getImageListOrQuoteImage(messageAction);
+		List<String> resultList;
+		switch (source) {
+			case "qq": resultList = uploadToQQ(imageList);break;
+			case "oss": resultList = uploadToOSS(imageList);break;
+			default: throw new AssertException("格式错啦(源)");
+		}
+		return BotMessage.simpleTextMessage(String.join("\n", resultList));
+	}
+
+	private List<String> uploadToOSS(List<String> imageList) {
 		List<String> resultList = new ArrayList<>();
 		for (String url : imageList) {
 			try {
@@ -36,6 +48,10 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 				resultList.add("上传失败？");
 			}
 		}
-		return BotMessage.simpleTextMessage(String.join("\n", resultList));
+		return resultList;
+	}
+
+	private List<String> uploadToQQ(List<String> imageList) {
+		return imageList.stream().map(QQUtil::getImageUrl).collect(Collectors.toList());
 	}
 }
