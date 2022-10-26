@@ -5,6 +5,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.BotUserItemMapping;
+import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotUserItemMappingManager;
@@ -15,6 +16,7 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,8 +41,22 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		switch (key) {
 			case "兑换": return handleBuy(messageAction);
 			case "回收": return handleSell(messageAction);
+			case "背包": return handleBag(messageAction);
 			default: throw new AssertException("啊嘞，不对劲");
 		}
+	}
+
+	private BotMessage handleBag(BotMessageAction messageAction) {
+		BotUser botUser = messageAction.getBotUser();
+		List<BotItemDTO> itemList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
+		List<String> resultList = new ArrayList<>();
+		for (BotItemDTO botItemDTO : itemList) {
+			resultList.add(botItemDTO.getName());
+			if (botItemDTO.getNum() > 1) {
+				resultList.add("*" + botItemDTO.getNum());
+			}
+		}
+		return BotMessage.simpleTextMessage(String.join("，", resultList));
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
