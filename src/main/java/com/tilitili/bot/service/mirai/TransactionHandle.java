@@ -38,7 +38,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		String key = messageAction.getKey();
 		switch (key) {
 			case "兑换": return handleBuy(messageAction);
-			case "卖出": return handleSell(messageAction);
+			case "回收": return handleSell(messageAction);
 			default: throw new AssertException("啊嘞，不对劲");
 		}
 	}
@@ -66,7 +66,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 		String numMessage = itemNum + "个";
 		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
-		return BotMessage.simpleTextMessage(String.format("兑换掉%s成功，剩余积分%s。", numMessage + itemName, nowScore));
+		return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
 
 	private BotMessage handleBuy(BotMessageAction messageAction) {
