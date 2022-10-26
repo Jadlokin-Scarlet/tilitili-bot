@@ -13,6 +13,7 @@ import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Gsons;
+import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import java.util.stream.IntStream;
 
 @Component
 public class ReplyHandle extends ExceptionRespMessageHandle {
+    private final String timeNumKey = "ReplyHandle.timeNum";
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final BotTalkManager botTalkManager;
@@ -37,13 +39,15 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     private final FunctionTalkService functionTalkService;
     private final BotFunctionMapper botFunctionMapper;
     private final BotUserMapper botUserMapper;
+    private final RedisCache redisCache;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserMapper botUserMapper) throws IOException {
+    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserMapper botUserMapper, RedisCache redisCache) throws IOException {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
         this.functionTalkService = functionTalkService;
         this.botFunctionMapper = botFunctionMapper;
         this.botUserMapper = botUserMapper;
+        this.redisCache = redisCache;
         this.gson = new Gson();
         this.botTalkManager = botTalkManager;
         this.random = new Random(System.currentTimeMillis());
@@ -66,6 +70,10 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             BotFunction botFunction = botFunctionMapper.getBotFunctionById(functionTalk.getFunctionId());
             if (botUser.getScore() < botFunction.getScore()) {
                 return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
+            }
+            Long theTimeNum = redisCache.increment(timeNumKey + "-" + botUser.getExternalId(), 1L);
+            if (theTimeNum > botFunction.getTimeNum()) {
+                return BotMessage.simpleTextMessage("不要太贪心哦。");
             }
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
