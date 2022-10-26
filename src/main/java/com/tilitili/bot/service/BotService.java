@@ -47,9 +47,10 @@ public class BotService {
     private final BotSenderManager botSenderManager;
     private final MiraiManager miraiManager;
     private final GoCqhttpManager goCqhttpManager;
+    private final BotSenderTaskMappingManager botSenderTaskMappingManager;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.eventHandleMap = eventHandleMap;
@@ -62,6 +63,7 @@ public class BotService {
         this.botSenderManager = botSenderManager;
         this.miraiManager = miraiManager;
         this.goCqhttpManager = goCqhttpManager;
+        this.botSenderTaskMappingManager = botSenderTaskMappingManager;
         gson = new Gson();
     }
 
@@ -115,6 +117,9 @@ public class BotService {
 //            }
             Asserts.checkNull(userIdLockMap.putIfAbsent(externalId, true), "听我说你先别急。");
             BotUser botUser = this.updateBotUser(botMessage);
+            // 校验权限
+            boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), 11L);
+            Asserts.isTrue(hasHelp, "啊嘞，不对劲。");
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSessionService.getSessionKey(botMessage));
             // 解析指令
