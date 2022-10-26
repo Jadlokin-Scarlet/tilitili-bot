@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.BotUserItemMapping;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
@@ -42,14 +44,35 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			case "兑换": return handleBuy(messageAction);
 			case "回收": return handleSell(messageAction);
 			case "背包": return handleBag(messageAction);
+			case "道具": return handleItemInfo(messageAction);
 			default: throw new AssertException("啊嘞，不对劲");
 		}
+	}
+
+	private BotMessage handleItemInfo(BotMessageAction messageAction) {
+		String itemName = messageAction.getValue();
+		BotItem botItem = botItemMapper.getBotItemByName(itemName);
+		Asserts.notNull(botItem, "那是啥");
+		List<BotMessageChain> resultList = new ArrayList<>();
+		resultList.add(BotMessageChain.ofPlain("*" + botItem.getName() + "*\n"));
+		resultList.add(BotMessageChain.ofPlain(botItem.getDescription() + "\n"));
+		if (Objects.equals(botItem.getPrice(), botItem.getSellPrice())) {
+			resultList.add(BotMessageChain.ofPlain("价值：" + botItem.getPrice() + "\n"));
+		} else {
+			resultList.add(BotMessageChain.ofPlain("兑换价：" + botItem.getPrice() + "\n"));
+			resultList.add(BotMessageChain.ofPlain("回收价：" + botItem.getSellPrice() + "\n"));
+		}
+		resultList.add(BotMessageChain.ofPlain("最大持有：" + botItem.getMaxLimit()));
+		return BotMessage.simpleListMessage(resultList);
 	}
 
 	private BotMessage handleBag(BotMessageAction messageAction) {
 		BotUser botUser = messageAction.getBotUser();
 		List<BotItemDTO> itemList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
 		List<String> resultList = new ArrayList<>();
+		if (itemList.isEmpty()) {
+			return BotMessage.simpleTextMessage("背包里一尘不染。。");
+		}
 		for (BotItemDTO botItemDTO : itemList) {
 			resultList.add(botItemDTO.getName());
 			if (botItemDTO.getNum() > 1) {
