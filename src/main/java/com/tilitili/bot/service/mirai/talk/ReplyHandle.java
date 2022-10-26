@@ -60,7 +60,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         BotUser botUser = messageAction.getBotUser();
 
         String req = TalkHandle.convertMessageToString(botMessage);
-        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botMessage.getQq());
+        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botUser.getExternalId());
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
             BotFunction botFunction = botFunctionMapper.getBotFunctionById(functionTalk.getFunctionId());
