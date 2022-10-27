@@ -78,10 +78,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			return BotMessage.simpleTextMessage("背包里一尘不染。。");
 		}
 		for (BotItemDTO botItemDTO : itemList) {
-			resultList.add(botItemDTO.getName());
-			if (botItemDTO.getNum() > 1) {
-				resultList.add("*" + botItemDTO.getNum());
-			}
+			resultList.add(botItemDTO.getName() + (botItemDTO.getNum() > 1? "*" + botItemDTO.getNum(): ""));
 		}
 		return BotMessage.simpleTextMessage(String.join("，", resultList));
 	}
