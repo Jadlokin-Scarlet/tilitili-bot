@@ -12,6 +12,7 @@ import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
+import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -71,7 +73,9 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             if (botUser.getScore() < botFunction.getScore()) {
                 return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
             }
-            Long theTimeNum = redisCache.increment(timeNumKey + "-" + botUser.getExternalId(), 1L);
+            String redisKey = timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getExternalId();
+            Long theTimeNum = redisCache.increment(redisKey, 1L);
+            redisCache.expire(redisKey, 60 * 60 * 24);
             if (theTimeNum > botFunction.getTimeNum()) {
                 return BotMessage.simpleTextMessage("不要太贪心哦。");
             }
