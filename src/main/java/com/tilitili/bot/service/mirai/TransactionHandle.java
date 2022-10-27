@@ -7,7 +7,6 @@ import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.BotUserItemMapping;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
@@ -53,21 +52,31 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		String itemName = messageAction.getValue();
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥");
-		List<BotMessageChain> resultList = new ArrayList<>();
-		resultList.add(BotMessageChain.ofPlain("*" + botItem.getName() + "*\n"));
-		resultList.add(BotMessageChain.ofPlain(botItem.getDescription() + "\n"));
+		List<String> resultList = new ArrayList<>();
+		resultList.add("*" + botItem.getName() + "*");
+		resultList.add(botItem.getDescription());
 		if (Objects.equals(botItem.getPrice(), botItem.getSellPrice())) {
-			resultList.add(BotMessageChain.ofPlain("价值：" + botItem.getPrice() + "\n"));
-		} else {
-			resultList.add(BotMessageChain.ofPlain("兑换价：" + botItem.getPrice() + "\n"));
-			if (botItem.getSellPrice() == 0) {
-				resultList.add(BotMessageChain.ofPlain("无法回收\n"));
+			if (botItem.getPrice() == null) {
+				resultList.add("无法交易");
 			} else {
-				resultList.add(BotMessageChain.ofPlain("回收价：" + botItem.getSellPrice() + "\n"));
+				resultList.add("价值：" + botItem.getPrice());
+			}
+		} else {
+			if (botItem.getPrice() == null) {
+				resultList.add("无法兑换");
+			} else {
+				resultList.add("兑换价：" + botItem.getPrice());
+			}
+			if (botItem.getSellPrice() == null) {
+				resultList.add("无法回收");
+			} else {
+				resultList.add("回收价：" + botItem.getSellPrice());
 			}
 		}
-		resultList.add(BotMessageChain.ofPlain("最大持有：" + botItem.getMaxLimit()));
-		return BotMessage.simpleListMessage(resultList);
+		if (botItem.getMaxLimit() != null) {
+			resultList.add("最大持有：" + botItem.getMaxLimit());
+		}
+		return BotMessage.simpleTextMessage(String.join("\n", resultList));
 	}
 
 	private BotMessage handleBag(BotMessageAction messageAction) {
