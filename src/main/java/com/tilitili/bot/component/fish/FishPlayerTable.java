@@ -3,6 +3,7 @@ package com.tilitili.bot.component.fish;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.FishPlayer;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -87,12 +88,12 @@ public class FishPlayerTable {
 
 		// 兑换道具
 		if (!botItemIdList.contains(BotItemDTO.FISH_TOOL)) {
-			botUserItemMappingManager.safeBuyItem(userId, BotItemDTO.FISH_TOOL, 1);
+			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemDTO.FISH_TOOL));
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼竿一把(-90)，谢谢惠顾。"));
 		}
 
 		if (!botItemIdList.contains(BotItemDTO.FISH_FOOD)) {
-			botUserItemMappingManager.safeBuyItem(userId, BotItemDTO.FISH_FOOD, 10);
+			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemDTO.FISH_FOOD).setItemNum(10));
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)，谢谢惠顾。"));
 		}
 
