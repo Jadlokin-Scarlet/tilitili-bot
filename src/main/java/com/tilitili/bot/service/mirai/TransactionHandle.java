@@ -60,7 +60,11 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofPlain("价值：" + botItem.getPrice() + "\n"));
 		} else {
 			resultList.add(BotMessageChain.ofPlain("兑换价：" + botItem.getPrice() + "\n"));
-			resultList.add(BotMessageChain.ofPlain("回收价：" + botItem.getSellPrice() + "\n"));
+			if (botItem.getSellPrice() == 0) {
+				resultList.add(BotMessageChain.ofPlain("无法回收\n"));
+			} else {
+				resultList.add(BotMessageChain.ofPlain("回收价：" + botItem.getSellPrice() + "\n"));
+			}
 		}
 		resultList.add(BotMessageChain.ofPlain("最大持有：" + botItem.getMaxLimit()));
 		return BotMessage.simpleListMessage(resultList);
