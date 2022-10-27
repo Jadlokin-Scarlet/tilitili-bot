@@ -9,9 +9,9 @@ import com.tilitili.common.emnus.GroupEmum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
@@ -38,15 +38,15 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     private final Gson gson;
     private final FunctionTalkService functionTalkService;
     private final BotFunctionMapper botFunctionMapper;
-    private final BotUserMapper botUserMapper;
+    private final BotUserManager botUserManager;
     private final RedisCache redisCache;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserMapper botUserMapper, RedisCache redisCache) throws IOException {
+    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserManager botUserManager, RedisCache redisCache) throws IOException {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
         this.functionTalkService = functionTalkService;
         this.botFunctionMapper = botFunctionMapper;
-        this.botUserMapper = botUserMapper;
+        this.botUserManager = botUserManager;
         this.redisCache = redisCache;
         this.gson = new Gson();
         this.botTalkManager = botTalkManager;
@@ -78,7 +78,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
             if (botFunction.getScore() > 0) {
-                botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - botFunction.getScore()));
+                botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), - botFunction.getScore());
             }
             return respMessage.setQuote(messageAction.getMessageId());
         }

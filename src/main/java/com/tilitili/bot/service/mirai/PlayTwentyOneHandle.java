@@ -10,6 +10,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -29,11 +30,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
 
 	private final BotUserMapper botUserMapper;
+	private final BotUserManager botUserManager;
 	private final BotManager botManager;
 
 	@Autowired
-	public PlayTwentyOneHandle(BotUserMapper botUserMapper, BotManager botManager) {
+	public PlayTwentyOneHandle(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager) {
 		this.botUserMapper = botUserMapper;
+		this.botUserManager = botUserManager;
 		this.botManager = botManager;
 	}
 
@@ -81,7 +84,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		score /= 2;
 
 		List<BotMessageChain> resp = new ArrayList<>();
-		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + score));
+		botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), score);
 		resp.add(BotMessageChain.ofPlain(String.format("返还%s积分%d，剩余%d积分。\n", botUser.getName(), score, botUser.getScore() + score)));
 
 		twentyOneTable.initPlayer(player);
@@ -106,7 +109,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean splitCardSuccess = twentyOneTable.splitCard(player);
 		Asserts.isTrue(splitCardSuccess, "啊嘞，不对劲");
 
-		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
+		botUserManager.safeUpdateScore(botUser.getId(), hasScore, - useScore);
 
 		List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(messageAction.getBotMessage());
 		return BotMessage.simpleListMessage(resp);
@@ -143,7 +146,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			for (TwentyOneCardList twentyOneCardList : player.getCardListList()) {
 				sum += twentyOneCardList.getScore();
 			}
-			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() + sum));
+			botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), sum);
 			resp.add(BotMessageChain.ofPlain(String.format("退出成功啦。返还积分%d，剩余%d积分。", sum, botUser.getScore() + sum)));
 		} else {
 			resp.add(BotMessageChain.ofPlain("退出成功啦。"));
@@ -221,7 +224,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Integer useScore = twentyOneCardList.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
 		twentyOneCardList.setScore(useScore * 2);
-		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(hasScore - useScore));
+		botUserManager.safeUpdateScore(botUser.getId(), hasScore, - useScore);
 
 		boolean addCardSuccess = twentyOneTable.addCard(player);
 		Asserts.isTrue(addCardSuccess, "啊嘞，不对劲");
@@ -268,7 +271,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Long playerId = botUser.getExternalId();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
@@ -309,7 +312,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 
@@ -333,7 +336,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean addGameSuccess = twentyOneTable.addGame(botUser, score);
 		Asserts.isTrue(addGameSuccess, "啊嘞，不对劲");
 
-		botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setScore(botUser.getScore() - score));
+		botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), - score);
 
 //		botManager.sendMessage(BotMessage.simpleTextMessage(String.format("准备完毕，使用积分%d，剩余%d积分。", score, botUser.getScore() - score), messageAction.getBotMessage()).setQuote(messageAction.getMessageId()));
 

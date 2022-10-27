@@ -9,6 +9,7 @@ import com.tilitili.common.entity.SortObject;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
@@ -32,6 +33,7 @@ public class TwentyOneTable {
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final BotUserMapper botUserMapper;
+	private final BotUserManager botUserManager;
 	private final BotManager botManager;
 	private final Long tableId;
 	private String status;
@@ -40,8 +42,9 @@ public class TwentyOneTable {
 	private final TwentyOneAdmin admin;
 	private Long waitPeoplePrepareId;
 
-	public TwentyOneTable(BotUserMapper botUserMapper, BotManager botManager, BotMessageAction messageAction) {
+	public TwentyOneTable(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, BotMessageAction messageAction) {
 		this.botUserMapper = botUserMapper;
+		this.botUserManager = botUserManager;
 		this.botManager = botManager;
 		this.tableId = messageAction.getBotSender().getId();
 		this.status = STATUS_WAIT;
@@ -249,7 +252,7 @@ public class TwentyOneTable {
 				String playerStr = String.format("\n%s：%s (%s) (%s分)", player.getBotUser().getName(), cardListStr, playerResult, subScore > 0? "+" + subScore: "" + subScore);
 				resp.add(BotMessageChain.ofPlain(playerStr));
 				BotUser botUser = botUserMapper.getBotUserByExternalId(player.getPlayerId());
-				botUserMapper.updateBotUserSelective(new BotUser().setId(player.getBotUser().getId()).setScore(botUser.getScore() + subScore + twentyOneCardList.getScore()));
+				botUserManager.safeUpdateScore(player.getBotUser().getId(), botUser.getScore(), subScore + twentyOneCardList.getScore());
 			}
 		}
 		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();

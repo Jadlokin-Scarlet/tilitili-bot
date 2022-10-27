@@ -8,6 +8,7 @@ import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.query.BotUserQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -26,10 +27,12 @@ import java.util.Locale;
 public class SignHandle extends ExceptionRespMessageHandle {
 	private final static String externalIdLockKey = "signHandle.externalIdLockKey";
 	private final BotUserMapper botUserMapper;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public SignHandle(BotUserMapper botUserMapper) {
+	public SignHandle(BotUserMapper botUserMapper, BotUserManager botUserManager) {
 		this.botUserMapper = botUserMapper;
+		this.botUserManager = botUserManager;
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		result.add(BotMessageChain.ofPlain("排序:分数\t名称"));
 		for (int index = 0; index < userList.size(); index++) {
 			BotUser botUser = userList.get(index);
-			if (botUser.getScore() <= 100) continue;
+			if (botUser.getScore() <= 150) continue;
 			result.add(BotMessageChain.ofPlain(String.format("\n%s:%s\t%s", index + 1, botUser.getScore(), botUser.getName())));
 		}
 		return BotMessage.simpleListMessage(result);
@@ -79,7 +82,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		try {
 			BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
 			Asserts.notNull(botUser, "似乎有什么不对劲");
-			if (botUser.getScore() >= 100) {
+			if (botUser.getScore() >= 150) {
 				log.info("积分满了");
 				return null;
 			}
@@ -87,10 +90,11 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				log.info("已经签到过了");
 				return null;
 			}
-			addScore = Math.max(100 - botUser.getScore(), 0);
-			BotUser updBotUser = new BotUser().setId(botUser.getId()).setLastSignTime(now);
-			if (addScore != 0) updBotUser.setScore(botUser.getScore() + addScore);
-			botUserMapper.updateBotUserSelective(updBotUser);
+			addScore = Math.max(150 - botUser.getScore(), 0);
+			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setLastSignTime(now));
+			if (addScore != 0) {
+				botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), addScore);
+			}
 		} finally {
 			session.remove(externalIdLockKey + externalId);
 		}
