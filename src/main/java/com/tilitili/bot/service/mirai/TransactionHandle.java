@@ -6,8 +6,10 @@ import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.BotUserItemMapping;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
@@ -16,10 +18,7 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
@@ -27,13 +26,15 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserMapper botUserMapper;
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
+	private final BotIcePriceManager botIcePriceManager;
 
 	@Autowired
-	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper) {
+	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager) {
 		this.botItemMapper = botItemMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserMapper = botUserMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
+		this.botIcePriceManager = botIcePriceManager;
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.notNull(oldMapping,  "你还没有%s。", botItem.getName());
 			itemNum = oldMapping.getNum();
 		}
-		botUserItemMappingManager.safeSellItem(botUser.getId(), botItem.getId(), itemNum);
+		this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
 		String numMessage = itemNum + "个";
 		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
@@ -130,10 +131,30 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		BotUser botUser = messageAction.getBotUser();
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥");
-		botUserItemMappingManager.safeBuyItem(botUser.getId(), botItem.getId(), itemNum);
+		this.buyItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
 		String numMessage = itemNum == 1 ? "" : itemNumStr + "个";
 		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
 		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
+	}
+
+	private void buyItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
+		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
+		if (BotItemDTO.ICE_NAME.equals(itemName)) {
+			botUserItemMappingManager.checkBuyTime();
+			Integer price = botIcePriceManager.getPrice();
+			data.setPrice(price);
+		}
+		botUserItemMappingManager.safeBuyItem(data);
+	}
+
+	private void sellItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
+		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
+		if (BotItemDTO.ICE_NAME.equals(itemName)) {
+			botUserItemMappingManager.checkSellTime();
+			Integer price = botIcePriceManager.getSellPrice();
+			data.setSellPrice(price);
+		}
+		botUserItemMappingManager.safeBuyItem(data);
 	}
 }
