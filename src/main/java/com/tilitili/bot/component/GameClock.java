@@ -2,7 +2,6 @@ package com.tilitili.bot.component;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,7 +16,7 @@ public class GameClock {
 		this.gameList = gameList;
 	}
 
-	@Scheduled(fixedDelay = 100)
+//	@Scheduled(fixedDelay = 100)
 	public void run() {
 		try {
 			long startTime = System.currentTimeMillis();

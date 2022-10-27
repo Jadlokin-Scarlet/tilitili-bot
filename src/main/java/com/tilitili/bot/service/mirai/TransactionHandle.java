@@ -2,9 +2,9 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.BotUser;
-import com.tilitili.common.entity.BotUserItemMapping;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -15,10 +15,14 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
@@ -51,7 +55,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleItemInfo(BotMessageAction messageAction) {
 		String itemName = messageAction.getValue();
-		BotItem botItem = botItemMapper.getBotItemByName(itemName);
+		BotItem botItem = this.getBotItemByNameOrIce(itemName);
 		Asserts.notNull(botItem, "那是啥");
 		List<String> resultList = new ArrayList<>();
 		resultList.add("*" + botItem.getName() + "*");
@@ -76,6 +80,9 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		if (botItem.getMaxLimit() != null) {
 			resultList.add("最大持有：" + botItem.getMaxLimit());
+		}
+		if (botItem.getEndTime() != null) {
+			resultList.add("有效期至：" + DateUtils.formatDateYMDHMS(botItem.getEndTime()));
 		}
 		return BotMessage.simpleTextMessage(String.join("\n", resultList));
 	}
@@ -108,9 +115,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.isNumber(itemNumStr, "格式错啦(物品数量)");
 			itemNum = Integer.parseInt(itemNumStr);
 		} else {
-			BotUserItemMapping oldMapping = botUserItemMappingMapper.getBotUserItemMappingByUserIdAndItemId(botUser.getId(), botItem.getId());
-			Asserts.notNull(oldMapping,  "你还没有%s。", botItem.getName());
-			itemNum = oldMapping.getNum();
+			itemNum = null;
 		}
 		this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
@@ -142,7 +147,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
 			botUserItemMappingManager.checkBuyTime();
-			Integer price = botIcePriceManager.getPrice();
+			Integer price = botIcePriceManager.getIcePrice().getBasePrice();
 			data.setPrice(price);
 		}
 		botUserItemMappingManager.safeBuyItem(data);
@@ -152,9 +157,19 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
 			botUserItemMappingManager.checkSellTime();
-			Integer price = botIcePriceManager.getSellPrice();
+			Integer price = botIcePriceManager.getIcePrice().getPrice();
 			data.setSellPrice(price);
 		}
 		botUserItemMappingManager.safeBuyItem(data);
+	}
+
+	private BotItem getBotItemByNameOrIce(String itemName) {
+		BotItem botItem = botItemMapper.getBotItemByName(itemName);
+		if (BotItemDTO.ICE_NAME.equals(itemName)) {
+			BotIcePrice icePrice = botIcePriceManager.getIcePrice();
+			botItem.setPrice(icePrice.getBasePrice());
+			botItem.setSellPrice(icePrice.getPrice());
+		}
+		return botItem;
 	}
 }
