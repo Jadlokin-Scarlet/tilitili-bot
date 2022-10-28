@@ -46,7 +46,7 @@ public class FishGame implements Game {
 	public void newTableIfExited(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
 		Long userId = messageAction.getBotUser().getId();
-		FishPlayer fishPlayer = fishPlayerMapper.getFishPlayerByUserId(userId);
+		FishPlayer fishPlayer = fishPlayerMapper.getVaildFishPlayerByUserId(userId);
 		if (fishPlayer == null) {
 			fishPlayer = new FishPlayer().setSenderId(senderId).setUserId(userId);
 			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
