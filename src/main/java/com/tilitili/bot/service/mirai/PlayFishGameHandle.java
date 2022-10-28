@@ -64,7 +64,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
-			return BotMessage.simpleTextMessage("啥也没有。。");
+			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
+			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
+			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
+			return BotMessage.simpleTextMessage(String.format("啥也没有。。(%s-1)", botItem.getName()));
 		}
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
