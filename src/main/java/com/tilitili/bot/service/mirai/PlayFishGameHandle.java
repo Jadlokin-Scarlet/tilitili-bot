@@ -87,11 +87,13 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Integer cost = fishConfig.getCost();
 
 		List<BotMessageChain> resultList = new ArrayList<>();
-		resultList.add(BotMessageChain.ofPlain(description));
 		if (itemId != null) {
 			BotItem botItem = botItemMapper.getBotItemById(itemId);
+			resultList.add(BotMessageChain.ofPlain(String.format("钓到一个%s，%s", botItem.getName(), botItem.getDescription())));
 			botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
 			resultList.add(BotMessageChain.ofPlain(String.format("(%s+1)", botItem.getName())));
+		} else {
+			resultList.add(BotMessageChain.ofPlain(description));
 		}
 
 		if (price != null && price > 0) {
