@@ -80,6 +80,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}
 		Asserts.notNull(fishConfig, "啊嘞，不对劲");
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()));
 		String description = fishConfig.getDescription();
 		Long itemId = fishConfig.getItemId();
 		Integer price = fishConfig.getPrice();
