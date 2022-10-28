@@ -3,14 +3,20 @@ package com.tilitili.bot;
 import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.common.entity.BotIcePrice;
+import com.tilitili.common.entity.BotItem;
+import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @SpringBootTest
@@ -50,17 +59,52 @@ class StartApplicationTest {
 
     @Test
     public void test2() {
-//        List<GoCqhttpChannel> channelList = goCqhttpManager.getGuildChannelList(GuildEmum.HUA_NA_GUILD.guildId);
-//        for (GoCqhttpChannel channel : channelList) {
-//            List<BotSender> oldBotsendList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setGuildId(GuildEmum.HUA_NA_GUILD.guildId).setChannelId(channel.getChannelId()));
-//            if (oldBotsendList.isEmpty()) {
-//                BotSender addBotSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE_STR).setGuildId(GuildEmum.HUA_NA_GUILD.guildId).setChannelId(channel.getChannelId()).setStatus(0).setName(channel.getChannelName());
-//                botSenderMapper.addBotSenderSelective(addBotSender);
-//                for (Long taskId : Arrays.asList(11L)) {
-//                    botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(addBotSender.getId()).setTaskId(taskId));
-//                }
-//            }
-//        }
+        String itemName = "蓝冰";
+        BotItem botItem = this.getBotItemByNameOrIce(itemName);
+        Asserts.notNull(botItem, "那是啥");
+        List<String> resultList = new ArrayList<>();
+        resultList.add("*" + botItem.getName() + "*");
+        resultList.add(botItem.getDescription());
+        if (Objects.equals(botItem.getPrice(), botItem.getSellPrice())) {
+            if (botItem.getPrice() == null) {
+                resultList.add("无法交易");
+            } else {
+                resultList.add("价值：" + botItem.getPrice());
+            }
+        } else {
+            if (botItem.getPrice() == null) {
+                resultList.add("无法兑换");
+            } else {
+                resultList.add("兑换价：" + botItem.getPrice());
+            }
+            if (botItem.getSellPrice() == null) {
+                resultList.add("无法回收");
+            } else {
+                resultList.add("回收价：" + botItem.getSellPrice());
+            }
+        }
+        if (botItem.getMaxLimit() != null) {
+            resultList.add("最大持有：" + botItem.getMaxLimit());
+        }
+        if (botItem.getEndTime() != null) {
+            resultList.add("有效期至：" + DateUtils.formatDateYMDHMS(botItem.getEndTime()));
+        }
+        log.info(String.join("\n", resultList));
+    }
+
+    @Autowired
+    private BotItemMapper botItemMapper;
+    @Autowired
+    private BotIcePriceManager botIcePriceManager;
+
+    private BotItem getBotItemByNameOrIce(String itemName) {
+        BotItem botItem = botItemMapper.getBotItemByName(itemName);
+        if (BotItemDTO.ICE_NAME.equals(itemName)) {
+            BotIcePrice icePrice = botIcePriceManager.getIcePrice();
+            botItem.setPrice(icePrice.getBasePrice());
+            botItem.setSellPrice(icePrice.getPrice());
+        }
+        return botItem;
     }
 
     @Test

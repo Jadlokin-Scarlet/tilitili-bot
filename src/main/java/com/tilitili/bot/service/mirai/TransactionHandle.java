@@ -146,7 +146,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private void buyItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
-			botUserItemMappingManager.checkBuyTime();
+			Asserts.isTrue(botUserItemMappingManager.checkBuyTime(), "周日才能兑换哦。");
 			Integer price = botIcePriceManager.getIcePrice().getBasePrice();
 			data.setPrice(price);
 		}
@@ -156,7 +156,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private void sellItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
-			botUserItemMappingManager.checkSellTime();
+			Asserts.isTrue(botUserItemMappingManager.checkSellTime(), "周日不收哦。");
 			Integer price = botIcePriceManager.getIcePrice().getPrice();
 			data.setSellPrice(price);
 		}
@@ -167,8 +167,12 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
 			BotIcePrice icePrice = botIcePriceManager.getIcePrice();
-			botItem.setPrice(icePrice.getBasePrice());
-			botItem.setSellPrice(icePrice.getPrice());
+			if (botUserItemMappingManager.checkBuyTime()) {
+				botItem.setPrice(icePrice.getBasePrice());
+			}
+			if (botUserItemMappingManager.checkSellTime()) {
+				botItem.setSellPrice(icePrice.getPrice());
+			}
 		}
 		return botItem;
 	}
