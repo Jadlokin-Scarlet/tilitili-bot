@@ -160,7 +160,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			Integer price = botIcePriceManager.getIcePrice().getPrice();
 			data.setSellPrice(price);
 		}
-		botUserItemMappingManager.safeBuyItem(data);
+		botUserItemMappingManager.safeSellItem(data);
 	}
 
 	private BotItem getBotItemByNameOrIce(String itemName) {
