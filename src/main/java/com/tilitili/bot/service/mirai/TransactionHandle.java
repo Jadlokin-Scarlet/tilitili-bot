@@ -143,7 +143,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
 
-	private void buyItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
+	private void buyItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkBuyTime(), "周日才能兑换哦。");
@@ -153,7 +153,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		botUserItemMappingManager.safeBuyItem(data);
 	}
 
-	private void sellItemWithIce(Long userId, Long itemId, int itemNum, String itemName) {
+	private void sellItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equals(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkSellTime(), "周日不收哦。");
