@@ -27,10 +27,10 @@ import java.util.Objects;
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotItemMapper botItemMapper;
-	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserMapper botUserMapper;
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
 	private final BotIcePriceManager botIcePriceManager;
+	private final BotUserItemMappingManager botUserItemMappingManager;
 
 	@Autowired
 	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager) {
