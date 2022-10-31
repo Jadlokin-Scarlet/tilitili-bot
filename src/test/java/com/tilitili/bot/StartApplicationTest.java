@@ -99,7 +99,7 @@ class StartApplicationTest {
 
     private BotItem getBotItemByNameOrIce(String itemName) {
         BotItem botItem = botItemMapper.getBotItemByName(itemName);
-        if (BotItemDTO.ICE_NAME.equals(itemName)) {
+        if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
             BotIcePrice icePrice = botIcePriceManager.getIcePrice();
             botItem.setPrice(icePrice.getBasePrice());
             botItem.setSellPrice(icePrice.getPrice());
