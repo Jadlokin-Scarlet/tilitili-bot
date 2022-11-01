@@ -51,8 +51,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		switch (messageAction.getKey()) {
-			case "抛竿": return handleStart(messageAction);
-			case "收杆": return handleEnd(messageAction);
+			case "抛竿": case "抛杆": return handleStart(messageAction);
+			case "收竿": case "收杆": return handleEnd(messageAction);
 			default: throw new AssertException();
 		}
 	}
