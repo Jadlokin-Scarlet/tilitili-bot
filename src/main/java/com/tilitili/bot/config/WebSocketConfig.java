@@ -5,7 +5,9 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
 import com.tilitili.bot.socket.BotEventWebSocketHandler;
 import com.tilitili.bot.socket.BotWebSocketHandler;
+import com.tilitili.bot.socket.KookWebSocketHandler;
 import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.manager.MiraiManager;
@@ -23,6 +25,7 @@ import org.springframework.jms.core.JmsTemplate;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +49,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     public void webSocketConnectionManager() {
         for (BotEmum bot : BotEmum.values()) {
             try {
-                String wsUrl = botManager.getWebSocketUrl(bot);
-                Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.qq);
-                BotWebSocketHandler botWebSocketHandler = new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+                BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
 
@@ -61,6 +62,17 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
             } catch (Exception e) {
                 log.error("异常", e);
             }
+        }
+    }
+
+    private BotWebSocketHandler newWebSocketHandle(BotEmum bot) throws URISyntaxException {
+        String wsUrl = botManager.getWebSocketUrl(bot);
+        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.qq);
+        switch (bot.getType()) {
+            case BotEmum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+            case BotEmum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+            case BotEmum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+            default: throw new AssertException("?");
         }
     }
 

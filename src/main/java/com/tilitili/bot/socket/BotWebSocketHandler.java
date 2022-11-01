@@ -12,9 +12,9 @@ import java.util.Arrays;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
-    private final BotEmum bot;
-    private final BotService botService;
-    private final BotManager botManager;
+    protected final BotEmum bot;
+    protected final BotService botService;
+    protected final BotManager botManager;
 
     public BotWebSocketHandler(URI serverUri, BotEmum bot, BotService botService, BotManager botManager) {
         super(serverUri);
@@ -42,10 +42,11 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         ));
         if (BotEmum.TYPE_GOCQ.equals(bot.getType())) {
             botMessage.setSenderId(3777L);
+            botManager.sendMessage(botMessage);
         } else if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
             botMessage.setSenderId(4380L);
+            botManager.sendMessage(botMessage);
         }
-        botManager.sendMessage(botMessage);
         super.onClose(code, reason, remote);
     }
 }
