@@ -112,6 +112,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		if (cost != null) {
 			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
 			Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1 - cost));
+			// 钓鱼的饵提前消耗掉过一个
+			subNum--;
 			if (subNum != 0) {
 				resultList.add(BotMessageChain.ofPlain(String.format("(%s%s%s)", botItem.getName(), subNum > 0? "+": "-", Math.abs(subNum))));
 			}
