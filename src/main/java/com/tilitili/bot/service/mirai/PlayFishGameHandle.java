@@ -55,7 +55,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "收杆": return handleEnd(messageAction);
 			default: throw new AssertException();
 		}
-//		fishGame.addOperate(messageAction);
 	}
 
 	private BotMessage handleEnd(BotMessageAction messageAction) {
@@ -67,8 +66,12 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINALL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
-			botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
-			return BotMessage.simpleTextMessage("啥也没有。。");
+			if (fishPlayer.getNotifyTime() == null) {
+				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
+				return BotMessage.simpleTextMessage("啥也没有。。");
+			} else {
+				return BotMessage.simpleTextMessage(String.format("似乎来晚了。。(%s-1)", botItem.getName()));
+			}
 		}
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
@@ -107,11 +110,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 		if (cost != null) {
 			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
-			if (cost != 1) {
-				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1 - cost));
-			}
-			if (cost > 0) {
-				resultList.add(BotMessageChain.ofPlain(String.format("(%s-%s)", botItem.getName(), cost)));
+			Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1 - cost));
+			if (subNum != 0) {
+				resultList.add(BotMessageChain.ofPlain(String.format("(%s%s%s)", botItem.getName(), subNum > 0? "+": "-", Math.abs(subNum))));
 			}
 		}
 
