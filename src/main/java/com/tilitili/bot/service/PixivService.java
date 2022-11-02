@@ -96,7 +96,7 @@ public class PixivService {
 		redisCache.setValue(messageIdKey, messageId);
 	}
 
-	public String sendPixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
+	private String sendPixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
 		String messageId = sendCachePixivUserImage(quote, userName, source, r18, sender);
 		if (messageId != null) {
@@ -113,7 +113,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
+	private String sendPixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		// step 1 有缓存直接读缓存
 		String messageId;
 		try {
@@ -169,7 +169,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
+	private String sendCachePixivUserImage(BotMessage quote, String userName, String source, String r18, BotSender sender) {
 		PixivImage noUsedImage = pixivImageMapper.getNoUsedUserImage(new PixivImageQuery().setUserName(userName).setSource(source).setR18(r18).setSenderId(sender.getId()));
 		if (noUsedImage != null) {
 			return sendPixivImage(quote, noUsedImage, sender);
@@ -178,7 +178,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendCachePixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
+	private String sendCachePixivImage(BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
 		boolean isFilterBookmark = ! searchKey.contains("goodTag");
 		PixivImage noUsedImage;
@@ -194,7 +194,7 @@ public class PixivService {
 		}
 	}
 
-	public String handleSearchDataList(List<PixivSearchIllust> dataList, BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
+	private String handleSearchDataList(List<PixivSearchIllust> dataList, BotMessage quote, String searchKey, String source, String r18, BotSender sender) {
 		if (CollectionUtils.isEmpty(dataList)) return null;
 
 		List<String> searchTagList = Arrays.asList(searchKey.split(" "));
@@ -231,7 +231,7 @@ public class PixivService {
 		return messageId;
 	}
 
-	public void spiderPixivUserImage(String userName) {
+	private void spiderPixivUserImage(String userName) {
 		String userId = pixivManager.getUserIdByNameProxy(userName);
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		List<PixivImage> oldPixivImageList = pixivImageMapper.getPixivImageByPidList(new PixivImageQuery().setPidList(userPidList).setSource(source));
@@ -248,7 +248,7 @@ public class PixivService {
 		}
 	}
 
-	public String sendPixivImage(BotMessage quote, PixivImage noUsedImage, BotSender sender) {
+	private String sendPixivImage(BotMessage quote, PixivImage noUsedImage, BotSender sender) {
 		String title = noUsedImage.getTitle();
 		String userName = noUsedImage.getUserName();
 		String pid = noUsedImage.getPid();
@@ -339,11 +339,11 @@ public class PixivService {
 		saveImageFromPixiv(pid, pid, Collections.emptyList());
 	}
 
-	public void saveImageFromPixiv(String pid, String searchKey) {
+	private void saveImageFromPixiv(String pid, String searchKey) {
 		saveImageFromPixiv(pid, searchKey, Collections.emptyList());
 	}
 
-	public void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) throws AssertException {
+	private void saveImageFromPixiv(String pid, String searchKey, List<String> externalTagList) throws AssertException {
 		PixivInfoIllust info = pixivManager.getInfoProxy(pid);
 		PixivImage pixivImage = new PixivImage();
 		pixivImage.setPid(pid);
@@ -385,7 +385,7 @@ public class PixivService {
 		}
 	}
 
-	public void supplePixivTag(PixivSearchIllust data, List<String> externalTagList) {
+	private void supplePixivTag(PixivSearchIllust data, List<String> externalTagList) {
 		String pid = data.getId();
 
 		// p站tag 搜索词tag列表 去重作为最终tag列表
