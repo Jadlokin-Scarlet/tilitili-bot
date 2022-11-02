@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -37,7 +38,9 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 			Asserts.isNumber(timeStr, "格式不对喵(秒数)");
 			int time = Integer.parseInt(timeStr);
 			Asserts.isTrue(time <= 60, "最多一分钟喵");
-			Asserts.notEquals(at, 545459363L, "不准喵");
+			if (!BotUserConstant.MASTER_USER_ID.equals(messageAction.getBotUser().getId())) {
+				Asserts.notEquals(at, 545459363L, "不准喵");
+			}
 
 			botManager.muteMember(bot, group, at, time);
 		} else if ("解除禁言".equals(key)) {
