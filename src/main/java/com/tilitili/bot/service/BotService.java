@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class BotService {
+    public static final String lastMessageIdKey = "lastMessageId";
+
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final Map<String, BaseEventHandle> eventHandleMap;
     private final BotSessionService botSessionService;
@@ -167,7 +169,10 @@ public class BotService {
                 respMessage.setChannelId(botSender.getChannelId());
             }
 
-            botManager.sendMessage(respMessage);
+            String messageId = botManager.sendMessage(respMessage);
+            if (messageId != null) {
+                session.put(lastMessageIdKey, messageId);
+            }
         } catch (AssertException e) {
             log.debug("异步消息处理断言异常, message=" + e.getMessage(), e);
         } catch (Exception e) {

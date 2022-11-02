@@ -1,6 +1,8 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotService;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.pixiv.PixivHandle;
 import com.tilitili.common.entity.BotSendMessageRecord;
@@ -44,6 +46,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
+        BotSessionService.MiraiSession session = messageAction.getSession();
         Long qq = messageAction.getBotMessage().getQq();
         String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
         String all = messageAction.getParamOrDefault("all", messageAction.getValue());
@@ -54,19 +57,20 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             Long bot = messageAction.getBotSender().getBot();
             botManager.recallMessage(quoteMessageId, bot);
             return BotMessage.emptyMessage();
+        } else if (recallAll) {
+            List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
+            for (BotSendMessageRecord sendMessage : sendMessageList) {
+                BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
+                botManager.recallMessage(sendMessage.getMessageId(), botSender.getBot());
+            }
+            return BotMessage.simpleTextMessage("搞定");
+        } else if (session.containsKey(BotService.lastMessageIdKey)) {
+            Long bot = messageAction.getBotSender().getBot();
+            botManager.recallMessage(session.get(BotService.lastMessageIdKey), bot);
+            return BotMessage.emptyMessage();
         }
 
         if (Objects.equals(qq, MASTER_QQ)) {
-
-            if (recallAll) {
-                List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
-                for (BotSendMessageRecord sendMessage : sendMessageList) {
-                    BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                    botManager.recallMessage(sendMessage.getMessageId(), botSender.getBot());
-                }
-                return BotMessage.simpleTextMessage("搞定");
-            }
-
             if (pid != null) {
                 List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
                 for (PixivImage pixivImage : pixivImageList) {
