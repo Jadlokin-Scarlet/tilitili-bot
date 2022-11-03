@@ -193,7 +193,9 @@ public class PixivCacheService {
 			}
 		} else {
 			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-			Asserts.isTrue(canSS, "不准色色");
+			if (sl > 5) {
+				Asserts.isTrue(canSS, "不准色色");
+			}
 			for (String url : urlList) {
 				String ossUrl = this.downloadPixivImageAndUploadToOSS(url);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
