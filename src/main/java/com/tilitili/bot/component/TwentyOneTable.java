@@ -27,9 +27,9 @@ import java.util.stream.IntStream;
 public class TwentyOneTable {
 	public static final String STATUS_WAIT = "wait";
 	public static final String STATUS_PLAYING = "playing";
-	public static final String FIVE_CARD = "五龙";
-	public static final String BLACK_JACK = "黑杰克";
-	public static final String BOOM_CARD = "爆pai";
+	public static final String FIVE_CARD = "峰回路转";
+	public static final String BLACK_JACK = "天选之子";
+	public static final String BOOM_CARD = "时运不济";
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final BotUserMapper botUserMapper;
@@ -83,7 +83,7 @@ public class TwentyOneTable {
 				}
 			} else {
 				boolean flashCardSuccess = this.flashCard();
-				Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
+				Asserts.isTrue(flashCardSuccess, "啊嘞，不对劲。");
 				List<BotMessageChain> resp = this.getNoticeMessage(botMessage);
 				try {
 					botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
@@ -172,7 +172,7 @@ public class TwentyOneTable {
 			}
 		}
 		this.waitPeoplePrepare(botMessage);
-		String message = String.format("此桌参与人员：%s\n已准备：%s\n未准备：%s", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
+		String message = String.format("本回合参与人员：%s\n已准备：%s\n未准备：%s", String.join(",", allPlayer), String.join(",", preparePlayer), String.join(",", notPreparePlayer));
 		return Lists.newArrayList(BotMessageChain.ofPlain(message));
 	}
 
@@ -214,15 +214,15 @@ public class TwentyOneTable {
 		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
-		List<String> chooseList = Lists.newArrayList("加排", "停牌");
+		List<String> chooseList = Lists.newArrayList("进货", "摆烂");
 		if (nowTwentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
 			chooseList.add("投降");
 		}
 		if (nowTwentyOneCardList.getCardList().size() == 2 && Objects.equals(nowTwentyOneCardList.getCardList().get(0).getValue(), nowTwentyOneCardList.getCardList().get(1).getValue())) {
-			chooseList.add("分牌");
+			chooseList.add("分家");
 		}
 		if (nowTwentyOneCardList.getCardList().size() == 2) {
-			chooseList.add("加倍");
+			chooseList.add("孤注一掷");
 		}
 		result.add(BotMessageChain.ofPlain("请选择："+String.join("、", chooseList)));
 		this.endWait();

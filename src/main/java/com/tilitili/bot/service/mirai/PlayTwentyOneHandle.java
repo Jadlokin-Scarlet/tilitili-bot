@@ -56,12 +56,12 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		switch (key) {
-			case "玩21点": case "w21": return this.startGame(messageAction);
+			case "玩21": case "w21": return this.startGame(messageAction);
 			case "准备": case "zb": return this.prepareGame(messageAction);
-			case "加牌": case "jp": case "加排": return this.addCard(messageAction, botUser, twentyOneTable);
-			case "停牌": case "tp": return this.stopCard(messageAction, botUser, twentyOneTable);
-			case "加倍": case "jb": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
-			case "分牌": case "fp": return this.splitCard(messageAction, twentyOneTable);
+			case "进货": case "jh": return this.addCard(messageAction, botUser, twentyOneTable);
+			case "摆烂": case "bl": return this.stopCard(messageAction, botUser, twentyOneTable);
+			case "孤注一掷": case "gzyz": return this.doubleAddCard(messageAction, botUser, twentyOneTable);
+			case "分家": case "fj": return this.splitCard(messageAction, twentyOneTable);
 			case "投降": case "tx": return this.surrender(messageAction, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
 			case "掀桌": return this.removeGame(botUser, twentyOneTable);
@@ -103,7 +103,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
 		Asserts.notNull(player, "啊嘞，有点不对劲");
 		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
-		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能双倍了哦");
+		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能分家了哦");
 		Integer useScore = twentyOneCardList.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
 		boolean splitCardSuccess = twentyOneTable.splitCard(player);
@@ -162,7 +162,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean ready = twentyOneTable.isReady();
 		if (ready) {
 			boolean flashCardSuccess = twentyOneTable.flashCard();
-			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
+			Asserts.isTrue(flashCardSuccess, "啊嘞，不对劲。");
 			resp.addAll(twentyOneTable.getNoticeMessage(messageAction.getBotMessage()));
 			return BotMessage.simpleListMessage(resp);
 		} else {
@@ -179,7 +179,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21点", "w21", "准备", "zb").contains(key);
+		boolean isStartGame = Arrays.asList("玩21", "w21", "准备", "zb").contains(key);
 		if (isStartGame) {
 			return true;
 		}
@@ -220,7 +220,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		TwentyOnePlayer player = twentyOneTable.getPlayerByPlayerId(botUser.getExternalId());
 		Asserts.notNull(player, "啊嘞，有点不对劲");
 		TwentyOneCardList twentyOneCardList = player.getFirstNoEndCardList();
-		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能双倍了哦");
+		Asserts.isTrue(twentyOneCardList.getCardList().size() == 2, "已经不能孤注一掷了哦");
 		Integer useScore = twentyOneCardList.getScore();
 		Asserts.isTrue(useScore <= hasScore, "积分好像不够惹。");
 		twentyOneCardList.setScore(useScore * 2);
@@ -292,8 +292,8 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		switch (twentyOneTable.getStatus()) {
 			case TwentyOneTable.STATUS_WAIT:
 				twentyOneTable.waitPeoplePrepare(botMessage);
-				return BotMessage.simpleTextMessage("入场成功！请尽快提交入场积分。格式：(准备 10)", botMessage).setQuote(messageAction.getMessageId());
-			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("入场成功！请等待下一局吧。", botMessage).setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("加入成功！请尽快准备吧。格式：(准备 10)", botMessage).setQuote(messageAction.getMessageId());
+			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("加入成功！请等待下一回合吧。", botMessage).setQuote(messageAction.getMessageId());
 			default: throw new AssertException("啊嘞，似乎不对劲");
 		}
 	}
@@ -343,7 +343,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		boolean ready = twentyOneTable.isReady();
 		if (ready) {
 			boolean flashCardSuccess = twentyOneTable.flashCard();
-			Asserts.isTrue(flashCardSuccess, "啊嘞，发牌失败了。");
+			Asserts.isTrue(flashCardSuccess, "啊嘞，不对劲。");
 			List<BotMessageChain> resp = twentyOneTable.getNoticeMessage(botMessage);
 			return BotMessage.simpleListMessage(resp);
 		} else {

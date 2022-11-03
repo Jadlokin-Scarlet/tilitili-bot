@@ -8,8 +8,8 @@ public class TwentyOneCard {
 	private final String type;
 	private final String value;
 	private boolean hidden;
-	private static final List<String> CARD_TYPE_LIST = Arrays.asList("♤️", "♧", "♢", "♡");
-	private static final List<String> CARD_VALUE_LIST = Arrays.asList("A","2","3","4","5","6","7","8","9","10","J","Q","K");
+	private static final List<String> CARD_TYPE_LIST = Arrays.asList("🍌", "🍋", "🍉", "🍎");
+	private static final List<String> CARD_VALUE_LIST = Arrays.asList("1","2","3","4","5","6","7","8","9","10","10","10","10");
 	public static final List<Integer> CARD_POINT_LIST = Arrays.asList(1,2,3,4,5,6,7,8,9,10,10,10,10);
 
 	public TwentyOneCard(int code) {
@@ -26,7 +26,7 @@ public class TwentyOneCard {
 	@Override
 	public String toString() {
 		if (hidden) return "**";
-		return value;
+		return value + "个" + type;
 	}
 
 	public Integer getPoint() {
