@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
-import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
@@ -10,7 +10,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.PixivManager;
+import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -26,14 +26,14 @@ import java.util.List;
 public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 	private static final String pixivLikeRecommendKey = "pixivLikeRecommendKey-";
 	private static final String pixivLikeRecommendIndexKey = "pixivLikeRecommendIndexKey-";
-	private final PixivManager pixivManager;
+	private final PixivCacheManager pixivManager;
 	private final BotTaskMapper botTaskMapper;
 	private final RedisCache redisCache;
 	private final BotMessageService botMessageService;
-	private final PixivService pixivService;
+	private final PixivCacheService pixivService;
 
 	@Autowired
-	public PixivLikeRecommendHandle(PixivManager pixivManager, BotTaskMapper botTaskMapper, RedisCache redisCache, BotMessageService botMessageService, PixivService pixivService) {
+	public PixivLikeRecommendHandle(PixivCacheManager pixivManager, BotTaskMapper botTaskMapper, RedisCache redisCache, BotMessageService botMessageService, PixivCacheService pixivService) {
 		this.pixivManager = pixivManager;
 		this.botTaskMapper = botTaskMapper;
 		this.redisCache = redisCache;
@@ -80,7 +80,7 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 				log.error("获取相关推荐失败, pid={}, message={}", recommendPid, e.getMessage());
 				continue;
 			}
-			if (!canSS && illust.getSl() > 4) {
+			if (!canSS && illust.getSl() > 3) {
 				continue;
 			}
 			break;

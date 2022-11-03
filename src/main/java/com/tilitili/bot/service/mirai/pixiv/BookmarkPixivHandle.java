@@ -2,12 +2,12 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
-import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
-import com.tilitili.common.manager.PixivManager;
+import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -20,13 +20,13 @@ import java.util.Arrays;
 @Component
 public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 	private final BotMessageService botMessageService;
-	private final PixivService pixivService;
-	private final PixivManager pixivManager;
+	private final PixivCacheService pixivService;
+	private final PixivCacheManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
 	private final RedisCache redisCache;
 
 	@Autowired
-	public BookmarkPixivHandle(BotMessageService botMessageService, PixivService pixivService, PixivManager pixivManager, PixivLoginUserMapper pixivLoginUserMapper, RedisCache redisCache) {
+	public BookmarkPixivHandle(BotMessageService botMessageService, PixivCacheService pixivService, PixivCacheManager pixivManager, PixivLoginUserMapper pixivLoginUserMapper, RedisCache redisCache) {
 		this.botMessageService = botMessageService;
 		this.pixivService = pixivService;
 		this.pixivManager = pixivManager;

@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
-import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FindImageHandle extends ExceptionRespMessageHandle {
-    private final PixivService pixivService;
+    private final PixivCacheService pixivService;
     private final BotMessageService botMessageService;
 
     @Autowired
-    public FindImageHandle(PixivService pixivService, BotMessageService botMessageService) {
+    public FindImageHandle(PixivCacheService pixivService, BotMessageService botMessageService) {
         this.pixivService = pixivService;
         this.botMessageService = botMessageService;
     }

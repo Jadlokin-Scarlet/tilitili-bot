@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
@@ -10,7 +10,7 @@ import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.pixiv.PixivRecommendIllust;
-import com.tilitili.common.manager.PixivManager;
+import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
@@ -31,13 +31,13 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	public final static String pixivImageListKey = "pixivImageListKey-";
 	public final static String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
 	private final RedisCache redisCache;
-	private final PixivManager pixivManager;
+	private final PixivCacheManager pixivManager;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
 	private final BotTaskMapper botTaskMapper;
-	private final PixivService pixivService;
+	private final PixivCacheService pixivService;
 
 	@Autowired
-	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivManager pixivManager, BotTaskMapper botTaskMapper, PixivService pixivService) {
+	public PixivRecommendHandle(RedisCache redisCache, PixivLoginUserMapper pixivLoginUserMapper, PixivCacheManager pixivManager, BotTaskMapper botTaskMapper, PixivCacheService pixivService) {
 		this.redisCache = redisCache;
 		this.pixivManager = pixivManager;
 		this.pixivLoginUserMapper = pixivLoginUserMapper;

@@ -2,9 +2,8 @@ package com.tilitili.bot.service.mirai.pixiv;
 
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.PixivService;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,30 +15,33 @@ import java.util.Map;
 @Slf4j
 @Component
 public class PixivR18Handle extends ExceptionRespMessageHandle {
-    private final PixivService pixivService;
-    private final Map<String, String> keyMap = ImmutableMap.of("ss", "1", "st", "2", "色色", "1", "色图", "2");
+    private final PixivCacheService pixivService;
+    private final Map<String, String> keyMap = ImmutableMap.of(
+            "ss", "r18",
+            "st", "all",
+            "色色", "r18",
+            "色图", "all");
 
     @Autowired
-    public PixivR18Handle(PixivService pixivService) {
+    public PixivR18Handle(PixivCacheService pixivService) {
 //        super("出门找图了，一会儿再来吧Σ（ﾟдﾟlll）");
         this.pixivService = pixivService;
     }
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
-        BotSender botSender = messageAction.getBotSender();
-        String pro = messageAction.getParamOrDefault("pro", "0");
+//        BotSender botSender = messageAction.getBotSender();
+//        String pro = messageAction.getParamOrDefault("pro", "0");
         String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
         String user = messageAction.getParam("u");
         String source = messageAction.getParamOrDefault("source", "pixiv");
         String num = messageAction.getParamOrDefault("num", "1");
-        String sendMessageId = messageAction.getMessageId();
-        BotMessage botMessage = messageAction.getBotMessage();
+//        String sendMessageId = messageAction.getMessageId();
+//        BotMessage botMessage = messageAction.getBotMessage();
         String titleKey = messageAction.getKeyWithoutPrefix();
         String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
 
-        pixivService.handlePixiv(botMessage, source, searchKey, user, r18, num, botSender);
-        return BotMessage.emptyMessage();
+        return pixivService.handlePixiv(messageAction, source, searchKey, user, r18, num);
     }
 
 }
