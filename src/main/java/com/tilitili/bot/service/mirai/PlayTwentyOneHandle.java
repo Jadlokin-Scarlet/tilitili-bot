@@ -56,7 +56,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		switch (key) {
-			case "玩21": case "w21": return this.startGame(messageAction);
+			case "买水果小游戏": return this.startGame(messageAction);
 			case "准备": case "zb": return this.prepareGame(messageAction);
 			case "进货": case "jh": return this.addCard(messageAction, botUser, twentyOneTable);
 			case "摆烂": case "bl": return this.stopCard(messageAction, botUser, twentyOneTable);
@@ -179,7 +179,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	public boolean checkKeyValid(String key, TwentyOneTable twentyOneTable, Long playerId) {
 		// 是开始指令则有效
-		boolean isStartGame = Arrays.asList("玩21", "w21", "准备", "zb").contains(key);
+		boolean isStartGame = Arrays.asList("买水果小游戏", "准备", "zb").contains(key);
 		if (isStartGame) {
 			return true;
 		}
