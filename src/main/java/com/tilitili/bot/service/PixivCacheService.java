@@ -96,19 +96,20 @@ public class PixivCacheService {
 				String title = data.getTitle();
 				String userName = data.getUserName();
 				Integer sl = data.getSl();
+				Integer pageCount = data.getPageCount();
 				// 看过了
 				if (recordPidList.contains(pid)) {
 					continue;
 				}
 
 				List<String> urlList = pixivManager.getPageListProxy(pid);
-				if (urlList.size() > 6) {
-					urlList = urlList.subList(0, 5);
+				if (urlList.size() > 1) {
+					urlList = urlList.subList(0, 1);
 				}
 
 				List<BotMessageChain> messageChainList;
 				try {
-					messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+					messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
 				} catch (AssertSeseException e) {
 					log.warn(e.getMessage(), e);
 					continue;
@@ -168,15 +169,15 @@ public class PixivCacheService {
 			Integer pageCount = info.getPageCount();
 			List<String> urlList = Collections.singletonList(info.getUrls().getOriginal());
 
-			if (pageCount != null && pageCount > 1) {
-				urlList = pixivManager.getPageListProxy(pid);
-				if (urlList.size() > 6) {
-					urlList = urlList.subList(0, 5);
-				}
-			}
+//			if (pageCount != null && pageCount > 1) {
+//				urlList = pixivManager.getPageListProxy(pid);
+//				if (urlList.size() > 1) {
+//					urlList = urlList.subList(0, 1);
+//				}
+//			}
 			List<BotMessageChain> messageChainList;
 			try {
-				messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+				messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
 			} catch (AssertSeseException e) {
 				log.warn(e.getMessage(), e);
 				continue;
@@ -188,7 +189,7 @@ public class PixivCacheService {
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}
 
-	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Boolean canSS) {
+	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Integer pageCount, Boolean canSS) {
 		List<BotMessageChain> messageChainList = new ArrayList<>();
 		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
 		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
@@ -206,7 +207,7 @@ public class PixivCacheService {
 //				Asserts.isTrue(canSS, "不准色色");
 			}
 			for (String url : urlList) {
-				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, urlList.size());
+				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}

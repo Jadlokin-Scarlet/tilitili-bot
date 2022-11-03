@@ -136,15 +136,16 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 		String pid = illust.getId();
 		Integer sl = illust.getSl();
+		Integer pageCount = illust.getPageCount();
 		log.debug("PixivRecommendHandle get url");
 		List<String> urlList = pixivManager.getPageListProxy(pid);
 
-		if (urlList.size() > 10) {
-			urlList = urlList.subList(0, 10);
+		if (urlList.size() > 1) {
+			urlList = urlList.subList(0, 1);
 		}
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, urlList, pageCount, canSS);
 
 		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);
