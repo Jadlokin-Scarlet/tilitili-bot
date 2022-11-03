@@ -1,20 +1,25 @@
 package com.tilitili.bot;
 
 import com.google.gson.reflect.TypeToken;
+import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.common.constant.BotSenderConstant;
+import com.tilitili.common.constant.BotUserConstant;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
-import com.tilitili.common.mapper.mysql.BotItemMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
-import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
-import com.tilitili.common.mapper.mysql.BotTaskMapper;
+import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.Gsons;
@@ -26,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +57,18 @@ class StartApplicationTest {
     private BotSenderTaskMappingMapper botSenderTaskMappingMapper;
     @Autowired
     private Map<String, BaseMessageHandle> messageHandleMap;
+    @Autowired
+    private BotUserMapper botUserMapper;
+    @Autowired
+    private PixivCacheService pixivCacheService;
 
     @Test
-    void main() {
-        System.out.println(messageHandleMap);
+    void main() throws UnsupportedEncodingException {
+        BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
+        BotUser botUser = botUserMapper.getBotUserById(BotUserConstant.MASTER_USER_ID);
+        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEmum.CIRNO_QQ);
+        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
+        System.out.println(Gsons.toJson(botMessage));
     }
 
     @Test

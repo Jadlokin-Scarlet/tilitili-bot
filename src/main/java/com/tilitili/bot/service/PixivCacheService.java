@@ -13,6 +13,7 @@ import com.tilitili.common.entity.view.bot.mirai.MiraiUploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.exception.AssertSeseException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
@@ -110,7 +111,13 @@ public class PixivCacheService {
 					urlList = urlList.subList(0, 5);
 				}
 
-				List<BotMessageChain> messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+				List<BotMessageChain> messageChainList;
+				try {
+					messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+				} catch (AssertSeseException e) {
+					log.warn(e.getMessage(), e);
+					continue;
+				}
 
 				botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(senderId).setUserId(userId));
 				return BotMessage.simpleListMessage(messageChainList).setQuote(messageId);
@@ -172,7 +179,13 @@ public class PixivCacheService {
 					urlList = urlList.subList(0, 5);
 				}
 			}
-			List<BotMessageChain> messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+			List<BotMessageChain> messageChainList;
+			try {
+				messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, canSS);
+			} catch (AssertSeseException e) {
+				log.warn(e.getMessage(), e);
+				continue;
+			}
 
 			botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(senderId).setUserId(botUserId));
 			return BotMessage.simpleListMessage(messageChainList).setQuote(messageAction.getMessageId());
@@ -193,8 +206,9 @@ public class PixivCacheService {
 			}
 		} else {
 			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-			if (sl > 5) {
-				Asserts.isTrue(canSS, "不准色色");
+			if (!canSS) {
+				throw new AssertSeseException();
+//				Asserts.isTrue(canSS, "不准色色");
 			}
 			for (String url : urlList) {
 				String ossUrl = this.downloadPixivImageAndUploadToOSS(url);
