@@ -193,15 +193,15 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
 		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
-		if (sl == null || sl < 3) {
-			for (String url : urlList) {
-				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, urlList.size());
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
-			}
-		} else {
+//		if (sl == null || sl < 3) {
+//			for (String url : urlList) {
+//				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, urlList.size());
+//				messageChainList.add(BotMessageChain.ofPlain("\n"));
+//				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
+//			}
+//		} else {
 			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-			if (!canSS) {
+			if (sl > 3 && !canSS) {
 				throw new AssertSeseException();
 //				Asserts.isTrue(canSS, "不准色色");
 			}
@@ -210,7 +210,7 @@ public class PixivCacheService {
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}
-		}
+//		}
 		return messageChainList;
 	}
 
