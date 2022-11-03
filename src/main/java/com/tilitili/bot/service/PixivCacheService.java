@@ -115,7 +115,7 @@ public class PixivCacheService {
 				}
 
 				botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(senderId).setUserId(userId));
-				return BotMessage.simpleListMessage(messageChainList).setQuote(messageId);
+				return BotMessage.simpleListMessage(messageChainList);//.setQuote(messageId);
 			}
 		}
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
@@ -145,7 +145,7 @@ public class PixivCacheService {
 //			}
 		}
 
-		return BotMessage.simpleListMessage(messageChainList).setQuote(messageAction.getMessageId());
+		return BotMessage.simpleListMessage(messageChainList);//.setQuote(messageAction.getMessageId());
 	}
 
 	private BotMessage sendPixivUserImage(BotMessageAction messageAction, String userName, String r18) {
@@ -183,7 +183,7 @@ public class PixivCacheService {
 			}
 
 			botPixivSendRecordMapper.addBotPixivSendRecordSelective(new BotPixivSendRecord().setPid(pid).setSenderId(senderId).setUserId(botUserId));
-			return BotMessage.simpleListMessage(messageChainList).setQuote(messageAction.getMessageId());
+			return BotMessage.simpleListMessage(messageChainList);//.setQuote(messageAction.getMessageId());
 		}
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}

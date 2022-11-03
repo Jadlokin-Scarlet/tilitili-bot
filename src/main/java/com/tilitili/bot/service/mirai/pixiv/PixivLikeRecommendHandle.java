@@ -97,6 +97,6 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 
 		log.debug("PixivRecommendHandle get make messageChainList");
 		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, urlList, canSS);
-		return BotMessage.simpleListMessage(messageChainList, botMessage);
+		return BotMessage.simpleListMessage(messageChainList);
 	}
 }
