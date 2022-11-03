@@ -62,7 +62,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
 		Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemDTO.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
 		int sumScore = botUser.getScore() + itemScore + icePrice * iceNum;
-		return BotMessage.simpleTextMessage(String.format("当前积分为%s分。", sumScore));
+		return BotMessage.simpleTextMessage(String.format("当前可用积分为%s，总积分为%s分。", botUser.getScore(), sumScore));
 	}
 
 	private BotMessage handleQueryRankMessage(BotMessageAction messageAction) {
