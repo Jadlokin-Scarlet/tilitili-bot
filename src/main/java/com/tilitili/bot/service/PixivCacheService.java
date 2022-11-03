@@ -256,7 +256,8 @@ public class PixivCacheService {
 
 	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url) {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
-		return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.re/%s-%s.%s", list.get(0), list.get(1), list.get(2)));
+		int page = Integer.parseInt(list.get(1)) + 1;
+		return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2)));
 //
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 //		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
@@ -289,7 +290,8 @@ public class PixivCacheService {
 
 	private String downloadPixivImageAndUploadToOSS(String url) {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
-		return String.format("https://pixiv.re/%s-%s.%s", list.get(0), list.get(1), list.get(2));
+		int page = Integer.parseInt(list.get(1)) + 1;
+		return String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2));
 
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 //		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
