@@ -274,7 +274,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
-		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 4, "人数爆满啦，稍后再来吧。");
+		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 2, "人数爆满啦，稍后再来吧。");
 
 		TwentyOneTable otherTable = this.getTableByPlayer(playerId);
 		if (otherTable != null) {

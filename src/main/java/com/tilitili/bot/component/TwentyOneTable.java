@@ -268,7 +268,7 @@ public class TwentyOneTable {
 			}
 		}
 		this.playerList = newPlayerList;
-		resp.add(BotMessageChain.ofPlain("\n下一局将在1m后开始，未准备将自动离席哦。"));
+//		resp.add(BotMessageChain.ofPlain("\n下一局将在1m后开始，未准备将自动离席哦。"));
 		this.initData();
 		this.waitPeoplePrepare(botMessage);
 		return resp;

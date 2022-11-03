@@ -117,9 +117,9 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		} else {
 			itemNum = null;
 		}
-		this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+		Integer subNum = this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
-		String numMessage = itemNum + "个";
+		String numMessage = (-subNum) + "个";
 		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
 		return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
@@ -136,31 +136,31 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		BotUser botUser = messageAction.getBotUser();
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥");
-		this.buyItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+		Integer subNum = this.buyItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
-		String numMessage = itemNum == 1 ? "" : itemNumStr + "个";
+		String numMessage = subNum == 1 ? "" : subNum + "个";
 		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
 		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
 
-	private void buyItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
+	private Integer buyItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkBuyTime(), "周日才能兑换哦。");
 			Integer price = botIcePriceManager.getIcePrice().getBasePrice();
 			data.setPrice(price);
 		}
-		botUserItemMappingManager.safeBuyItem(data);
+		return botUserItemMappingManager.safeBuyItem(data).getSubNum();
 	}
 
-	private void sellItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
+	private Integer sellItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
 		if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkSellTime(), "周日不收哦。");
 			Integer price = botIcePriceManager.getIcePrice().getPrice();
 			data.setSellPrice(price);
 		}
-		botUserItemMappingManager.safeSellItem(data);
+		return botUserItemMappingManager.safeSellItem(data).getSubNum();
 	}
 
 	private BotItem getBotItemByNameOrIce(String itemName) {
