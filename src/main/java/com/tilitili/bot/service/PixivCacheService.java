@@ -136,7 +136,7 @@ public class PixivCacheService {
 
 //			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 //			if (isSese) {
-			String ossUrl = this.downloadPixivImageAndUploadToOSS(imageUrl);
+			String ossUrl = this.downloadPixivImageAndUploadToOSS(imageUrl, 1);
 			messageChainList.add(BotMessageChain.ofPlain(ossUrl != null ? ossUrl : imageUrl));
 //			} else {
 //				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
@@ -195,7 +195,7 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl == null || sl < 3) {
 			for (String url : urlList) {
-				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url);
+				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, urlList.size());
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
 			}
@@ -206,7 +206,7 @@ public class PixivCacheService {
 //				Asserts.isTrue(canSS, "不准色色");
 			}
 			for (String url : urlList) {
-				String ossUrl = this.downloadPixivImageAndUploadToOSS(url);
+				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, urlList.size());
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}
@@ -254,10 +254,14 @@ public class PixivCacheService {
 	}
 
 
-	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url) {
+	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
-		int page = Integer.parseInt(list.get(1)) + 1;
-		return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2)));
+		if (pageCount > 1) {
+			int page = Integer.parseInt(list.get(1)) + 1;
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2)));
+		} else {
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.re/%s.%s", list.get(0), list.get(2)));
+		}
 //
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 //		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
@@ -288,10 +292,14 @@ public class PixivCacheService {
 //		}
 	}
 
-	private String downloadPixivImageAndUploadToOSS(String url) {
+	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
-		int page = Integer.parseInt(list.get(1)) + 1;
-		return String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2));
+		if (pageCount > 1) {
+			int page = Integer.parseInt(list.get(1)) + 1;
+			return String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(2));
+		} else {
+			return String.format("https://pixiv.re/%s.%s", list.get(0), list.get(2));
+		}
 
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 //		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
