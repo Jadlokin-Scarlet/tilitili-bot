@@ -258,12 +258,12 @@ public class PixivCacheService {
 
 	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToQQ pageCount={} url={}", pageCount, url);
-		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+)(?:_ugoira0)?.(\\w+)", url);
+		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
 		if (pageCount > 1) {
-			int page = Integer.parseInt(list.get(1)) + 1;
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(2)));
+			int page = Integer.parseInt(list.get(2)) + 1;
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
 		} else {
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(2)));
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
 		}
 //
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
@@ -297,12 +297,12 @@ public class PixivCacheService {
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
-		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+)(?:_ugoira0)?.(\\w+)", url);
+		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
 		if (pageCount > 1) {
-			int page = Integer.parseInt(list.get(1)) + 1;
-			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(2));
+			int page = Integer.parseInt(list.get(2)) + 1;
+			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
 		} else {
-			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(2));
+			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 		}
 
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
