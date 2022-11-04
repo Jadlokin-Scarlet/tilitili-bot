@@ -260,9 +260,9 @@ public class PixivCacheService {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
 		if (pageCount > 1) {
 			int page = Integer.parseInt(list.get(1)) + 1;
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(2)));
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s(?:_ugoira0)?.%s", list.get(0), page, list.get(2)));
 		} else {
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(2)));
+			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s(?:_ugoira0)?.%s", list.get(0), list.get(2)));
 		}
 //
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
@@ -298,9 +298,9 @@ public class PixivCacheService {
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+).(\\w+)", url);
 		if (pageCount > 1) {
 			int page = Integer.parseInt(list.get(1)) + 1;
-			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(2));
+			return String.format("https://pixiv.nl/%s-%s(?:_ugoira0)?.%s", list.get(0), page, list.get(2));
 		} else {
-			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(2));
+			return String.format("https://pixiv.nl/%s(?:_ugoira0)?.%s", list.get(0), list.get(2));
 		}
 
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
