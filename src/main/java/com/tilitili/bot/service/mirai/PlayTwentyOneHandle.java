@@ -65,8 +65,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "投降": case "tx": return this.surrender(messageAction, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
 			case "掀桌": return this.removeGame(botUser, twentyOneTable);
+			case "桌面": return this.showTable(messageAction, twentyOneTable);
 			default: return null;
 		}
+	}
+
+	private BotMessage showTable(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
+		return BotMessage.simpleListMessage(twentyOneTable.getNoticeMessage(messageAction.getBotMessage()));
 	}
 
 	private BotMessage surrender(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
@@ -189,7 +194,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			return false;
 		}
 
-		boolean isEndGame = Arrays.asList("掀桌", "退出").contains(key);
+		boolean isEndGame = Arrays.asList("掀桌", "退出", "桌面").contains(key);
 		if (isEndGame) {
 			return true;
 		}
