@@ -195,13 +195,13 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
 		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
-//		if (sl == null || sl < 3) {
-//			for (String url : urlList) {
-//				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, urlList.size());
-//				messageChainList.add(BotMessageChain.ofPlain("\n"));
-//				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
-//			}
-//		} else {
+		if (sl == null || sl < 3) {
+			for (String url : urlList) {
+				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
+				messageChainList.add(BotMessageChain.ofPlain("\n"));
+				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
+			}
+		} else {
 			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
 			if (sl > 3 && !canSS) {
 				throw new AssertSeseException();
@@ -212,7 +212,7 @@ public class PixivCacheService {
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
 			}
-//		}
+		}
 		return messageChainList;
 	}
 
