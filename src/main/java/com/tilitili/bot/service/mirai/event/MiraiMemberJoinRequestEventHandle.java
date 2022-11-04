@@ -38,7 +38,7 @@ public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<Mira
 	public void handleEvent(BotEmum bot, MiraiMemberJoinRequestEvent event) {
 		String message = String.format("[%s][%s]申请加入[%s][%s]，备注[%s]，是否接受(同意加群申请/拒绝加群申请)", event.getNick(), event.getFromId(), event.getGroupName(), event.getGroupId(), event.getMessage());
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getGroupId());
-		Asserts.checkEquals(bot.qq, botSender.getQq(), "没有权限");
+		Asserts.checkEquals(bot.id, botSender.getQq(), "没有权限");
 
 		// 校验权限
 		boolean hasEventHandle = botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), 50L);

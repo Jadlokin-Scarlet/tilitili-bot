@@ -28,7 +28,7 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 		String message = String.format("%s离开了。", event.getMember().getMemberName());
 
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getMember().getGroup().getId());
-		Asserts.checkEquals(bot.qq, botSender.getQq(), "没有权限");
+		Asserts.checkEquals(bot.id, botSender.getQq(), "没有权限");
 
 		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
 	}

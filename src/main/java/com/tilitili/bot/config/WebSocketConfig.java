@@ -67,7 +67,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     private BotWebSocketHandler newWebSocketHandle(BotEmum bot) throws URISyntaxException {
         String wsUrl = botManager.getWebSocketUrl(bot);
-        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.qq);
+        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.text);
         switch (bot.getType()) {
             case BotEmum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
             case BotEmum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);

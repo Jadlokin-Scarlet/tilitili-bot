@@ -33,9 +33,9 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(subject.getId());
 		}
-		Asserts.checkEquals(botSender.getBot(), bot.getQq(), "bot不匹配，跳过");
-		Asserts.notEquals(event.getFromId(), botSender.getBot(), "发起者为本人，跳过");
-		Asserts.checkEquals(event.getTarget(), botSender.getBot(), "目标不为bot，跳过");
+		Asserts.checkEquals(botSender.getBot(), bot.id, "bot不匹配，跳过");
+		Asserts.notEquals(event.getFromId(), bot.qq, "发起者为本人，跳过");
+		Asserts.checkEquals(event.getTarget(), bot.qq, "目标不为bot，跳过");
 
 		botManager.sendNudge(bot, botSender, event.getFromId());
 	}

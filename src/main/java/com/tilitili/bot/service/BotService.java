@@ -110,7 +110,7 @@ public class BotService {
 
             // 获取sender
             BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
-            if (!Objects.equals(botSender.getBot(), botEmum.qq)) return;
+            if (!Objects.equals(botSender.getBot(), botEmum.id)) return;
 
             // 获取用户锁，并保存user消息
 //            userIdLockMap.putIfAbsent()
@@ -222,8 +222,10 @@ public class BotService {
         String quoteMessageId = botMessageAction.getQuoteMessageId();
         Long quoteSenderId = botMessageAction.getQuoteSenderId();
         if (quoteMessageId == null) return null;
+        BotEmum bot = BotEmum.getBotById(botSender.getBot());
+        if (bot == null) return null;
 
-        if (Objects.equals(quoteSenderId, botSender.getBot())) {
+        if (Objects.equals(quoteSenderId, bot.qq)) {
             BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
             if (sendMessageRecord != null) {
                 return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);

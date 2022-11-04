@@ -32,7 +32,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
-		Long botQQ = messageAction.getBotSender().getBot();
+		Long botQQ = messageAction.getBot().qq;
 		String key = messageAction.getKeyWithoutPrefix();
 		List<Long> atList = messageAction.getAtList();
 		String text;
