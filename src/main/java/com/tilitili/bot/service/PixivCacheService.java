@@ -191,10 +191,10 @@ public class PixivCacheService {
 
 	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Integer pageCount, Boolean canSS) {
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
-		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
-		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
-		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
+//		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
+//		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
+//		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
+//		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl == null || sl < 3) {
 			for (String url : urlList) {
 				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
@@ -202,7 +202,7 @@ public class PixivCacheService {
 				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
 			}
 		} else {
-			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
+//			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
 			if (sl > 3 && !canSS) {
 				throw new AssertSeseException();
 //				Asserts.isTrue(canSS, "不准色色");
