@@ -257,6 +257,7 @@ public class PixivCacheService {
 
 
 	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
+		log.info("downloadPixivImageAndUploadToQQ pageCount={} url={}", pageCount, url);
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+)(?:_ugoira0)?.(\\w+)", url);
 		if (pageCount > 1) {
 			int page = Integer.parseInt(list.get(1)) + 1;
@@ -295,6 +296,7 @@ public class PixivCacheService {
 	}
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
+		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
 		List<String> list = StringUtils.extractList("/(\\d+)_p(\\d+)(?:_ugoira0)?.(\\w+)", url);
 		if (pageCount > 1) {
 			int page = Integer.parseInt(list.get(1)) + 1;
