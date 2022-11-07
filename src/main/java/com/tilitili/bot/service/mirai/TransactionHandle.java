@@ -19,10 +19,8 @@ import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
@@ -101,27 +99,45 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
-		String value = messageAction.getValue();
-		List<String> valueList = Arrays.asList(value.split(" "));
-		Asserts.notEmpty(valueList, "格式错啦(物品名)");
-		String itemName = valueList.get(0);
-
 		BotUser botUser = messageAction.getBotUser();
-		BotItem botItem = botItemMapper.getBotItemByName(itemName);
-		Asserts.notNull(botItem, "那是啥");
-		Integer itemNum;
-		if (valueList.size() > 1) {
-			String itemNumStr = valueList.get(1);
-			Asserts.isNumber(itemNumStr, "格式错啦(物品数量)");
-			itemNum = Integer.parseInt(itemNumStr);
+		String value = messageAction.getValue();
+		List<BotItemDTO> itemList;
+		if (value.contains(" ")) {
+			List<String> valueList = Arrays.asList(value.split(" "));
+			Asserts.notEmpty(valueList, "格式错啦(物品名)");
+			String itemName = valueList.get(0);
+			BotItemDTO itemDTO = new BotItemDTO().setName(itemName);
+			if (valueList.size() > 1) {
+				String itemNumStr = valueList.get(1);
+				Asserts.isNumber(itemNumStr, "格式错啦(物品数量)");
+				itemDTO.setNum(Integer.parseInt(itemNumStr));
+			}
+			itemList = Collections.singletonList(itemDTO);
 		} else {
-			itemNum = null;
+			String[] itemStrList = value.split("，");
+			itemList = Arrays.stream(itemStrList).map(itemStr -> new BotItemDTO()
+					.setName(itemStr.split("\\*")[0])
+					.setNum(itemStr.contains("*") ? Integer.parseInt(itemStr.split("\\*")[1]) : 1)
+			).collect(Collectors.toList());
 		}
-		Integer subNum = this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
-		String numMessage = (-subNum) + "个";
-		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
-		return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余积分%s。", numMessage + itemName, nowScore));
+		int subNum = 0;
+		for (BotItemDTO item : itemList) {
+			String itemName = item.getName();
+			BotItem botItem = botItemMapper.getBotItemByName(itemName);
+			Asserts.notNull(botItem, "那是啥");
+			Integer itemNum = item.getNum();
+			subNum += this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+		}
+
+		if (itemList.size() == 1) {
+			String numMessage = (-subNum) + "个";
+			String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
+			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + itemList.get(0).getName(), nowScore));
+		} else {
+			String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
+			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore));
+		}
 	}
 
 	private BotMessage handleBuy(BotMessageAction messageAction) {
