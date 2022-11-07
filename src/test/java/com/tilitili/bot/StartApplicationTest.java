@@ -1,19 +1,12 @@
 package com.tilitili.bot;
 
 import com.google.gson.reflect.TypeToken;
-import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
-import com.tilitili.common.constant.BotSenderConstant;
-import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.dto.BotItemDTO;
-import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.manager.BotIcePriceManager;
@@ -64,11 +57,11 @@ class StartApplicationTest {
 
     @Test
     void main() throws UnsupportedEncodingException {
-        BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
-        BotUser botUser = botUserMapper.getBotUserById(BotUserConstant.MASTER_USER_ID);
-        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEmum.CIRNO_QQ);
-        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
-        System.out.println(Gsons.toJson(botMessage));
+//        BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
+//        BotUser botUser = botUserMapper.getBotUserById(BotUserConstant.MASTER_USER_ID);
+//        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEmum.CIRNO_QQ);
+//        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
+//        System.out.println(Gsons.toJson(botMessage));
     }
 
     @Test

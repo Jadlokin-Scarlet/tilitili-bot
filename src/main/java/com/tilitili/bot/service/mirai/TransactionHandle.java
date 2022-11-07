@@ -58,6 +58,9 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		List<String> resultList = new ArrayList<>();
 		resultList.add("*" + botItem.getName() + "*");
 		resultList.add(botItem.getDescription());
+		if (botItem.getGrade() != null) {
+			resultList.add("稀有度：" + botItem);
+		}
 		if (Objects.equals(botItem.getPrice(), botItem.getSellPrice())) {
 			if (botItem.getPrice() == null) {
 				resultList.add("无法交易");
