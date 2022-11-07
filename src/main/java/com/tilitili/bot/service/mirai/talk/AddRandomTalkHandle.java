@@ -1,22 +1,21 @@
 package com.tilitili.bot.service.mirai.talk;
 
 import com.tilitili.bot.entity.ExcelResult;
+import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.bot.entity.RandomTalkDTO;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
-import com.tilitili.common.entity.BotFunction;
-import com.tilitili.common.entity.BotFunctionTalk;
-import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
+import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.mapper.mysql.BotFunctionMapper;
-import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
@@ -26,7 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,14 +39,18 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotFunctionMapper botFunctionMapper;
 	private final BotFunctionTalkMapper botFunctionTalkMapper;
 	private final FunctionTalkService functionTalkService;
+	private final FishConfigMapper fishConfigMapper;
+	private final BotItemMapper botItemMapper;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper) {
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 		this.botFunctionMapper = botFunctionMapper;
 		this.botFunctionTalkMapper = BotFunctionTalkMapper;
 		this.functionTalkService = functionTalkService;
+		this.fishConfigMapper = fishConfigMapper;
+		this.botItemMapper = botItemMapper;
 	}
 
 	@Override
@@ -55,6 +61,58 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			return null;
 		}
 		String fileName = fileChain.getName();
+		if (fileName.startsWith("钓鱼奖励配置")) {
+			String fileId = fileChain.getId();
+			Asserts.notNull(fileId, "啊嘞，找不到文件。");
+			File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotMessage().getGroup(), fileId);
+			ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
+			List<FishConfigDTO> resultList = excelResult.getResultList();
+			log.info("{}", resultList);
+			List<FishConfig> newFishConfigList = new ArrayList<>();
+			for (FishConfigDTO config : resultList) {
+				try {
+					int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
+					Integer cost = config.getCost();
+					Asserts.notNull(cost, "格式错啦(cost)");
+					Integer rate = config.getRate();
+					Asserts.notNull(rate, "格式错啦(rate)");
+					Integer price = config.getPrice();
+					String type = config.getType();
+					Asserts.notNull(type, "格式错啦(type)");
+					if ("事件".equals(type)) {
+						String desc = config.getDesc();
+						newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price));
+					} else {
+						Asserts.notNull(price, "格式错啦(price)");
+						String itemName = config.getItemName();
+						String itemDesc = config.getItemDesc();
+						String itemGrade = config.getItemGrade();
+						Asserts.notNull(itemName, "格式错啦(itemName)");
+						Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
+						Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
+						BotItem botItem = botItemMapper.getBotItemByName(itemName);
+						if (botItem == null) {
+							botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade);
+							botItemMapper.addBotItemSelective(botItem);
+						} else {
+							botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade));
+						}
+						newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
+					}
+				} catch (AssertException e) {
+					return BotMessage.simpleTextMessage(e.getMessage());
+				} catch (Exception e) {
+					return BotMessage.simpleTextMessage("格式不对");
+				}
+			}
+			for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery())) {
+				fishConfigMapper.deleteFishConfigByPrimary(fishConfig.getId());
+			}
+			for (FishConfig fishConfig : newFishConfigList) {
+				fishConfigMapper.addFishConfigSelective(fishConfig);
+			}
+			return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置)", newFishConfigList.size()));
+		}
 		Asserts.isTrue(fileName.startsWith("随机对话模板"), "文件名不对哦。");
 
 		String fileId = fileChain.getId();
