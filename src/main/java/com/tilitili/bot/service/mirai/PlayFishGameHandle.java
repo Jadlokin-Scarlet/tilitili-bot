@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.component.fish.FishGame;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.FishPlayerConstant;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
-//	private final FishGame fishGame;
 	private final Random random;
 
 	private final FishPlayerMapper fishPlayerMapper;
@@ -36,7 +34,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserMapper botUserMapper;
 
 	@Autowired
-	public PlayFishGameHandle(FishGame fishGame, FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapper botUserMapper) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapper botUserMapper) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -53,7 +51,27 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		switch (messageAction.getKey()) {
 			case "抛竿": case "抛杆": return handleStart(messageAction);
 			case "收竿": case "收杆": return handleEnd(messageAction);
+			case "鱼呢": return getStatus(messageAction);
 			default: throw new AssertException();
+		}
+	}
+
+	private BotMessage getStatus(BotMessageAction messageAction) {
+		BotUser botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
+
+		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		Asserts.notNull(fishPlayer, "你还没抛竿");
+		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
+			if (fishPlayer.getNotifyTime() == null) {
+				return BotMessage.simpleTextMessage("鱼还没来呢。");
+			} else {
+				return BotMessage.simpleTextMessage("鱼已经跑啦");
+			}
+		} else if (FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
+			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！");
+		} else {
+			throw new AssertException();
 		}
 	}
 
