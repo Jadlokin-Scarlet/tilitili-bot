@@ -96,7 +96,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 		Integer scale = fishPlayer.getScale();
 		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setScale(scale));
-		int theRate = random.nextInt(10000);
+		Integer rateSum = fishConfigMapper.countFishConfigRateSum(scale);
+		Asserts.notNull(rateSum, "啊嘞，不对劲");
+		int theRate = random.nextInt(rateSum);
 		FishConfig fishConfig = null;
 		for (FishConfig config : configList) {
 			theRate -= config.getRate();
