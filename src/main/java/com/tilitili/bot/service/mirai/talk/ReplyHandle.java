@@ -73,14 +73,14 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             if (botUser.getScore() < botFunction.getScore()) {
                 return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
             }
+            BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
+            functionTalkService.supplementChain(bot, botSender, respMessage);
             String redisKey = timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getExternalId();
             Long theTimeNum = redisCache.increment(redisKey, 1L);
             redisCache.expire(redisKey, 60 * 60 * 24);
             if (theTimeNum > botFunction.getTimeNum()) {
                 return BotMessage.simpleTextMessage("不要太贪心哦。");
             }
-            BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
-            functionTalkService.supplementChain(bot, botSender, respMessage);
             if (botFunction.getScore() > 0) {
                 botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), - botFunction.getScore());
             }
