@@ -23,6 +23,9 @@ public class BotMessageService {
 			if (StringUtils.isBlank(pid) && text.contains("https://www.pixiv.net")) {
 				pid = StringUtils.patten1("&illust_id=(\\d+)", text);
 			}
+			if (StringUtils.isBlank(pid) && text.contains("https://pixiv.nl")) {
+				pid = StringUtils.patten1("/(\\d+)\\.", text);
+			}
 			return pid;
 		}
 		return null;
