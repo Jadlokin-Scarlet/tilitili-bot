@@ -30,7 +30,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		return null;
 	}
 
-	private BotMessage handleDeleteAdmin(BotMessageAction messageAction) {
+	private BotMessage handleAdmin(BotMessageAction messageAction) {
 		BotEmum bot = messageAction.getBot();
 		List<Long> atList = messageAction.getAtList();
 		Long group = messageAction.getBotSender().getGroup();
@@ -41,7 +41,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		return BotMessage.simpleTextMessage("好了喵。");
 	}
 
-	private BotMessage handleAdmin(BotMessageAction messageAction) {
+	private BotMessage handleDeleteAdmin(BotMessageAction messageAction) {
 		BotEmum bot = messageAction.getBot();
 		List<Long> atList = messageAction.getAtList();
 		Long group = messageAction.getBotSender().getGroup();
