@@ -57,7 +57,9 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		BotUser botUser = messageAction.getBotUser();
 		Asserts.notNull(botUser, "啊嘞，似乎不对劲");
 		List<BotItemDTO> itemDTOList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
-		int itemScore = itemDTOList.stream().map(BotItemDTO::getSellPrice).filter(Objects::nonNull).mapToInt(Integer::intValue).sum();
+		int itemScore = itemDTOList.stream()
+				.filter(StreamUtil.isNotNull(BotItemDTO::getSellPrice)).filter(StreamUtil.isNotNull(BotItemDTO::getNum))
+				.map(botItemDTO -> botItemDTO.getNum() * botItemDTO.getSellPrice()).mapToInt(Integer::intValue).sum();
 		BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
 		Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
 		Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemDTO.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
