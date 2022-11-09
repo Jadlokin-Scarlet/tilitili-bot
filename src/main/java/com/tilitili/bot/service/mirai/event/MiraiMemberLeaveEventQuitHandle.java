@@ -8,9 +8,11 @@ import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberLeaveEventQuit
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiMemberLeaveEventQuit> {
 	private final BotManager botManager;
@@ -28,7 +30,7 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 		String message = String.format("%s离开了。", event.getMember().getMemberName());
 
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getMember().getGroup().getId());
-		Asserts.checkEquals(bot.id, botSender.getQq(), "没有权限");
+		Asserts.checkEquals(bot.id, botSender.getBot(), "没有权限");
 
 		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
 	}
