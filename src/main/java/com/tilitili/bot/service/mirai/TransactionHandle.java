@@ -104,6 +104,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleSell(BotMessageAction messageAction) {
 		BotUser botUser = messageAction.getBotUser();
 		String value = messageAction.getValue();
+		Asserts.notBlank(value, "格式错啦(物品名)");
 		List<BotItemDTO> itemList;
 		if (value.contains(" ")) {
 			List<String> valueList = Arrays.asList(value.split(" "));
@@ -145,6 +146,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleBuy(BotMessageAction messageAction) {
 		String value = messageAction.getValue();
+		Asserts.notBlank(value, "格式错啦(物品名)");
 		List<String> valueList = Arrays.asList(value.split(" "));
 		Asserts.notEmpty(valueList, "格式错啦(物品名)");
 		String itemName = valueList.get(0);

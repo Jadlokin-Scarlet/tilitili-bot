@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai.subscription;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.Subscription;
 import com.tilitili.common.entity.query.SubscriptionQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -29,13 +29,7 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		String name = messageAction.getParamOrDefault("name", messageAction.getValue());
-		BotMessage botMessage = messageAction.getBotMessage();
-
-		Long qq = botMessage.getQq();
-		Long group = botMessage.getGroup();
-		Long guildId = botMessage.getGuildId();
-		Long channelId = botMessage.getChannelId();
-		String sendType = botMessage.getSendType();
+		BotSender botSender = messageAction.getBotSender();
 
 		Asserts.notBlank(name, "格式错啦(name)");
 
@@ -43,8 +37,7 @@ public class DeleteTweetSubscriptionHandle extends ExceptionRespMessageHandle {
 		Asserts.notNull(user, "没找到用户");
 		String userId = user.getRestId();
 
-		Long qqWithoutGroup = SendTypeEmum.GROUP_MESSAGE_STR.equals(sendType)? null: qq;
-		SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(userId).setSendType(sendType).setSendGroup(group).setSendQq(qqWithoutGroup).setSendGuild(guildId).setSendChannel(channelId);
+		SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(2).setValue(userId).setSenderId(botSender.getId());
 		List<Subscription> oldList = subscriptionMapper.getSubscriptionByCondition(subscriptionQuery);
 		Asserts.notEmpty(oldList, "还没关注哦。");
 		Asserts.checkEquals(oldList.size(), 1, "不太对劲。");

@@ -4,6 +4,8 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotCalendar;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotCalendarMapper;
 import com.tilitili.common.utils.AESUtils;
@@ -35,13 +37,10 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String body = messageAction.getBody();
-        BotMessage botMessage = messageAction.getBotMessage();
+        BotSender botSender = messageAction.getBotSender();
+        BotUser botUser = messageAction.getBotUser();
         List<Long> atList = messageAction.getAtList();
-        String sendType = botMessage.getSendType();
-        Long qq = botMessage.getQq();
-        Long group = botMessage.getGroup();
-        Long guildId = botMessage.getGuildId();
-        Long channelId = botMessage.getChannelId();
+        String sendType = botSender.getSendType();
 
         Asserts.notBlank(body, "格式错啦(正文)");
         body = convertCnNumber(body);
@@ -67,9 +66,8 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
             respAtList.addAll(atList);
-        } else if (sendType.equals(SendTypeEmum.GROUP_MESSAGE_STR)) {
-            Asserts.notNull(qq, "怪怪的");
-            respAtList.add(qq);
+        } else if (!SendTypeEmum.FRIEND_MESSAGE_STR.equals(sendType)) {
+            respAtList.add(botUser.getExternalId());
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -90,7 +88,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         calendar.set(Calendar.SECOND, 0);
 
         String atListStr = respAtList.isEmpty()? null: respAtList.stream().map(String::valueOf).collect(Collectors.joining(","));
-        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setSendGroup(group).setSendQq(qq).setSendType(sendType).setSendGuild(guildId).setSendChannel(channelId).setAtList(atListStr);
+        BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setAtList(atListStr).setSenderId(botSender.getId());
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日 HH时mm分");

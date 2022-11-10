@@ -1,7 +1,6 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.QQUtil;
@@ -17,7 +16,7 @@ public class BotMessageService {
 	public String getQuotePid(BotMessageAction messageAction) {
 		if (messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null);
 			String text = quoteMessageAction.getText();
 			String pid = StringUtils.patten1("pid: (\\d+)", text);
 			if (StringUtils.isBlank(pid) && text.contains("https://www.pixiv.net")) {
@@ -36,7 +35,7 @@ public class BotMessageService {
 
 		if (CollectionUtils.isEmpty(imageUrlList) && messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null);
 			imageUrlList = quoteMessageAction.getImageList();
 		}
 
@@ -52,17 +51,17 @@ public class BotMessageService {
 		return url;
 	}
 
-	public boolean isAdmin(BotMessageAction messageAction) {
-		BotMessage botMessage = messageAction.getBotMessage();
-		String sendType = botMessage.getSendType();
-		Asserts.notNull(sendType, "找不到发送渠道");
-		switch (sendType) {
-			case SendTypeEmum.FRIEND_MESSAGE_STR: return true;
-			case SendTypeEmum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
-			case SendTypeEmum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
-			default: return false;
-		}
-	}
+//	public boolean isAdmin(BotMessageAction messageAction) {
+//		BotMessage botMessage = messageAction.getBotMessage();
+//		String sendType = botMessage.getSendType();
+//		Asserts.notNull(sendType, "找不到发送渠道");
+//		switch (sendType) {
+//			case SendTypeEmum.FRIEND_MESSAGE_STR: return true;
+//			case SendTypeEmum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
+//			case SendTypeEmum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
+//			default: return false;
+//		}
+//	}
 
 	private boolean isGuildAdmin(BotMessageAction messageAction) {
 		return false;

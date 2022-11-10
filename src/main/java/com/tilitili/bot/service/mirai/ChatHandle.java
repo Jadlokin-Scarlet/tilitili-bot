@@ -19,8 +19,10 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -90,9 +92,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList();
-		boolean isFriend = messageAction.getBotMessage().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
+		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = atList.contains(bot.qq) || (bot.tinyId != null && atList.contains(bot.tinyId));
-		boolean isRandomReply = random == 0 && messageAction.getBotMessage().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
+		boolean isRandomReply = random == 0 && messageAction.getBotSender().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
 		}
@@ -147,19 +149,22 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		BotEmum bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
+		BotUser botUser = messageAction.getBotUser();
 		ImmutableMap.Builder<Object, Object> param;
-		if (Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
+		if (Objects.equals(botSender.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 1)
-					.put("from", botMessage.getQq())
-					.put("fromName", botMessage.getGroupNickName());
-		} else {
+					.put("from", botUser.getExternalId())
+					.put("fromName", botUser.getName());
+		} else if (Objects.equals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 2)
-					.put("from", botMessage.getQq())
-					.put("fromName", botMessage.getGroupNickName())
-					.put("to", botMessage.getGroup());
-			if (botMessage.getGroupName() != null) param.put("toName", botMessage.getGroupName());
+					.put("from", botUser.getExternalId())
+					.put("fromName", botUser.getName())
+					.put("to", botSender.getGroup());
+			if (botSender.getName() != null) param.put("toName", botSender.getName());
+		} else {
+			throw new AssertException();
 		}
 		String json = gson.toJson(param.build());
 		String respStr = HttpClientUtil.httpPost("https://api.mlyai.com/reply", json, header);

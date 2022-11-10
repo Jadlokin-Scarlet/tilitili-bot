@@ -24,11 +24,12 @@ public class BotSessionService {
     }
 
     public String getSessionKey(BotMessage botMessage) {
-        String sendType = botMessage.getSendType();
-        Long qq = botMessage.getQq();
-        Long group = botMessage.getGroup();
-        Long guildId = botMessage.getGuildId();
-        Long channelId = botMessage.getChannelId();
+        BotSender botSender = botMessage.getBotSender();
+        String sendType = botSender.getSendType();
+        Long qq = botSender.getQq();
+        Long group = botSender.getGroup();
+        Long guildId = botSender.getGuildId();
+        Long channelId = botSender.getChannelId();
         return getSessionKey(sendType, qq, group, guildId, channelId);
     }
 

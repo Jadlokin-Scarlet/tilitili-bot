@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTalk;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -57,13 +58,14 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUser botUser = messageAction.getBotUser();
 		BotMessage botMessage = messageAction.getBotMessage();
+		BotSender botSender = messageAction.getBotSender();
 		List<String> imageList = messageAction.getImageList();
-		String sendType = botMessage.getSendType();
-		Long qq = botMessage.getQq();
-		Long group = botMessage.getGroup();
-		Long guildId = botMessage.getGuildId();
-		Long channelId = botMessage.getChannelId();
-		Long tinyId = botMessage.getTinyId();
+//		String sendType = botMessage.getSendType();
+//		Long qq = botMessage.getQq();
+//		Long group = botMessage.getGroup();
+//		Long guildId = botMessage.getGuildId();
+//		Long channelId = botMessage.getChannelId();
+//		Long tinyId = botMessage.getTinyId();
 		Long qqOrTinyId = botUser.getExternalId();
 
 		String senderReqKey = reqKey + qqOrTinyId;
@@ -120,7 +122,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 			botTalkMapper.deleteBotTalkByPrimary(oldTalk.getId());
 		}
 
-		BotTalk addBotTalk = new BotTalk().setType(type).setReq(req).setResp(resp).setSendType(sendType).setSendQq(qq).setSendGroup(group).setSendGuild(guildId).setSendChannel(channelId).setSendTiny(tinyId);
+		BotTalk addBotTalk = new BotTalk().setType(type).setReq(req).setResp(resp).setSenderId(botSender.getId());
 		botTalkMapper.addBotTalkSelective(addBotTalk);
 		if (oldTalk == null) {
 			List<BotMessageChain> messageChainList = Lists.newArrayList(BotMessageChain.ofPlain("学废了！"));

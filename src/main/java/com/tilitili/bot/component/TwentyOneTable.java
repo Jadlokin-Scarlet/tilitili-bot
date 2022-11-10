@@ -211,7 +211,7 @@ public class TwentyOneTable {
 			}
 		}
 		result.add(BotMessageChain.ofPlain("\n"));
-		if (!Objects.equals(botMessage.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
+		if (!Objects.equals(botMessage.getBotSender().getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getExternalId()));
 		}
 		List<String> chooseList = Lists.newArrayList("进货", "摆烂");

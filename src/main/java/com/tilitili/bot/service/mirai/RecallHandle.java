@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.bot.service.mirai.pixiv.PixivHandle;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -18,8 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
-
-import static org.jsoup.helper.StringUtil.isBlank;
 
 @Component
 public class RecallHandle extends ExceptionRespMessageHandle {
@@ -42,8 +39,8 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
-        Long qq = messageAction.getBotMessage().getQq();
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+//        Long qq = messageAction.getBotMessage().getQq();
+//        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
         String all = messageAction.getParamOrDefault("all", messageAction.getValue());
         String quoteMessageId = messageAction.getQuoteMessageId();
         boolean recallAll = Objects.equals(all, "1");
@@ -65,7 +62,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             return BotMessage.emptyMessage();
         }
 
-        if (Objects.equals(qq, MASTER_QQ)) {
+//        if (Objects.equals(qq, MASTER_QQ)) {
 //            if (pid != null) {
 //                List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
 //                for (PixivImage pixivImage : pixivImageList) {
@@ -80,14 +77,14 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 //                return null;
 //            }
 
-            String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
-            if (! isBlank(messageIdStr)) {
-                BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
-                BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
-                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getBot());
-                return BotMessage.simpleTextMessage("搞定");
-            }
-        }
+//            String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
+//            if (! isBlank(messageIdStr)) {
+//                BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
+//                BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+//                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getBot());
+//                return BotMessage.simpleTextMessage("搞定");
+//            }
+//        }
         return null;
     }
 }

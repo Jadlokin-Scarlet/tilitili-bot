@@ -50,9 +50,10 @@ public class BotService {
     private final MiraiManager miraiManager;
     private final GoCqhttpManager goCqhttpManager;
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
+    private final KookManager kookManager;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager, KookManager kookManager) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.eventHandleMap = eventHandleMap;
@@ -66,6 +67,7 @@ public class BotService {
         this.miraiManager = miraiManager;
         this.goCqhttpManager = goCqhttpManager;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
+        this.kookManager = kookManager;
         gson = new Gson();
     }
 
@@ -105,27 +107,26 @@ public class BotService {
             // 解析message
             botMessage = this.getBotMessageFromStr(message, botEmum);
             if (botMessage == null) return;
+            botMessage.setBotUser(this.updateBotUser(botMessage.getBotUser()));
             botMessageRecordManager.asyncLogRecord(message, botMessage);
-            Long externalId = botMessage.getExternalId();
 
             // 获取sender
-            BotSender botSender = botSenderManager.getSenderByBotMessage(botMessage);
+            BotSender botSender = botMessage.getBotSender();
             if (!Objects.equals(botSender.getBot(), botEmum.id)) return;
+            BotUser botUser = botMessage.getBotUser();
 
             // 获取用户锁，并保存user消息
-//            userIdLockMap.putIfAbsent()
-//            if (!userIdLockMap.putIfAbsent(externalId, Boolean.TRUE)) {
-//
-//            }
-            Asserts.checkNull(userIdLockMap.putIfAbsent(externalId, true), "听我说你先别急。");
-            BotUser botUser = this.updateBotUser(botMessage);
+            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getExternalId(), true), "听我说你先别急。");
             // 校验权限
             boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), 11L);
-            Asserts.isTrue(hasHelp, "啊嘞，不对劲。");
+            if (!hasHelp) {
+                log.info(botMessage.getMessageId() + "无权限");
+                return;
+            }
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSessionService.getSessionKey(botMessage));
             // 解析指令
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botSender, botUser, botEmum);
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botEmum);
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
             // 查询回复消息
@@ -161,12 +162,8 @@ public class BotService {
                 return;
             }
             // 如果最后是消息，则回复
-            if (respMessage.getSendType() == null) {
-                respMessage.setSendType(botSender.getSendType());
-                respMessage.setQq(botSender.getQq());
-                respMessage.setGroup(botSender.getGroup());
-                respMessage.setGuildId(botSender.getGuildId());
-                respMessage.setChannelId(botSender.getChannelId());
+            if (respMessage.getBotSender() == null) {
+                respMessage.setBotSender(botSender);
             }
 
             String messageId = botManager.sendMessage(respMessage);
@@ -178,20 +175,24 @@ public class BotService {
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
         } finally {
-            if (botMessage != null) {
-                userIdLockMap.remove(botMessage.getExternalId());
+            if (botMessage != null && botMessage.getBotUser() != null && botMessage.getBotUser().getExternalId() != null) {
+                userIdLockMap.remove(botMessage.getBotUser().getExternalId());
             }
         }
     }
 
     private BotMessage getBotMessageFromStr(String message, BotEmum botEmum) {
-        if (botEmum.type.equals(BotEmum.TYPE_MIRAI)) {
+        if (BotEmum.TYPE_MIRAI.equals(botEmum.type)) {
             return miraiManager.handleMiraiWsMessageToBotMessage(message);
-        } else {
+        } else if (BotEmum.TYPE_GOCQ.equals(botEmum.type)) {
             if (message.contains("post_type\":\"meta_event")) return null;
             if (message.contains("post_type\":\"notice")) return null;
             if (message.contains("post_type\":\"request")) return null;
             return goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
+        } else if (BotEmum.TYPE_KOOK.equals(botEmum.type)) {
+            return kookManager.handleKookWsMessageToBotMessage(message);
+        } else {
+            throw new AssertException();
         }
     }
 
@@ -240,15 +241,15 @@ public class BotService {
         return null;
     }
 
-    private BotUser updateBotUser(BotMessage botMessage) {
-        BotUser botUser = botUserMapper.getBotUserByExternalId(botMessage.getExternalId());
-        if (botUser != null) {
-            botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setName(botMessage.getGroupNickName()));
+    private BotUser updateBotUser(BotUser botUser) {
+        BotUser dbBotUser = botUserMapper.getBotUserByExternalId(botUser.getExternalId());
+        if (dbBotUser != null) {
+            botUserMapper.updateBotUserSelective(new BotUser().setId(dbBotUser.getId()).setName(botUser.getName()));
+            return dbBotUser.setName(botUser.getName());
         } else {
-            botUser = botUserManager.convertBotUserByBotMessage(botMessage);
             botUserMapper.addBotUserSelective(botUser);
+            return botUser;
         }
-        return botUser;
     }
 
     private List<BotTask> getBotTalkDtoList(BotMessageAction botMessageAction) {

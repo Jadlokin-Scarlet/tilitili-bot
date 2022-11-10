@@ -7,6 +7,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
@@ -55,6 +56,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		if (!SendTypeEmum.GROUP_MESSAGE_STR.equals(messageAction.getBotSender().getSendType())) {
+			return null;
+		}
 		List<BotMessageChain> chainList = messageAction.getBotMessage().getBotMessageChainList();
 		BotMessageChain fileChain = chainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_FILE)).findFirst().orElse(null);
 		if (fileChain == null) {
@@ -64,7 +68,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		if (fileName.startsWith("钓鱼奖励配置")) {
 			String fileId = fileChain.getId();
 			Asserts.notNull(fileId, "啊嘞，找不到文件。");
-			File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotMessage().getGroup(), fileId);
+			File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
 			ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
 			List<FishConfigDTO> resultList = excelResult.getResultList();
 			log.info("{}", resultList);
@@ -117,7 +121,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
-		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotMessage().getGroup(), fileId);
+		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");

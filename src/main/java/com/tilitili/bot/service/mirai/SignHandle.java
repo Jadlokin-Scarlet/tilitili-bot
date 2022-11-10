@@ -3,7 +3,6 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -87,18 +86,16 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleSignMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
-		Long externalId = botMessage.getSendType().equals(SendTypeEmum.GUILD_MESSAGE_STR)? botMessage.getTinyId(): botMessage.getQq();
-		Asserts.notNull(externalId, "似乎哪里不对劲");
+		BotUser botUser = messageAction.getBotUser();
+		Asserts.notNull(botUser, "似乎有什么不对劲");
 		Date now = new Date();
-		if (! session.putIfAbsent(externalIdLockKey + externalId, "lock")) {
+		if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock")) {
 			log.info("别签到刷屏");
 			return null;
 		}
 
 		int addScore;
 		try {
-			BotUser botUser = botUserMapper.getBotUserByExternalId(externalId);
-			Asserts.notNull(botUser, "似乎有什么不对劲");
 			List<BotItemDTO> itemDTOList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
 			int itemScore = itemDTOList.stream().map(BotItemDTO::getSellPrice).filter(Objects::nonNull).mapToInt(Integer::intValue).sum();
 			BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
@@ -119,7 +116,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), addScore);
 			}
 		} finally {
-			session.remove(externalIdLockKey + externalId);
+			session.remove(externalIdLockKey + botUser.getId());
 		}
 
 

@@ -6,6 +6,7 @@ import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -50,6 +51,8 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotMessage botMessage = messageAction.getBotMessage();
+		BotUser botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 		log.debug("PixivRecommendHandle start");
 
 		String key = messageAction.getKeyWithoutPrefix();
@@ -57,10 +60,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		boolean isNoBookmark = Objects.equals(key, "不");
 		String mode = keyModeMap.getOrDefault(key, "all");
 		log.debug("PixivRecommendHandle get cookie");
-		Long qq = botMessage.getQq();
-		Long tinyId = botMessage.getTinyId();
-		Long sender = qq != null? qq : tinyId;
-		Asserts.notNull(sender, "发送者为空");
+
 
 		BotSender botSender = messageAction.getBotSender();
 		List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
@@ -70,9 +70,9 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			Asserts.notEquals(mode, "r18", "不准色色");
 		}
 
-		String pixivImageRedisKey = pixivImageKey + sender;
+		String pixivImageRedisKey = pixivImageKey + userId;
 
-		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserBySender(sender);
+		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserByUserId(userId);
 		if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageRedisKey)) {
 			log.info("无可收藏的pid");
 			return null;
@@ -87,21 +87,21 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 			String pid = pidAndMode.split("_")[0];
 			mode = pidAndMode.split("_")[1];
 			if (pid != null) {
-				String token = pixivManager.getPixivToken(sender, cookie);
+				String token = pixivManager.getPixivToken(userId, cookie);
 				pixivManager.bookmarkImageForCookie(pid, cookie, token);
 			} else {
 				return null;
 			}
-			redisCache.delete(pixivImageListKey + sender + mode);
-			redisCache.delete(pixivImageListPageNoKey + sender + mode);
+			redisCache.delete(pixivImageListKey + userId + mode);
+			redisCache.delete(pixivImageListPageNoKey + userId + mode);
 		}
 		if (isNoBookmark) {
 			String pidAndMode = (String) redisCache.getValue(pixivImageRedisKey);
 			mode = pidAndMode.split("_")[1];
 		}
 
-		String pixivImageListRedisKey = pixivImageListKey + sender + mode;
-		String pixivImageListPageNoRedisKey = pixivImageListPageNoKey + sender + mode;
+		String pixivImageListRedisKey = pixivImageListKey + userId + mode;
+		String pixivImageListPageNoRedisKey = pixivImageListPageNoKey + userId + mode;
 
 		log.debug("PixivRecommendHandle get info");
 		PixivRecommendIllust illust;

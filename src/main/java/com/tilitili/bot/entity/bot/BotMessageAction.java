@@ -40,9 +40,9 @@ public class BotMessageAction {
     private BotMessage quoteMessage;
     private String virtualKey;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotSender botSender, BotUser botUser, BotEmum botEmum) {
-        this.botSender = botSender;
-        this.botUser = botUser;
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotEmum botEmum) {
+        this.botSender = botMessage.getBotSender();
+        this.botUser = botMessage.getBotUser();
         this.botMessage = botMessage;
         this.bot = botEmum;
         this.session = session;

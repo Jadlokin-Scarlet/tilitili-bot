@@ -194,7 +194,7 @@ public class PixivCacheService {
 //		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
 //		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
 		messageChainList.add(BotMessageChain.ofPlain("页数: "+pageCount));
-//		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
+		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl == null || sl < 3) {
 			for (String url : urlList) {
 				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);

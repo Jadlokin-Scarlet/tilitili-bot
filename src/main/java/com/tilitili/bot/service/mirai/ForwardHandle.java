@@ -63,7 +63,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 						default: return "";
 					}
 				}).collect(Collectors.joining());
-				String sender = messageAction.getBotMessage().getGroupNickName();
+				String sender = messageAction.getBotUser().getName();
 				minecraftManager.sendMessage(server, String.format("[%s]%s：%s", server.getPrefix(), sender, message));
 				return BotMessage.emptyMessage();
 			}
