@@ -91,11 +91,18 @@ public class ExcelUtil {
 		ExcelResult<T> result = new ExcelResult<>();
 		try (FileInputStream stream = new FileInputStream(file); Workbook workbook = new XSSFWorkbook(stream);) {
 			List<List<List<String>>> data = new ArrayList<>();
+			Short cellNum = null;
 			for (Sheet sheet : workbook) {
 				List<List<String>> page = new ArrayList<>();
 				for (Row row : sheet) {
+					if (cellNum == null) cellNum = row.getLastCellNum();
 					List<String> item = new ArrayList<>();
-					for (Cell cell : row) {
+					for (int index = row.getFirstCellNum(); index < cellNum; index++) {
+						Cell cell = row.getCell(index);
+						if (cell == null) {
+							item.add("");
+							continue;
+						}
 						switch (cell.getCellType()) {
 							case STRING: item.add(cell.getRichStringCellValue().getString()); break;
 							case NUMERIC: {

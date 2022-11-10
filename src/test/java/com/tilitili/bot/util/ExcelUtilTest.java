@@ -2,7 +2,7 @@ package com.tilitili.bot.util;
 
 import com.tilitili.bot.StartApplication;
 import com.tilitili.bot.entity.ExcelResult;
-import com.tilitili.bot.entity.RandomTalkDTO;
+import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -19,8 +19,8 @@ public class ExcelUtilTest {
 
 	@Test
 	public void getListFromExcel() {
-		File file = new File("/Users/admin/Documents/随机对话模板-测试.xlsx");
-		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
+		File file = new File("/Users/admin/Downloads/钓鱼奖励配置.xlsx");
+		ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
 		System.out.println(Gsons.toJson(excelResult));
 	}
 }
