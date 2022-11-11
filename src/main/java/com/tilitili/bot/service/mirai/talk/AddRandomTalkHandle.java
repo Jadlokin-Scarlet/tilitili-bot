@@ -72,6 +72,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
 			List<FishConfigDTO> resultList = excelResult.getResultList();
 			log.info("{}", resultList);
+			int rateSum = 0;
 			List<FishConfig> newFishConfigList = new ArrayList<>();
 			for (FishConfigDTO config : resultList) {
 				try {
@@ -80,6 +81,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					Asserts.notNull(cost, "格式错啦(cost)");
 					Integer rate = config.getRate();
 					Asserts.notNull(rate, "格式错啦(rate)");
+					rateSum += rate;
 					Integer price = config.getPrice();
 					String type = config.getType();
 					Asserts.notNull(type, "格式错啦(type)");
@@ -115,7 +117,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			for (FishConfig fishConfig : newFishConfigList) {
 				fishConfigMapper.addFishConfigSelective(fishConfig);
 			}
-			return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置)", newFishConfigList.size()));
+			return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置，总权重%s)", newFishConfigList.size(), rateSum));
 		}
 		Asserts.isTrue(fileName.startsWith("随机对话模板"), "文件名不对哦。");
 
