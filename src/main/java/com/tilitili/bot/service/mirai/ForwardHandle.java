@@ -15,6 +15,7 @@ import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -79,8 +80,11 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			String senderName = forwardConfig.getSourceName() != null? forwardConfig.getSourceName(): messageAction.getBotSender().getName();
 			String userName = messageAction.getBotUser().getName();
-			sourceMessageChainList.add(0, BotMessageChain.ofPlain(String.format("[%s]%s：", senderName, userName)));
-			return BotMessage.simpleListMessage(sourceMessageChainList).setSenderId(targetSenderId);
+
+			List<BotMessageChain> newMessageChainList = new ArrayList<>();
+			newMessageChainList.add(BotMessageChain.ofPlain(String.format("[%s]%s：", senderName, userName)));
+			newMessageChainList.addAll(sourceMessageChainList);
+			return BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId);
 		}
 		return null;
 	}
