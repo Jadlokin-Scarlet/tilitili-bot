@@ -75,7 +75,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 				return BotMessage.emptyMessage();
 			}
 		}
-		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
+		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId).setStatus(0));
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			String senderName = forwardConfig.getSourceName() != null? forwardConfig.getSourceName(): messageAction.getBotSender().getName();
