@@ -44,7 +44,7 @@ public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<Mira
 		boolean hasEventHandle = botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), 50L);
 		Asserts.isTrue(hasEventHandle, "啊嘞，不对劲。");
 
-		BotSessionService.MiraiSession session = botSessionService.getSession(botSessionService.getSessionKey(botSender));
+		BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
 		session.put(newMemberKey, Gsons.toJson(event));
 		session.put(newMemberKey + "-" + event.getFromId(), Gsons.toJson(event));
 		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));

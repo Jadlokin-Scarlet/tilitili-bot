@@ -127,7 +127,7 @@ public class BotService {
                 return;
             }
             // 获取session
-            BotSessionService.MiraiSession session = botSessionService.getSession(botSessionService.getSessionKey(botMessage));
+            BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botEmum);
             // 查询匹配任务列表
@@ -174,7 +174,7 @@ public class BotService {
                 session.put(lastMessageIdKey, messageId);
             }
         } catch (AssertException e) {
-            log.debug("异步消息处理断言异常, message=" + e.getMessage(), e);
+            log.warn("异步消息处理断言异常, message=" + e.getMessage(), e);
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
         } finally {
