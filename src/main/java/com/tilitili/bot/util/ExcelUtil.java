@@ -59,6 +59,9 @@ public class ExcelUtil {
 					String valueStr = item.get(i).trim();
 					Field field = indexFieldMap.get(i);
 
+					if (StringUtils.isBlank(valueStr)) {
+						continue;
+					}
 					if (Modifier.isFinal(field.getModifiers())) {
 						continue;//final不做处理
 					}
@@ -103,20 +106,22 @@ public class ExcelUtil {
 							item.add("");
 							continue;
 						}
-						switch (cell.getCellType()) {
-							case STRING: item.add(cell.getRichStringCellValue().getString()); break;
-							case NUMERIC: {
-								if (DateUtil.isCellDateFormatted(cell)) {
-									item.add(cell.getDateCellValue() + "");
-								} else {
-									item.add(cell.getNumericCellValue() + "");
-								}
-								break;
-							}
-							case BOOLEAN: item.add(cell.getBooleanCellValue() + ""); break;
-							case FORMULA: item.add(cell.getCellFormula() + ""); break;
-							default: item.add("");
-						}
+						cell.setCellType(CellType.STRING);
+						item.add(cell.getRichStringCellValue().getString());
+//						switch (cell.getCellType()) {
+//							case STRING:item.add(cell.getRichStringCellValue().getString());break;
+//							case NUMERIC: {
+//								if (DateUtil.isCellDateFormatted(cell)) {
+//									item.add(cell.getDateCellValue() + "");
+//								} else {
+//									item.add(cell.getNumericCellValue() + "");
+//								}
+//								break;
+//							}
+//							case BOOLEAN: item.add(cell.getBooleanCellValue() + ""); break;
+//							case FORMULA: item.add(cell.getCellFormula() + ""); break;
+//							default: item.add("");
+//						}
 					}
 					page.add(item);
 				}

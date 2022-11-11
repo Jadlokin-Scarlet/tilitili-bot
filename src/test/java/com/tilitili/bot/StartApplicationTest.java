@@ -1,14 +1,20 @@
 package com.tilitili.bot;
 
 import com.google.gson.reflect.TypeToken;
+import com.tilitili.bot.entity.ExcelResult;
+import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
+import com.tilitili.common.entity.FishConfig;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
@@ -24,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +61,8 @@ class StartApplicationTest {
     private BotUserMapper botUserMapper;
     @Autowired
     private PixivCacheService pixivCacheService;
+    @Autowired
+    private FishConfigMapper fishConfigMapper;
 
     @Test
     void main() throws UnsupportedEncodingException {
@@ -62,6 +71,57 @@ class StartApplicationTest {
 //        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEmum.CIRNO_QQ);
 //        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
 //        System.out.println(Gsons.toJson(botMessage));
+    }
+
+    @Test
+    public void test3() {
+        File file = new File("/Users/admin/Downloads/钓鱼奖励配置.xlsx");
+        ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
+        List<FishConfigDTO> resultList = excelResult.getResultList();
+        log.info("{}", resultList);
+        List<FishConfig> newFishConfigList = new ArrayList<>();
+        for (FishConfigDTO config : resultList) {
+            try {
+                int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
+                Integer cost = config.getCost();
+                Asserts.notNull(cost, "格式错啦(cost)");
+                Integer rate = config.getRate();
+                Asserts.notNull(rate, "格式错啦(rate)");
+                Integer price = config.getPrice();
+                String type = config.getType();
+                Asserts.notNull(type, "格式错啦(type)");
+                if ("事件".equals(type)) {
+                    String desc = config.getDesc();
+                    newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price));
+                } else {
+                    Asserts.notNull(price, "格式错啦(price)");
+                    String itemName = config.getItemName();
+                    String itemDesc = config.getItemDesc();
+                    String itemGrade = config.getItemGrade();
+                    Asserts.notNull(itemName, "格式错啦(itemName)");
+                    Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
+                    Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
+                    BotItem botItem = botItemMapper.getBotItemByName(itemName);
+                    if (botItem == null) {
+                        botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade);
+                        botItemMapper.addBotItemSelective(botItem);
+                    } else {
+                        botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade));
+                    }
+                    newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
+                }
+            } catch (AssertException e) {
+                log.info(e.getMessage());
+            } catch (Exception e) {
+                log.info("格式不对");
+            }
+        }
+        for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery())) {
+            fishConfigMapper.deleteFishConfigByPrimary(fishConfig.getId());
+        }
+        for (FishConfig fishConfig : newFishConfigList) {
+            fishConfigMapper.addFishConfigSelective(fishConfig);
+        }
     }
 
     @Test
