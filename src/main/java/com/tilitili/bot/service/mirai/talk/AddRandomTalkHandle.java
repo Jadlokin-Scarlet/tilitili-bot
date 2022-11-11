@@ -65,62 +65,17 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			return null;
 		}
 		String fileName = fileChain.getName();
-		if (fileName.startsWith("钓鱼奖励配置")) {
-			String fileId = fileChain.getId();
-			Asserts.notNull(fileId, "啊嘞，找不到文件。");
-			File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
-			ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
-			List<FishConfigDTO> resultList = excelResult.getResultList();
-			log.info("{}", resultList);
-			int rateSum = 0;
-			List<FishConfig> newFishConfigList = new ArrayList<>();
-			for (FishConfigDTO config : resultList) {
-				try {
-					int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
-					Integer cost = config.getCost();
-					Asserts.notNull(cost, "格式错啦(cost)");
-					Integer rate = config.getRate();
-					Asserts.notNull(rate, "格式错啦(rate)");
-					rateSum += rate;
-					Integer price = config.getPrice();
-					String type = config.getType();
-					Asserts.notNull(type, "格式错啦(type)");
-					if ("事件".equals(type)) {
-						String desc = config.getDesc();
-						newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price));
-					} else {
-						Asserts.notNull(price, "格式错啦(price)");
-						String itemName = config.getItemName();
-						String itemDesc = config.getItemDesc();
-						String itemGrade = config.getItemGrade();
-						Asserts.notNull(itemName, "格式错啦(itemName)");
-						Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
-						Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
-						BotItem botItem = botItemMapper.getBotItemByName(itemName);
-						if (botItem == null) {
-							botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade);
-							botItemMapper.addBotItemSelective(botItem);
-						} else {
-							botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade));
-						}
-						newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
-					}
-				} catch (AssertException e) {
-					return BotMessage.simpleTextMessage(e.getMessage());
-				} catch (Exception e) {
-					return BotMessage.simpleTextMessage("格式不对");
-				}
-			}
-			for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery())) {
-				fishConfigMapper.deleteFishConfigByPrimary(fishConfig.getId());
-			}
-			for (FishConfig fishConfig : newFishConfigList) {
-				fishConfigMapper.addFishConfigSelective(fishConfig);
-			}
-			return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置，总权重%s)", newFishConfigList.size(), rateSum));
-		}
-		Asserts.isTrue(fileName.startsWith("随机对话模板"), "文件名不对哦。");
 
+		if (fileName.startsWith("钓鱼奖励配置")) {
+			return this.handleFishFile(messageAction, fileChain);
+		} else if (fileName.startsWith("随机对话模板")) {
+			return this.handleRandomTalkFile(messageAction, fileChain);
+		} else {
+			return null;
+		}
+	}
+
+	private BotMessage handleRandomTalkFile(BotMessageAction messageAction, BotMessageChain fileChain) {
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
 		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
@@ -193,5 +148,60 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String scoreMessage = score == 0? "": String.format("，积分%s", score);
 		String timeNumMessage = timeNum == 99999999? "": "，每" + timeUnit + timeNumStr + "次";
 		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage, timeNumMessage));
+	}
+
+	private BotMessage handleFishFile(BotMessageAction messageAction, BotMessageChain fileChain) {
+		String fileId = fileChain.getId();
+		Asserts.notNull(fileId, "啊嘞，找不到文件。");
+		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
+		ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
+		List<FishConfigDTO> resultList = excelResult.getResultList();
+		log.info("{}", resultList);
+		int rateSum = 0;
+		List<FishConfig> newFishConfigList = new ArrayList<>();
+		for (FishConfigDTO config : resultList) {
+			try {
+				int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
+				Integer cost = config.getCost();
+				Asserts.notNull(cost, "格式错啦(cost)");
+				Integer rate = config.getRate();
+				Asserts.notNull(rate, "格式错啦(rate)");
+				rateSum += rate;
+				Integer price = config.getPrice();
+				String type = config.getType();
+				Asserts.notNull(type, "格式错啦(type)");
+				if ("事件".equals(type)) {
+					String desc = config.getDesc();
+					newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price));
+				} else {
+					Asserts.notNull(price, "格式错啦(price)");
+					String itemName = config.getItemName();
+					String itemDesc = config.getItemDesc();
+					String itemGrade = config.getItemGrade();
+					Asserts.notNull(itemName, "格式错啦(itemName)");
+					Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
+					Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
+					BotItem botItem = botItemMapper.getBotItemByName(itemName);
+					if (botItem == null) {
+						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade);
+						botItemMapper.addBotItemSelective(botItem);
+					} else {
+						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade));
+					}
+					newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
+				}
+			} catch (AssertException e) {
+				return BotMessage.simpleTextMessage(e.getMessage());
+			} catch (Exception e) {
+				return BotMessage.simpleTextMessage("格式不对");
+			}
+		}
+		for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery())) {
+			fishConfigMapper.deleteFishConfigByPrimary(fishConfig.getId());
+		}
+		for (FishConfig fishConfig : newFishConfigList) {
+			fishConfigMapper.addFishConfigSelective(fishConfig);
+		}
+		return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置，总权重%s)", newFishConfigList.size(), rateSum));
 	}
 }
