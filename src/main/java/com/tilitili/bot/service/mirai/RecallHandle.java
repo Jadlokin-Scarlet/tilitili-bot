@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -47,18 +48,18 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
         if (quoteMessageId != null) {
             Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(quoteMessageId, bot);
+            botManager.recallMessage(BotEmum.getBotById(bot), quoteMessageId);
             return BotMessage.emptyMessage();
         } else if (recallAll) {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
                 BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                botManager.recallMessage(sendMessage.getMessageId(), botSender.getBot());
+                botManager.recallMessage(BotEmum.getBotById(botSender.getBot()), sendMessage.getMessageId());
             }
             return BotMessage.simpleTextMessage("搞定");
         } else if (session.containsKey(BotService.lastMessageIdKey)) {
             Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(session.get(BotService.lastMessageIdKey), bot);
+            botManager.recallMessage(BotEmum.getBotById(bot), session.get(BotService.lastMessageIdKey));
             return BotMessage.emptyMessage();
         }
 

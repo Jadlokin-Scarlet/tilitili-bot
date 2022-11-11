@@ -14,6 +14,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
+import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
@@ -51,9 +52,10 @@ public class BotService {
     private final GoCqhttpManager goCqhttpManager;
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
     private final KookManager kookManager;
+    private final BotMessageRecordMapper botMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager, KookManager kookManager) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager, KookManager kookManager, BotMessageRecordMapper botMessageRecordMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.eventHandleMap = eventHandleMap;
@@ -68,6 +70,7 @@ public class BotService {
         this.goCqhttpManager = goCqhttpManager;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
         this.kookManager = kookManager;
+        this.botMessageRecordMapper = botMessageRecordMapper;
         gson = new Gson();
     }
 
@@ -233,7 +236,7 @@ public class BotService {
             }
         }
 
-        BotMessageRecord quoteMessageRecord = botManager.getMessage(quoteMessageId);
+        BotMessageRecord quoteMessageRecord = botMessageRecordMapper.getBotMessageRecordByMessageId(quoteMessageId);
         if (quoteMessageRecord != null) {
             return botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
         }
