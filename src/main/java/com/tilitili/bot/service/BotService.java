@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.google.common.base.CaseFormat;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
@@ -12,6 +13,10 @@ import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
+import com.tilitili.common.entity.view.bot.kook.KookEvent;
+import com.tilitili.common.entity.view.bot.kook.KookMessage;
+import com.tilitili.common.entity.view.bot.kook.KookTextExtra;
+import com.tilitili.common.entity.view.bot.kook.KookWsData;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
@@ -82,7 +87,7 @@ public class BotService {
                 String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
                 Asserts.notBlank(eventType, "获取事件类型失败");
                 handleName = "mirai" + eventType + "Handle";
-            } else {
+            } else if (BotEmum.TYPE_GOCQ.equals(bot.getType())) {
                 GocqhttpBaseEvent baseEvent = Gsons.fromJson(message, GocqhttpBaseEvent.class);
                 String postType = baseEvent.getPostType();
                 String noticeType = baseEvent.getNoticeType();
@@ -92,6 +97,13 @@ public class BotService {
                 noticeType = noticeType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, noticeType);
                 subType = subType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, subType);
                 handleName = "gocq" + postType + noticeType + subType + "Handle";
+            } else if (BotEmum.TYPE_KOOK.equals(bot.getType())) {
+                KookWsData<KookMessage> data = Gsons.fromJson(message, new TypeToken<KookWsData<KookEvent<?>>>() {}.getType());
+                KookTextExtra extra = data.getD().getExtra();
+                String eventType = extra.getType();
+                handleName = "kook" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, eventType) + "Handle";
+            } else {
+                throw new AssertException();
             }
             Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件=%s", handleName);
             BaseEventHandle messageHandle = eventHandleMap.get(handleName);

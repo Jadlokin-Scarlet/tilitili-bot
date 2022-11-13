@@ -27,8 +27,15 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
         log.debug("Message Received message={}", message);
         KookWsData<?> kookWsData = Gsons.fromJson(message, KookWsData.class);
         switch (kookWsData.getS()) {
-            case 0: sn = kookWsData.getSn() == null? 0: kookWsData.getSn();
-                botService.syncHandleTextMessage(message, bot); break;
+            case 0: {
+                this.sn = kookWsData.getSn() == null ? 0 : kookWsData.getSn();
+                if (message.contains("type\":\"255")) {
+                    botService.syncHandleEvent(bot, message);
+                } else {
+                    botService.syncHandleTextMessage(message, bot);
+                }
+                break;
+            }
             case 1: case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 30, TimeUnit.SECONDS); break;
             default: log.warn("记录s="+kookWsData.getS());
         }
