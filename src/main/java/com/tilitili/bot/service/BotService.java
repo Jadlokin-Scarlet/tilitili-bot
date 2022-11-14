@@ -120,7 +120,7 @@ public class BotService {
             // 解析message
             botMessage = this.getBotMessageFromStr(message, botEmum);
             if (botMessage == null) return;
-            botMessage.setBotUser(this.updateBotUser(botMessage.getBotUser()));
+            botMessage.setBotUser(botUserManager.addOrUpdateBotUser(botMessage.getBotUser()));
             botMessageRecordManager.asyncLogRecord(message, botMessage);
 
             // 获取sender
@@ -252,17 +252,6 @@ public class BotService {
         }
         log.warn("messageId={}找不到", quoteMessageId);
         return null;
-    }
-
-    private BotUser updateBotUser(BotUser botUser) {
-        BotUser dbBotUser = botUserMapper.getBotUserByExternalId(botUser.getExternalId());
-        if (dbBotUser != null) {
-            botUserMapper.updateBotUserSelective(new BotUser().setId(dbBotUser.getId()).setName(botUser.getName()));
-            return dbBotUser.setName(botUser.getName());
-        } else {
-            botUserMapper.addBotUserSelective(botUser);
-            return botUser;
-        }
     }
 
     private List<BotTask> getBotTalkDtoList(BotMessageAction botMessageAction) {

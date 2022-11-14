@@ -50,6 +50,9 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 		BotSender botSender = botSenderMapper.getBotSenderByKookChannelId(channelId);
 		Asserts.notNull(botSender, "找不到频道");
 		BotUser botUser = botUserMapper.getBotUserByExternalId(userId);
+//		if (botUser == null) {
+//			botManager.getMemberInfo(bot, )
+//		}
 		Asserts.notNull(botUser, "找不到用户");
 
 		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
@@ -63,8 +66,8 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
-			String sourceName = forwardConfig.getSourceName() != null? forwardConfig.getSourceName(): botSender.getName();
-			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s加入了语音频道%s", botUser.getName(), sourceName)).setBotSender(targetSender));
+			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
+			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s加入了语音频道%s%s", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
 		}
 	}
 }
