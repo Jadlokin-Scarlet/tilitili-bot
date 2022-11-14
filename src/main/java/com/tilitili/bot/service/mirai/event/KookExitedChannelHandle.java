@@ -61,7 +61,7 @@ public class KookExitedChannelHandle extends KookAutoEventHandle<KookExitedChann
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
 			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
-			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s退出了语音频道%s%s", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
+			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s退出了语音[%s%s]", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
 		}
 	}
 }
