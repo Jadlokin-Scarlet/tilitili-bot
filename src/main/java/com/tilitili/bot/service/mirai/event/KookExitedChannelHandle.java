@@ -8,7 +8,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.KookJoinedChannel;
+import com.tilitili.common.entity.view.bot.mirai.event.KookExitedChannel;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
@@ -23,15 +23,15 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChannel> {
+public class KookExitedChannelHandle extends KookAutoEventHandle<KookExitedChannel> {
 	private final BotSenderMapper botSenderMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 	private final BotManager botManager;
 
 	@Autowired
-	public KookJoinedChannelHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager) {
-		super(KookJoinedChannel.class);
+	public KookExitedChannelHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager) {
+		super(KookExitedChannel.class);
 		this.botSenderMapper = botSenderMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
@@ -39,7 +39,7 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, KookJoinedChannel event) throws Exception {
+	public void handleEvent(BotEmum bot, KookExitedChannel event) throws Exception {
 		log.info(Gsons.toJson(event));
 		Long externalId = event.getUserId();
 		Long channelId = event.getChannelId();
@@ -61,7 +61,7 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
 			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
-			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s加入了语音频道%s%s", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
+			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s退出了语音频道%s%s", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
 		}
 	}
 }
