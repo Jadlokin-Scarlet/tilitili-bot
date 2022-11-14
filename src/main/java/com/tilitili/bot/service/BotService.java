@@ -13,10 +13,7 @@ import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
-import com.tilitili.common.entity.view.bot.kook.KookEvent;
-import com.tilitili.common.entity.view.bot.kook.KookMessage;
-import com.tilitili.common.entity.view.bot.kook.KookTextExtra;
-import com.tilitili.common.entity.view.bot.kook.KookWsData;
+import com.tilitili.common.entity.view.bot.kook.*;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
@@ -98,8 +95,8 @@ public class BotService {
                 subType = subType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, subType);
                 handleName = "gocq" + postType + noticeType + subType + "Handle";
             } else if (BotEmum.TYPE_KOOK.equals(bot.getType())) {
-                KookWsData<KookMessage> data = Gsons.fromJson(message, new TypeToken<KookWsData<KookEvent<?>>>() {}.getType());
-                KookTextExtra extra = data.getD().getExtra();
+                KookWsEvent<?> data = Gsons.fromJson(message, new TypeToken<KookWsEvent<?>>() {}.getType());
+                KookEventExtra<?> extra = data.getD().getExtra();
                 String eventType = extra.getType();
                 handleName = "kook" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, eventType) + "Handle";
             } else {
