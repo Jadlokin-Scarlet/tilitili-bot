@@ -7,6 +7,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
+import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
@@ -130,7 +131,7 @@ public class BotService {
             // 获取用户锁，并保存user消息
             Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getExternalId(), true), "听我说你先别急。");
             // 校验权限
-            boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), 11L);
+            boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
             if (!hasHelp) {
                 log.info(botMessage.getMessageId() + "无权限");
                 return;
