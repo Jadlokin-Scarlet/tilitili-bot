@@ -14,8 +14,8 @@ public abstract class KookAutoEventHandle<T> implements BaseEventHandle {
 
 	@Override
 	public void handleEventStr(BotEmum bot, String eventMessage) throws Exception {
-		T event = Gsons.fromJson(eventMessage, type.getType());
-		this.handleEvent(bot, event);
+		KookEventResponse<T> resp = Gsons.fromJson(eventMessage, type.getType());
+		this.handleEvent(bot, resp.getData().getExtra().getBody());
 	}
 
 	public abstract void handleEvent(BotEmum bot, T event) throws Exception;
