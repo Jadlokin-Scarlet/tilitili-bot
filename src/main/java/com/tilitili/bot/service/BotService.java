@@ -114,18 +114,18 @@ public class BotService {
     }
 
     @Async
-    public void syncHandleTextMessage(String message, BotEmum botEmum) {
+    public void syncHandleTextMessage(String message, BotEmum bot) {
         BotMessage botMessage = null;
         try {
             // 解析message
-            botMessage = this.getBotMessageFromStr(message, botEmum);
+            botMessage = this.getBotMessageFromStr(message, bot);
             if (botMessage == null) return;
-            botMessage.setBotUser(botUserManager.addOrUpdateBotUser(botMessage.getBotUser()));
+            botMessage.setBotUser(botManager.addOrUpdateBotUser(bot, botMessage.getBotSender(), botMessage.getBotUser()));
             botMessageRecordManager.asyncLogRecord(message, botMessage);
 
             // 获取sender
             BotSender botSender = botMessage.getBotSender();
-            if (!Objects.equals(botSender.getBot(), botEmum.id)) return;
+            if (!Objects.equals(botSender.getBot(), bot.id)) return;
             BotUser botUser = botMessage.getBotUser();
 
             // 获取用户锁，并保存user消息
@@ -139,7 +139,7 @@ public class BotService {
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
             // 解析指令
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, botEmum);
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
             // 查询回复消息

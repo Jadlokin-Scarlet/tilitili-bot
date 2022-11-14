@@ -40,7 +40,8 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			Long senderId = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
 
-			BotUser botUser = botUserMapper.getBotUserByExternalId(senderId);
+			// 此功能只能QQ用
+			BotUser botUser = botUserMapper.getBotUserByExternalIdAndType(senderId, 0);
 			Asserts.notNull(botUser, "第%s句找不到人", i);
 
 			String senderName = botUser.getName();

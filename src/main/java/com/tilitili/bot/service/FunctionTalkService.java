@@ -2,7 +2,7 @@ package com.tilitili.bot.service;
 
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.view.bot.BotFriend;
+import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
@@ -78,11 +78,11 @@ public class FunctionTalkService {
 		for (BotMessageChain botMessageChain : botMessageChainList) {
 			switch (botMessageChain.getType()) {
 				case "memberName": {
-					BotFriend botFriend = botManager.getMemberInfo(bot, botSender.getGroup(), botMessageChain.getTarget());
-					Asserts.notNull(botFriend, "啊嘞，不对劲");
-					Asserts.notNull(botFriend.getMemberName(), "查无此人");
+					BotUser botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUser().setExternalId(botMessageChain.getTarget()));
+					Asserts.notNull(botUser, "啊嘞，不对劲");
+					Asserts.notNull(botUser.getName(), "查无此人");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_PLAIN);
-					botMessageChain.setText(botFriend.getMemberName());
+					botMessageChain.setText(botUser.getName());
 					break;
 				}
 				case "portrait": {

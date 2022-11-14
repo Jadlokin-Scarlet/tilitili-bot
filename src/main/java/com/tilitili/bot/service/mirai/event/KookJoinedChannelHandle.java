@@ -11,6 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.KookJoinedChannel;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
@@ -30,29 +31,28 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 	private final BotManager botManager;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public KookJoinedChannelHandle(BotSenderMapper botSenderMapper, BotUserMapper botUserMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager) {
+	public KookJoinedChannelHandle(BotSenderMapper botSenderMapper, BotUserMapper botUserMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager, BotUserManager botUserManager) {
 		super(KookJoinedChannel.class);
 		this.botSenderMapper = botSenderMapper;
 		this.botUserMapper = botUserMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 		this.botManager = botManager;
+		this.botUserManager = botUserManager;
 	}
 
 	@Override
 	public void handleEvent(BotEmum bot, KookJoinedChannel event) throws Exception {
 		log.info(Gsons.toJson(event));
-		Long userId = event.getUserId();
+		Long externalId = event.getUserId();
 		Long channelId = event.getChannelId();
 
 		BotSender botSender = botSenderMapper.getBotSenderByKookChannelId(channelId);
 		Asserts.notNull(botSender, "找不到频道");
-		BotUser botUser = botUserMapper.getBotUserByExternalId(userId);
-//		if (botUser == null) {
-//			botManager.getMemberInfo(bot, )
-//		}
+		BotUser botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUser().setExternalId(externalId));
 		Asserts.notNull(botUser, "找不到用户");
 
 		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
