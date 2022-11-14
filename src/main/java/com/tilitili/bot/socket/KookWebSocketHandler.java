@@ -29,7 +29,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
         switch (kookWsData.getS()) {
             case 0: {
                 this.sn = kookWsData.getSn() == null ? 0 : kookWsData.getSn();
-                if (message.contains("type\":\"255")) {
+                if (message.contains("type\":255")) {
                     botService.syncHandleEvent(bot, message);
                 } else {
                     botService.syncHandleTextMessage(message, bot);
