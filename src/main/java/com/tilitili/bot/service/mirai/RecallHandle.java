@@ -11,9 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
-import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,17 +19,13 @@ import java.util.Objects;
 
 @Component
 public class RecallHandle extends ExceptionRespMessageHandle {
-    @Value("${mirai.master-qq}")
-    private Long MASTER_QQ;
 
-    private final RedisCache redisCache;
     private final BotManager botManager;
     private final BotSenderMapper botSenderMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public RecallHandle(RedisCache redisCache, BotManager botManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
-        this.redisCache = redisCache;
+    public RecallHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
         this.botSenderMapper = botSenderMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
