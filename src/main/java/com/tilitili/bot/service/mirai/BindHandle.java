@@ -50,7 +50,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		String sourceKey = (String) redisCache.getValue(targetKey);
 
-		Asserts.notEquals(botUser.getType(), 0, "啊嘞，不对劲");
+		Asserts.checkEquals(botUser.getType(), 0, "啊嘞，不对劲");
 
 		long sourceUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
 		botUserMapper.updateBotUserSelective(new BotUser().setId(sourceUserId).setParentId(botUser.getId()));
