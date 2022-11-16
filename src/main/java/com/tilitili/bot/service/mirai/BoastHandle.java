@@ -17,12 +17,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class BoastHandle extends ExceptionRespMessageHandle {
 	@Value("${mirai.bot-guild-qq}")
 	private String BOT_GUILD_QQ;
 	private final BotBoastMapper botBoastMapper;
+	private final Random random = new Random(System.currentTimeMillis());
 
 	@Autowired
 	public BoastHandle(BotBoastMapper botBoastMapper) {
@@ -48,9 +50,13 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 			throw new AssertException();
 		}
 		Asserts.notBlank(text, "网络异常");
-
-		if (botBoastMapper.getBotBoastByCondition(new BotBoastQuery().setText(text).setType(type)).isEmpty()) {
-			botBoastMapper.addBotBoastSelective(new BotBoast().setText(text).setType(type));
+		if (text.contains("买不起流量包了")) {
+			List<BotBoast> boastList = botBoastMapper.getBotBoastByCondition(new BotBoastQuery().setType(type));
+			text = boastList.get(random.nextInt(boastList.size())).getText();
+		} else {
+			if (botBoastMapper.getBotBoastByCondition(new BotBoastQuery().setText(text).setType(type)).isEmpty()) {
+				botBoastMapper.addBotBoastSelective(new BotBoast().setText(text).setType(type));
+			}
 		}
 
 		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他", "mmt").contains(key);
