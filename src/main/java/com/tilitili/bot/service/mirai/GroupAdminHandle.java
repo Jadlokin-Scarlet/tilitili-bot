@@ -22,7 +22,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String key = messageAction.getKey();
+		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
 			case "管理员": return handleAdmin(messageAction);
 			case "取消管理员": return handleDeleteAdmin(messageAction);

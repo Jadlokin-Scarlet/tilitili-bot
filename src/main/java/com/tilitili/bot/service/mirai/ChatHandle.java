@@ -56,7 +56,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String key = messageAction.getKey();
+		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
 			case "换人": return handleChange(messageAction);
 			default: return handleChat(messageAction);

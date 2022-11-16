@@ -31,7 +31,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String key = messageAction.getKey();
+		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
 			case "同意群邀请": return handleMiraiGroupInviteEvent(messageAction);
 			case "同意好友邀请": return handleMiraiNewFriendEvent(messageAction);

@@ -26,7 +26,7 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotEmum bot = messageAction.getBot();
-		String key = messageAction.getKey();
+		String key = messageAction.getKeyWithoutPrefix();
 		List<Long> atList = messageAction.getAtList();
 		BotSender botSender = messageAction.getBotSender();
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR, "啊嘞，不对劲");

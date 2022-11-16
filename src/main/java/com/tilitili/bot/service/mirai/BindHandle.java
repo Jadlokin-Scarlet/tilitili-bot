@@ -37,7 +37,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		switch (messageAction.getKey()) {
+		switch (messageAction.getKeyWithoutPrefix()) {
 			case "申请合体": return handleApply(messageAction);
 			case "合体！": return handleAccept(messageAction);
 			default: throw new AssertException();
