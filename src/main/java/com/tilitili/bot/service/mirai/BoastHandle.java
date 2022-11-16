@@ -12,7 +12,6 @@ import com.tilitili.common.mapper.mysql.BotBoastMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -21,8 +20,6 @@ import java.util.Random;
 
 @Component
 public class BoastHandle extends ExceptionRespMessageHandle {
-	@Value("${mirai.bot-guild-qq}")
-	private String BOT_GUILD_QQ;
 	private final BotBoastMapper botBoastMapper;
 	private final Random random = new Random(System.currentTimeMillis());
 
