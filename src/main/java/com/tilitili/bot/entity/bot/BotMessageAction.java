@@ -62,6 +62,7 @@ public class BotMessageAction {
 
         key = "";
         value = "";
+        keyWithoutPrefix = "";
         if (isNotBlank(head)) {
             if (head.contains(" ")) {
                 int splitIndex = head.indexOf(" ");
