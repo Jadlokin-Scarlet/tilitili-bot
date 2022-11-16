@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Component
 public class BoastHandle extends ExceptionRespMessageHandle {
@@ -56,7 +55,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 
 		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他", "mmt").contains(key);
 		if (isOther) {
-			Long firstAt = atList.stream().filter(Predicate.isEqual(botQQ).or(Predicate.isEqual(BOT_GUILD_QQ)).negate()).findFirst().orElse(null);
+			Long firstAt = atList.stream().findFirst().orElse(null);
 			Asserts.notNull(firstAt, "谁？");
 			return BotMessage.simpleListMessage(Arrays.asList(
 					BotMessageChain.ofAt(firstAt),
