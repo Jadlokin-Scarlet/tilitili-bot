@@ -3,7 +3,7 @@ package com.tilitili.bot.entity.bot;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
@@ -22,7 +22,7 @@ public class BotMessageAction {
     private final BotSessionService.MiraiSession session;
     private final BotMessage botMessage;
     private final BotSender botSender;
-    private final BotUser botUser;
+    private final BotUserDTO botUser;
     private final BotEmum bot;
     private final List<String> imageList;
     private final List<Long> atList;
@@ -204,7 +204,7 @@ public class BotMessageAction {
         return this;
     }
 
-    public BotUser getBotUser() {
+    public BotUserDTO getBotUser() {
         return botUser;
     }
 

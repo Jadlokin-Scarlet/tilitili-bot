@@ -3,10 +3,10 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ import java.util.List;
 
 @Component
 public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
-	private final BotUserMapper botUserMapper;
+	private final BotUserManager botUserManager;
 	private final FunctionTalkService functionTalkService;
 
 	@Autowired
-	public ForwardMarkHandle(BotUserMapper botUserMapper, FunctionTalkService functionTalkService) {
-		this.botUserMapper = botUserMapper;
+	public ForwardMarkHandle(BotUserManager botUserManager, FunctionTalkService functionTalkService) {
+		this.botUserManager = botUserManager;
 		this.functionTalkService = functionTalkService;
 	}
 
@@ -41,7 +41,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			String text = cellList.get(1);
 
 			// 此功能只能QQ用
-			BotUser botUser = botUserMapper.getBotUserByExternalIdAndType(senderId, 0);
+			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(senderId, 0);
 			Asserts.notNull(botUser, "第%s句找不到人", i);
 
 			String senderName = botUser.getName();

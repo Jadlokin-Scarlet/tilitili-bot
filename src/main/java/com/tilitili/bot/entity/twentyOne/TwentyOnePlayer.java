@@ -1,16 +1,16 @@
 package com.tilitili.bot.entity.twentyOne;
 
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.utils.StreamUtil;
 
 import java.util.List;
 
 public class TwentyOnePlayer {
-	private BotUser botUser;
+	private BotUserDTO botUser;
 	private List<TwentyOneCardList> cardListList;
 
 	public Long getPlayerId() {
-		return botUser == null? null: botUser.getExternalId();
+		return botUser == null? null: botUser.getId();
 	}
 
 	public Integer getHaveScore() {
@@ -41,11 +41,11 @@ public class TwentyOnePlayer {
 		return this;
 	}
 
-	public BotUser getBotUser() {
+	public BotUserDTO getBotUser() {
 		return botUser;
 	}
 
-	public TwentyOnePlayer setBotUser(BotUser botUser) {
+	public TwentyOnePlayer setBotUser(BotUserDTO botUser) {
 		this.botUser = botUser;
 		return this;
 	}

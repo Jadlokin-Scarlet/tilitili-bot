@@ -19,7 +19,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -149,17 +149,17 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		BotEmum bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		ImmutableMap.Builder<Object, Object> param;
 		if (Objects.equals(botSender.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 1)
-					.put("from", botUser.getExternalId())
+					.put("from", botUser.getQq())
 					.put("fromName", botUser.getName());
 		} else if (Objects.equals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 2)
-					.put("from", botUser.getExternalId())
+					.put("from", botUser.getQq())
 					.put("fromName", botUser.getName())
 					.put("to", botSender.getGroup());
 			if (botSender.getName() != null) param.put("toName", botSender.getName());

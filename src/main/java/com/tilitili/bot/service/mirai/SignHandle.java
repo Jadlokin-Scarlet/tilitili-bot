@@ -4,8 +4,9 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotIcePrice;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.BotUserRankDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -53,8 +54,9 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleQueryScoreMessage(BotMessageAction messageAction) {
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Asserts.notNull(botUser, "啊嘞，似乎不对劲");
+		Asserts.notNull(botUser.getScore(), "未绑定");
 		List<BotItemDTO> itemDTOList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
 		int itemScore = itemDTOList.stream()
 				.filter(StreamUtil.isNotNull(BotItemDTO::getSellPrice)).filter(StreamUtil.isNotNull(BotItemDTO::getNum))
@@ -86,8 +88,10 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleSignMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
-		BotUser botUser = messageAction.getBotUser();
+		BotSender botSender = messageAction.getBotSender();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Asserts.notNull(botUser, "似乎有什么不对劲");
+		Asserts.notNull(botUser.getScore(), "未绑定");
 		Date now = new Date();
 		if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock")) {
 			log.info("别签到刷屏");
@@ -111,9 +115,9 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				return null;
 			}
 			addScore = Math.max(150 - sumScore, 0);
-			botUserMapper.updateBotUserSelective(new BotUser().setId(botUser.getId()).setLastSignTime(now));
+			botUserManager.updateBotUserSelective(botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
 			if (addScore != 0) {
-				botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), addScore);
+				botUserManager.safeUpdateScore(botUser, addScore);
 			}
 		} finally {
 			session.remove(externalIdLockKey + botUser.getId());

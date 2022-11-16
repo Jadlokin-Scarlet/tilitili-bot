@@ -6,16 +6,17 @@ import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.GroupEmum;
-import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.BotFunction;
+import com.tilitili.common.entity.BotFunctionTalk;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotTalk;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
-import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.RedisCache;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -63,26 +64,29 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         Long qq = botSender.getQq();
         Long group = botSender.getGroup();
-        BotUser botUser = messageAction.getBotUser();
+        BotUserDTO botUser = messageAction.getBotUser();
 
         String req = TalkHandle.convertMessageToString(botMessage);
-        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botUser.getExternalId());
+        List<BotFunctionTalk> functionTalkList = botFunctionTalkMapper.getRespListByReq(req, botSender.getId(), botUser.getQq());
         if (!functionTalkList.isEmpty()) {
             BotFunctionTalk functionTalk = functionTalkList.get(random.nextInt(functionTalkList.size()));
             BotFunction botFunction = botFunctionMapper.getBotFunctionById(functionTalk.getFunctionId());
-            if (botUser.getScore() < botFunction.getScore()) {
-                return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
+            if (botFunction.getScore() > 0) {
+                Asserts.notNull(botUser.getScore(), "未绑定");
+                if (botUser.getScore() < botFunction.getScore()) {
+                    return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
+                }
             }
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
-            String redisKey = timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getExternalId();
+            String redisKey = timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
             Long theTimeNum = redisCache.increment(redisKey, 1L);
             redisCache.expire(redisKey, 60 * 60 * 24);
             if (theTimeNum > botFunction.getTimeNum()) {
                 return BotMessage.simpleTextMessage("不要太贪心哦。");
             }
             if (botFunction.getScore() > 0) {
-                botUserManager.safeUpdateScore(botUser.getId(), botUser.getScore(), - botFunction.getScore());
+                botUserManager.safeUpdateScore(botUser, - botFunction.getScore());
             }
             return respMessage.setQuote(messageAction.getMessageId());
         }

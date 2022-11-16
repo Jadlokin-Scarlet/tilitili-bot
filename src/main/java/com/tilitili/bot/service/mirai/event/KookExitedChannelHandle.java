@@ -5,7 +5,7 @@ import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.KookExitedChannel;
@@ -46,7 +46,7 @@ public class KookExitedChannelHandle extends KookAutoEventHandle<KookExitedChann
 
 		BotSender botSender = botSenderMapper.getBotSenderByKookChannelId(channelId);
 		Asserts.notNull(botSender, "找不到频道");
-		BotUser botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUser().setExternalId(externalId));
+		BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setKookUserId(externalId).setType(2));
 		Asserts.notNull(botUser, "找不到用户");
 
 		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");

@@ -1,11 +1,13 @@
 package com.tilitili.bot.service;
 
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.QQUtil;
@@ -22,10 +24,12 @@ import java.util.regex.Pattern;
 @Service
 public class FunctionTalkService {
 	private final BotManager botManager;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public FunctionTalkService(BotManager botManager) {
+	public FunctionTalkService(BotManager botManager, BotUserManager botUserManager) {
 		this.botManager = botManager;
+		this.botUserManager = botUserManager;
 	}
 
 	public static String convertMessageToString(BotMessage botMessage) {
@@ -63,13 +67,24 @@ public class FunctionTalkService {
 			case "at": {
 				String qq = StringUtils.patten1(",qq=(\\d+|all)", cq);
 				if (!Objects.equals(qq, "all")) {
-					botMessageChain.add(BotMessageChain.ofAt(Long.valueOf(qq)));
+					BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(Long.valueOf(qq), BotUserConstant.USER_TYPE_QQ);
+					botMessageChain.add(BotMessageChain.ofAt(botUser.getId()));
 				}
 				break;
 			}
 			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));break;
-			case "memberName": botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));break;
-			case "portrait": botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq))));break;
+			case "memberName": {
+				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
+				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+				botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(botUser.getId()));
+				break;
+			}
+			case "portrait": {
+				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
+				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser.getId()));
+				break;
+			}
 		}
 	}
 
@@ -78,7 +93,7 @@ public class FunctionTalkService {
 		for (BotMessageChain botMessageChain : botMessageChainList) {
 			switch (botMessageChain.getType()) {
 				case "memberName": {
-					BotUser botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUser().setExternalId(botMessageChain.getTarget()));
+					BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botMessageChain.getTarget());
 					Asserts.notNull(botUser, "啊嘞，不对劲");
 					Asserts.notNull(botUser.getName(), "查无此人");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_PLAIN);

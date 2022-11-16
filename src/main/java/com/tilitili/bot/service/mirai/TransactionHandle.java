@@ -4,13 +4,14 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
-import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
@@ -29,14 +30,16 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
 	private final BotIcePriceManager botIcePriceManager;
 	private final BotUserItemMappingManager botUserItemMappingManager;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager) {
+	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager) {
 		this.botItemMapper = botItemMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserMapper = botUserMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botIcePriceManager = botIcePriceManager;
+		this.botUserManager = botUserManager;
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleBag(BotMessageAction messageAction) {
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		List<BotItemDTO> itemList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
 		List<String> resultList = new ArrayList<>();
 		if (itemList.isEmpty()) {
@@ -102,7 +105,8 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Asserts.notNull(botUser.getScore(), "未绑定");
 		String value = messageAction.getValue();
 		Asserts.notBlank(value, "格式错啦(物品名)");
 		List<BotItemDTO> itemList;
@@ -136,10 +140,10 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 		if (itemList.size() == 1) {
 			String numMessage = (-subNum) + "个";
-			String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
+			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
 			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + itemList.get(0).getName(), nowScore));
 		} else {
-			String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
+			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
 			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore));
 		}
 	}
@@ -154,13 +158,14 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.isNumber(itemNumStr, "格式错啦(物品数量)");
 		int itemNum = Integer.parseInt(itemNumStr);
 
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Asserts.notNull(botUser.getScore(), "未绑定");
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥");
 		Integer subNum = this.buyItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
 		String numMessage = subNum == 1 ? "" : subNum + "个";
-		String nowScore = String.valueOf(botUserMapper.getBotUserById(botUser.getId()).getScore());
+		String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
 		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
 

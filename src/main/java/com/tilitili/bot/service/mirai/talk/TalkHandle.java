@@ -7,7 +7,7 @@ import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTalk;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -41,11 +41,11 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleAssertException(BotMessageAction messageAction, AssertException e) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotUser botUser = messageAction.getBotUser();
-		Long qqOrTinyId = botUser.getExternalId();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 
-		String senderReqKey = reqKey + qqOrTinyId;
-		String senderStatusKey = statusKey + qqOrTinyId;
+		String senderReqKey = reqKey + userId;
+		String senderStatusKey = statusKey + userId;
 
 		session.remove(senderStatusKey);
 		session.remove(senderReqKey);
@@ -56,7 +56,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		List<String> imageList = messageAction.getImageList();
@@ -66,10 +66,10 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 //		Long guildId = botMessage.getGuildId();
 //		Long channelId = botMessage.getChannelId();
 //		Long tinyId = botMessage.getTinyId();
-		Long qqOrTinyId = botUser.getExternalId();
+		Long userId = botUser.getId();
 
-		String senderReqKey = reqKey + qqOrTinyId;
-		String senderStatusKey = statusKey + qqOrTinyId;
+		String senderReqKey = reqKey + userId;
+		String senderStatusKey = statusKey + userId;
 
 		String value = messageAction.getValueOrVirtualValue() == null? "": messageAction.getValueOrVirtualValue();
 		String reqStr = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
@@ -144,10 +144,10 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public String isThisTask(BotMessageAction botMessageAction) {
-		BotUser botUser = botMessageAction.getBotUser();
-		Long qqOrTinyId = botUser.getExternalId();
+		BotUserDTO botUser = botMessageAction.getBotUser();
+		Long userId = botUser.getId();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();
-		String senderStatusKey = statusKey + qqOrTinyId;
+		String senderStatusKey = statusKey + userId;
 		if (session.containsKey(senderStatusKey)) {
 			return "对话";
 		}

@@ -126,10 +126,9 @@ public class BotService {
             // 获取sender
             BotSender botSender = botMessage.getBotSender();
             if (!Objects.equals(botSender.getBot(), bot.id)) return;
-            BotUser botUser = botMessage.getBotUser();
 
             // 获取用户锁，并保存user消息
-            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getExternalId(), true), "听我说你先别急。");
+            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
             // 校验权限
             boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
             if (!hasHelp) {
@@ -188,8 +187,8 @@ public class BotService {
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
         } finally {
-            if (botMessage != null && botMessage.getBotUser() != null && botMessage.getBotUser().getExternalId() != null) {
-                userIdLockMap.remove(botMessage.getBotUser().getExternalId());
+            if (botMessage != null && botMessage.getBotUser() != null && botMessage.getBotUser().getId() != null) {
+                userIdLockMap.remove(botMessage.getBotUser().getId());
             }
         }
     }

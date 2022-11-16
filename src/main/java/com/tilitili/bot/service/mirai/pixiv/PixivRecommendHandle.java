@@ -8,6 +8,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.PixivLoginUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.pixiv.PixivRecommendIllust;
@@ -51,7 +52,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotMessage botMessage = messageAction.getBotMessage();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 		log.debug("PixivRecommendHandle start");
 

@@ -5,7 +5,7 @@ import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.BotPixivSendRecord;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
@@ -78,7 +78,7 @@ public class PixivCacheService {
 
 	private BotMessage sendPixivImage(BotMessageAction messageAction, String searchKey, String r18) {
 		BotSender botSender = messageAction.getBotSender();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		String messageId = messageAction.getMessageId();
 		Long senderId = botSender.getId();
 		Long userId = botUser.getId();
@@ -151,7 +151,7 @@ public class PixivCacheService {
 
 	private BotMessage sendPixivUserImage(BotMessageAction messageAction, String userName, String r18) {
 		BotSender botSender = messageAction.getBotSender();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long senderId = botSender.getId();
 		Long botUserId = botUser.getId();
 		boolean canSS = !"safe".equals(r18);

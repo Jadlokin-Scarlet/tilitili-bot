@@ -5,7 +5,7 @@ import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.KookJoinedChannel;
@@ -41,12 +41,12 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 	@Override
 	public void handleEvent(BotEmum bot, KookJoinedChannel event) throws Exception {
 		log.info(Gsons.toJson(event));
-		Long externalId = event.getUserId();
+		Long kookUserId = event.getUserId();
 		Long channelId = event.getChannelId();
 
 		BotSender botSender = botSenderMapper.getBotSenderByKookChannelId(channelId);
 		Asserts.notNull(botSender, "找不到频道");
-		BotUser botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUser().setExternalId(externalId));
+		BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setKookUserId(kookUserId));
 		Asserts.notNull(botUser, "找不到用户");
 
 		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");

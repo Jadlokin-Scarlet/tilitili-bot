@@ -4,8 +4,8 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.PixivLoginUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.manager.PixivCacheManager;
@@ -38,7 +38,7 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotMessage botMessage = messageAction.getBotMessage();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());

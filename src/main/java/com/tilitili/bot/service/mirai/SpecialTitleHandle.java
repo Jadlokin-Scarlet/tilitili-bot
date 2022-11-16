@@ -5,7 +5,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotFriend;
 import com.tilitili.common.entity.view.bot.BotGroup;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -30,14 +30,14 @@ public class SpecialTitleHandle extends ExceptionRespMessageToSenderHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotEmum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		String specialTitle = messageAction.getValue();
 		List<Long> atList = messageAction.getAtList();
 		Asserts.notBlank(specialTitle, "格式错啦(头衔)");
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
 
 		Long group = botSender.getGroup();
-		Long qq = botUser.getExternalId();
+		Long qq = botUser.getQq();
 		if (CollectionUtils.isNotEmpty(atList)) {
 			qq = atList.get(0);
 		}

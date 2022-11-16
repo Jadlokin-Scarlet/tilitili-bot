@@ -5,7 +5,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotCalendarMapper;
 import com.tilitili.common.utils.AESUtils;
@@ -38,7 +38,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String body = messageAction.getBody();
         BotSender botSender = messageAction.getBotSender();
-        BotUser botUser = messageAction.getBotUser();
+        BotUserDTO botUser = messageAction.getBotUser();
         List<Long> atList = messageAction.getAtList();
         String sendType = botSender.getSendType();
 
@@ -67,7 +67,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
             respAtList.addAll(atList);
         } else if (!SendTypeEmum.FRIEND_MESSAGE_STR.equals(sendType)) {
-            respAtList.add(botUser.getExternalId());
+            respAtList.add(botUser.getId());
         }
 
         Calendar calendar = Calendar.getInstance();

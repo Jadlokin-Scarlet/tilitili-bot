@@ -5,12 +5,14 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.FishPlayerConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotUserItemMappingManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotUserMapper botUserMapper;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapper botUserMapper) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapper botUserMapper, BotUserManager botUserManager) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -42,6 +45,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botUserMapper = botUserMapper;
+		this.botUserManager = botUserManager;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -57,7 +61,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage getStatus(BotMessageAction messageAction) {
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
@@ -76,7 +80,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleEnd(BotMessageAction messageAction) {
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
@@ -125,7 +129,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (price != null && price > 0) {
-			botUserMapper.safeUpdateScore(userId, price);
+			botUserManager.safeUpdateScore(botUser, price);
 			resultList.add(BotMessageChain.ofPlain(String.format("(积分+%s)", price)));
 		}
 
@@ -144,7 +148,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		BotUser botUser = messageAction.getBotUser();
+		BotUserDTO botUser = messageAction.getBotUser();
 		Long senderId = botSender.getId();
 		Long userId = botUser.getId();
 
