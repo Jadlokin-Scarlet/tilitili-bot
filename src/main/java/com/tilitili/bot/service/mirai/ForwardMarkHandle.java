@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
@@ -28,6 +29,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		BotSender botSender = messageAction.getBotSender();
 		String body = messageAction.getBody();
 		Asserts.notBlank(body, "格式错啦(台本)");
 		String[] rowList = body.split("\n");
@@ -46,7 +48,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 
 			String senderName = botUser.getName();
 			nodeList.add(new BotMessageNode().setSenderId(senderId).setSenderName(senderName).setMessageChain(
-					functionTalkService.convertCqToMessageChain(text)
+					functionTalkService.convertCqToMessageChain(botSender, text)
 			));
 		}
 		return BotMessage.simpleForwardMessage(nodeList);

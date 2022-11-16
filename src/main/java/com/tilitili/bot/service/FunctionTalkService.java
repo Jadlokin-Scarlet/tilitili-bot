@@ -1,6 +1,5 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -36,7 +35,7 @@ public class FunctionTalkService {
 		return Gsons.toJson(BotMessage.simpleListMessage(botMessage.getBotMessageChainList()));
 	}
 
-	public List<BotMessageChain> convertCqToMessageChain(String messageStr) {
+	public List<BotMessageChain> convertCqToMessageChain(BotSender botSender, String messageStr) {
 		String[] textList = messageStr.split("\\[CQ:\\w+[^\\[\\]]*]");
 		Matcher cqMatcher = Pattern.compile("\\[CQ:\\w+[^\\[\\]]*]").matcher(messageStr);
 
@@ -47,17 +46,18 @@ public class FunctionTalkService {
 				botMessageChain.add(BotMessageChain.ofPlain(s));
 			}
 			if (cqMatcher.find()) {
-				findNextCqToChain(cqMatcher, botMessageChain);
+				findNextCqToChain(botSender, cqMatcher, botMessageChain);
 			}
 		}
 
 		while (cqMatcher.find()) {
-			findNextCqToChain(cqMatcher, botMessageChain);
+			findNextCqToChain(botSender, cqMatcher, botMessageChain);
 		}
 		return botMessageChain;
 	}
 
-	private void findNextCqToChain(Matcher cqMatcher, List<BotMessageChain> botMessageChain) {
+	private void findNextCqToChain(BotSender botSender, Matcher cqMatcher, List<BotMessageChain> botMessageChain) {
+		BotEmum bot = BotEmum.getBotById(botSender.getBot());
 		String cq = cqMatcher.group();
 		String messageType = StringUtils.patten1("CQ:(\\w+)", cq);
 		Asserts.notBlank(messageType, "gocq正则解析异常, text=%s", cq);
@@ -67,7 +67,7 @@ public class FunctionTalkService {
 			case "at": {
 				String qq = StringUtils.patten1(",qq=(\\d+|all)", cq);
 				if (!Objects.equals(qq, "all")) {
-					BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(Long.valueOf(qq), BotUserConstant.USER_TYPE_QQ);
+					BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(Long.valueOf(qq)));
 					botMessageChain.add(BotMessageChain.ofAt(botUser.getId()));
 				}
 				break;
@@ -75,13 +75,13 @@ public class FunctionTalkService {
 			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));break;
 			case "memberName": {
 				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
-				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(qq));
 				botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(botUser.getId()));
 				break;
 			}
 			case "portrait": {
 				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
-				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(qq));
 				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser.getId()));
 				break;
 			}

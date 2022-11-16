@@ -98,35 +98,39 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
 		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score).setTimeNum(timeNum);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
-		List<Long> botSenderIdList = new ArrayList<>();
+		List<BotSender> botSenderList = new ArrayList<>();
 		if (StringUtils.isNotBlank(friendList)) {
-			botSenderIdList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
 					.map(botSenderMapper::getBotSenderByQq)
-					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(groupList)) {
-			botSenderIdList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
 					.map(botSenderMapper::getBotSenderByGroup)
-					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(guildList)) {
-			botSenderIdList.addAll(Arrays.stream(guildList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(guildList.split(",")).map(Long::valueOf)
 					.flatMap(guildId -> botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setGuildId(guildId).setStatus(0)).stream())
-					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(channelList)) {
-			botSenderIdList.addAll(Arrays.stream(channelList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(channelList.split(",")).map(Long::valueOf)
 					.map(botSenderMapper::getBotSenderByChannelId)
-					.filter(Objects::nonNull).map(BotSender::getId).collect(Collectors.toList()));
+					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
 			Asserts.notBlank(randomTalkDTO.getResp(), "回复不能为空");
-			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getReq())));
-			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(randomTalkDTO.getResp())));
-			for (Long botSenderId : botSenderIdList) {
-				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSenderId).setBlackList(randomTalkDTO.getBlackList());
+			if (botSenderList.isEmpty()) {
+				continue;
+			}
+			BotSender firstBotSender = botSenderList.get(0);
+			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(firstBotSender, randomTalkDTO.getReq())));
+			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(firstBotSender, randomTalkDTO.getResp())));
+			for (BotSender botSender : botSenderList) {
+				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}
