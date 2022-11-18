@@ -9,7 +9,6 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

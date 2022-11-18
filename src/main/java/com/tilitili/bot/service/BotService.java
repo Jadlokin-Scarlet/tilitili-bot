@@ -103,7 +103,10 @@ public class BotService {
             } else {
                 throw new AssertException();
             }
-            Asserts.isTrue(eventHandleMap.containsKey(handleName), "未定义的事件=%s", handleName);
+            if (!eventHandleMap.containsKey(handleName)) {
+                log.warn("未定义的事件={}", handleName);
+                return;
+            }
             BaseEventHandle messageHandle = eventHandleMap.get(handleName);
             messageHandle.handleEventStr(bot, message);
         } catch (AssertException e) {

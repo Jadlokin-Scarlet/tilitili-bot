@@ -7,10 +7,13 @@ import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeSubject;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
-import com.tilitili.common.utils.Asserts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
+@Slf4j
 @Component
 public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent> {
 	private final BotManager botManager;
@@ -33,9 +36,18 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(subject.getId());
 		}
-		Asserts.checkEquals(botSender.getBot(), bot.id, "bot不匹配，跳过");
-		Asserts.notEquals(event.getFromId(), bot.qq, "发起者为本人，跳过");
-		Asserts.checkEquals(event.getTarget(), bot.qq, "目标不为bot，跳过");
+		if (!Objects.equals(botSender.getBot(), bot.id)) {
+			log.info("bot不匹配，跳过");
+			return;
+		}
+		if (Objects.equals(event.getFromId(), bot.qq)) {
+			log.info("发起者为本人，跳过");
+			return;
+		}
+		if (!Objects.equals(event.getTarget(), bot.qq)) {
+			log.info("目标不为bot，跳过");
+			return;
+		}
 
 		botManager.sendNudge(bot, botSender, event.getFromId());
 	}

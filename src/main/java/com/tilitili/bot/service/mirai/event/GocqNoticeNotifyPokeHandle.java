@@ -6,11 +6,12 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.mirai.event.GocqNoticeNotifyPoke;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -34,9 +35,19 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 		} else {
 			botSender = botSenderMapper.getBotSenderByQq(event.getSenderId());
 		}
-		Asserts.checkEquals(botSender.getBot(), bot.id, "bot不匹配，跳过");
-		Asserts.notEquals(event.getUserId(), bot.qq, "发起者为本人，跳过");
-		Asserts.checkEquals(event.getTargetId(), bot.qq, "目标不为bot，跳过");
+
+		if (!Objects.equals(botSender.getBot(), bot.id)) {
+			log.info("bot不匹配，跳过");
+			return;
+		}
+		if (Objects.equals(event.getUserId(), bot.qq)) {
+			log.info("发起者为本人，跳过");
+			return;
+		}
+		if (!Objects.equals(event.getTargetId(), bot.qq)) {
+			log.info("目标不为bot，跳过");
+			return;
+		}
 
 		botManager.sendNudge(bot, botSender, event.getUserId());
 	}
