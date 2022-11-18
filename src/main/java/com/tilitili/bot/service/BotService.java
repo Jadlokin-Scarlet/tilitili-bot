@@ -118,17 +118,10 @@ public class BotService {
         BotMessage botMessage = null;
         try {
             // 解析message
-            botMessage = this.getBotMessageFromStr(message, bot);
+            botMessage = botManager.handleWsMessageToBotMessage(bot, message);
             if (botMessage == null) return;
-            botMessage.setBotUser(botManager.addOrUpdateBotUser(bot, botMessage.getBotSender(), botMessage.getBotUser()));
-            botMessageRecordManager.asyncLogRecord(message, botMessage);
-
-            // 获取sender
+            // 获取sender，校验权限
             BotSender botSender = botMessage.getBotSender();
-            if (!Objects.equals(botSender.getBot(), bot.id)) return;
-
-            // 获取用户锁，并保存user消息
-            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
             // 校验权限
             boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
             if (!hasHelp) {
@@ -137,6 +130,11 @@ public class BotService {
             }
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
+            // 消息记录
+            botMessageRecordManager.asyncLogRecord(message, botMessage);
+
+            // 获取用户锁
+            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
             // 查询匹配任务列表
@@ -173,11 +171,11 @@ public class BotService {
             if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
                 return;
             }
-            // 如果最后是消息，则回复
+            // 没设置发送者，就默认原路发回
             if (respMessage.getBotSender() == null) {
                 respMessage.setBotSender(botSender);
             }
-
+            // 如果最后是消息，则回复
             String messageId = botManager.sendMessage(respMessage);
             if (messageId != null) {
                 session.put(lastMessageIdKey, messageId);
@@ -190,21 +188,6 @@ public class BotService {
             if (botMessage != null && botMessage.getBotUser() != null && botMessage.getBotUser().getId() != null) {
                 userIdLockMap.remove(botMessage.getBotUser().getId());
             }
-        }
-    }
-
-    private BotMessage getBotMessageFromStr(String message, BotEmum botEmum) {
-        if (BotEmum.TYPE_MIRAI.equals(botEmum.type)) {
-            return miraiManager.handleMiraiWsMessageToBotMessage(message);
-        } else if (BotEmum.TYPE_GOCQ.equals(botEmum.type)) {
-            if (message.contains("post_type\":\"meta_event")) return null;
-            if (message.contains("post_type\":\"notice")) return null;
-            if (message.contains("post_type\":\"request")) return null;
-            return goCqhttpManager.handleGoCqhttpWsMessageToBotMessage(message);
-        } else if (BotEmum.TYPE_KOOK.equals(botEmum.type)) {
-            return kookManager.handleKookWsMessageToBotMessage(message);
-        } else {
-            throw new AssertException();
         }
     }
 

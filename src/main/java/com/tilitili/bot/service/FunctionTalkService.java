@@ -65,23 +65,23 @@ public class FunctionTalkService {
 		switch (messageType) {
 			case "image": botMessageChain.add(BotMessageChain.ofImage(StringUtils.patten1(",url=([^=,\\]]+)", cq)));break;
 			case "at": {
-				String qq = StringUtils.patten1(",qq=(\\d+|all)", cq);
-				if (!Objects.equals(qq, "all")) {
-					BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(Long.valueOf(qq)));
+				String externalId = StringUtils.patten1(",qq=(\\d+|all)", cq);
+				if (!Objects.equals(externalId, "all")) {
+					BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, Long.valueOf(externalId));
 					botMessageChain.add(BotMessageChain.ofAt(botUser.getId()));
 				}
 				break;
 			}
 			case "face": botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(StringUtils.patten1(",id=([0-9\\-]+)", cq))));break;
 			case "memberName": {
-				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
-				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(qq));
+				Long externalId = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
+				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, externalId);
 				botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(botUser.getId()));
 				break;
 			}
 			case "portrait": {
-				Long qq = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
-				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setQq(qq));
+				Long externalId = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
+				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, externalId);
 				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser.getId()));
 				break;
 			}
@@ -101,8 +101,11 @@ public class FunctionTalkService {
 					break;
 				}
 				case "portrait": {
+					BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botMessageChain.getTarget());
+					Asserts.notNull(botUser, "啊嘞，不对劲");
+					Asserts.notNull(botUser.getFace(), "查无此人");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_IMAGE);
-					botMessageChain.setUrl(QQUtil.getFriendPortrait(botMessageChain.getTarget()));
+					botMessageChain.setUrl(botUser.getFace());
 				}
 			}
 		}
