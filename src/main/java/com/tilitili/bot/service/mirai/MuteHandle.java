@@ -6,8 +6,10 @@ import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,10 +19,12 @@ import java.util.List;
 @Component
 public class MuteHandle extends ExceptionRespMessageHandle {
 	private final BotManager botManager;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public MuteHandle(BotManager botManager) {
+	public MuteHandle(BotManager botManager, BotUserManager botUserManager) {
 		this.botManager = botManager;
+		this.botUserManager = botUserManager;
 	}
 
 	@Override
@@ -30,9 +34,9 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 		List<Long> atList = messageAction.getAtList();
 		BotSender botSender = messageAction.getBotSender();
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
-		Long group = botSender.getGroup();
 		Asserts.notEmpty(atList, "格式不对喵(at)");
-		Long at = atList.get(0);
+		Long atUserId = atList.get(0);
+		BotUserDTO atUser = botUserManager.getBotUserByIdWithParent(atUserId);
 
 		if ("禁言".equals(key)) {
 			String timeStr = messageAction.getValueOrDefault("60");
@@ -40,12 +44,12 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 			int time = Integer.parseInt(timeStr);
 			Asserts.isTrue(time <= 60, "最多一分钟喵");
 			if (!BotUserConstant.MASTER_USER_ID.equals(messageAction.getBotUser().getId())) {
-				Asserts.notEquals(at, 545459363L, "不准喵");
+				Asserts.notEquals(atUserId, BotUserConstant.MASTER_USER_ID, "不准喵");
 			}
 
-			botManager.muteMember(bot, group, at, time);
+			botManager.muteMember(bot, botSender, atUser, time);
 		} else if ("解除禁言".equals(key)) {
-			botManager.unMuteMember(bot, group, at);
+			botManager.unMuteMember(bot, botSender, atUser);
 		}
 
 		return BotMessage.simpleTextMessage("好了喵");

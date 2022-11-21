@@ -16,6 +16,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
@@ -92,8 +93,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList();
+		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
 		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
-		boolean hasAtBot = atList.contains(bot.qq) || (bot.tinyId != null && atList.contains(bot.tinyId));
+		boolean hasAtBot = !atList.isEmpty();
 		boolean isRandomReply = random == 0 && messageAction.getBotSender().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;

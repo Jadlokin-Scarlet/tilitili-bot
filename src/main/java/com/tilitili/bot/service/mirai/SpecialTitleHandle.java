@@ -6,10 +6,9 @@ import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.view.bot.BotFriend;
-import com.tilitili.common.entity.view.bot.BotGroup;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +19,12 @@ import java.util.List;
 @Component
 public class SpecialTitleHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotManager botManager;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public SpecialTitleHandle(BotManager botManager) {
+	public SpecialTitleHandle(BotManager botManager, BotUserManager botUserManager) {
 		this.botManager = botManager;
+		this.botUserManager = botUserManager;
 	}
 
 	@Override
@@ -37,11 +38,10 @@ public class SpecialTitleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
 
 		Long group = botSender.getGroup();
-		Long qq = botUser.getQq();
 		if (CollectionUtils.isNotEmpty(atList)) {
-			qq = atList.get(0);
+			botUser = botUserManager.getBotUserByIdWithParent(atList.get(0));
 		}
-		botManager.changeMemberInfo(bot, new BotFriend().setGroup(new BotGroup().setGroup(group)).setQq(qq).setSpecialTitle(specialTitle));
+		botManager.changeMemberInfo(bot, botSender, botUser, null, specialTitle);
 		return BotMessage.simpleTextMessage("搞定√");
 	}
 }
