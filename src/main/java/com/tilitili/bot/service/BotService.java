@@ -10,17 +10,20 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
-import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.BotMessageRecord;
+import com.tilitili.common.entity.BotSendMessageRecord;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
-import com.tilitili.common.entity.view.bot.kook.*;
+import com.tilitili.common.entity.view.bot.kook.KookEventExtra;
+import com.tilitili.common.entity.view.bot.kook.KookWsEvent;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
@@ -46,33 +49,21 @@ public class BotService {
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
-    private final BotUserManager botUserManager;
     private final Gson gson;
-    private final BotUserMapper botUserMapper;
     private final BotMessageRecordManager botMessageRecordManager;
-    private final BotSenderManager botSenderManager;
-    private final MiraiManager miraiManager;
-    private final GoCqhttpManager goCqhttpManager;
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
-    private final KookManager kookManager;
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotUserManager botUserManager, BotUserMapper botUserMapper, BotMessageRecordManager botMessageRecordManager, BotSenderManager botSenderManager, MiraiManager miraiManager, GoCqhttpManager goCqhttpManager, BotSenderTaskMappingManager botSenderTaskMappingManager, KookManager kookManager, BotMessageRecordMapper botMessageRecordMapper) {
+    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.eventHandleMap = eventHandleMap;
         this.botSessionService = botSessionService;
         this.botTaskMapper = botTaskMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
-        this.botUserManager = botUserManager;
-        this.botUserMapper = botUserMapper;
         this.botMessageRecordManager = botMessageRecordManager;
-        this.botSenderManager = botSenderManager;
-        this.miraiManager = miraiManager;
-        this.goCqhttpManager = goCqhttpManager;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
-        this.kookManager = kookManager;
         this.botMessageRecordMapper = botMessageRecordMapper;
         gson = new Gson();
     }
