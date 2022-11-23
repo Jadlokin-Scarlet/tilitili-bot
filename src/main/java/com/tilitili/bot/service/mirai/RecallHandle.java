@@ -42,18 +42,18 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
         if (quoteMessageId != null) {
             Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(BotEmum.getBotById(bot), quoteMessageId);
+            botManager.recallMessage(BotEmum.getBotById(bot), messageAction.getBotSender(), quoteMessageId);
             return BotMessage.emptyMessage();
         } else if (recallAll) {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
                 BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                botManager.recallMessage(BotEmum.getBotById(botSender.getBot()), sendMessage.getMessageId());
+                botManager.recallMessage(BotEmum.getBotById(botSender.getBot()), botSender, sendMessage.getMessageId());
             }
             return BotMessage.simpleTextMessage("搞定");
         } else if (session.containsKey(BotService.lastMessageIdKey)) {
             Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(BotEmum.getBotById(bot), session.get(BotService.lastMessageIdKey));
+            botManager.recallMessage(BotEmum.getBotById(bot), messageAction.getBotSender(), session.get(BotService.lastMessageIdKey));
             return BotMessage.emptyMessage();
         }
 
