@@ -101,7 +101,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		for (BotItemDTO botItemDTO : itemList) {
 			resultList.add(botItemDTO.getName() + (botItemDTO.getNum() > 1? "*" + botItemDTO.getNum(): ""));
 		}
-		return BotMessage.simpleTextMessage(String.join("，", resultList));
+		return BotMessage.simpleTextMessage(String.join(",", resultList));
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
@@ -122,7 +122,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			}
 			itemList = Collections.singletonList(itemDTO);
 		} else {
-			String[] itemStrList = value.split("，");
+			String[] itemStrList = value.split("[，,]");
 			itemList = Arrays.stream(itemStrList).map(itemStr -> new BotItemDTO()
 					.setName(itemStr.split("\\*")[0])
 					.setNum(itemStr.contains("*") ? Integer.parseInt(itemStr.split("\\*")[1]) : 1)

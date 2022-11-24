@@ -1,5 +1,6 @@
 package com.tilitili.bot;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
@@ -32,10 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @SpringBootTest
@@ -63,6 +61,30 @@ class StartApplicationTest {
     private PixivCacheService pixivCacheService;
     @Autowired
     private FishConfigMapper fishConfigMapper;
+
+    public static void main(String[] args) {
+        System.out.println(compare("石头", "剪刀"));
+        System.out.println(compare("石头", "石头"));
+        System.out.println(compare("石头", "布"));
+        System.out.println(compare("剪刀", "剪刀"));
+        System.out.println(compare("剪刀", "石头"));
+        System.out.println(compare("剪刀", "布"));
+        System.out.println(compare("布", "剪刀"));
+        System.out.println(compare("布", "石头"));
+        System.out.println(compare("布", "布"));
+    }
+
+    private final static Map<String, Integer> map = ImmutableMap.of("石头", 0, "剪刀", 1, "布", 2);
+    private final static Map<String, Integer> map2 = new HashMap<String, Integer>(){{
+        put("石头", 0);
+        put("剪刀", 1);
+        put("布", 2);
+    }};
+    private static Integer compare(String as, String bs) {
+        Integer a = map.get(as);
+        Integer b = map.get(bs);
+        return Integer.compare((a + (4 - b)) % 3, 1);
+    }
 
     @Test
     void main() throws UnsupportedEncodingException {
@@ -256,10 +278,6 @@ class StartApplicationTest {
         redisCache.addMapValue("test", "test", "lock");
         System.out.println(redisCache.removeMapValue("test", "test"));
         System.out.println(redisCache.removeMapValue("test", "test"));
-    }
-    public static void main(String[] args) {
-        String s = "{\"syncId\":\"-1\",\"data\":{\"type\":\"BotInvitedJoinGroupRequestEvent\",\"eventId\":1661416058802410,\"message\":\"\",\"fromId\":545459363,\"groupId\":458232866,\"groupName\":\"【东方恋迷踪】超异域恋恋连结\",\"nick\":\"Jadlokin_Scarlet\"}}";
-        StartApplicationTest.<MiraiBotInvitedJoinGroupRequestEvent>run(s);
     }
 
     private static <T> T run(String s) {

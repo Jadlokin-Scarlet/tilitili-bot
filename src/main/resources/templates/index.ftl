@@ -9,7 +9,7 @@
 <#--	<div style="text-align: center; margin: auto; position: absolute; top: 50%;left: 50%;transform:translate(-50%,-50%);">-->
 	<div style="width:600px;height:800px;display:table;">
 		<div style="text-align:center;display:table-cell;vertical-align:middle;">
-			<span>${msg}</span>
+			<span style="word-wrap:break-word;width: 600px">${msg}</span>
 		</div>
 	</div>
 </body>
