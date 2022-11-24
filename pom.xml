@@ -23,11 +23,6 @@
                 <updatePolicy>always</updatePolicy>
             </snapshots>
         </repository>
-        <repository>
-            <id>mvnrepository</id>
-            <name>mvnrepository</name>
-            <url>https://mvnrepository.com</url>
-        </repository>
     </repositories>
 
     <properties>
@@ -88,16 +83,6 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-freemarker</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>core-renderer</artifactId>
-            <version>R8</version>
         </dependency>
     </dependencies>
 
