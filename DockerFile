@@ -1,6 +1,8 @@
 From hub.c.163.com/library/java:8-jre
 
+COPY SimSun.ttf /usr/share/fonts/
 COPY SimSun.ttf /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/fonts/SimSun.ttf
+#apt-get update && apt install fontconfig -y && fc-cache -f
 
 COPY libAquesTalk10.so.1 /usr/lib/
 COPY libAqKanji2Koe.so.4 /usr/lib/
