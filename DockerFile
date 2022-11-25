@@ -1,5 +1,7 @@
 From hub.c.163.com/library/java:8-jre
 
+COPY /usr/share/fonts/SimSun.ttf /usr/share/fonts/
+
 COPY libAquesTalk10.so.1 /usr/lib/
 COPY libAqKanji2Koe.so.4 /usr/lib/
 COPY libAqUsrDic.so.4 /usr/lib/
