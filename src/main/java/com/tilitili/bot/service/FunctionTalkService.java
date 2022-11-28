@@ -84,6 +84,7 @@ public class FunctionTalkService {
 				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser.getId()));
 				break;
 			}
+			case "enter": botMessageChain.add(BotMessageChain.ofPlain("\n"));
 		}
 	}
 
