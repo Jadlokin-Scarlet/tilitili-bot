@@ -88,7 +88,11 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		if (botItem.getEndTime() != null) {
 			resultList.add("有效期至：" + DateUtils.formatDateYMDHMS(botItem.getEndTime()));
 		}
-		return BotMessage.simpleTextMessage(String.join("\n", resultList));
+		if (botItem.getIcon() == null) {
+			return BotMessage.simpleTextMessage(String.join("\n", resultList));
+		} else {
+			return BotMessage.simpleImageTextMessage(String.join("\n", resultList), botItem.getIcon());
+		}
 	}
 
 	private BotMessage handleBag(BotMessageAction messageAction) {
