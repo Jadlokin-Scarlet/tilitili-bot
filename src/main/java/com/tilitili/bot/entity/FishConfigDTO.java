@@ -21,6 +21,8 @@ public class FishConfigDTO {
 	private Integer cost;
 	@ExcelProperty(value = "稀有度")
 	private String itemGrade;
+	@ExcelProperty(value = "图片")
+	private String image;
 
 	public String getScaleStr() {
 		return scaleStr;
@@ -101,5 +103,13 @@ public class FishConfigDTO {
 	public FishConfigDTO setItemGrade(String itemGrade) {
 		this.itemGrade = itemGrade;
 		return this;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 }

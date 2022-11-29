@@ -119,13 +119,16 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Integer cost = fishConfig.getCost();
 
 		List<BotMessageChain> resultList = new ArrayList<>();
+		String icon;
 		if (itemId != null) {
 			BotItem botItem = botItemMapper.getBotItemById(itemId);
 			resultList.add(BotMessageChain.ofPlain(String.format("钓到一个%s，%s", botItem.getName(), botItem.getDescription())));
 			botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
 			resultList.add(BotMessageChain.ofPlain(String.format("(%s+1)", botItem.getName())));
+			icon = botItem.getIcon();
 		} else {
 			resultList.add(BotMessageChain.ofPlain(description));
+			icon = fishConfig.getIcon();
 		}
 
 		if (price != null && price > 0) {
@@ -141,6 +144,11 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			if (subNum != 0) {
 				resultList.add(BotMessageChain.ofPlain(String.format("(%s%s%s)", botItem.getName(), subNum > 0? "+": "-", Math.abs(subNum))));
 			}
+		}
+
+		if (icon != null) {
+			resultList.add(BotMessageChain.ofPlain("\n"));
+			resultList.add(BotMessageChain.ofImage(icon));
 		}
 
 		return BotMessage.simpleListMessage(resultList);

@@ -176,21 +176,24 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				Asserts.notNull(type, "格式错啦(type)");
 				if ("事件".equals(type)) {
 					String desc = config.getDesc();
-					newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price));
+					String icon = config.getImage();
+					newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price).setIcon(icon));
 				} else {
 					Asserts.notNull(price, "格式错啦(price)");
 					String itemName = config.getItemName();
 					String itemDesc = config.getItemDesc();
 					String itemGrade = config.getItemGrade();
+					String itemIcon = config.getImage();
 					Asserts.notNull(itemName, "格式错啦(itemName)");
 					Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
 					Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
+					Asserts.notNull(itemIcon, "格式错啦(itemIcon)");
 					BotItem botItem = botItemMapper.getBotItemByName(itemName);
 					if (botItem == null) {
-						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade);
+						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon);
 						botItemMapper.addBotItemSelective(botItem);
 					} else {
-						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade));
+						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon));
 					}
 					newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
 				}
