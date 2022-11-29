@@ -91,7 +91,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		if (botItem.getIcon() == null) {
 			return BotMessage.simpleTextMessage(String.join("\n", resultList));
 		} else {
-			return BotMessage.simpleImageTextMessage(String.join("\n", resultList), botItem.getIcon());
+			return BotMessage.simpleImageTextMessage(String.join("\n", resultList) + "\n", botItem.getIcon());
 		}
 	}
 
