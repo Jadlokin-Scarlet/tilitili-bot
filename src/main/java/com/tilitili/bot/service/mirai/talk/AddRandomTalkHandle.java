@@ -187,7 +187,6 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					Asserts.notNull(itemName, "格式错啦(itemName)");
 					Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
 					Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
-					Asserts.notNull(itemIcon, "格式错啦(itemIcon)");
 					BotItem botItem = botItemMapper.getBotItemByName(itemName);
 					if (botItem == null) {
 						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon);
