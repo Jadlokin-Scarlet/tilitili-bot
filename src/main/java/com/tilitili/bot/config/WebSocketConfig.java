@@ -11,6 +11,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -36,9 +37,11 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     private final BotService botService;
     private final BotManager botManager;
     private final MiraiManager miraiManager;
+    private final SendMessageManager sendMessageManager;
 
     @Autowired
-    public WebSocketConfig(BotService botService, BotManager botManager, MiraiManager miraiManager) {
+    public WebSocketConfig(BotService botService, BotManager botManager, MiraiManager miraiManager, SendMessageManager sendMessageManager) {
+        this.sendMessageManager = sendMessageManager;
         botWebSocketHandlerList = new ArrayList<>();
         this.miraiManager = miraiManager;
         this.botService = botService;
@@ -69,9 +72,9 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         String wsUrl = botManager.getWebSocketUrl(bot);
         Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.text);
         switch (bot.getType()) {
-            case BotEmum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
-            case BotEmum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
-            case BotEmum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, botManager);
+            case BotEmum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEmum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEmum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             default: throw new AssertException("?");
         }
     }

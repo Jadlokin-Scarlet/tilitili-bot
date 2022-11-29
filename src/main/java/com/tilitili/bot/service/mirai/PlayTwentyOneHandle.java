@@ -11,6 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -32,12 +33,14 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
 	private final BotManager botManager;
+	private final SendMessageManager sendMessageManager;
 
 	@Autowired
-	public PlayTwentyOneHandle(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager) {
+	public PlayTwentyOneHandle(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, SendMessageManager sendMessageManager) {
 		this.botUserMapper = botUserMapper;
 		this.botUserManager = botUserManager;
 		this.botManager = botManager;
+		this.sendMessageManager = sendMessageManager;
 	}
 
 	@Override
@@ -278,7 +281,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Long playerId = botUser.getId();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, sendMessageManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 1, "人数爆满啦，稍后再来吧。");
@@ -319,7 +322,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, sendMessageManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 

@@ -4,7 +4,7 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.SendMessageManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -14,13 +14,13 @@ import java.util.Arrays;
 public class BotWebSocketHandler extends BaseWebSocketHandler {
     protected final BotEmum bot;
     protected final BotService botService;
-    protected final BotManager botManager;
+    protected final SendMessageManager sendMessageManager;
 
-    public BotWebSocketHandler(URI serverUri, BotEmum bot, BotService botService, BotManager botManager) {
+    public BotWebSocketHandler(URI serverUri, BotEmum bot, BotService botService, SendMessageManager sendMessageManager) {
         super(serverUri);
         this.bot = bot;
         this.botService = botService;
-        this.botManager = botManager;
+        this.sendMessageManager = sendMessageManager;
     }
 
     @Override
@@ -42,10 +42,10 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         ));
         if (BotEmum.TYPE_GOCQ.equals(bot.getType())) {
             botMessage.setSenderId(3777L);
-            botManager.sendMessage(botMessage);
+            sendMessageManager.sendMessage(botMessage);
         } else if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
             botMessage.setSenderId(4380L);
-            botManager.sendMessage(botMessage);
+            sendMessageManager.sendMessage(botMessage);
         }
         super.onClose(code, reason, remote);
     }

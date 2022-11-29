@@ -11,6 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.KookJoinedChannel;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
@@ -28,14 +29,16 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 	private final BotManager botManager;
+	private final SendMessageManager sendMessageManager;
 
 	@Autowired
-	public KookJoinedChannelHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager) {
+	public KookJoinedChannelHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotManager botManager, SendMessageManager sendMessageManager) {
 		super(KookJoinedChannel.class);
 		this.botSenderMapper = botSenderMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 		this.botManager = botManager;
+		this.sendMessageManager = sendMessageManager;
 	}
 
 	@Override
@@ -62,7 +65,7 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
 			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
-			botManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s加入了语音[%s%s]", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
+			sendMessageManager.sendMessage(BotMessage.simpleTextMessage(String.format("%s加入了语音[%s%s]", botUser.getName(), sourceNameStr, botSender.getName())).setBotSender(targetSender));
 		}
 	}
 }

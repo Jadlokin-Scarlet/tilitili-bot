@@ -7,7 +7,7 @@ import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.MathUtil;
@@ -36,11 +36,10 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	public final Map<String, String> replaceMap;
 	public final String calRegix;
 
-	private final BotManager botManager;
-
+	private final SendMessageManager sendMessageManager;
 	@Autowired
-	public PlayTwentyFourHandle(BotManager botManager) {
-		this.botManager = botManager;
+	public PlayTwentyFourHandle(SendMessageManager sendMessageManager) {
+		this.sendMessageManager = sendMessageManager;
 		replaceMap = ImmutableMap.<String, String>builder()
 				.put("÷", "/")
 				.put("＋", "+")
@@ -156,7 +155,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			String lastSendTime2Str = session.get(lastSendTimeKey);
 			boolean needEnd = lastSendTime2Str != null && DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
 			if (needEnd) {
-				botManager.sendMessage(BotMessage.simpleTextMessage("戳啦，答案是"+answerTmp, messageAction.getBotMessage()));
+				sendMessageManager.sendMessage(BotMessage.simpleTextMessage("戳啦，答案是"+answerTmp, messageAction.getBotMessage()));
 				session.remove(numListKey);
 				session.remove(lastSendTimeKey);
 				session.remove(lockKey);

@@ -4,12 +4,13 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.entity.twentyOne.*;
 import com.tilitili.common.emnus.SendTypeEmum;
-import com.tilitili.common.entity.SortObject;
+import com.tilitili.common.entity.dto.SortObject;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
@@ -35,6 +36,7 @@ public class TwentyOneTable {
 	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
 	private final BotManager botManager;
+	private final SendMessageManager sendMessageManager;
 	private final Long tableId;
 	private String status;
 	private List<TwentyOnePlayer> playerList;
@@ -42,10 +44,11 @@ public class TwentyOneTable {
 	private final TwentyOneAdmin admin;
 	private Long waitPeoplePrepareId;
 
-	public TwentyOneTable(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, BotMessageAction messageAction) {
+	public TwentyOneTable(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, SendMessageManager sendMessageManager, BotMessageAction messageAction) {
 		this.botUserMapper = botUserMapper;
 		this.botUserManager = botUserManager;
 		this.botManager = botManager;
+		this.sendMessageManager = sendMessageManager;
 		this.tableId = messageAction.getBotSender().getId();
 		this.status = STATUS_WAIT;
 		this.playerList = new ArrayList<>();
@@ -77,7 +80,7 @@ public class TwentyOneTable {
 			if (playerList.isEmpty()) {
 				this.initData();
 				try {
-					botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+					sendMessageManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
 				} catch (Exception e) {
 					log.error("21点提示异常",e);
 				}
@@ -86,7 +89,7 @@ public class TwentyOneTable {
 				Asserts.isTrue(flashCardSuccess, "啊嘞，不对劲。");
 				List<BotMessageChain> resp = this.getNoticeMessage(botMessage);
 				try {
-					botManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
+					sendMessageManager.sendMessage(BotMessage.simpleListMessage(resp, botMessage));
 				} catch (Exception e) {
 					log.error("21点提示异常", e);
 				}
@@ -262,7 +265,7 @@ public class TwentyOneTable {
 		}
 		if (newPlayerList.isEmpty()) {
 			try {
-				botManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
+				sendMessageManager.sendMessage(BotMessage.simpleTextMessage("游戏结束啦", botMessage));
 			} catch (Exception e) {
 				log.error("21点提示异常", e);
 			}

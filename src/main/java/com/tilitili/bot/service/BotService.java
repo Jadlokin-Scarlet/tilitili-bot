@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class BotService {
     public static final String lastMessageIdKey = "lastMessageId";
-
+    private final SendMessageManager sendMessageManager;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final Map<String, BaseEventHandle> eventHandleMap;
     private final BotSessionService botSessionService;
@@ -55,7 +55,8 @@ public class BotService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
+    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
+        this.sendMessageManager = sendMessageManager;
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.eventHandleMap = eventHandleMap;
@@ -170,7 +171,7 @@ public class BotService {
                 respMessage.setBotSender(botSender);
             }
             // 如果最后是消息，则回复
-            String messageId = botManager.sendMessage(respMessage);
+            String messageId = sendMessageManager.sendMessage(respMessage);
             if (messageId != null) {
                 session.put(lastMessageIdKey, messageId);
             }

@@ -5,7 +5,7 @@ import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberLeaveEventQuit;
-import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
@@ -15,14 +15,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiMemberLeaveEventQuit> {
-	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
+	private final SendMessageManager sendMessageManager;
 
 	@Autowired
-	public MiraiMemberLeaveEventQuitHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
+	public MiraiMemberLeaveEventQuitHandle(BotSenderMapper botSenderMapper, SendMessageManager sendMessageManager) {
 		super(MiraiMemberLeaveEventQuit.class);
-		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
+		this.sendMessageManager = sendMessageManager;
 	}
 
 	@Override
@@ -32,6 +32,6 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getMember().getGroup().getId());
 		Asserts.checkEquals(bot.id, botSender.getBot(), "没有权限");
 
-		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
+		sendMessageManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
 	}
 }

@@ -3,7 +3,7 @@ package com.tilitili.bot.socket;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.view.bot.kook.KookWsData;
-import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +17,8 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
     private final ScheduledExecutorService executorService;
     private int sn = 0;
 
-    public KookWebSocketHandler(URI serverUri, BotEmum bot, BotService botService, BotManager botManager) {
-        super(serverUri, bot, botService, botManager);
+    public KookWebSocketHandler(URI serverUri, BotEmum bot, BotService botService, SendMessageManager sendMessageManager) {
+        super(serverUri, bot, botService, sendMessageManager);
         this.executorService = Executors.newSingleThreadScheduledExecutor();
     }
 

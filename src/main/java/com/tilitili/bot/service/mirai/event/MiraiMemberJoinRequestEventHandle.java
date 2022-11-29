@@ -6,10 +6,9 @@ import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberJoinRequestEvent;
-import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
-import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +17,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<MiraiMemberJoinRequestEvent> {
 	public static final String newMemberKey = "MiraiMemberJoinRequestEventHandle.newMember";
-	private final BotManager botManager;
 	private final BotSenderMapper botSenderMapper;
 	private final BotSessionService botSessionService;
-	private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
+	private final SendMessageManager sendMessageManager;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
 	@Autowired
-	public MiraiMemberJoinRequestEventHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotSessionService botSessionService, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public MiraiMemberJoinRequestEventHandle(BotSenderMapper botSenderMapper, BotSessionService botSessionService, SendMessageManager sendMessageManager, BotSenderTaskMappingManager botSenderTaskMappingManager) {
 		super(MiraiMemberJoinRequestEvent.class);
-		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 		this.botSessionService = botSessionService;
-		this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
+		this.sendMessageManager = sendMessageManager;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 	}
 
@@ -47,6 +44,6 @@ public class MiraiMemberJoinRequestEventHandle extends MiraiAutoEventHandle<Mira
 		BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
 		session.put(newMemberKey, Gsons.toJson(event));
 		session.put(newMemberKey + "-" + event.getFromId(), Gsons.toJson(event));
-		botManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
+		sendMessageManager.sendMessage(BotMessage.simpleTextMessage(message).setSenderId(botSender.getId()));
 	}
 }
