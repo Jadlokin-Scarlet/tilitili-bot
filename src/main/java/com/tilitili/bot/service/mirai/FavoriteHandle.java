@@ -50,10 +50,10 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 			List<Long> atList = messageAction.getAtList();
 			atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
 			boolean hasAtBot = !atList.isEmpty();
-			boolean isFriend = botSender.getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
+			boolean isFriend = SendTypeEmum.FRIEND_MESSAGE_STR.equals(botSender.getSendType());
 			if (hasAtBot || isFriend) {
 				BotFavorite favorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
-				if (favorite != null) {
+				if (favorite == null) {
 					int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setFavorite(FavoriteEmum.strange.getFavorite()).setLevel(FavoriteEmum.strange.getLevel()));
 					if (addCnt != 0) {
 						return BotMessage.simpleTextMessage("你好，初次见面，我叫琪露诺。(好感度启用)");
