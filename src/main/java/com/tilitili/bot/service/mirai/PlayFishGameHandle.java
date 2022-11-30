@@ -69,6 +69,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		for (FishPlayer fishPlayer : fishPlayerList) {
 			if (fishPlayer.getItemId() == null) continue;
 			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+			if (fishConfig == null) continue;
 			if (fishConfig.getPrice() != null) {
 				userScoreMap.merge(fishPlayer.getUserId(), fishConfig.getPrice(), Integer::sum);
 			}
