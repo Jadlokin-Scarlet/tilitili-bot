@@ -15,14 +15,13 @@ import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
@@ -56,8 +55,35 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "抛竿": case "抛杆": return handleStart(messageAction);
 			case "收竿": case "收杆": return handleEnd(messageAction);
 			case "鱼呢": return getStatus(messageAction);
+			case "钓鱼榜": return getRank(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage getRank(BotMessageAction messageAction) {
+		Date todayStartTime = DateUtils.getCurrentDay();
+		Date yesterdayStartTime = DateUtils.addDay(todayStartTime, -1);
+		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(yesterdayStartTime, todayStartTime);
+//		List<SortObject<Long>> userScoreList = new ArrayList<>();
+		Map<Long, Integer> userScoreMap = new HashMap<>();
+		for (FishPlayer fishPlayer : fishPlayerList) {
+			if (fishPlayer.getItemId() == null) continue;
+			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+			if (fishConfig.getPrice() != null) {
+				userScoreMap.merge(fishPlayer.getUserId(), fishConfig.getPrice(), Integer::sum);
+			}
+			if (fishConfig.getItemId() != null) {
+				BotItem botItem = botItemMapper.getBotItemById(fishConfig.getItemId());
+				if (botItem.getSellPrice() != null) {
+					userScoreMap.merge(fishPlayer.getUserId(), botItem.getSellPrice(), Integer::sum);
+				}
+			}
+		}
+		List<String> rankList = userScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s", botUserManager.getBotUserByIdWithParent(entry.getKey()).getName(), entry.getValue()))
+				.collect(Collectors.toList());
+
+		return BotMessage.simpleTextMessage(IntStream.range(0, rankList.size()).mapToObj(index -> String.format("%s:%s", index==0?"钓鱼佬":index+1, rankList.get(index))).collect(Collectors.joining("\n")));
 	}
 
 	private BotMessage getStatus(BotMessageAction messageAction) {
@@ -99,9 +125,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 		Integer scale = fishPlayer.getScale();
-		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setScale(scale));
-		Integer rateSum = fishConfigMapper.countFishConfigRateSum(scale);
-		Asserts.notNull(rateSum, "啊嘞，不对劲");
+		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setScale(scale).setStatus(0));
+		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
 		int theRate = random.nextInt(rateSum);
 		FishConfig fishConfig = null;
 		for (FishConfig config : configList) {

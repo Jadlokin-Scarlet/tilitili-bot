@@ -202,8 +202,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				return BotMessage.simpleTextMessage("格式不对");
 			}
 		}
-		for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery())) {
-			fishConfigMapper.deleteFishConfigByPrimary(fishConfig.getId());
+		for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setStatus(0))) {
+			fishConfigMapper.updateFishConfigSelective(new FishConfig().setId(fishConfig.getId()).setStatus(-1));
 		}
 		for (FishConfig fishConfig : newFishConfigList) {
 			fishConfigMapper.addFishConfigSelective(fishConfig);
