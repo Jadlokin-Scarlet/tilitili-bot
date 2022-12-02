@@ -103,7 +103,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 
 		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId) && messageAction.getText() != null) {
 			String text = messageAction.getText();
-			List<String> resultList = StringUtils.pattenAll("(.+) 和 (.+) 开始比划牛子，", text);
+			List<String> resultList = StringUtils.extractList("(.+) 和 (.+) 开始比划牛子，", text);
 			log.info("pkList = " + resultList);
 			if (resultList.size() == 2 && (resultList.contains("Debris") || resultList.contains("Jadlokin_Scarlet"))) {
 				if (future != null) {
