@@ -1,13 +1,13 @@
 package com.tilitili.bot.service.mirai.event;
 
-import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
+import com.tilitili.bot.service.mirai.base.GocqAutoEventHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberLeaveEventQuit;
+import com.tilitili.common.entity.view.bot.mirai.event.GocqNoticeGroupDecreaseKick;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
@@ -19,15 +19,15 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiMemberLeaveEventQuit> {
+public class GocqNoticeGroupDecreaseKickHandle extends GocqAutoEventHandle<GocqNoticeGroupDecreaseKick> {
 	private final BotSenderMapper botSenderMapper;
 	private final SendMessageManager sendMessageManager;
 	private final BotUserManager botUserManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
 	@Autowired
-	public MiraiMemberLeaveEventQuitHandle(BotSenderMapper botSenderMapper, SendMessageManager sendMessageManager, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
-		super(MiraiMemberLeaveEventQuit.class);
+	public GocqNoticeGroupDecreaseKickHandle(BotSenderMapper botSenderMapper, SendMessageManager sendMessageManager, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
+		super(GocqNoticeGroupDecreaseKick.class);
 		this.botSenderMapper = botSenderMapper;
 		this.sendMessageManager = sendMessageManager;
 		this.botUserManager = botUserManager;
@@ -35,10 +35,10 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, MiraiMemberLeaveEventQuit event) {
-		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getMember().getGroup().getId());
-		BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(event.getMember().getId(), BotUserConstant.USER_TYPE_QQ);
-		String message = String.format("%s离开了。", event.getMember().getMemberName());
+	public void handleEvent(BotEmum bot, GocqNoticeGroupDecreaseKick event) throws Exception {
+		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getGroupId());
+		BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(event.getUserId(), BotUserConstant.USER_TYPE_QQ);
+		String message = String.format("%s离开了。", botUser == null? event.getUserId(): botUser.getName());
 
 		if (botUser != null) {
 			BotUserSenderMapping botUserSenderMapping = botUserSenderMappingMapper.getBotUserSenderMappingBySenderIdAndUserId(botSender.getId(), botUser.getId());

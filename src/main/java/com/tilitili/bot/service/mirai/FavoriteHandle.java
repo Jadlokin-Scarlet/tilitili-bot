@@ -108,7 +108,7 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 				Integer addFavorite = botFavoriteManager.safeAddFavorite(userId, favoriteActionAdd.getFavorite());
 				if (addFavorite != 0) {
 					respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
-					redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toMillis(1)));
+					redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 				}
 			}
 		}

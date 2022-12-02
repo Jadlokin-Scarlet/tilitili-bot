@@ -7,7 +7,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberLeaveEventQuit;
+import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberLeaveEventKick;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
@@ -19,15 +19,15 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiMemberLeaveEventQuit> {
+public class MiraiMemberLeaveEventKickHandle extends MiraiAutoEventHandle<MiraiMemberLeaveEventKick> {
 	private final BotSenderMapper botSenderMapper;
 	private final SendMessageManager sendMessageManager;
 	private final BotUserManager botUserManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
 	@Autowired
-	public MiraiMemberLeaveEventQuitHandle(BotSenderMapper botSenderMapper, SendMessageManager sendMessageManager, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
-		super(MiraiMemberLeaveEventQuit.class);
+	public MiraiMemberLeaveEventKickHandle(BotSenderMapper botSenderMapper, SendMessageManager sendMessageManager, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
+		super(MiraiMemberLeaveEventKick.class);
 		this.botSenderMapper = botSenderMapper;
 		this.sendMessageManager = sendMessageManager;
 		this.botUserManager = botUserManager;
@@ -35,7 +35,7 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, MiraiMemberLeaveEventQuit event) {
+	public void handleEvent(BotEmum bot, MiraiMemberLeaveEventKick event) {
 		BotSender botSender = botSenderMapper.getBotSenderByGroup(event.getMember().getGroup().getId());
 		BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(event.getMember().getId(), BotUserConstant.USER_TYPE_QQ);
 		String message = String.format("%s离开了。", event.getMember().getMemberName());
