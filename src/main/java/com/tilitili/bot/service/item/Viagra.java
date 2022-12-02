@@ -35,7 +35,7 @@ public class Viagra extends BaseItem {
 		BotUserItemMapping botUserItemMapping = botUserItemMappingMapper.getBotUserItemMappingByUserIdAndItemId(userId, botItem.getId());
 		Asserts.notNull(botUserItemMapping, "你还没拥有他");
 		Integer cnt = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(-1));
-		Asserts.checkEquals(cnt, 1, "使用失败惹");
+		Asserts.checkEquals(cnt, -1, "使用失败惹");
 
 		String redisKey = String.format("CattleHandle-%s", userId);
 		redisCache.delete(redisKey);
