@@ -84,7 +84,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long expire = redisCache.getExpire(redisKey);
 		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60? expire/60+"分钟": expire+"秒");
 
-		String otherRedisKey = String.format("CattleHandle-%s", userId);
+		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 
