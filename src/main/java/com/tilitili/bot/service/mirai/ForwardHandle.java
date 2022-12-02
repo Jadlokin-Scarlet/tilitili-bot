@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,8 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final SendMessageManager sendMessageManager;
+
+	private ScheduledFuture<?> future;
 
 	public ForwardHandle(MinecraftManager minecraftManager, BaiduManager baiduManager, BotForwardConfigMapper botForwardConfigMapper, SendMessageManager sendMessageManager) {
 		this.minecraftManager = minecraftManager;
@@ -98,9 +101,14 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			return BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId);
 		}
 
-		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId) && BotUserConstant.MASTER_USER_ID.equals(userId)) {
-			if (messageAction.getKeyWithoutPrefix().contains("比划比划")) {
-				scheduled.schedule(() -> {
+		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId)) {
+			String head = messageAction.getHead();
+			List<String> resultList = StringUtils.pattenAll("(.+) 和 (.+) 开始比划牛子，", head);
+			if (resultList.size() == 2 && (resultList.contains("Debris") || resultList.contains("Jadlokin_Scarlet"))) {
+				if (future != null) {
+					future.cancel(false);
+				}
+				future = scheduled.schedule(() -> {
 					sendMessageManager.sendMessage(BotMessage.simpleListMessage(Arrays.asList(
 							BotMessageChain.ofPlain("好啦。"),
 							BotMessageChain.ofAt(BotUserConstant.MASTER_USER_ID)
