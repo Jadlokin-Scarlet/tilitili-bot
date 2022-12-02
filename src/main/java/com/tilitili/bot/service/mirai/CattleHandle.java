@@ -80,6 +80,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notEmpty(atList, "和谁比划？");
 		Long otherUserId = atList.get(0);
 
+		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+		Asserts.notNull(cattle, "巧妇难为无米炊。");
+		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
+
 		String redisKey = String.format("CattleHandle-%s", userId);
 		Long expire = redisCache.getExpire(redisKey);
 		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60? expire/60+"分钟": expire+"秒");
@@ -87,11 +92,6 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
-
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
-		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
-		Asserts.notNull(cattle, "巧妇难为无米炊。");
-		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
 		int rate = random.nextInt(100);
 		int length = random.nextInt(1000);
