@@ -51,8 +51,19 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "领取牛子": return handleStart(messageAction);
 			case "比划比划": return handlePk(messageAction);
 			case "牛子榜": return handleRank(messageAction);
+			case "牛子0榜": return handleDescRank(messageAction);
 		}
 		return null;
+	}
+
+	private BotMessage handleDescRank(BotMessageAction messageAction) {
+		BotSender botSender = messageAction.getBotSender();
+		List<BotCattle> cattleList = botCattleMapper.getBotCattleByCondition(new BotCattleQuery().setPageSize(20).setSorter("length"));
+		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
+		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
+		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
+		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index+1, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
+		return BotMessage.simpleTextMessage(resp);
 	}
 
 	private BotMessage handleInfo(BotMessageAction messageAction) {
