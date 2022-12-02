@@ -67,7 +67,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
-		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
+		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index+1, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
 	}
 
@@ -79,6 +79,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<Long> atList = messageAction.getAtList();
 		Asserts.notEmpty(atList, "和谁比划？");
 		Long otherUserId = atList.get(0);
+		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
 
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
