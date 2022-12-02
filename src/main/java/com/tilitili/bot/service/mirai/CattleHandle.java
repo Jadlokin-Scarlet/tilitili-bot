@@ -109,7 +109,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String messageId = messageAction.getMessageId();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
-		Asserts.notNull(botCattleMapper.getBotCattleByUserId(userId), "不要太贪心哦");
+		Asserts.checkNull(botCattleMapper.getBotCattleByUserId(userId), "不要太贪心哦");
 		int length = random.nextInt(1000);
 		botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
 		return BotMessage.simpleTextMessage(String.format("恭喜领到%02fcm", length / 100.0)).setQuote(messageId);
