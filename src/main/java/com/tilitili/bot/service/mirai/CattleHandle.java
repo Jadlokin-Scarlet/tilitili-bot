@@ -98,10 +98,10 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotMessage resp;
 		if (rate < 45) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
-			resp = BotMessage.simpleTextMessage(String.format("恭喜你赢得了%.2fcm。", length / 100.0)).setQuote(messageId);
+			resp = BotMessage.simpleTextMessage(String.format("一番胶战后，你赢得了%.2fcm。", length / 100.0)).setQuote(messageId);
 		} else if (rate < 90) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
-			resp = BotMessage.simpleTextMessage(String.format("可惜你输了%.2fcm。", length / 100.0)).setQuote(messageId);
+			resp = BotMessage.simpleTextMessage(String.format("一番胶战后，你输了%.2fcm。", length / 100.0)).setQuote(messageId);
 		} else {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
 			resp = BotMessage.simpleTextMessage(String.format("不好，缠在一起了，双方都断了%.2fcm。", length / 100.0)).setQuote(messageId);
