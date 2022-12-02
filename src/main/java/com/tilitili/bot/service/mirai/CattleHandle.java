@@ -47,11 +47,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		switch (messageAction.getKeyWithoutPrefix()) {
+			case "我的牛子": return handleInfo(messageAction);
 			case "领取牛子": return handleStart(messageAction);
 			case "比划比划": return handlePk(messageAction);
 			case "牛子榜": return handleRank(messageAction);
 		}
 		return null;
+	}
+
+	private BotMessage handleInfo(BotMessageAction messageAction) {
+		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(messageAction.getBotUser().getId());
+		Asserts.notNull(botCattle, "巧妇难为无米炊。");
+		return BotMessage.simpleTextMessage(String.format("足足有%.2fcm长", botCattle.getLength() / 100.0));
 	}
 
 	private BotMessage handleRank(BotMessageAction messageAction) {
@@ -60,7 +67,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
-		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%s\t%s", index, senderCattleList.get(index).getLength(), botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
+		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm\t%s", index, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
 	}
 
@@ -91,13 +98,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotMessage resp;
 		if (rate < 45) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
-			resp = BotMessage.simpleTextMessage(String.format("恭喜你赢得了%02fcm。", length / 100.0)).setQuote(messageId);
+			resp = BotMessage.simpleTextMessage(String.format("恭喜你赢得了%.2fcm。", length / 100.0)).setQuote(messageId);
 		} else if (rate < 90) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
-			resp = BotMessage.simpleTextMessage(String.format("可惜你输了%02fcm。", length / 100.0)).setQuote(messageId);
+			resp = BotMessage.simpleTextMessage(String.format("可惜你输了%.2fcm。", length / 100.0)).setQuote(messageId);
 		} else {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
-			resp = BotMessage.simpleTextMessage(String.format("不好，缠在一起了，双方都断了%02fcm。", length / 100.0)).setQuote(messageId);
+			resp = BotMessage.simpleTextMessage(String.format("不好，缠在一起了，双方都断了%.2fcm。", length / 100.0)).setQuote(messageId);
 		}
 
 		redisCache.setValue(redisKey, "yes", 60*60);
@@ -112,6 +119,6 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkNull(botCattleMapper.getBotCattleByUserId(userId), "不要太贪心哦");
 		int length = random.nextInt(1000);
 		botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
-		return BotMessage.simpleTextMessage(String.format("恭喜领到%02fcm", length / 100.0)).setQuote(messageId);
+		return BotMessage.simpleTextMessage(String.format("恭喜领到%.2fcm", length / 100.0)).setQuote(messageId);
 	}
 }
