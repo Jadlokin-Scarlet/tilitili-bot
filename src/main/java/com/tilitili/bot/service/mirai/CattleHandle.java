@@ -58,7 +58,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleDescRank(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		List<BotCattle> cattleList = botCattleMapper.getBotCattleByCondition(new BotCattleQuery().setPageSize(20).setSorter("length"));
+		List<BotCattle> cattleList = botCattleMapper.getBotCattleByCondition(new BotCattleQuery().setPageSize(20).setSorter("length").setSorted("asc"));
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
