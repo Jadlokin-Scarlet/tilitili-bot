@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
@@ -14,7 +15,6 @@ import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +26,20 @@ import java.util.stream.Collectors;
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotItemMapper botItemMapper;
-	private final BotUserMapper botUserMapper;
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
 	private final BotIcePriceManager botIcePriceManager;
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserManager botUserManager;
+	private final BotItemService botItemService;
 
 	@Autowired
-	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserMapper botUserMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager) {
+	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService) {
 		this.botItemMapper = botItemMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
-		this.botUserMapper = botUserMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botIcePriceManager = botIcePriceManager;
 		this.botUserManager = botUserManager;
+		this.botItemService = botItemService;
 	}
 
 	@Override
@@ -50,8 +50,20 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			case "回收": return handleSell(messageAction);
 			case "背包": return handleBag(messageAction);
 			case "道具": return handleItemInfo(messageAction);
+			case "使用": return handleUse(messageAction);
 			default: throw new AssertException("啊嘞，不对劲");
 		}
+	}
+
+	private BotMessage handleUse(BotMessageAction messageAction) {
+		String itemName = messageAction.getValue();
+
+		BotItem botItem = botItemMapper.getBotItemByName(itemName);
+		Asserts.notNull(botItem, "那是啥。");
+
+		boolean success = botItemService.useItem(messageAction.getBotSender(), messageAction.getBotUser(), botItem);
+		Asserts.isTrue(success, "使用失败惹");
+		return BotMessage.simpleTextMessage("好惹。");
 	}
 
 	private BotMessage handleItemInfo(BotMessageAction messageAction) {
