@@ -2,6 +2,8 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
+import com.tilitili.common.constant.BotSenderConstant;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.MinecraftServerEmum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
@@ -9,6 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -19,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,16 +34,20 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final MinecraftManager minecraftManager;
 	private final BaiduManager baiduManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
+	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
+	private final SendMessageManager sendMessageManager;
 
-	public ForwardHandle(MinecraftManager minecraftManager, BaiduManager baiduManager, BotForwardConfigMapper botForwardConfigMapper) {
+	public ForwardHandle(MinecraftManager minecraftManager, BaiduManager baiduManager, BotForwardConfigMapper botForwardConfigMapper, SendMessageManager sendMessageManager) {
 		this.minecraftManager = minecraftManager;
 		this.baiduManager = baiduManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
+		this.sendMessageManager = sendMessageManager;
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
+		Long userId = messageAction.getBotUser().getId();
 
 		List<BotMessageChain> sourceMessageChainList = messageAction.getBotMessage().getBotMessageChainList();
 		if (senderId == 4370L) {
@@ -86,6 +96,17 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			newMessageChainList.add(BotMessageChain.ofPlain(String.format("[%s%s]%s：", sourceNameStr, messageAction.getBotSender().getName(), userName)));
 			newMessageChainList.addAll(sourceMessageChainList);
 			return BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId);
+		}
+
+		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId) && BotUserConstant.MASTER_USER_ID.equals(userId)) {
+			if (messageAction.getKeyWithoutPrefix().contains("比划比划")) {
+				scheduled.schedule(() -> {
+					sendMessageManager.sendMessage(BotMessage.simpleListMessage(Arrays.asList(
+							BotMessageChain.ofPlain("好啦。"),
+							BotMessageChain.ofAt(BotUserConstant.MASTER_USER_ID)
+					)).setBotSender(messageAction.getBotSender()));
+				}, 5, TimeUnit.MINUTES);
+			}
 		}
 		return null;
 	}

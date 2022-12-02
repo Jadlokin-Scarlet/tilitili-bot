@@ -81,7 +81,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}
 		List<String> rankList = userScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
-				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s", botUserManager.getBotUserByIdWithParent(entry.getKey()).getName(), entry.getValue()))
+				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s", entry.getValue(), botUserManager.getBotUserByIdWithParent(entry.getKey()).getName()))
 				.collect(Collectors.toList());
 
 		return BotMessage.simpleTextMessage(IntStream.range(0, rankList.size()).mapToObj(index -> String.format("%s:%s", index==0?"钓鱼佬":index+1, rankList.get(index))).collect(Collectors.joining("\n")));
