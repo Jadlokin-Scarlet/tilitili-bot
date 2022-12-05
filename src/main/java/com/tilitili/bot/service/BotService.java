@@ -115,7 +115,7 @@ public class BotService {
             // 解析message
             botMessage = botManager.handleWsMessageToBotMessage(bot, message);
             if (botMessage == null) {
-                log.info(botMessage.getMessageId() + "解析失败");
+                log.info("解析失败");
                 return;
             }
             // 获取sender，校验权限
