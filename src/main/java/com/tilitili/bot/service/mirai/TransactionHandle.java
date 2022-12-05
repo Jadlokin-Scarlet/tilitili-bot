@@ -17,12 +17,14 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotItemMapper botItemMapper;
@@ -147,11 +149,15 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 		int subNum = 0;
 		for (BotItemDTO item : itemList) {
-			String itemName = item.getName();
-			BotItem botItem = botItemMapper.getBotItemByName(itemName);
-			Asserts.notNull(botItem, "那是啥");
-			Integer itemNum = item.getNum();
-			subNum += this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+			try {
+				String itemName = item.getName();
+				BotItem botItem = botItemMapper.getBotItemByName(itemName);
+				Asserts.notNull(botItem, "那是啥");
+				Integer itemNum = item.getNum();
+				subNum += this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+			} catch (AssertException e) {
+				log.warn("物品"+item.getName()+"回收失败，"+e.getMessage());
+			}
 		}
 
 		if (itemList.size() == 1) {

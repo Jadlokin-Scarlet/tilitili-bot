@@ -6,7 +6,6 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotTaskDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotSenderManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import org.jsoup.helper.StringUtil;
@@ -17,12 +16,10 @@ import java.util.List;
 
 @Component
 public class HelpHandle extends ExceptionRespMessageHandle {
-    private final BotSenderManager botSenderManager;
     private final BotTaskMapper botTaskMapper;
 
     @Autowired
-    public HelpHandle(BotSenderManager botSenderManager, BotTaskMapper botTaskMapper) {
-        this.botSenderManager = botSenderManager;
+    public HelpHandle(BotTaskMapper botTaskMapper) {
         this.botTaskMapper = botTaskMapper;
     }
 
