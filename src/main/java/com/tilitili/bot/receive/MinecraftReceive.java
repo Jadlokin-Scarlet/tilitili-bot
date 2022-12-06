@@ -67,7 +67,8 @@ public class MinecraftReceive {
 			BotMessage botMessage = minecraftManager.handleMessage(request, serverEmum);
 			if (botMessage == null) return;
 
-			BotSender botSender = botSenderMapper.getBotSenderById(4407L);
+			BotSender botSender = botSenderMapper.getValidBotSenderById(4407L);
+			Asserts.notNull(botSender, "无权限");
 //			botService.syncHandleTextMessage(botMessage, botSender);
 
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());

@@ -6,6 +6,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.mirai.event.GocqNoticeNotifyPoke;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,11 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 		log.info(Gsons.toJson(event));
 		BotSender botSender;
 		if (event.getGroupId() != null) {
-			botSender = botSenderMapper.getBotSenderByGroup(event.getGroupId());
+			botSender = botSenderMapper.getValidBotSenderByGroup(event.getGroupId());
 		} else {
-			botSender = botSenderMapper.getBotSenderByQq(event.getSenderId());
+			botSender = botSenderMapper.getValidBotSenderByQq(event.getSenderId());
 		}
+		Asserts.notNull(botSender, "无权限");
 
 		if (!Objects.equals(botSender.getBot(), bot.id)) {
 			log.info("bot不匹配，跳过");

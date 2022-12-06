@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeSubject;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,10 +33,11 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 
 		BotSender botSender;
 		if ("Group".equals(subject.getKind())) {
-			botSender = botSenderMapper.getBotSenderByGroup(subject.getId());
+			botSender = botSenderMapper.getValidBotSenderByGroup(subject.getId());
 		} else {
-			botSender = botSenderMapper.getBotSenderByQq(subject.getId());
+			botSender = botSenderMapper.getValidBotSenderByQq(subject.getId());
 		}
+		Asserts.notNull(botSender, "无权限");
 		if (!Objects.equals(botSender.getBot(), bot.id)) {
 			log.info("bot不匹配，跳过");
 			return;

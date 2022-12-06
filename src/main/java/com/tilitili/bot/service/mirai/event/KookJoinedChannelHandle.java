@@ -47,7 +47,7 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 		Long kookUserId = event.getUserId();
 		Long channelId = event.getChannelId();
 
-		BotSender botSender = botSenderMapper.getBotSenderByKookChannelId(channelId);
+		BotSender botSender = botSenderMapper.getValidBotSenderByKookChannelId(channelId);
 		Asserts.notNull(botSender, "找不到频道");
 		BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, new BotUserDTO().setKookUserId(kookUserId));
 		Asserts.notNull(botUser, "找不到用户");
@@ -60,8 +60,8 @@ public class KookJoinedChannelHandle extends KookAutoEventHandle<KookJoinedChann
 
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetSender = botSenderMapper.getBotSenderById(targetSenderId);
-
+			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			Asserts.notNull(targetSender, "找不到渠道");
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
 			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
