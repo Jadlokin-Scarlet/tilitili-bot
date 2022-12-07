@@ -39,10 +39,10 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 	@Autowired
 	public FavoriteHandle(RedisCache redisCache, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotFavoriteActionAddMapper botFavoriteActionAddMapper) {
 		this.redisCache = redisCache;
-		this.botFavoriteManager = botFavoriteManager;
-		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
 		this.botFavoriteMapper = botFavoriteMapper;
+		this.botFavoriteManager = botFavoriteManager;
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
+		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
