@@ -31,15 +31,18 @@ public class MapHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		Long userId = messageAction.getBotUser().getId();
 
-		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
-		Asserts.checkNull(fishPlayer, "还在钓鱼中，不要分心鸭。");
-
 		String place = messageAction.getValue();
 		Asserts.notBlank(place, "去哪？");
 		BotPlace botPlace = botPlaceMapper.getBotPlaceByPlace(place);
 		Asserts.notNull(botPlace, randomResp1.getResp());
 		Long placeId = botPlace.getId();
 		BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
+		if (userMapMapping != null) {
+			Asserts.notEquals(userMapMapping.getPlaceId(), botPlace.getId(), "你已经在%s啦。", botPlace.getPlace());
+		}
+
+		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		Asserts.checkNull(fishPlayer, "还在钓鱼中，不要分心鸭。");
 		if (userMapMapping == null) {
 			botUserMapMappingMapper.addBotUserMapMappingSelective(new BotUserMapMapping().setUserId(userId).setPlaceId(placeId));
 		} else {
