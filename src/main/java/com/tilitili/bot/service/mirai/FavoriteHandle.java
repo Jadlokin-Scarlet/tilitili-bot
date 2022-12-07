@@ -28,21 +28,22 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class FavoriteHandle extends BaseMessageHandleAdapt {
-	private final Random random;
 	private final RedisCache redisCache;
 	private final BotFavoriteMapper botFavoriteMapper;
 	private final BotFavoriteManager botFavoriteManager;
 	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
 	private final BotFavoriteActionAddMapper botFavoriteActionAddMapper;
 
+	private final Random random;
+
 	@Autowired
 	public FavoriteHandle(RedisCache redisCache, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotFavoriteActionAddMapper botFavoriteActionAddMapper) {
 		this.redisCache = redisCache;
 		this.botFavoriteManager = botFavoriteManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
-		this.random = new Random(System.currentTimeMillis());
 		this.botFavoriteMapper = botFavoriteMapper;
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
+		this.random = new Random(System.currentTimeMillis());
 	}
 
 	@Override
