@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.FavoriteEmum;
@@ -46,6 +47,13 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		Long senderId = messageAction.getBotSender().getId();
+		String source = session.getOrDefault(ChatHandle.nameKey + senderId, "tx");
+		if (!source.equals("qln")) {
+			return null;
+		}
+
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		String action = messageAction.getText();

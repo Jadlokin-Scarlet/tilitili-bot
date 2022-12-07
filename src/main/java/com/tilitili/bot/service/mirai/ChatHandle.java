@@ -46,8 +46,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final Gson gson = new Gson();
 	private final BotManager botManager;
 	private final AnimeWordsService animeWordsService;
-	private final List<String> nameList = Arrays.asList("tx", "qy", "ml");
-	private final String nameKey = "ChatHandle.nameKey";
+	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "qln");
+	public static final String nameKey = "ChatHandle.nameKey";
 
 	@Autowired
 	public ChatHandle(BotManager botManager, AnimeWordsService animeWordsService) {
@@ -82,6 +82,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String redisKey = nameKey + messageAction.getBotSender().getId();
 		String source = session.getOrDefault(redisKey, "tx");
+		if (source.equals("qln")) {
+			return null;
+		}
 
 		BotEmum bot = messageAction.getBot();
 		if (bot == null) {
