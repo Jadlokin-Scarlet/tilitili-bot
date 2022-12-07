@@ -67,9 +67,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleInfo(BotMessageAction messageAction) {
-		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(messageAction.getBotUser().getId());
+		Long userId = messageAction.getBotUser().getId();
+		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
-		return BotMessage.simpleTextMessage(String.format("足足有%.2fcm长", botCattle.getLength() / 100.0));
+		String redisKey = String.format("CattleHandle-%s", userId);
+		Long expire = redisCache.getExpire(redisKey);
+		String cdStr = expire > 0? "，圣光微显": "";
+		return BotMessage.simpleTextMessage(String.format("足足有%.2fcm长%s", botCattle.getLength() / 100.0, cdStr));
 	}
 
 	private BotMessage handleRank(BotMessageAction messageAction) {
