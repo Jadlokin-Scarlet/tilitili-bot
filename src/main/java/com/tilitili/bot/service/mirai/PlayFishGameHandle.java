@@ -115,6 +115,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		Asserts.notNull(fishPlayer, "你还没抛竿");
+		Asserts.notEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_WAIT, "你还没抛竿");
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
 			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINALL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
