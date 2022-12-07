@@ -149,8 +149,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
 			respList.add(BotMessageChain.ofPlain("不好，"));
 			if (isRandom) {
+				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 				respList.add(BotMessageChain.ofPlain("和"));
-				respList.add(BotMessageChain.ofAt(otherUserId));
+				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
 			}
 			respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，双方都断了%.2fcm。", length / 100.0)));
 		}

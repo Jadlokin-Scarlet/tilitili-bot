@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.constant.BotUserConstant;
+import com.tilitili.common.constant.FavoriteConstant;
 import com.tilitili.common.emnus.FavoriteEmum;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.BotFavorite;
@@ -96,7 +97,7 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 		String level = botFavorite.getLevel();
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setAction(action).setLevel(level));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level));
 		if (favoriteTalkList.isEmpty()) {
 			return null;
 		}
@@ -108,7 +109,7 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 
 		// 获取好感度增量
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(action, level);
-		if (favoriteActionAdd != null) {
+		if (favoriteActionAdd != null && FavoriteConstant.TYPE_ACTION.equals(favoriteActionAdd.getType())) {
 			// 凌晨4点刷新
 			String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 			// 每个人每天每个动作只能加一次好感度

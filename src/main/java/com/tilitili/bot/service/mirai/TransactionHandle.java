@@ -3,25 +3,30 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
-import com.tilitili.common.entity.BotIcePrice;
-import com.tilitili.common.entity.BotItem;
+import com.tilitili.common.constant.FavoriteConstant;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
+import com.tilitili.common.entity.query.BotFavoriteTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.mapper.mysql.BotItemMapper;
-import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
+import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,15 +38,25 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserManager botUserManager;
 	private final BotItemService botItemService;
+	private final BotFavoriteMapper botFavoriteMapper;
+	private final BotFavoriteActionAddMapper botFavoriteActionAddMapper;
+	private final RedisCache redisCache;
+	private final BotFavoriteManager botFavoriteManager;
+	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
 
 	@Autowired
-	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService) {
+	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService, BotFavoriteMapper botFavoriteMapper, BotFavoriteActionAddMapper botFavoriteActionAddMapper, RedisCache redisCache, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper) {
 		this.botItemMapper = botItemMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botIcePriceManager = botIcePriceManager;
 		this.botUserManager = botUserManager;
 		this.botItemService = botItemService;
+		this.botFavoriteMapper = botFavoriteMapper;
+		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
+		this.redisCache = redisCache;
+		this.botFavoriteManager = botFavoriteManager;
+		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 	}
 
 	@Override
@@ -53,8 +68,51 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			case "背包": return handleBag(messageAction);
 			case "道具": return handleItemInfo(messageAction);
 			case "使用": return handleUse(messageAction);
+			case "赠送": return handleGift(messageAction);
 			default: throw new AssertException("啊嘞，不对劲");
 		}
+	}
+
+	private BotMessage handleGift(BotMessageAction messageAction) {
+		Long userId = messageAction.getBotUser().getId();
+		String itemName = messageAction.getValue();
+
+		BotItem botItem = botItemMapper.getBotItemByName(itemName);
+		Asserts.notNull(botItem, "那是啥。");
+
+		BotFavorite botFavorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
+		Asserts.notNull(botFavorite, "好感度未启用。");
+		List<BotMessageChain> respChainList = new ArrayList<>();
+
+		// 获取对话
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(botFavorite.getLevel()));
+		if (favoriteTalkList.isEmpty()) {
+			return null;
+		}
+		BotFavoriteTalk favoriteTalk = favoriteTalkList.get(ThreadLocalRandom.current().nextInt(favoriteTalkList.size()));
+		respChainList.add(BotMessageChain.ofPlain(favoriteTalk.getResp()));
+
+		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(itemName, botFavorite.getLevel());
+		if (favoriteActionAdd == null || !FavoriteConstant.TYPE_ITEM.equals(favoriteActionAdd.getType())) {
+			return null;
+		}
+
+		// 凌晨4点刷新
+		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
+		// 每个人每天每个动作只能加一次好感度
+		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
+		if (redisCache.exists(redisKey)) {
+			return null;
+		}
+
+		Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(-1));
+		Asserts.checkEquals(subNum, -1, "啊嘞，不对劲");
+		Integer addFavorite = botFavoriteManager.safeAddFavorite(userId, favoriteActionAdd.getFavorite());
+		if (addFavorite != 0) {
+			respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
+		}
+		redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+		return BotMessage.simpleListMessage(respChainList);
 	}
 
 	private BotMessage handleUse(BotMessageAction messageAction) {
