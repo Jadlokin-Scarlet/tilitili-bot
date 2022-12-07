@@ -32,18 +32,16 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
-	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapper botUserMapper, BotUserManager botUserManager) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
-		this.botUserMapper = botUserMapper;
 		this.botUserManager = botUserManager;
 
 		this.random = new Random(System.currentTimeMillis());
