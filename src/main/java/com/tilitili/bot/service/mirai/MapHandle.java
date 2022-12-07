@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.RandomResp;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotPlace;
 import com.tilitili.common.entity.BotUserMapMapping;
 import com.tilitili.common.entity.FishPlayer;
@@ -14,7 +14,7 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MapHandle extends BaseMessageHandleAdapt {
+public class MapHandle extends ExceptionRespMessageHandle {
 	private final BotPlaceMapper botPlaceMapper;
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
 	private final FishPlayerMapper fishPlayerMapper;
