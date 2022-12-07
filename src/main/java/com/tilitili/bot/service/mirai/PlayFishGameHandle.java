@@ -128,8 +128,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
-		Integer scale = fishPlayer.getScale();
-		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setScale(scale).setStatus(0));
+		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(fishPlayer.getPlaceId()).setStatus(0));
 		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
 		int theRate = random.nextInt(rateSum);
 		FishConfig fishConfig = null;
