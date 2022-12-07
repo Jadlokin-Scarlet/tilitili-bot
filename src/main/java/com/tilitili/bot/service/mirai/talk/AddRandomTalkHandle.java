@@ -175,7 +175,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				Long placeId;
 				if (place != null) {
 					BotPlace botPlace = botPlaceMapper.getBotPlaceByPlace(place);
-					Asserts.notNull(botPlace, "未知地区(%s)", place);
+					Asserts.notNull(botPlace, "未知区域(%s)", place);
 					placeId = botPlace.getId();
 				} else {
 					placeId = BotPlaceConstant.PLACE_FIRST_FISH;
@@ -184,6 +184,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				Asserts.notNull(cost, "格式错啦(cost)");
 				Integer rate = config.getRate();
 				Asserts.notNull(rate, "格式错啦(rate)");
+				if (rate == 0) {
+					continue;
+				}
 				rateSum += rate;
 				Integer price = config.getPrice();
 				String type = config.getType();
