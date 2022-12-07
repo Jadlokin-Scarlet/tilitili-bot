@@ -7,6 +7,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.constant.BotPlaceConstant;
 import com.tilitili.common.emnus.SendTypeEmum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
@@ -42,9 +43,11 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final FunctionTalkService functionTalkService;
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
+	private final BotUserMapMappingMapper botUserMapMappingMapper;
+	private final BotPlaceMapper botPlaceMapper;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotPlaceMapper botPlaceMapper) {
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 		this.botFunctionMapper = botFunctionMapper;
@@ -52,6 +55,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		this.functionTalkService = functionTalkService;
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
+		this.botUserMapMappingMapper = botUserMapMappingMapper;
+		this.botPlaceMapper = botPlaceMapper;
 	}
 
 	@Override
@@ -166,6 +171,15 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		for (FishConfigDTO config : resultList) {
 			try {
 				int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
+				String place = config.getPlace();
+				Long placeId;
+				if (place != null) {
+					BotPlace botPlace = botPlaceMapper.getBotPlaceByPlace(place);
+					Asserts.notNull(botPlace, "未知地区(%s)", place);
+					placeId = botPlace.getId();
+				} else {
+					placeId = BotPlaceConstant.PLACE_FIRST_FISH;
+				}
 				Integer cost = config.getCost();
 				Asserts.notNull(cost, "格式错啦(cost)");
 				Integer rate = config.getRate();
@@ -177,7 +191,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				if ("事件".equals(type)) {
 					String desc = config.getDesc();
 					String icon = config.getImage();
-					newFishConfigList.add(new FishConfig().setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price).setIcon(icon));
+					newFishConfigList.add(new FishConfig().setPlaceId(placeId).setDescription(desc).setScale(scale).setCost(cost).setRate(rate).setPrice(price).setIcon(icon));
 				} else {
 					Asserts.notNull(price, "格式错啦(price)");
 					String itemName = config.getItemName();
@@ -194,7 +208,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					} else {
 						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon));
 					}
-					newFishConfigList.add(new FishConfig().setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
+					newFishConfigList.add(new FishConfig().setPlaceId(placeId).setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
 				}
 			} catch (AssertException e) {
 				return BotMessage.simpleTextMessage(e.getMessage());

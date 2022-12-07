@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotPlaceConstant;
 import com.tilitili.common.constant.FishPlayerConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -33,9 +34,11 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotUserManager botUserManager;
+	private final BotPlaceMapper botPlaceMapper;
+	private final BotUserMapMappingMapper botUserMapMappingMapper;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -43,6 +46,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botUserManager = botUserManager;
+		this.botPlaceMapper = botPlaceMapper;
+		this.botUserMapMappingMapper = botUserMapMappingMapper;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -187,8 +192,14 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		Asserts.isTrue(fishPlayer == null || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus()), "你已经在钓啦！");
 		if (fishPlayer == null) {
+			BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
+			Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
+			List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
+			Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
+
 			fishPlayer = new FishPlayer();
 			fishPlayer.setUserId(userId);
+			fishPlayer.setPlaceId(placeId);
 			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
 			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 		}

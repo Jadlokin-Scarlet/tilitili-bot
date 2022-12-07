@@ -23,6 +23,8 @@ public class FishConfigDTO {
 	private String itemGrade;
 	@ExcelProperty(value = "图片")
 	private String image;
+	@ExcelProperty(value = "区域")
+	private String place;
 
 	public String getScaleStr() {
 		return scaleStr;
@@ -111,5 +113,14 @@ public class FishConfigDTO {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public String getPlace() {
+		return place;
+	}
+
+	public FishConfigDTO setPlace(String place) {
+		this.place = place;
+		return this;
 	}
 }
