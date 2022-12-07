@@ -115,9 +115,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		Asserts.notNull(fishPlayer, "你还没抛竿");
-		Asserts.notEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_WAIT, "你还没抛竿");
-		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
-			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINALL);
+		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus()) || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus())) {
+			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
 			if (fishPlayer.getNotifyTime() == null) {
@@ -189,20 +188,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Long senderId = botSender.getId();
 		Long userId = botUser.getId();
 
-		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
-		Asserts.isTrue(fishPlayer == null || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus()), "你已经在钓啦！");
-		if (fishPlayer == null) {
-			BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
-			Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
-			List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
-			Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
-
-			fishPlayer = new FishPlayer();
-			fishPlayer.setUserId(userId);
-			fishPlayer.setPlaceId(placeId);
-			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
-			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
-		}
 		List<BotMessageChain> resultList = new ArrayList<>();
 
 		List<BotItemDTO> botItemList = botUserItemMappingMapper.getItemListByUserId(userId);
@@ -217,6 +202,21 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		if (!botItemIdList.contains(BotItemDTO.FISH_FOOD)) {
 			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemDTO.FISH_FOOD).setItemNum(10));
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)，谢谢惠顾。\n"));
+		}
+
+		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		Asserts.isTrue(fishPlayer == null || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus()), "你已经在钓啦！");
+		if (fishPlayer == null) {
+			BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
+			Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
+			List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
+			Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
+
+			fishPlayer = new FishPlayer();
+			fishPlayer.setUserId(userId);
+			fishPlayer.setPlaceId(placeId);
+			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
+			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 		}
 
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FISHING);
