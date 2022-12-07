@@ -129,16 +129,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notBlank(value, "格式错啦(物品名)");
 		List<BotItemDTO> itemList;
 		if (value.contains(" ")) {
-			List<String> valueList = Arrays.asList(value.split(" "));
-			Asserts.notEmpty(valueList, "格式错啦(物品名)");
-			String itemName = valueList.get(0);
-			BotItemDTO itemDTO = new BotItemDTO().setName(itemName);
-			if (valueList.size() > 1) {
-				String itemNumStr = valueList.get(1);
-				Asserts.isNumber(itemNumStr, "格式错啦(物品数量)");
-				itemDTO.setNum(Integer.parseInt(itemNumStr));
-			}
-			itemList = Collections.singletonList(itemDTO);
+			return BotMessage.simpleTextMessage("格式错啦，详情请看(帮助 回收)");
 		} else {
 			String[] itemStrList = value.split("[，,、]");
 			itemList = Arrays.stream(itemStrList).map(itemStr -> new BotItemDTO()
@@ -147,24 +138,37 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			).collect(Collectors.toList());
 		}
 
-		int subNum = 0;
-		for (BotItemDTO item : itemList) {
-			try {
-				String itemName = item.getName();
-				BotItem botItem = botItemMapper.getBotItemByName(itemName);
-				Asserts.notNull(botItem, "那是啥");
-				Integer itemNum = item.getNum();
-				subNum += this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
-			} catch (AssertException e) {
-				log.warn("物品"+item.getName()+"回收失败，"+e.getMessage());
-			}
-		}
-
 		if (itemList.size() == 1) {
+			BotItemDTO item = itemList.get(0);
+			String itemName = item.getName();
+			BotItem botItem = botItemMapper.getBotItemByName(itemName);
+			Asserts.notNull(botItem, "那是啥");
+			Integer itemNum = item.getNum();
+			int subNum = this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+
 			String numMessage = (-subNum) + "个";
 			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
-			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + itemList.get(0).getName(), nowScore));
+			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + item.getName(), nowScore));
 		} else {
+			int subNum = 0;
+			for (BotItemDTO item : itemList) {
+				try {
+					String itemName = item.getName();
+					BotItem botItem = botItemMapper.getBotItemByName(itemName);
+					Asserts.notNull(botItem, "那是啥");
+					Integer itemNum = item.getNum();
+					if (itemNum != 0) {
+						subNum += this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
+					}
+				} catch (AssertException e) {
+					log.warn("物品"+item.getName()+"回收失败，"+e.getMessage());
+				}
+			}
+
+			if (subNum == 0) {
+				return BotMessage.simpleTextMessage("似乎没有东西可以回收");
+			}
+
 			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
 			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore));
 		}

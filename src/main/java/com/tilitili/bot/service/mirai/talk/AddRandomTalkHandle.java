@@ -17,6 +17,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotPlaceManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -43,11 +44,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final FunctionTalkService functionTalkService;
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
-	private final BotUserMapMappingMapper botUserMapMappingMapper;
-	private final BotPlaceMapper botPlaceMapper;
+	private final BotPlaceManager botPlaceManager;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotPlaceMapper botPlaceMapper) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
 		this.botManager = botManager;
 		this.botSenderMapper = botSenderMapper;
 		this.botFunctionMapper = botFunctionMapper;
@@ -55,8 +55,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		this.functionTalkService = functionTalkService;
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
-		this.botUserMapMappingMapper = botUserMapMappingMapper;
-		this.botPlaceMapper = botPlaceMapper;
+		this.botPlaceManager = botPlaceManager;
 	}
 
 	@Override
@@ -172,25 +171,25 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			try {
 				int scale = "小".equals(config.getScaleStr()) ? 0 : 1;
 				String place = config.getPlace();
+				Integer cost = config.getCost();
+				Integer rate = config.getRate();
+				Integer price = config.getPrice();
+				String type = config.getType();
+				Asserts.notNull(cost, "格式错啦(cost)");
+				Asserts.notNull(rate, "格式错啦(rate)");
+				Asserts.notNull(type, "格式错啦(type)");
+				if (rate == 0) {
+					continue;
+				}
 				Long placeId;
 				if (place != null) {
-					BotPlace botPlace = botPlaceMapper.getBotPlaceByPlace(place);
+					BotPlace botPlace = botPlaceManager.getBotPlaceByPlaceCache(place);
 					Asserts.notNull(botPlace, "未知区域(%s)", place);
 					placeId = botPlace.getId();
 				} else {
 					placeId = BotPlaceConstant.PLACE_FIRST_FISH;
 				}
-				Integer cost = config.getCost();
-				Asserts.notNull(cost, "格式错啦(cost)");
-				Integer rate = config.getRate();
-				Asserts.notNull(rate, "格式错啦(rate)");
-				if (rate == 0) {
-					continue;
-				}
 				rateSum += rate;
-				Integer price = config.getPrice();
-				String type = config.getType();
-				Asserts.notNull(type, "格式错啦(type)");
 				if ("事件".equals(type)) {
 					String desc = config.getDesc();
 					String icon = config.getImage();
