@@ -81,7 +81,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, redemptionLength);
 		botCattleMapper.safeUpdateCattleLength(botCattle.getId(), realRedemptionLength);
 
-		return BotMessage.simpleTextMessage(String.format("赎回%.2fcm，当前%.2fcm，消耗%s积分", realRedemptionLength / 100.0, (botCattle.getLength() + realRedemptionLength) / 100.0, realRedemptionLength));
+		return BotMessage.simpleTextMessage(String.format("赎回了%.2fcm，现在有%.2fcm，消耗了%s积分，再接再厉啊。", realRedemptionLength / 100.0, (botCattle.getLength() + realRedemptionLength) / 100.0, realRedemptionLength));
 	}
 
 	private BotMessage handleDescRank(BotMessageAction messageAction) {
