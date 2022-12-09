@@ -84,8 +84,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 		Asserts.isTrue(redisCache.setNotExist(String.format("redemption-%s-%s", userId, dayStr), "yes", 1, TimeUnit.DAYS), "阿伟，你咋又来赎牛子哦。");
 
-		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, redemptionLength);
-		Asserts.checkEquals(realRedemptionLength, redemptionLength, "啊嘞，不对劲");
+		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, -redemptionLength);
+		Asserts.checkEquals(realRedemptionLength, -redemptionLength, "啊嘞，不对劲");
 		Asserts.checkEquals(botCattleMapper.safeUpdateCattleLength(botCattle.getId(), botCattle.getLength(), realRedemptionLength), 1, "啊嘞，不对劲");
 
 		return BotMessage.simpleTextMessage(String.format("赎回了%.2fcm，现在有%.2fcm，消耗了%s积分，再接再厉啊。", realRedemptionLength / 100.0, (botCattle.getLength() + realRedemptionLength) / 100.0, realRedemptionLength));
