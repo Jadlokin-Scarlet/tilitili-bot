@@ -75,6 +75,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.isNumber(qqStr, "格式错啦(QQ号)");
 		long qq = Long.parseLong(qqStr);
 		BotUserDTO targetBotUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+		Asserts.notNull(targetBotUser, "查无此人");
 
 		String sourceKey = applyKey + botUser.getId();
 		String targetKey = applyKey + targetBotUser.getId();
