@@ -10,6 +10,7 @@ import com.tilitili.common.entity.query.BotCattleQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotCattleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
@@ -19,6 +20,7 @@ import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -52,8 +54,27 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "比划比划": return handlePk(messageAction);
 			case "牛子榜": return handleRank(messageAction);
 			case "牛子0榜": return handleDescRank(messageAction);
+			case "赎回牛子": return handleRedemption(messageAction);
+			default: throw new AssertException();
 		}
-		return null;
+	}
+
+	private BotMessage handleRedemption(BotMessageAction messageAction) {
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
+		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		Asserts.notNull(botCattle, "巧妇难为无米炊。");
+
+		String redemptionLengthStr = messageAction.getValueOrDefault("10");
+		Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
+		int redemptionLength = new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue();
+		Asserts.isTrue(redemptionLength > 0, "格式错啦(长度)");
+		if (redemptionLength > 1000) redemptionLength = 1000;
+
+		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, redemptionLength);
+		botCattleMapper.safeUpdateCattleLength(botCattle.getId(), realRedemptionLength);
+
+		return BotMessage.simpleTextMessage(String.format("赎回%.2fcm，当前%.2fcm，消耗%s积分", realRedemptionLength / 100.0, (botCattle.getLength() + realRedemptionLength) / 100.0, realRedemptionLength));
 	}
 
 	private BotMessage handleDescRank(BotMessageAction messageAction) {
