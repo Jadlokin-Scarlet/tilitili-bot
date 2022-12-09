@@ -15,9 +15,7 @@ import com.tilitili.common.manager.BotCattleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,20 +64,29 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = botUser.getId();
 		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
-		Asserts.isTrue(botCattle.getLength() < 0, "你已经有了。");
 
-		String redemptionLengthStr = messageAction.getValueOrDefault("10");
-		Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
-		int redemptionLength = new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue();
-		Asserts.isTrue(redemptionLength > 0, "格式错啦(长度)");
-		if (redemptionLength > 1000) redemptionLength = 1000;
+		int score = MathUtil.range(0, botUser.getScore(), 1000);
+		Asserts.notEquals(score, 0, "欲邀击筑悲歌饮，正值倾家无酒钱。");
+
+		int length;
+		if (StringUtils.isNotBlank(messageAction.getValue())) {
+			String redemptionLengthStr = messageAction.getValue();
+			Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
+			length = MathUtil.range(0, new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue(), 1000);
+		} else {
+			length = MathUtil.range(0, -botCattle.getLength(), 1000);
+		}
+		Asserts.notEquals(length, 0, "无病莫呻吟");
+
+		int redemptionLength = Math.min(score, length);
 
 		// 凌晨4点刷新
 		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 		Asserts.isTrue(redisCache.setNotExist(String.format("redemption-%s-%s", userId, dayStr), "yes", 1, TimeUnit.DAYS), "阿伟，你咋又来赎牛子哦。");
 
 		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, redemptionLength);
-		botCattleMapper.safeUpdateCattleLength(botCattle.getId(), realRedemptionLength);
+		Asserts.checkEquals(realRedemptionLength, redemptionLength, "啊嘞，不对劲");
+		Asserts.checkEquals(botCattleMapper.safeUpdateCattleLength(botCattle.getId(), botCattle.getLength(), realRedemptionLength), 1, "啊嘞，不对劲");
 
 		return BotMessage.simpleTextMessage(String.format("赎回了%.2fcm，现在有%.2fcm，消耗了%s积分，再接再厉啊。", realRedemptionLength / 100.0, (botCattle.getLength() + realRedemptionLength) / 100.0, realRedemptionLength));
 	}
