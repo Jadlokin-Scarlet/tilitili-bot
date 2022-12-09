@@ -3,30 +3,28 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
-import com.tilitili.common.constant.FavoriteConstant;
-import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.BotIcePrice;
+import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
-import com.tilitili.common.entity.query.BotFavoriteTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.mapper.mysql.*;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
+import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,25 +36,15 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserManager botUserManager;
 	private final BotItemService botItemService;
-	private final BotFavoriteMapper botFavoriteMapper;
-	private final BotFavoriteActionAddMapper botFavoriteActionAddMapper;
-	private final RedisCache redisCache;
-	private final BotFavoriteManager botFavoriteManager;
-	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
 
 	@Autowired
-	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService, BotFavoriteMapper botFavoriteMapper, BotFavoriteActionAddMapper botFavoriteActionAddMapper, RedisCache redisCache, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper) {
+	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService) {
 		this.botItemMapper = botItemMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botIcePriceManager = botIcePriceManager;
 		this.botUserManager = botUserManager;
 		this.botItemService = botItemService;
-		this.botFavoriteMapper = botFavoriteMapper;
-		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
-		this.redisCache = redisCache;
-		this.botFavoriteManager = botFavoriteManager;
-		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 	}
 
 	@Override

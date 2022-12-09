@@ -62,12 +62,6 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 		}
 
 		BotUserDTO botUser = messageAction.getBotUser();
-		String action = messageAction.getText();
-
-		// 触发对话的关键词不会太长
-		if (action.length() > 5) {
-			return null;
-		}
 
 		// 其他平台必须绑定主账号
 		if (BotUserConstant.USER_TYPE_QQ != botUser.getType()) {
@@ -127,6 +121,11 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 		Long userId = messageAction.getBotUser().getId();
 		String action = messageAction.getText();
 
+		// 触发对话的关键词不会太长
+		if (action.length() > 5) {
+			return null;
+		}
+
 		// 没解锁的跳过判定
 		BotFavorite botFavorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
 		if (botFavorite == null) {
@@ -174,11 +173,11 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 		boolean isFriend = SendTypeEmum.FRIEND_MESSAGE_STR.equals(botSender.getSendType());
 		if (hasAtBot || isFriend) {
 			BotFavorite favorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
-			if (favorite == null) {
-				int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setFavorite(FavoriteEmum.strange.getFavorite()).setLevel(FavoriteEmum.strange.getLevel()));
-				if (addCnt != 0) {
-					return BotMessage.simpleTextMessage("你好，初次见面，我叫琪露诺。(好感度启用)");
-				}
+			Asserts.checkNull(favorite, "已经开启了");
+			int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setFavorite(FavoriteEmum.strange.getFavorite()).setLevel(FavoriteEmum.strange.getLevel()));
+			Asserts.notEquals(addCnt, 0, "启用失败");
+			if (addCnt != 0) {
+				return BotMessage.simpleTextMessage("你好，初次见面，我叫琪露诺。(好感度启用)");
 			}
 		}
 		return null;
