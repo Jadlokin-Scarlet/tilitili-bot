@@ -16,12 +16,14 @@ import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -64,12 +66,17 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = botUser.getId();
 		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
+		Asserts.isTrue(botCattle.getLength() < 0, "你已经有了。");
 
 		String redemptionLengthStr = messageAction.getValueOrDefault("10");
 		Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
 		int redemptionLength = new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue();
 		Asserts.isTrue(redemptionLength > 0, "格式错啦(长度)");
 		if (redemptionLength > 1000) redemptionLength = 1000;
+
+		// 凌晨4点刷新
+		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
+		Asserts.isTrue(redisCache.setNotExist(String.format("redemption-%s-%s", userId, dayStr), "yes", 1, TimeUnit.DAYS), "阿伟，你咋又来赎牛子哦。");
 
 		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, redemptionLength);
 		botCattleMapper.safeUpdateCattleLength(botCattle.getId(), realRedemptionLength);
