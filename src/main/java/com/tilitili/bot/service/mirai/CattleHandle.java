@@ -68,14 +68,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		int score = MathUtil.range(0, botUser.getScore(), 1000);
 		Asserts.notEquals(score, 0, "欲邀击筑悲歌饮，正值倾家无酒钱。");
 
-		int length;
-		if (StringUtils.isNotBlank(messageAction.getValue())) {
-			String redemptionLengthStr = messageAction.getValue();
-			Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
-			length = MathUtil.range(0, new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue(), 1000);
-		} else {
-			length = MathUtil.range(0, -botCattle.getLength(), 1000);
-		}
+		String redemptionLengthStr = messageAction.getValueOrDefault("10");
+		Asserts.isNumber(redemptionLengthStr, "格式错啦(长度)");
+		int inputLength = MathUtil.range(0, new BigDecimal(redemptionLengthStr).multiply(BigDecimal.valueOf(100)).intValue(), 1000);
+		Asserts.notEquals(inputLength, 0, "找茬柿吧");
+		int length = MathUtil.range(0, Math.min(-botCattle.getLength(), inputLength), 1000);
 		Asserts.notEquals(length, 0, "无病莫呻吟");
 
 		int redemptionLength = Math.min(score, length);
