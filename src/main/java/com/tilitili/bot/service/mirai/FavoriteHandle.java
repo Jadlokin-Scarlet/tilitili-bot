@@ -166,12 +166,15 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		Long userId = messageAction.getBotUser().getId();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 		List<Long> atList = messageAction.getAtList();
 		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
 		boolean hasAtBot = !atList.isEmpty();
 		boolean isFriend = SendTypeEmum.FRIEND_MESSAGE_STR.equals(botSender.getSendType());
 		if (hasAtBot || isFriend) {
+			Asserts.checkEquals(botUser.getType(), BotUserConstant.USER_TYPE_QQ, "未绑定");
+
 			BotFavorite favorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
 			Asserts.checkNull(favorite, "已经开启了");
 			int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setFavorite(FavoriteEmum.strange.getFavorite()).setLevel(FavoriteEmum.strange.getLevel()));

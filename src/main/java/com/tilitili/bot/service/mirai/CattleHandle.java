@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotCattle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
@@ -15,7 +16,10 @@ import com.tilitili.common.manager.BotCattleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.MathUtil;
+import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -197,6 +201,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String messageId = messageAction.getMessageId();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
+		Asserts.checkEquals(botUser.getType(), BotUserConstant.USER_TYPE_QQ, "未绑定");
+
 		Asserts.checkNull(botCattleMapper.getBotCattleByUserId(userId), "不要太贪心哦");
 		int length = random.nextInt(1000);
 		botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
