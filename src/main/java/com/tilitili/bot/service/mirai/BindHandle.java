@@ -2,16 +2,21 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
+import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.stereotype.Component;
@@ -24,15 +29,19 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private static final String applyKey = "BindHandle.apply-";
 
 	private final RedisCache redisCache;
-	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
+	private final BotSenderMapper botSenderMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
+	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
+	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
-	public BindHandle(RedisCache redisCache, BotUserMapper botUserMapper, BotUserManager botUserManager, BotForwardConfigMapper botForwardConfigMapper) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
 		this.redisCache = redisCache;
-		this.botUserMapper = botUserMapper;
 		this.botUserManager = botUserManager;
+		this.botSenderMapper = botSenderMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
+		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
+		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 	}
 
 	@Override
@@ -85,7 +94,19 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0));
 		Asserts.notEmpty(forwardConfigList, "无权限");
 		BotForwardConfig forwardConfig = forwardConfigList.get(0);
-		Long targetSenderId = forwardConfig.getTargetSenderId();
+
+		List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setUserId(targetBotUser.getId()));
+		BotSender targetSender = null;
+		for (BotUserSenderMapping mapping : mappingList) {
+			Long senderId = mapping.getSenderId();
+			BotSender theTargetSender = botSenderMapper.getValidBotSenderById(senderId);
+			boolean hasBind = botSenderTaskMappingManager.checkSenderHasTask(senderId, BotTaskConstant.bindTaskId);
+			if (hasBind) {
+				targetSender = theTargetSender;
+				break;
+			}
+		}
+		Asserts.notNull(targetSender, "查无此人");
 
 		redisCache.setValue(sourceKey, targetKey);
 		redisCache.setValue(targetKey, sourceKey);
@@ -94,6 +115,6 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleListMessage(Arrays.asList(
 				BotMessageChain.ofAt(targetBotUser.getId()),
 				BotMessageChain.ofPlain(String.format("来自%s的%s申请和你合体。(合体！/但是我拒绝)",sourceName, botUser.getName()))
-		)).setSenderId(targetSenderId);
+		)).setBotSender(targetSender);
 	}
 }
