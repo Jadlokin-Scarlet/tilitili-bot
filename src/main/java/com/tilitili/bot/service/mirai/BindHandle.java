@@ -108,8 +108,8 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Asserts.notNull(targetSender, "查无此人");
 
-		redisCache.setValue(sourceKey, targetKey);
-		redisCache.setValue(targetKey, sourceKey);
+		redisCache.setValue(sourceKey, targetKey, 60 * 60);
+		redisCache.setValue(targetKey, sourceKey, 60 * 60);
 
 		String sourceName = String.join("-", forwardConfig.getSourceName(), botSender.getName());
 		return BotMessage.simpleListMessage(Arrays.asList(
