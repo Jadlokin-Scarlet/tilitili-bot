@@ -205,6 +205,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotMessageChain> respList = new ArrayList<>();
 		if (rate < 45) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
+			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 			if (isRandom) {
 				respList.add(BotMessageChain.ofPlain("你与"));
 				respList.add(BotMessageChain.ofAt(otherUserId));
@@ -212,6 +213,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm。", length / 100.0)));
 		} else if (rate < 90) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
+			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
 			if (isRandom) {
 				respList.add(BotMessageChain.ofPlain("你与"));
 				respList.add(BotMessageChain.ofAt(otherUserId));
@@ -219,6 +221,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm。", length / 100.0)));
 		} else {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
+			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
 			respList.add(BotMessageChain.ofPlain("不好，"));
 			if (isRandom) {
 				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
