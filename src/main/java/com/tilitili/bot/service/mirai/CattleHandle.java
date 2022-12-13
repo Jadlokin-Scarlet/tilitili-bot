@@ -96,7 +96,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				case 2: message = String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length);break;
 				default: throw new AssertException();
 			}
-			if (message.length() + chainList.stream().mapToInt(String::length).sum() > 100) {
+			if (message.length() + chainList.stream().mapToInt(String::length).sum() + chainList.size() > 100) {
 				break;
 			}
 			chainList.add(message);
