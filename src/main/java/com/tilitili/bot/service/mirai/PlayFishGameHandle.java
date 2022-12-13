@@ -59,8 +59,44 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "收竿": case "收杆": return handleEnd(messageAction);
 			case "鱼呢": return getStatus(messageAction);
 			case "钓鱼榜": return getRank(messageAction);
+			case "乐观榜": return getRateRank(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage getRateRank(BotMessageAction messageAction) {
+		Date todayStartTime = DateUtils.getCurrentDay();
+		Date yesterdayStartTime = DateUtils.addDay(todayStartTime, -1);
+		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(yesterdayStartTime, todayStartTime);
+		Map<Long, Integer> userScoreMap = new HashMap<>();
+		Map<Long, Integer> userCntMap = new HashMap<>();
+		Map<Long, Integer> userRateMap = new HashMap<>();
+		for (FishPlayer fishPlayer : fishPlayerList) {
+			Long userId = fishPlayer.getUserId();
+			if (fishPlayer.getItemId() == null) continue;
+			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+			if (fishConfig == null) continue;
+			userCntMap.merge(userId, 1, Integer::sum);
+			if (fishConfig.getPrice() != null) {
+				userScoreMap.merge(userId, fishConfig.getPrice(), Integer::sum);
+			}
+			if (fishConfig.getItemId() != null) {
+				BotItem botItem = botItemMapper.getBotItemById(fishConfig.getItemId());
+				if (botItem.getSellPrice() != null) {
+					userScoreMap.merge(userId, botItem.getSellPrice(), Integer::sum);
+				}
+			}
+		}
+		userScoreMap.forEach((userId, score) -> {
+			if (userCntMap.containsKey(userId)) {
+				userRateMap.put(userId, score / userCntMap.get(userId));
+			}
+		});
+		List<String> rankList = userRateMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s\t%s", userCntMap.get(entry.getKey()), userScoreMap.get(entry.getKey()), botUserManager.getBotUserByIdWithParent(entry.getKey()).getName()))
+				.collect(Collectors.toList());
+
+		return BotMessage.simpleTextMessage(IntStream.range(0, rankList.size()).mapToObj(index -> String.format("%s:%s", index==0?"酋长":index+1, rankList.get(index))).collect(Collectors.joining("\n")));
 	}
 
 	private BotMessage getRank(BotMessageAction messageAction) {
