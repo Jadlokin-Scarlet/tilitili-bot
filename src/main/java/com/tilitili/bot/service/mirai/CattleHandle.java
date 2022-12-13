@@ -73,6 +73,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleRecord(BotMessageAction messageAction) {
 		Long userId = messageAction.getBotUser().getId();
 		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
+		Asserts.notEmpty(botCattleRecordList, "我不倒啊");
 		List<BotMessageChain> chainList = new ArrayList<>();
 		for (int index = 0; index < botCattleRecordList.size(); index++) {
 			BotCattleRecord botCattleRecord = botCattleRecordList.get(index);
@@ -207,16 +208,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 			if (isRandom) {
+				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 				respList.add(BotMessageChain.ofPlain("你与"));
-				respList.add(BotMessageChain.ofAt(otherUserId));
+				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
 			}
 			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm。", length / 100.0)));
 		} else if (rate < 90) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
 			if (isRandom) {
+				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 				respList.add(BotMessageChain.ofPlain("你与"));
-				respList.add(BotMessageChain.ofAt(otherUserId));
+				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
 			}
 			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm。", length / 100.0)));
 		} else {
