@@ -89,12 +89,17 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 			String targetUserName = targetUser.getName();
 			double length = botCattleRecord.getLength() / 100.0;
+			String message;
 			switch (result) {
-				case 0: chainList.add(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length));break;
-				case 1: chainList.add(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length));break;
-				case 2: chainList.add(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length));break;
+				case 0: message = String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length);break;
+				case 1: message = String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length);break;
+				case 2: message = String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length);break;
 				default: throw new AssertException();
 			}
+			if (message.length() + chainList.stream().mapToInt(String::length).sum() > 100) {
+				break;
+			}
+			chainList.add(message);
 		}
 		return BotMessage.simpleTextMessage(String.join("\n", chainList));
 	}
