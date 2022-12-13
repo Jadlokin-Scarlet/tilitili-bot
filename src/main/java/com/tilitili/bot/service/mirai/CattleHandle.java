@@ -86,14 +86,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				result = 2 - result;
 			}
 			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(targetUserId);
-			BotCattle targetCattle = botCattleMapper.getBotCattleByUserId(targetUserId);
 
 			String targetUserName = targetUser.getName();
-			double targetLength = targetCattle.getLength() / 100.0;
+			double length = botCattleRecord.getLength() / 100.0;
 			switch (result) {
-				case 0: chainList.add(BotMessageChain.ofPlain(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, targetLength)));break;
-				case 1: chainList.add(BotMessageChain.ofPlain(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, targetLength)));break;
-				case 2: chainList.add(BotMessageChain.ofPlain(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, targetLength)));break;
+				case 0: chainList.add(BotMessageChain.ofPlain(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length)));break;
+				case 1: chainList.add(BotMessageChain.ofPlain(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length)));break;
+				case 2: chainList.add(BotMessageChain.ofPlain(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length)));break;
 				default: throw new AssertException();
 			}
 		}
