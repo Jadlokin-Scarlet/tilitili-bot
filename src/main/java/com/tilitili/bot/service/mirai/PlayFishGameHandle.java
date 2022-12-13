@@ -92,7 +92,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 				userRateMap.put(userId, score / userCntMap.get(userId));
 			}
 		});
-		List<String> rankList = userRateMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
+		List<String> rankList = userRateMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).limit(5)
 				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s\t%s", userCntMap.get(entry.getKey()), userScoreMap.get(entry.getKey()), botUserManager.getBotUserByIdWithParent(entry.getKey()).getName()))
 				.collect(Collectors.toList());
 
