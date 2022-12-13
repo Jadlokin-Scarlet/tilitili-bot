@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotCattle;
+import com.tilitili.common.entity.BotCattleRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -15,6 +16,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotCattleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
+import com.tilitili.common.mapper.mysql.BotCattleRecordMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -37,16 +39,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
 	private final BotUserManager botUserManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
+	private final BotCattleRecordMapper botCattleRecordMapper;
 
 	private final Random random;
 
 	@Autowired
-	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
+	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper) {
 		this.botCattleMapper = botCattleMapper;
 		this.botCattleManager = botCattleManager;
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
+		this.botCattleRecordMapper = botCattleRecordMapper;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -56,11 +60,43 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "我的牛子": return handleInfo(messageAction);
 			case "领取牛子": return handleStart(messageAction);
 			case "比划比划": return handlePk(messageAction);
-			case "牛子榜": return handleRank(messageAction);
-			case "牛子0榜": return handleDescRank(messageAction);
+			case "天榜": return handleRank(messageAction);
+			case "地榜": return handleDescRank(messageAction);
 			case "赎回牛子": return handleRedemption(messageAction);
+			case "我牛子呢": return handleRecord(messageAction);
+			case "牛子榜": return BotMessage.simpleTextMessage("你是否在找：天榜");
+			case "牛子0榜": return BotMessage.simpleTextMessage("你是否在找：地榜");
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleRecord(BotMessageAction messageAction) {
+		Long userId = messageAction.getBotUser().getId();
+		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
+		List<BotMessageChain> chainList = new ArrayList<>();
+		for (int index = 0; index < botCattleRecordList.size(); index++) {
+			BotCattleRecord botCattleRecord = botCattleRecordList.get(index);
+			Long targetUserId = botCattleRecord.getTargetUserId();
+			Integer result = botCattleRecord.getResult();
+
+			boolean isTarget = Objects.equals(targetUserId, userId);
+			if (isTarget) {
+				targetUserId = botCattleRecord.getSourceUserId();
+				result = 2 - result;
+			}
+			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(targetUserId);
+			BotCattle targetCattle = botCattleMapper.getBotCattleByUserId(targetUserId);
+
+			String targetUserName = targetUser.getName();
+			double targetLength = targetCattle.getLength() / 100.0;
+			switch (result) {
+				case 0: chainList.add(BotMessageChain.ofPlain(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, targetLength)));break;
+				case 1: chainList.add(BotMessageChain.ofPlain(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, targetLength)));break;
+				case 2: chainList.add(BotMessageChain.ofPlain(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, targetLength)));break;
+				default: throw new AssertException();
+			}
+		}
+		return BotMessage.simpleListMessage(chainList);
 	}
 
 	private BotMessage handleRedemption(BotMessageAction messageAction) {
