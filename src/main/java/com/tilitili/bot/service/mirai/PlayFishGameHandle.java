@@ -96,7 +96,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s\t%s", userCntMap.get(entry.getKey()), userScoreMap.get(entry.getKey()), botUserManager.getBotUserByIdWithParent(entry.getKey()).getName()))
 				.collect(Collectors.toList());
 
-		return BotMessage.simpleTextMessage(IntStream.range(0, rankList.size()).mapToObj(index -> String.format("%s:%s", index==0?"酋长":index+1, rankList.get(index))).collect(Collectors.joining("\n")));
+		return BotMessage.simpleTextMessage("次数\t积分\t酋长\n" + String.join("\n", rankList));
 	}
 
 	private BotMessage getRank(BotMessageAction messageAction) {
