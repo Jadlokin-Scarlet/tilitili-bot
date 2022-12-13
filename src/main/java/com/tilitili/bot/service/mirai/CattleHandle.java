@@ -74,7 +74,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = messageAction.getBotUser().getId();
 		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
 		Asserts.notEmpty(botCattleRecordList, "我不倒啊");
-		List<BotMessageChain> chainList = new ArrayList<>();
+		List<String> chainList = new ArrayList<>();
 		for (int index = 0; index < botCattleRecordList.size(); index++) {
 			BotCattleRecord botCattleRecord = botCattleRecordList.get(index);
 			Long targetUserId = botCattleRecord.getTargetUserId();
@@ -90,13 +90,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			String targetUserName = targetUser.getName();
 			double length = botCattleRecord.getLength() / 100.0;
 			switch (result) {
-				case 0: chainList.add(BotMessageChain.ofPlain(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length)));break;
-				case 1: chainList.add(BotMessageChain.ofPlain(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length)));break;
-				case 2: chainList.add(BotMessageChain.ofPlain(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length)));break;
+				case 0: chainList.add(String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length));break;
+				case 1: chainList.add(String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length));break;
+				case 2: chainList.add(String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length));break;
 				default: throw new AssertException();
 			}
 		}
-		return BotMessage.simpleListMessage(chainList);
+		return BotMessage.simpleTextMessage(String.join("\n", chainList));
 	}
 
 	private BotMessage handleRedemption(BotMessageAction messageAction) {
