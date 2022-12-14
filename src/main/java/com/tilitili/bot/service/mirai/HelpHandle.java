@@ -12,7 +12,6 @@ import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
 import org.jsoup.helper.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -24,7 +23,6 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     private final BotTaskMapper botTaskMapper;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
 
-    @Autowired
     public HelpHandle(BotTaskMapper botTaskMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
         this.botTaskMapper = botTaskMapper;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
