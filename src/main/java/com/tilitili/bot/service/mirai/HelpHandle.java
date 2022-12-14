@@ -14,9 +14,8 @@ import com.tilitili.common.utils.Asserts;
 import org.jsoup.helper.StringUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class HelpHandle extends ExceptionRespMessageHandle {
@@ -44,7 +43,12 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         Long senderId = messageAction.getBotSender().getId();
         String taskNameList = messageAction.getValue();
         Asserts.notBlank(taskNameList, "格式错啦");
-        List<Long> taskIdList = Arrays.stream(taskNameList.split("，")).map(botTaskMapper::getBotTaskByName).map(BotTask::getId).collect(Collectors.toList());
+        List<Long> taskIdList = new ArrayList<>();
+        for (String taskName : taskNameList.split("，")) {
+            BotTask task = botTaskMapper.getBotTaskByNick(taskName);
+            Asserts.notNull(task, "%s是什么", taskName);
+            taskIdList.add(task.getId());
+        }
 
         for (Long taskId : taskIdList) {
             BotSenderTaskMapping botSenderTaskMapping = botSenderTaskMappingMapper.getBotSenderTaskMappingBySenderIdAndTaskId(senderId, taskId);
@@ -62,7 +66,12 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         Long senderId = messageAction.getBotSender().getId();
         String taskNameList = messageAction.getValue();
         Asserts.notBlank(taskNameList, "格式错啦");
-        List<Long> taskIdList = Arrays.stream(taskNameList.split("，")).map(botTaskMapper::getBotTaskByName).map(BotTask::getId).collect(Collectors.toList());
+        List<Long> taskIdList = new ArrayList<>();
+        for (String taskName : taskNameList.split("，")) {
+            BotTask task = botTaskMapper.getBotTaskByNick(taskName);
+            Asserts.notNull(task, "%s是什么", taskName);
+            taskIdList.add(task.getId());
+        }
 
         for (Long taskId : taskIdList) {
             BotSenderTaskMapping botSenderTaskMapping = botSenderTaskMappingMapper.getBotSenderTaskMappingBySenderIdAndTaskId(senderId, taskId);
