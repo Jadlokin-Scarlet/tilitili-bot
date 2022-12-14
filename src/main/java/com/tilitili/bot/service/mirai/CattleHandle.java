@@ -37,9 +37,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotCattleManager botCattleManager;
 	private final RedisCache redisCache;
 	private final BotUserManager botUserManager;
-	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotCattleRecordMapper botCattleRecordMapper;
 	private final BotUserItemMappingManager botUserItemMappingManager;
+	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
 	private final Random random;
 
