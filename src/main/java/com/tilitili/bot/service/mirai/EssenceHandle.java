@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEmum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class EssenceHandle extends BaseMessageHandleAdapt {
+public class EssenceHandle extends ExceptionRespMessageHandle {
 	private final BotManager botManager;
 	private final CheckManager checkManager;
 
