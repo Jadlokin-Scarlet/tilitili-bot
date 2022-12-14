@@ -49,9 +49,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botCattleManager = botCattleManager;
-		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botCattleRecordMapper = botCattleRecordMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
+		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
