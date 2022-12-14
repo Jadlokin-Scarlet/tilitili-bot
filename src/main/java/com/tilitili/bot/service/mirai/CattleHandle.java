@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotCattle;
 import com.tilitili.common.entity.BotCattleRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
+import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotCattleQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
@@ -14,6 +15,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotCattleManager;
+import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotCattleRecordMapper;
@@ -40,17 +42,19 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserManager botUserManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotCattleRecordMapper botCattleRecordMapper;
+	private final BotUserItemMappingManager botUserItemMappingManager;
 
 	private final Random random;
 
 	@Autowired
-	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper) {
+	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper, BotUserItemMappingManager botUserItemMappingManager) {
 		this.botCattleMapper = botCattleMapper;
 		this.botCattleManager = botCattleManager;
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botCattleRecordMapper = botCattleRecordMapper;
+		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -83,7 +87,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			boolean isTarget = Objects.equals(targetUserId, userId);
 			if (isTarget) {
 				targetUserId = botCattleRecord.getSourceUserId();
-				result = 2 - result;
+				if (result < 3) {
+					result = 2 - result;
+				}
 			}
 			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(targetUserId);
 
@@ -94,6 +100,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				case 0: message = String.format("%s.斩获[%s]%.2fcm", index+1, targetUserName, length);break;
 				case 1: message = String.format("%s.和[%s]一起折断了%.2fcm", index+1, targetUserName, length);break;
 				case 2: message = String.format("%s.败给[%s]%.2fcm", index+1, targetUserName, length);break;
+				case 3: message = String.format("%s.和[%s]一起长了%.2fcm", index+1, targetUserName, length);break;
 				default: throw new AssertException();
 			}
 			if (message.length() + chainList.stream().mapToInt(String::length).sum() + chainList.size() > 100) {
@@ -227,15 +234,27 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			}
 			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm。", length / 100.0)));
 		} else {
-			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
-			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
-			respList.add(BotMessageChain.ofPlain("不好，"));
-			if (isRandom) {
-				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-				respList.add(BotMessageChain.ofPlain("和"));
-				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+			if (botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT)){
+				botCattleManager.safeCalculateCattle(userId, otherUserId, length, length);
+				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(length).setResult(3).setLength(length));
+				respList.add(BotMessageChain.ofPlain("不好，"));
+				if (isRandom) {
+					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+					respList.add(BotMessageChain.ofPlain("和"));
+					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+				}
+				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，幸好在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
+			} else {
+				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
+				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
+				respList.add(BotMessageChain.ofPlain("不好，"));
+				if (isRandom) {
+					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+					respList.add(BotMessageChain.ofPlain("和"));
+					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+				}
+				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，双方都断了%.2fcm。", length / 100.0)));
 			}
-			respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，双方都断了%.2fcm。", length / 100.0)));
 		}
 
 		redisCache.setValue(redisKey, "yes", 60*60);
