@@ -33,6 +33,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,10 +111,10 @@ public class BotService {
 
     @Async
     public void syncHandleTextMessage(String message, BotEmum bot) {
-        BotMessage botMessage = null;
+        List<Long> lockUserId = new ArrayList<>();
         try {
             // 解析message
-            botMessage = botManager.handleWsMessageToBotMessage(bot, message);
+            BotMessage botMessage = botManager.handleWsMessageToBotMessage(bot, message);
             if (botMessage == null) {
                 log.info("解析失败");
                 return;
@@ -133,8 +134,13 @@ public class BotService {
 
             // 获取用户锁
             Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
+            lockUserId.add(botMessage.getBotUser().getId());
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
+            for (Long atUserId : botMessageAction.getAtList()) {
+                Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
+                lockUserId.add(atUserId);
+            }
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
             // 查询回复消息
@@ -183,8 +189,8 @@ public class BotService {
         } catch (Exception e) {
             log.error("异步消息处理异常", e);
         } finally {
-            if (botMessage != null && botMessage.getBotUser() != null && botMessage.getBotUser().getId() != null) {
-                userIdLockMap.remove(botMessage.getBotUser().getId());
+            for (Long userId : lockUserId) {
+                userIdLockMap.remove(userId);
             }
         }
     }
