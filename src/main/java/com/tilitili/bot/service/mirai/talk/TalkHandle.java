@@ -12,9 +12,11 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotTalkManager;
+import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.QQUtil;
+import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class TalkHandle extends ExceptionRespMessageHandle {
+	private final CheckManager checkManager;
 	private final BotTalkMapper botTalkMapper;
 	private final BotTalkManager botTalkManager;
 	private static final String reqKey = "TalkHandle.reqKey";
@@ -33,7 +36,8 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	private static final Gson gson = new Gson();
 
 	@Autowired
-	public TalkHandle(BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
+	public TalkHandle(CheckManager checkManager, BotTalkMapper botTalkMapper, BotTalkManager botTalkManager) {
+		this.checkManager = checkManager;
 		this.botTalkMapper = botTalkMapper;
 		this.botTalkManager = botTalkManager;
 	}
@@ -111,11 +115,17 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 			session.put(senderStatusKey, "1");
 			return BotMessage.simpleTextMessage("请告诉我关键词吧");
 		}
-		Asserts.notBlank(req, "格式不对啦(提问)");
-		Asserts.notBlank(resp, "格式不对啦(回答)");
 
 		session.remove(senderStatusKey);
 		session.remove(senderReqKey);
+
+		Asserts.notBlank(req, "格式不对啦(提问)");
+		Asserts.notBlank(resp, "格式不对啦(回答)");
+
+		BotMessage respBotMessage = gson.fromJson(resp, BotMessage.class);
+		String text = respBotMessage.getBotMessageChainList().stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_PLAIN))
+				.map(BotMessageChain::getText).collect(Collectors.joining(""));
+		Asserts.isTrue(checkManager.checkText(text), "达咩");
 
 		BotTalk oldTalk = botTalkManager.getJsonTalkOrOtherTalk(req, botMessage);
 		if (oldTalk != null) {
@@ -126,7 +136,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		botTalkMapper.addBotTalkSelective(addBotTalk);
 		if (oldTalk == null) {
 			List<BotMessageChain> messageChainList = Lists.newArrayList(BotMessageChain.ofPlain("学废了！"));
-			messageChainList.addAll(gson.fromJson(resp, BotMessage.class).getBotMessageChainList());
+			messageChainList.addAll(respBotMessage.getBotMessageChainList());
 			return BotMessage.simpleListMessage(messageChainList);
 		} else {
 			List<BotMessageChain> messageChainList = Lists.newArrayList(BotMessageChain.ofPlain("覆盖了！原本是"));
