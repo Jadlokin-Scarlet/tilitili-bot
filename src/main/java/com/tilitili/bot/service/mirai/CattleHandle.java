@@ -3,10 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.entity.BotCattle;
-import com.tilitili.common.entity.BotCattleRecord;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUserSenderMapping;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotCattleQuery;
@@ -244,6 +241,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
 				}
 				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，幸好在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
+				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1));
+				Asserts.checkEquals(subNum, -1, "使用失败");
 			} else {
 				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
 				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
