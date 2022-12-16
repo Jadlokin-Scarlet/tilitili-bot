@@ -179,6 +179,8 @@ public class BotService {
             if (respMessage.getBotSender() == null) {
                 respMessage.setBotSender(botSender);
             }
+            // 记录消息和回复消息的关系
+            respMessage.setMessageId(botMessage.getMessageId());
             // 如果最后是消息，则回复
             String messageId = sendMessageManager.sendMessage(respMessage);
             if (messageId != null) {
