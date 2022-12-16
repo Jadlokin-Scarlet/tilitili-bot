@@ -13,6 +13,7 @@ import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
+import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -31,26 +32,28 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ForwardHandle extends BaseMessageHandleAdapt {
+	public static final String forwardMappingKey = "ForwardHandle.forwardMapping-";
 	private final List<String> blackList4370 = Arrays.asList("https://gchat.qpic.cn/qmeetpic/49134681639135681/7091721-2888756874-C116108D71E375A0A37E168B6C97889A/0?term");
 	private final MinecraftManager minecraftManager;
 	private final BaiduManager baiduManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final SendMessageManager sendMessageManager;
+	private final RedisCache redisCache;
 
 	private ScheduledFuture<?> future;
 
-	public ForwardHandle(MinecraftManager minecraftManager, BaiduManager baiduManager, BotForwardConfigMapper botForwardConfigMapper, SendMessageManager sendMessageManager) {
+	public ForwardHandle(MinecraftManager minecraftManager, BaiduManager baiduManager, BotForwardConfigMapper botForwardConfigMapper, SendMessageManager sendMessageManager, RedisCache redisCache) {
 		this.minecraftManager = minecraftManager;
 		this.baiduManager = baiduManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.sendMessageManager = sendMessageManager;
+		this.redisCache = redisCache;
 	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
-		Long userId = messageAction.getBotUser().getId();
 
 		List<BotMessageChain> sourceMessageChainList = messageAction.getBotMessage().getBotMessageChainList();
 		if (senderId == 4370L) {
