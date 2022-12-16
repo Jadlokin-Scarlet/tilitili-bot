@@ -46,7 +46,9 @@ public class GocqNoticeGroupDecreaseLeaveHandle extends GocqAutoEventHandle<Gocq
 
 		if (botUser != null) {
 			BotUserSenderMapping botUserSenderMapping = botUserSenderMappingMapper.getBotUserSenderMappingBySenderIdAndUserId(botSender.getId(), botUser.getId());
-			botUserSenderMappingMapper.deleteBotUserSenderMappingByPrimary(botUserSenderMapping.getId());
+			if (botUserSenderMapping != null) {
+				botUserSenderMappingMapper.deleteBotUserSenderMappingByPrimary(botUserSenderMapping.getId());
+			}
 		}
 
 		Asserts.notNull(botSender, "无权限");
