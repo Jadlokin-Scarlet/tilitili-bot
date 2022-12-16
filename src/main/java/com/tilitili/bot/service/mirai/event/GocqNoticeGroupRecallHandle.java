@@ -47,6 +47,6 @@ public class GocqNoticeGroupRecallHandle extends GocqAutoEventHandle<GocqNoticeG
 		BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
 		Asserts.notNull(replySender, "没有权限");
 
-		botManager.recallMessage(BotEmum.getBotById(replySender.getId()), replySender, replyMessageId);
+		botManager.recallMessage(BotEmum.getBotById(replySender.getBot()), replySender, replyMessageId);
 	}
 }
