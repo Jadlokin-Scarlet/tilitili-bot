@@ -7,7 +7,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
@@ -51,8 +50,8 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 		}
 		Asserts.isNumber(pid, "格式错啦(pid)");
 
-		PixivInfoIllust infoProxy = pixivManager.getInfoProxy(pid);
-		Asserts.notNull(infoProxy, "啊嘞，不对劲");
+//		PixivInfoIllust infoProxy = pixivManager.getInfoProxy(pid);
+//		Asserts.notNull(infoProxy, "啊嘞，不对劲");
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserByUserId(userId);
 		Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
