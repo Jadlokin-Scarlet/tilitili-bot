@@ -50,8 +50,7 @@ public class BookmarkPixivHandle extends ExceptionRespMessageHandle {
 		}
 		Asserts.isNumber(pid, "格式错啦(pid)");
 
-//		PixivInfoIllust infoProxy = pixivManager.getInfoProxy(pid);
-//		Asserts.notNull(infoProxy, "啊嘞，不对劲");
+		Asserts.notNull(pixivManager.getPageListProxy(pid), "啊嘞，不对劲");
 
 		PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserByUserId(userId);
 		Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
