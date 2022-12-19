@@ -240,7 +240,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 					respList.add(BotMessageChain.ofPlain("和"));
 					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
 				}
-				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，但是在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
+				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，但在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
 				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1));
 				Asserts.checkEquals(subNum, -1, "使用失败");
 			} else {
