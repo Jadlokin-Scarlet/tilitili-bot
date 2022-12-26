@@ -184,7 +184,11 @@ public class BotService {
             // 如果最后是消息，则回复
             String messageId = sendMessageManager.sendMessage(respMessage);
             if (messageId != null) {
-                session.put(lastMessageIdKey, messageId);
+                Long respSenderId = respMessage.getBotSender() != null ? respMessage.getBotSender().getId() : respMessage.getSenderId();
+                if (respSenderId != null) {
+                    BotSessionService.MiraiSession respSession = botSessionService.getSession(respSenderId);
+                    respSession.put(lastMessageIdKey, messageId);
+                }
             }
         } catch (AssertException e) {
             log.warn("异步消息处理断言异常, message=" + e.getMessage(), e);
