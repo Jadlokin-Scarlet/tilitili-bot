@@ -38,6 +38,7 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
         Long uid = owner.getUid();
         String name = owner.getName();
         Long roomId = owner.getRoomId();
+        Asserts.notNull(roomId, "直播间不存在");
 
         SubscriptionQuery subscriptionQuery = new SubscriptionQuery().setStatus(0).setType(1).setValue(String.valueOf(uid)).setSenderId(senderId);
         int oldCount = subscriptionMapper.countSubscriptionByCondition(subscriptionQuery);
