@@ -73,9 +73,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleRecord(BotMessageAction messageAction) {
 		Long userId = messageAction.getBotUser().getId();
+		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		Asserts.notNull(botCattle, "我不倒啊。");
 		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
 		Asserts.notEmpty(botCattleRecordList, "我不倒啊");
 		List<String> chainList = new ArrayList<>();
+		String title = String.format("当前%.2fcm。", botCattle.getLength() / 100.0);
+		chainList.add(title);
 		for (int index = 0; index < botCattleRecordList.size(); index++) {
 			BotCattleRecord botCattleRecord = botCattleRecordList.get(index);
 			Long targetUserId = botCattleRecord.getTargetUserId();
@@ -100,7 +104,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				case 3: message = String.format("%s.和[%s]一起长了%.2fcm", index+1, targetUserName, length);break;
 				default: throw new AssertException();
 			}
-			if (message.length() + chainList.stream().mapToInt(String::length).sum() + chainList.size() > 100) {
+			if (title.length() + message.length() + chainList.stream().mapToInt(String::length).sum() + chainList.size() > 100) {
 				break;
 			}
 			chainList.add(message);
