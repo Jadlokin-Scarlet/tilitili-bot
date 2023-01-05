@@ -116,11 +116,14 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				if ("签到".equals(text.trim())) {
 					break;
 				}
-				for (int index = 0; index < 10; index++) {
+				for (int index = 0; index < 3; index++) {
 					reply = reqReply(text);
 					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
 				}
 				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
+				if (isRandomReply && reply.contains("风太大了，没有听清，能再说一遍么")) {
+					return BotMessage.emptyMessage();
+				}
 				break;
 			}
 			case "qy": reply = reqQingYunReply(text); break;
