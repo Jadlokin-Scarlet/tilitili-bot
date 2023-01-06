@@ -49,8 +49,16 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			case "签到": case "qd": return handleSignMessage(messageAction);
 			case "积分排行": case "jfph": return handleQueryRankMessage(messageAction);
 			case "积分查询": case "jfcx": return handleQueryScoreMessage(messageAction);
+			case "v我": return handleBorrow(messageAction);
 			default: return null;
 		}
+	}
+
+	private BotMessage handleBorrow(BotMessageAction messageAction) {
+		String scoreStr = messageAction.getValue();
+		Asserts.isNumber(scoreStr, "格式错啦(积分)");
+
+		return null;
 	}
 
 	private BotMessage handleQueryScoreMessage(BotMessageAction messageAction) {
