@@ -7,6 +7,7 @@ import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.MinecraftServerEmum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
+import com.tilitili.common.entity.view.baidu.TranslateView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BaiduManager;
@@ -81,7 +82,8 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 					switch (chain.getType()) {
 						case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
 						case BotMessage.MESSAGE_TYPE_IMAGE:
-							String imageText = baiduManager.translateImageIgnoreError(chain.getUrl()).getSumSrc();
+							TranslateView translateView = baiduManager.translateImageIgnoreError(chain.getUrl());
+							String imageText = translateView != null? translateView.getSumSrc(): null;
 							return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
 						default: return "";
 					}
