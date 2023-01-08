@@ -11,6 +11,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotBoastMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,8 +46,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		} else {
 			throw new AssertException();
 		}
-		Asserts.notBlank(text, "网络异常");
-		if (text.contains("买不起流量包了")) {
+		if (text.contains("流量包") || StringUtils.isBlank(text)) {
 			List<BotBoast> boastList = botBoastMapper.getBotBoastByCondition(new BotBoastQuery().setType(type));
 			text = boastList.get(random.nextInt(boastList.size())).getText();
 		} else {
@@ -54,6 +54,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 				botBoastMapper.addBotBoastSelective(new BotBoast().setText(text).setType(type));
 			}
 		}
+		Asserts.notBlank(text, "网络异常");
 
 		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他", "mmt").contains(key);
 		if (isOther) {
