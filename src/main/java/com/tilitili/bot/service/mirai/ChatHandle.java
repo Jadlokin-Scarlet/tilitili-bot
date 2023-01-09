@@ -121,7 +121,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
 				}
 				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
-				if (isRandomReply && reply.contains("风太大了，没有听清，能再说一遍么")) {
+				if (isRandomReply && (reply.contains("能再说一遍么") || reply.contains("不是姑姑我不明白，这世界变化快"))) {
 					return BotMessage.emptyMessage();
 				}
 				break;
