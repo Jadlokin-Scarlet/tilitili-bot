@@ -45,9 +45,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Autowired
 	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper, BotUserItemMappingManager botUserItemMappingManager) {
-		this.botCattleMapper = botCattleMapper;
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
+		this.botCattleMapper = botCattleMapper;
 		this.botCattleManager = botCattleManager;
 		this.botCattleRecordMapper = botCattleRecordMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
