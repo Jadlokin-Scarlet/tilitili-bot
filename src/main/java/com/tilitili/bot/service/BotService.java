@@ -109,6 +109,10 @@ public class BotService {
         }
     }
 
+    public void testHandleTextMessage(String message, BotEmum bot) {
+        this.syncHandleTextMessage(message, bot);
+    }
+
     @Async
     public void syncHandleTextMessage(String message, BotEmum bot) {
         List<Long> lockUserId = new ArrayList<>();
@@ -138,6 +142,7 @@ public class BotService {
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
             for (Long atUserId : botMessageAction.getAtList()) {
+                if (Objects.equals(atUserId, botMessage.getBotUser().getId())) continue;
                 Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
                 lockUserId.add(atUserId);
             }

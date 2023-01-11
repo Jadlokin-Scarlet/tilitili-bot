@@ -2,7 +2,6 @@ package com.tilitili.bot.service;
 
 import com.tilitili.bot.StartApplication;
 import com.tilitili.common.emnus.BotEmum;
-import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.syncHandleTextMessage("{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":38072,\"time\":1670205887},{\"type\":\"Plain\",\"text\":\"ping\"}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}", BotEmum.CIRNO_QQ);
-		TimeUtil.millisecondsSleep(3600);
+		tester.testHandleTextMessage("{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":8516,\"time\":1673431411},{\"type\":\"Plain\",\"text\":\"管理员\"},{\"type\":\"At\",\"target\":545459363,\"display\":\"\"},{\"type\":\"Plain\",\"text\":\" \"}],\"sender\":{\"id\":545459363,\"memberName\":\"Jadlokin_Scarlet\",\"specialTitle\":\"测试\",\"permission\":\"MEMBER\",\"joinTimestamp\":1548094603,\"lastSpeakTimestamp\":1673431411,\"muteTimeRemaining\":0,\"group\":{\"id\":729412455,\"name\":\"My Homo\",\"permission\":\"OWNER\"}}}}", BotEmum.CIRNO_QQ);
 	}
 }
