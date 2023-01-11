@@ -173,6 +173,7 @@ public class BotService {
             }
             // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
             if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
+                log.info(botMessage.getMessageId() + "已处理");
                 return;
             }
             // 没设置发送者，就默认原路发回
