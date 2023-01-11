@@ -1,4 +1,4 @@
-From hub.c.163.com/library/java:8-jre
+From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre
 
 #COPY SimSun.ttf /usr/share/fonts/
 #COPY SimSun.ttf /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/fonts/SimSun.ttf
