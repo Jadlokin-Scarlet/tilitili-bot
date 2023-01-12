@@ -86,14 +86,15 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotUserDTO otherUser = messageAction.getBotUser();
 		Long otherUserId = otherUser.getId();
 
-		String applyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
-		if (!session.containsKey(applyRedisKey)) {
+		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		if (!session.containsKey(otherApplyRedisKey)) {
 			return null;
 		}
 
-		long userId = Long.parseLong(session.get(applyRedisKey));
+		long userId = Long.parseLong(session.get(otherApplyRedisKey));
 		BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
 
+		String applyRedisKey = String.format("CattleHandle-applyPk-%s", userId);
 		String redisKey = String.format("CattleHandle-%s", userId);
 		Long expire = redisCache.getExpire(redisKey);
 		if (expire > 0) {
@@ -110,6 +111,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		// 主逻辑
 		session.remove(applyRedisKey);
+		session.remove(otherApplyRedisKey);
 		if (expire > 0) {
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, botUser, refreshItem), "啊嘞，道具不够用了");
 		}
@@ -151,13 +153,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		// 主逻辑
-		String otherRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
-		session.remove(otherRedisKey);
-		session.put(otherRedisKey, String.valueOf(userId));
+		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		session.remove(otherApplyRedisKey);
 
-		String redisKey = String.format("CattleHandle-applyPk-%s", userId);
-		session.remove(redisKey);
-		session.put(redisKey, String.valueOf(otherUserId));
+		String applyRedisKey = String.format("CattleHandle-applyPk-%s", userId);
+		session.remove(applyRedisKey);
+
+		session.put(otherApplyRedisKey, String.valueOf(userId));
 
 		return BotMessage.emptyMessage();
 	}
