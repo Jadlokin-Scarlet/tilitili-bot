@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
-import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
@@ -82,19 +81,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUserDTO theUser = messageAction.getBotUser();
 		Long theUserId = theUser.getId();
 
-		String theApplyRedisKey = String.format("CattleHandle-applyPk-%s", theUserId);
-		if (!session.containsKey(theApplyRedisKey)) {
+		String theApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), theUserId);
+		if (!redisCache.exists(theApplyRedisKey)) {
 			return null;
 		}
 
-		long otherUserId = Long.parseLong(session.get(theApplyRedisKey));
+		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
 		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 
-		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
 		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		if (otherExpire > 0) {
@@ -110,8 +108,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
 
 		// 主逻辑
-		session.remove(otherApplyRedisKey);
-		session.remove(theApplyRedisKey);
+		redisCache.delete(otherApplyRedisKey);
+		redisCache.delete(theApplyRedisKey);
 		if (otherExpire > 0) {
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, otherUser, refreshItem), "啊嘞，不对劲");
 		}
@@ -122,14 +120,14 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		List<BotMessageChain> resp = this.pk(theUserId, otherUserId, false);
 
-		session.put(otherApplyRedisKey, String.valueOf(theUserId));
+		redisCache.setValue(otherApplyRedisKey, String.valueOf(theUserId), 60);
 		redisCache.setValue(otherRedisKey, "yes", 60*60);
 		redisCache.setValue(theRedisKey, "yes", 60*60);
 		return BotMessage.simpleListMessage(resp);
 	}
 
 	private BotMessage handleApplyPK(BotMessageAction messageAction) {
-		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotSender botSender = messageAction.getBotSender();
 		Long userId = messageAction.getBotUser().getId();
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
@@ -154,13 +152,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		// 主逻辑
-		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
-		session.remove(otherApplyRedisKey);
+		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
+		redisCache.delete(otherApplyRedisKey);
 
-		String applyRedisKey = String.format("CattleHandle-applyPk-%s", userId);
-		session.remove(applyRedisKey);
+		String applyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), userId);
+		redisCache.delete(applyRedisKey);
 
-		session.put(otherApplyRedisKey, String.valueOf(userId));
+		redisCache.setValue(otherApplyRedisKey, String.valueOf(userId), 60);
 
 		return BotMessage.emptyMessage();
 	}
