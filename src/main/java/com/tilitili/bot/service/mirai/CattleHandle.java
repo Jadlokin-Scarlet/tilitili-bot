@@ -93,7 +93,6 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		long userId = Long.parseLong(session.get(applyRedisKey));
 		BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
-		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
 
 		String redisKey = String.format("CattleHandle-%s", userId);
 		Long expire = redisCache.getExpire(redisKey);
@@ -141,6 +140,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notEmpty(atList, "你要和谁决斗？");
 
 		Long otherUserId = atList.get(0);
+		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
+
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
