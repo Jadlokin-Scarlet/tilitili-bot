@@ -107,23 +107,31 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
 
 		List<BotMessageChain> respList = new ArrayList<>();
+		int useCnt = 0;
 		for (int index = 0; index < Math.min(5, senderCattleList.size()); index++) {
-			if (redisCache.getExpire(redisKey) > 0 && !botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH)) {
+			boolean hasCd = redisCache.getExpire(redisKey) > 0;
+			boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH);
+			if (hasCd && !hasItem) {
 				break;
 			}
 
-			Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
+			if (hasCd) {
+				Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
+			}
 
 			BotCattle otherCattle = senderCattleList.get(index);
 			Long otherUserId = otherCattle.getUserId();
 			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 
-			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
+			respList.add(BotMessageChain.ofPlain("\n"));
 			respList.addAll(this.pk(userId, otherUserId, true));
 
 			redisCache.setValue(redisKey, "yes", 60*60);
 			redisCache.setValue(otherRedisKey, "yes", 60*60);
+
+			useCnt ++;
 		}
+		respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量", useCnt)));
 
 		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
@@ -269,7 +277,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		int rate = random.nextInt(100);
 		int length = random.nextInt(1000);
 		List<BotMessageChain> respList = new ArrayList<>();
-		if (rate < 45) {
+		if (rate < 47) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
 			if (isRandom) {
@@ -277,7 +285,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			} else {
 				respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm，还剩%.2fcm。", length / 100.0, (cattle.getLength() - length) / 100.0)));
 			}
-		} else if (rate < 90) {
+		} else if (rate < 94) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 			if (isRandom) {
