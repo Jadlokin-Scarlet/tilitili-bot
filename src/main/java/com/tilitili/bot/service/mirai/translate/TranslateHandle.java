@@ -6,13 +6,17 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.baidu.TranslateView;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BaiduManager;
 import com.tilitili.common.manager.BotTranslateMappingManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
@@ -34,6 +38,10 @@ public class TranslateHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSender botSender = messageAction.getBotSender();
         String enText = messageAction.getValueOrDefault(messageAction.getBody());
+        if (StringUtils.isBlank(enText) && messageAction.getQuoteMessage() != null) {
+            BotMessage quoteMessage = messageAction.getQuoteMessage();
+            enText = quoteMessage.getBotMessageChainList().stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_PLAIN)).map(BotMessageChain::getText).collect(Collectors.joining(""));
+        }
         List<String> imageList = botMessageService.getImageListOrQuoteImage(messageAction);
         String from = messageAction.getParam("from");
         String to = messageAction.getParam("to");
