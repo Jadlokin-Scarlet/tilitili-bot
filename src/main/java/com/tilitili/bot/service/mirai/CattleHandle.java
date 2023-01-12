@@ -83,47 +83,47 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotUserDTO otherUser = messageAction.getBotUser();
-		Long otherUserId = otherUser.getId();
+		BotUserDTO theUser = messageAction.getBotUser();
+		Long theUserId = theUser.getId();
 
-		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
-		if (!session.containsKey(otherApplyRedisKey)) {
+		String theApplyRedisKey = String.format("CattleHandle-applyPk-%s", theUserId);
+		if (!session.containsKey(theApplyRedisKey)) {
 			return null;
 		}
 
-		long userId = Long.parseLong(session.get(otherApplyRedisKey));
-		BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
+		long otherUserId = Long.parseLong(session.get(theApplyRedisKey));
+		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 
-		String applyRedisKey = String.format("CattleHandle-applyPk-%s", userId);
-		String redisKey = String.format("CattleHandle-%s", userId);
-		Long expire = redisCache.getExpire(redisKey);
-		if (expire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
-		}
-
+		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
 		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		if (otherExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60 ? otherExpire / 60 + "分钟" : otherExpire + "秒");
+		}
+
+		String theRedisKey = String.format("CattleHandle-%s", theUserId);
+		Long theExpire = redisCache.getExpire(theRedisKey);
+		if (theExpire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(theUserId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", theExpire > 60? theExpire/60+"分钟": theExpire+"秒");
 		}
 
 		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
 
 		// 主逻辑
-		session.remove(applyRedisKey);
 		session.remove(otherApplyRedisKey);
-		if (expire > 0) {
-			Asserts.isTrue(botItemService.useItemWithoutError(botSender, botUser, refreshItem), "啊嘞，道具不够用了");
-		}
-
+		session.remove(theApplyRedisKey);
 		if (otherExpire > 0) {
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, otherUser, refreshItem), "啊嘞，道具不够用了");
 		}
 
-		List<BotMessageChain> resp = this.pk(userId, otherUserId, true);
+		if (theExpire > 0) {
+			Asserts.isTrue(botItemService.useItemWithoutError(botSender, theUser, refreshItem), "啊嘞，道具不够用了");
+		}
 
-		redisCache.setValue(redisKey, "yes", 60*60);
+		List<BotMessageChain> resp = this.pk(otherUserId, theUserId, true);
+
 		redisCache.setValue(otherRedisKey, "yes", 60*60);
+		redisCache.setValue(theRedisKey, "yes", 60*60);
 		return BotMessage.simpleListMessage(resp);
 	}
 
