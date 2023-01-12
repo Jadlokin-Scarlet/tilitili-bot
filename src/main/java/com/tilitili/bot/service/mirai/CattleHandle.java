@@ -190,6 +190,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private List<BotMessageChain> pk(Long userId, Long otherUserId, boolean isRandom) {
+		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
+
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 
 		int rate = random.nextInt(100);
