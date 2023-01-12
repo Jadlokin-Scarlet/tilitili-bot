@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotUserConstant;
@@ -17,6 +18,7 @@ import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotCattleRecordMapper;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -41,11 +43,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotCattleRecordMapper botCattleRecordMapper;
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
+	private final BotItemService botItemService;
+	private final BotItemMapper botItemMapper;
 
 	private final Random random;
 
 	@Autowired
-	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper, BotUserItemMappingManager botUserItemMappingManager) {
+	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper, BotUserItemMappingManager botUserItemMappingManager, BotItemService botItemService, BotItemMapper botItemMapper) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botCattleMapper = botCattleMapper;
@@ -53,6 +57,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		this.botCattleRecordMapper = botCattleRecordMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
+		this.botItemService = botItemService;
+		this.botItemMapper = botItemMapper;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -75,37 +81,47 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
+		BotSender botSender = messageAction.getBotSender();
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		Long otherUserId = messageAction.getBotUser().getId();
+		BotUserDTO otherUser = messageAction.getBotUser();
+		Long otherUserId = otherUser.getId();
 
-		String redisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
-		if (!session.containsKey(redisKey)) {
+		String applyRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		if (!session.containsKey(applyRedisKey)) {
 			return null;
 		}
 
-		long userId = Long.parseLong(session.get(redisKey));
+		long userId = Long.parseLong(session.get(applyRedisKey));
+		BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
 
-		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
+		String redisKey = String.format("CattleHandle-%s", userId);
+		Long expire = redisCache.getExpire(redisKey);
 		if (expire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
 
-		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
+		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		if (otherExpire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 		}
 
+		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
+
 		// 主逻辑
-		session.remove(redisKey);
+		session.remove(applyRedisKey);
 		if (expire > 0) {
-			Asserts.checkEquals(botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1)), -1, "啊嘞，道具不够用了");
+			Asserts.isTrue(botItemService.useItemWithoutError(botSender, botUser, refreshItem), "啊嘞，道具不够用了");
 		}
 
 		if (otherExpire > 0) {
-			Asserts.checkEquals(botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(otherUserId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1)), -1, "啊嘞，道具不够用了");;
+			Asserts.isTrue(botItemService.useItemWithoutError(botSender, otherUser, refreshItem), "啊嘞，道具不够用了");
 		}
 
 		List<BotMessageChain> resp = this.pk(userId, otherUserId, false);
+
+		redisCache.setValue(redisKey, "yes", 60*60);
+		redisCache.setValue(otherRedisKey, "yes", 60*60);
 		return BotMessage.simpleListMessage(resp);
 	}
 
