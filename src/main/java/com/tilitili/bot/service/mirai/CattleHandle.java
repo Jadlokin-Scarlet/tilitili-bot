@@ -149,9 +149,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		// 主逻辑
-		String redisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		String otherRedisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		session.remove(otherRedisKey);
+		session.put(otherRedisKey, String.valueOf(userId));
+
+		String redisKey = String.format("CattleHandle-applyPk-%s", userId);
 		session.remove(redisKey);
-		session.put(redisKey, String.valueOf(userId));
+		session.put(redisKey, String.valueOf(otherUserId));
 
 		return BotMessage.emptyMessage();
 	}
