@@ -118,6 +118,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			Long otherUserId = otherCattle.getUserId();
 			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 
+			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
 			respList.addAll(this.pk(userId, otherUserId, true));
 
 			redisCache.setValue(redisKey, "yes", 60*60);
