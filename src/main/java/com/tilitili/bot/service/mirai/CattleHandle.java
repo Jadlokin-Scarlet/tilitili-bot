@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
@@ -67,8 +68,177 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "我牛子呢": return handleRecord(messageAction);
 			case "牛子榜": return BotMessage.simpleTextMessage("你是否在找：天榜");
 			case "牛子0榜": return BotMessage.simpleTextMessage("你是否在找：地榜");
+			case "决斗": return handleApplyPK(messageAction);
+			case "杀": return handleAcceptPK(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		Long otherUserId = messageAction.getBotUser().getId();
+
+		String redisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		if (!session.containsKey(redisKey)) {
+			return null;
+		}
+
+		long userId = Long.parseLong(session.get(redisKey));
+
+		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
+		if (expire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+		}
+
+		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
+		if (otherExpire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
+		}
+
+		// 主逻辑
+		session.remove(redisKey);
+		if (expire > 0) {
+			Asserts.checkEquals(botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1)), -1, "啊嘞，道具不够用了");
+		}
+
+		if (otherExpire > 0) {
+			Asserts.checkEquals(botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(otherUserId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1)), -1, "啊嘞，道具不够用了");;
+		}
+
+		List<BotMessageChain> resp = this.pk(userId, otherUserId, false);
+		return BotMessage.simpleListMessage(resp);
+	}
+
+	private BotMessage handleApplyPK(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		Long userId = messageAction.getBotUser().getId();
+		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		Asserts.notNull(cattle, "巧妇难为无米炊。");
+
+		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
+		if (expire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+		}
+
+		List<Long> atList = messageAction.getAtList();
+		Asserts.notEmpty(atList, "你要和谁决斗？");
+
+		Long otherUserId = atList.get(0);
+		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
+
+		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
+		if (otherExpire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
+		}
+
+		// 主逻辑
+		String redisKey = String.format("CattleHandle-applyPk-%s", otherUserId);
+		session.remove(redisKey);
+		session.put(redisKey, String.valueOf(userId));
+
+		return BotMessage.emptyMessage();
+	}
+
+	private BotMessage handlePk(BotMessageAction messageAction) {
+		String messageId = messageAction.getMessageId();
+		BotSender botSender = messageAction.getBotSender();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
+		String redisKey = String.format("CattleHandle-%s", userId);
+		Long expire = redisCache.getExpire(redisKey);
+		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+
+		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		Asserts.notNull(cattle, "巧妇难为无米炊。");
+
+		BotCattle otherCattle;
+		boolean isRandom;
+		List<Long> atList = messageAction.getAtList();
+		if (atList.isEmpty()) {
+			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
+			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
+					.filter(Predicate.isEqual(userId).negate())
+					.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
+					.map(botCattleMapper::getBotCattleByUserId)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
+			if (!senderCattleList.isEmpty()) {
+				otherCattle = senderCattleList.get(random.nextInt(senderCattleList.size()));
+			} else {
+				otherCattle = null;
+			}
+			isRandom = true;
+		} else {
+			Long otherUserId = atList.get(0);
+			Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
+			otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+			isRandom = false;
+		}
+		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
+
+		Long otherUserId = otherCattle.getUserId();
+		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+		Long otherExpire = redisCache.getExpire(otherRedisKey);
+		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
+
+		List<BotMessageChain> respList = pk(userId, otherUserId, isRandom);
+
+		redisCache.setValue(redisKey, "yes", 60*60);
+		redisCache.setValue(otherRedisKey, "yes", 60*60);
+		return BotMessage.simpleListMessage(respList).setQuote(messageId);
+	}
+
+	private List<BotMessageChain> pk(Long userId, Long otherUserId, boolean isRandom) {
+		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+
+		int rate = random.nextInt(100);
+		int length = random.nextInt(1000);
+		List<BotMessageChain> respList = new ArrayList<>();
+		if (rate < 45) {
+			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
+			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
+			if (isRandom) {
+				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+				respList.add(BotMessageChain.ofPlain("你与"));
+				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+			}
+			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm，还剩%.2fcm。", length / 100.0, (cattle.getLength() - length) / 100.0)));
+		} else if (rate < 90) {
+			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
+			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
+			if (isRandom) {
+				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+				respList.add(BotMessageChain.ofPlain("你与"));
+				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+			}
+			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (cattle.getLength() + length) / 100.0)));
+		} else {
+			if (botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT)){
+				botCattleManager.safeCalculateCattle(userId, otherUserId, length, length);
+				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(length).setResult(3).setLength(length));
+				respList.add(BotMessageChain.ofPlain("不好，"));
+				if (isRandom) {
+					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+					respList.add(BotMessageChain.ofPlain("和"));
+					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+				}
+				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，但在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
+				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1));
+				Asserts.checkEquals(subNum, -1, "使用失败");
+			} else {
+				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
+				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
+				respList.add(BotMessageChain.ofPlain("不好，"));
+				if (isRandom) {
+					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+					respList.add(BotMessageChain.ofPlain("和"));
+					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
+				}
+				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，双方都断了%.2fcm。", length / 100.0)));
+			}
+		}
+		return respList;
 	}
 
 	private BotMessage handleRecord(BotMessageAction messageAction) {
@@ -169,100 +339,6 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
 		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index+1, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
-	}
-
-	private BotMessage handlePk(BotMessageAction messageAction) {
-		String messageId = messageAction.getMessageId();
-		BotSender botSender = messageAction.getBotSender();
-		BotUserDTO botUser = messageAction.getBotUser();
-		Long userId = botUser.getId();
-		String redisKey = String.format("CattleHandle-%s", userId);
-		Long expire = redisCache.getExpire(redisKey);
-		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60? expire/60+"分钟": expire+"秒");
-
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
-		Asserts.notNull(cattle, "巧妇难为无米炊。");
-
-		BotCattle otherCattle;
-		boolean isRandom;
-		List<Long> atList = messageAction.getAtList();
-		if (atList.isEmpty()) {
-			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
-			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
-					.filter(Predicate.isEqual(userId).negate())
-					.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
-					.map(botCattleMapper::getBotCattleByUserId)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toList());
-			if (!senderCattleList.isEmpty()) {
-				otherCattle = senderCattleList.get(random.nextInt(senderCattleList.size()));
-			} else {
-				otherCattle = null;
-			}
-			isRandom = true;
-		} else {
-			Long otherUserId = atList.get(0);
-			Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
-			otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
-			isRandom = false;
-		}
-		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
-
-		Long otherUserId = otherCattle.getUserId();
-		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
-		Long otherExpire = redisCache.getExpire(otherRedisKey);
-		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
-
-		int rate = random.nextInt(100);
-		int length = random.nextInt(1000);
-		List<BotMessageChain> respList = new ArrayList<>();
-		if (rate < 45) {
-			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
-			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
-			if (isRandom) {
-				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-				respList.add(BotMessageChain.ofPlain("你与"));
-				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
-			}
-			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm，还剩%.2fcm。", length / 100.0, (cattle.getLength() - length) / 100.0)));
-		} else if (rate < 90) {
-			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
-			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
-			if (isRandom) {
-				BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-				respList.add(BotMessageChain.ofPlain("你与"));
-				respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
-			}
-			respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (cattle.getLength() + length) / 100.0)));
-		} else {
-			if (botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT)){
-				botCattleManager.safeCalculateCattle(userId, otherUserId, length, length);
-				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(length).setResult(3).setLength(length));
-				respList.add(BotMessageChain.ofPlain("不好，"));
-				if (isRandom) {
-					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-					respList.add(BotMessageChain.ofPlain("和"));
-					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
-				}
-				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，但在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", length / 100.0)));
-				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1));
-				Asserts.checkEquals(subNum, -1, "使用失败");
-			} else {
-				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
-				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
-				respList.add(BotMessageChain.ofPlain("不好，"));
-				if (isRandom) {
-					BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-					respList.add(BotMessageChain.ofPlain("和"));
-					respList.add(BotMessageChain.ofPlain(" " + otherUser.getName() + " "));
-				}
-				respList.add(BotMessageChain.ofPlain(String.format("缠在一起了，双方都断了%.2fcm。", length / 100.0)));
-			}
-		}
-
-		redisCache.setValue(redisKey, "yes", 60*60);
-		redisCache.setValue(otherRedisKey, "yes", 60*60);
-		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
