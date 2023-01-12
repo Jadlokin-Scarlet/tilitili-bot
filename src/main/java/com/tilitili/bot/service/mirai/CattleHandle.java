@@ -37,28 +37,28 @@ import java.util.stream.IntStream;
 @Component
 public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
+	private final BotItemMapper botItemMapper;
+	private final BotItemService botItemService;
 	private final BotUserManager botUserManager;
 	private final BotCattleMapper botCattleMapper;
 	private final BotCattleManager botCattleManager;
 	private final BotCattleRecordMapper botCattleRecordMapper;
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
-	private final BotItemService botItemService;
-	private final BotItemMapper botItemMapper;
 
 	private final Random random;
 
 	@Autowired
 	public CattleHandle(BotCattleMapper botCattleMapper, BotCattleManager botCattleManager, RedisCache redisCache, BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotCattleRecordMapper botCattleRecordMapper, BotUserItemMappingManager botUserItemMappingManager, BotItemService botItemService, BotItemMapper botItemMapper) {
 		this.redisCache = redisCache;
+		this.botItemMapper = botItemMapper;
+		this.botItemService = botItemService;
 		this.botUserManager = botUserManager;
 		this.botCattleMapper = botCattleMapper;
 		this.botCattleManager = botCattleManager;
 		this.botCattleRecordMapper = botCattleRecordMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
-		this.botItemService = botItemService;
-		this.botItemMapper = botItemMapper;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
