@@ -75,8 +75,56 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "牛子0榜": return BotMessage.simpleTextMessage("你是否在找：地榜");
 			case "决斗": return handleApplyPK(messageAction);
 			case "杀": return handleAcceptPK(messageAction);
+			case "男蛮入侵": return handleAOE(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleAOE(BotMessageAction messageAction) {
+		String messageId = messageAction.getMessageId();
+		BotSender botSender = messageAction.getBotSender();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
+		String redisKey = String.format("CattleHandle-%s", userId);
+		Long expire = redisCache.getExpire(redisKey);
+		if (expire > 0) {
+			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+		}
+
+		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		Asserts.notNull(cattle, "巧妇难为无米炊。");
+
+		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
+		List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
+				.filter(Predicate.isEqual(userId).negate())
+				.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
+				.map(botCattleMapper::getBotCattleByUserId)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+		Asserts.notEmpty(senderCattleList, "拔剑四顾心茫然。");
+		Collections.shuffle(senderCattleList);
+
+		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
+
+		List<BotMessageChain> respList = new ArrayList<>();
+		for (int index = 0; index < Math.min(5, senderCattleList.size()); index++) {
+			if (redisCache.getExpire(redisKey) > 0 && !botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH)) {
+				break;
+			}
+
+			Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
+
+			BotCattle otherCattle = senderCattleList.get(index);
+			Long otherUserId = otherCattle.getUserId();
+			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+
+			respList.addAll(this.pk(userId, otherUserId, true));
+
+			redisCache.setValue(redisKey, "yes", 60*60);
+			redisCache.setValue(otherRedisKey, "yes", 60*60);
+		}
+
+		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
 
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
@@ -224,7 +272,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
 			if (isRandom) {
-				respList.add(BotMessageChain.ofPlain(String.format("%s 与 %s 一番胶战后，输了%.2fcm，还剩%.2fcm。", user.getName(), otherUser.getName(), length / 100.0, (cattle.getLength() - length) / 100.0)));
+				respList.add(BotMessageChain.ofPlain(String.format("与 %s 一番胶战后，输了%.2fcm，还剩%.2fcm。", otherUser.getName(), length / 100.0, (cattle.getLength() - length) / 100.0)));
 			} else {
 				respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm，还剩%.2fcm。", length / 100.0, (cattle.getLength() - length) / 100.0)));
 			}
@@ -232,7 +280,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 			if (isRandom) {
-				respList.add(BotMessageChain.ofPlain(String.format("%s 与 %s 一番胶战后，赢得了%.2fcm，现在有%.2fcm。", user.getName(), otherUser.getName(), length / 100.0, (cattle.getLength() + length) / 100.0)));
+				respList.add(BotMessageChain.ofPlain(String.format("与 %s 一番胶战后，赢得了%.2fcm，现在有%.2fcm。", otherUser.getName(), length / 100.0, (cattle.getLength() + length) / 100.0)));
 			} else {
 				respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (cattle.getLength() + length) / 100.0)));
 			}
@@ -241,7 +289,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				botCattleManager.safeCalculateCattle(userId, otherUserId, length, length);
 				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(length).setResult(3).setLength(length));
 				if (isRandom) {
-					respList.add(BotMessageChain.ofPlain(String.format("不好，%s 和 %s 缠在一起了，但在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", user.getName(), otherUser.getName(), length / 100.0)));
+					respList.add(BotMessageChain.ofPlain(String.format("不好，和 %s 缠在一起了，但在纠缠之缘的作用下，彼此促进，双方都长了%.2fcm。", otherUser.getName(), length / 100.0)));
 				} else {
 					respList.add(BotMessageChain.ofPlain(String.format("不好，缠在一起了，但在纠缠之缘的作用下，双方都长了%.2fcm。", length / 100.0)));
 				}
@@ -251,7 +299,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);
 				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(-length).setResult(1).setLength(length));
 				if (isRandom) {
-					respList.add(BotMessageChain.ofPlain(String.format("不好，%s 和 %s 缠在一起了，双方都断了%.2fcm。", user.getName(), otherUser.getName(), length / 100.0)));
+					respList.add(BotMessageChain.ofPlain(String.format("不好，和 %s 缠在一起了，双方都断了%.2fcm。", otherUser.getName(), length / 100.0)));
 				} else {
 					respList.add(BotMessageChain.ofPlain(String.format("不好，缠在一起了，双方都断了%.2fcm。", length / 100.0)));
 				}
