@@ -132,7 +132,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		if (useCnt > 1) {
 			respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
-		} elsse if (useCnt == 1) {
+		} else if (useCnt == 1) {
 			respList.add(0, BotMessageChain.ofPlain(String.format("%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
 		}
 
