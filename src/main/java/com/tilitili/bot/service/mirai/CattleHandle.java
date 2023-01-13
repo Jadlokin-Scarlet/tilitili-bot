@@ -117,21 +117,24 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 			if (hasCd) {
 				Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
+				useCnt ++;
 			}
 
 			BotCattle otherCattle = senderCattleList.get(index);
 			Long otherUserId = otherCattle.getUserId();
 			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 
-			respList.add(BotMessageChain.ofPlain("\n"));
+			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
 			respList.addAll(this.pk(userId, otherUserId, true));
 
 			redisCache.setValue(redisKey, "yes", 60*60);
 			redisCache.setValue(otherRedisKey, "yes", 60*60);
-
-			useCnt ++;
 		}
-		respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量", useCnt)));
+		if (useCnt > 1) {
+			respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
+		} elsse if (useCnt == 1) {
+			respList.add(0, BotMessageChain.ofPlain(String.format("%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
+		}
 
 		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
