@@ -17,6 +17,7 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -130,16 +131,27 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notNull(botUser.getScore(), "未绑定");
 		String value = messageAction.getValue();
 		Asserts.notBlank(value, "格式错啦(物品名)");
-		List<BotItemDTO> itemList;
-		if (value.contains(" ")) {
-			return BotMessage.simpleTextMessage("格式错啦，详情请看(帮助 回收)");
-		} else {
-			String[] itemStrList = value.split("[，,、]");
-			itemList = Arrays.stream(itemStrList).map(itemStr -> new BotItemDTO()
-					.setName(itemStr.split("\\*")[0])
-					.setNum(itemStr.contains("*") ? Integer.parseInt(itemStr.split("\\*")[1]) : 1)
-			).collect(Collectors.toList());
+		List<BotItemDTO> itemList = new ArrayList<>();
+
+		String[] itemStrList = value.split("[ *，,、]");
+		for (String itemStr : itemStrList) {
+			if (StringUtils.isNumber(itemStr)) {
+				itemList.get(itemList.size() - 1).setNum(Integer.parseInt(itemStr));
+			} else {
+				itemList.add(new BotItemDTO().setName(itemStr).setNum(1));
+			}
 		}
+
+
+//		if (value.contains(" ")) {
+//			return BotMessage.simpleTextMessage("格式错啦，详情请看(帮助 回收)");
+//		} else {
+//			String[] itemStrList = value.split("[，,、]");
+//			itemList = Arrays.stream(itemStrList).map(itemStr -> new BotItemDTO()
+//					.setName(itemStr.split("\\*")[0])
+//					.setNum(itemStr.contains("*") ? Integer.parseInt(itemStr.split("\\*")[1]) : 1)
+//			).collect(Collectors.toList());
+//		}
 
 		if (itemList.size() == 1) {
 			BotItemDTO item = itemList.get(0);
@@ -180,7 +192,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleBuy(BotMessageAction messageAction) {
 		String value = messageAction.getValue();
 		Asserts.notBlank(value, "格式错啦(物品名)");
-		List<String> valueList = Arrays.asList(value.split(" "));
+		List<String> valueList = Arrays.asList(value.split("[ *]"));
 		Asserts.notEmpty(valueList, "格式错啦(物品名)");
 		String itemName = valueList.get(0);
 		String itemNumStr = valueList.size() > 1 ? valueList.get(1) : "1";

@@ -203,6 +203,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					Asserts.notNull(itemName, "格式错啦(itemName)");
 					Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
 					Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
+					Asserts.notNumber(itemName, "格式错啦，道具名称不能是数字");
+					Asserts.isFalse(itemName.contains(" *，,、"), "格式错啦，道具名称不能有[ *，,、]符号");
 					BotItem botItem = botItemMapper.getBotItemByName(itemName);
 					if (botItem == null) {
 						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon);
