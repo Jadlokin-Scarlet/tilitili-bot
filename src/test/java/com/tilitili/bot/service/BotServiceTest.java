@@ -23,6 +23,6 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-//		tester.testHandleTextMessage("{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":8516,\"time\":1673431411},{\"type\":\"Plain\",\"text\":\"管理员\"},{\"type\":\"At\",\"target\":545459363,\"display\":\"\"},{\"type\":\"Plain\",\"text\":\" \"}],\"sender\":{\"id\":545459363,\"memberName\":\"Jadlokin_Scarlet\",\"specialTitle\":\"测试\",\"permission\":\"MEMBER\",\"joinTimestamp\":1548094603,\"lastSpeakTimestamp\":1673431411,\"muteTimeRemaining\":0,\"group\":{\"id\":729412455,\"name\":\"My Homo\",\"permission\":\"OWNER\"}}}}", BotEnum.CIRNO_QQ);
+		tester.testHandleTextMessage("{\"post_type\":\"message\",\"message_type\":\"guild\",\"time\":1674670112,\"self_id\":2325622370,\"sub_type\":\"channel\",\"message\":\"[CQ:image,file=5fa56fac3e987fac7526537952e9abcf.image,url=https://gchat.qpic.cn/qmeetpic/79033321637042471/8580811-3151789254-5FA56FAC3E987FAC7526537952E9ABCF/0?term=255]\",\"self_tiny_id\":\"144115219183125111\",\"sender\":{\"nickname\":\"傲寒sky\",\"tiny_id\":\"144115218866871126\",\"user_id\":144115218866871126},\"guild_id\":\"79033321637042471\",\"channel_id\":\"8580811\",\"message_id\":\"BAEYyGMlmFknAAAAAACC7ssAAAAAAAEQtA==\",\"user_id\":\"144115218866871126\"}", BotEnum.HONG_PING);
 	}
 }
