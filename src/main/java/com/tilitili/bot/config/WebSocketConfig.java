@@ -2,10 +2,7 @@ package com.tilitili.bot.config;
 
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
-import com.tilitili.bot.socket.BaseWebSocketHandler;
-import com.tilitili.bot.socket.BotEventWebSocketHandler;
-import com.tilitili.bot.socket.BotWebSocketHandler;
-import com.tilitili.bot.socket.KookWebSocketHandler;
+import com.tilitili.bot.socket.*;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
@@ -53,6 +50,9 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         for (BotEnum bot : BotEnum.values()) {
             try {
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
+                if (botWebSocketHandler == null) {
+                    continue;
+                }
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
 
@@ -75,6 +75,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
             case BotEnum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             case BotEnum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             case BotEnum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEnum.TYPE_MINECRAFT: return null;
             default: throw new AssertException("?");
         }
     }

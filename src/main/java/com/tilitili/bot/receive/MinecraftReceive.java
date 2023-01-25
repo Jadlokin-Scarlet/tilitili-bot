@@ -2,6 +2,7 @@ package com.tilitili.bot.receive;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.service.BotService;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.MinecraftServerEnum;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.emnus.TaskStatus;
@@ -31,6 +32,7 @@ public class MinecraftReceive {
 	private final BotService botService;
 	private final BotSenderMapper botSenderMapper;
 
+
 	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
 		this.botService = botService;
 		this.botSenderMapper = botSenderMapper;
@@ -54,23 +56,11 @@ public class MinecraftReceive {
 			List<String> valueList = taskMessage.getValueList();
 			Asserts.isTrue(valueList.size() == 2, "参数异常");
 			String requestStr = valueList.get(0);
-			String serverName = valueList.get(1);
-
-			MinecraftServerEnum serverEnum = MinecraftServerEnum.getByName(serverName);
-			Asserts.notNull(serverEnum, "找不到服务器配置");
-
-			Asserts.notBlank(requestStr, "参数异常");
-			MinecraftWebHooksRequest request = gson.fromJson(requestStr, MinecraftWebHooksRequest.class);
-			Asserts.notNull(request, "参数异常");
-			Asserts.notNull(request.getEventType(), "参数异常");
-
-			BotMessage botMessage = minecraftManager.handleMessage(request, serverEnum);
-			if (botMessage == null) return;
-
-			BotSender botSender = botSenderMapper.getValidBotSenderById(4407L);
-			Asserts.notNull(botSender, "无权限");
-//			botService.syncHandleTextMessage(botMessage, botSender);
-
+			String senderIdStr = valueList.get(1);
+			Asserts.isNumber(senderIdStr, "参数异常");
+			long senderId = Long.parseLong(senderIdStr);
+			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
+			botService.syncHandleTextMessage(requestStr, BotEnum.getBotById(botSender.getBot()));
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
 		} catch (Exception e) {
 			if (taskMessage != null && taskMessage.getId() != null) {
