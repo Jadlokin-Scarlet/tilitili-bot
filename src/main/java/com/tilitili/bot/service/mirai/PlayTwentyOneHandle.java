@@ -58,7 +58,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			log.info(Gsons.toJson(twentyOneTable.getPlayerList()));
 		}
 
-		Asserts.notNull(botUser.getScore(), "未绑定");
+//		Asserts.notNull(botUser.getScore(), "未绑定");
 
 		switch (key) {
 			case "买水果小游戏": return this.startGame(messageAction);

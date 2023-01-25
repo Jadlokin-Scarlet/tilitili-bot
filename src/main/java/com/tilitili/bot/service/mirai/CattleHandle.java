@@ -430,7 +430,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		int length = random.nextInt(1000);
 		botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
 
-		String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ? "": "，有共同群聊最好先申请合体再领。";
+		String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ? "": "(tips：有共同群聊最好先申请合体再领。";
 		return BotMessage.simpleTextMessage(String.format("恭喜领到%.2fcm%s", length / 100.0, tips)).setQuote(messageId);
 	}
 }

@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -99,7 +100,8 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Asserts.notNull(botUser, "似乎有什么不对劲");
-		Asserts.notNull(botUser.getScore(), "未绑定");
+		Integer initScore = botUser.getScore();
+		Asserts.notNull(initScore, "未绑定");
 		Date now = new Date();
 		if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock")) {
 			log.info("别签到刷屏");
@@ -113,7 +115,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
 			Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
 			Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemDTO.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
-			int sumScore = botUser.getScore() + itemScore + icePrice * iceNum;
+			int sumScore = initScore + itemScore + icePrice * iceNum;
 			if (sumScore >= 100) {
 				log.info("积分满了");
 				return null;
@@ -141,7 +143,8 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		String talk = "今天也是充满希望的一天";
 		String message1 = String.format("%s好，%s", time, talk);
 		String message2 = String.format("(分数+%d)", addScore);
-		String message = message1 + (addScore == 0? "": message2);
+		String tips = initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
+		String message = message1 + (addScore == 0? "": message2) + tips;
 		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId());
 	}
 }
