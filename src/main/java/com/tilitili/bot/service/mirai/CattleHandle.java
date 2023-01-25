@@ -64,16 +64,16 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		switch (messageAction.getKeyWithoutPrefix()) {
-			case "我的牛子": return handleInfo(messageAction);
-			case "领取牛子": return handleStart(messageAction);
+			case "我的牛子": case "我的牛牛": return handleInfo(messageAction);
+			case "领取牛子": case "领取牛牛": return handleStart(messageAction);
 			case "比划比划": return handlePk(messageAction);
 			case "天榜": return handleRank(messageAction);
 			case "地榜": return handleDescRank(messageAction);
-			case "赎回牛子": return handleRedemption(messageAction);
-			case "我牛子呢": return handleRecord(messageAction);
+			case "赎回牛子": case "赎回牛牛": return handleRedemption(messageAction);
+			case "我牛子呢": case "我牛牛呢": return handleRecord(messageAction);
 			case "牛子榜": return BotMessage.simpleTextMessage("你是否在找：天榜");
 			case "牛子0榜": return BotMessage.simpleTextMessage("你是否在找：地榜");
-			case "决斗": return handleApplyPK(messageAction);
+			case "决斗": case "撅斗": return handleApplyPK(messageAction);
 			case "杀": return handleAcceptPK(messageAction);
 			case "男蛮入侵": return handleAOE(messageAction);
 			default: throw new AssertException();
