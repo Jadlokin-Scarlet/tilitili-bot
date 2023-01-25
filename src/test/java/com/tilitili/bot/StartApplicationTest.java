@@ -90,7 +90,7 @@ class StartApplicationTest {
     void main() throws UnsupportedEncodingException {
 //        BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
 //        BotUser botUser = botUserMapper.getBotUserById(BotUserConstant.MASTER_USER_ID);
-//        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEmum.CIRNO_QQ);
+//        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEnum.CIRNO_QQ);
 //        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
 //        System.out.println(Gsons.toJson(botMessage));
     }
@@ -204,7 +204,7 @@ class StartApplicationTest {
 //        List<MiraiFriend> friendList = miraiManager.getFriendList();
 //        List<Long> qqList = friendList.stream().map(MiraiFriend::getId).collect(Collectors.toList());
 //        for (MiraiFriend friend : friendList) {
-//            BotSender friendSender = new BotSender().setSendType(SendTypeEmum.FRIEND_MESSAGE_STR).setQq(friend.getId()).setName(friend.getNickname());
+//            BotSender friendSender = new BotSender().setSendType(SendTypeEnum.FRIEND_MESSAGE_STR).setQq(friend.getId()).setName(friend.getNickname());
 //            botSenderMapper.addBotSenderSelective(friendSender);
 //            List<Integer> list = new ArrayList<>();
 //            if (Arrays.asList(66600000L, 1701008067L).contains(friendSender.getQq())) continue;
@@ -219,7 +219,7 @@ class StartApplicationTest {
 //        // group message
 //        List<MiraiGroup> groupList = miraiManager.getGroupList();
 //        for (MiraiGroup group : groupList) {
-//            BotSender groupSender = new BotSender().setSendType(SendTypeEmum.GROUP_MESSAGE_STR).setGroup(group.getId()).setName(group.getName());
+//            BotSender groupSender = new BotSender().setSendType(SendTypeEnum.GROUP_MESSAGE_STR).setGroup(group.getId()).setName(group.getName());
 //            botSenderMapper.addBotSenderSelective(groupSender);
 //            List<Integer> list = new ArrayList<>();
 //            if (groupSender.getGroup().equals(RANK_GROUP.value)) {
@@ -236,7 +236,7 @@ class StartApplicationTest {
 //            for (MiraiFriend temp : tempList) {
 //                if (qqList.contains(temp.getId())) continue;
 //
-//                BotSender tempSender = new BotSender().setSendType(SendTypeEmum.TEMP_MESSAGE_STR).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
+//                BotSender tempSender = new BotSender().setSendType(SendTypeEnum.TEMP_MESSAGE_STR).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
 //                botSenderMapper.addBotSenderSelective(tempSender);
 //
 //                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
@@ -248,7 +248,7 @@ class StartApplicationTest {
 //        for (GoCqhttpGuild guild : guildList) {
 //            List<GoCqhttpChannel> channelList = goCqhttpManager.getGuildChannelList(guild.getGuildId());
 //            for (GoCqhttpChannel channel : channelList) {
-//                BotSender guildSender = new BotSender().setSendType(SendTypeEmum.GUILD_MESSAGE_STR).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
+//                BotSender guildSender = new BotSender().setSendType(SendTypeEnum.GUILD_MESSAGE_STR).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
 //                botSenderMapper.addBotSenderSelective(guildSender);
 //                List<Integer> list = new ArrayList<>();
 //                if (channel.getChannelId().equals(CAI_HONG_GUANZHU_CHANNEL.channelId)) {// 转播自助用

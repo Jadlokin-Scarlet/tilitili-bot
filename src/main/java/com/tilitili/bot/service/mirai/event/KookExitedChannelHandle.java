@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.KookAutoEventHandle;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -42,7 +42,7 @@ public class KookExitedChannelHandle extends KookAutoEventHandle<KookExitedChann
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, KookExitedChannel event) throws Exception {
+	public void handleEvent(BotEnum bot, KookExitedChannel event) throws Exception {
 		log.info(Gsons.toJson(event));
 		Long externalId = event.getUserId();
 		Long channelId = event.getChannelId();

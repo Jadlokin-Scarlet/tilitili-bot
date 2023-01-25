@@ -8,8 +8,8 @@ import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.BotEmum;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
@@ -71,14 +71,14 @@ public class BotService {
     }
 
     @Async
-    public void syncHandleEvent(BotEmum bot, String message) {
+    public void syncHandleEvent(BotEnum bot, String message) {
         try {
             String handleName;
-            if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
+            if (BotEnum.TYPE_MIRAI.equals(bot.getType())) {
                 String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
                 Asserts.notBlank(eventType, "获取事件类型失败");
                 handleName = "mirai" + eventType + "Handle";
-            } else if (BotEmum.TYPE_GOCQ.equals(bot.getType())) {
+            } else if (BotEnum.TYPE_GOCQ.equals(bot.getType())) {
                 GocqhttpBaseEvent baseEvent = Gsons.fromJson(message, GocqhttpBaseEvent.class);
                 String postType = baseEvent.getPostType();
                 String noticeType = baseEvent.getNoticeType();
@@ -88,7 +88,7 @@ public class BotService {
                 noticeType = noticeType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, noticeType);
                 subType = subType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, subType);
                 handleName = "gocq" + postType + noticeType + subType + "Handle";
-            } else if (BotEmum.TYPE_KOOK.equals(bot.getType())) {
+            } else if (BotEnum.TYPE_KOOK.equals(bot.getType())) {
                 KookWsEvent<?> data = Gsons.fromJson(message, new TypeToken<KookWsEvent<?>>() {}.getType());
                 KookEventExtra<?> extra = data.getD().getExtra();
                 String eventType = extra.getType();
@@ -109,12 +109,12 @@ public class BotService {
         }
     }
 
-    public void testHandleTextMessage(String message, BotEmum bot) {
+    public void testHandleTextMessage(String message, BotEnum bot) {
         this.syncHandleTextMessage(message, bot);
     }
 
     @Async
-    public void syncHandleTextMessage(String message, BotEmum bot) {
+    public void syncHandleTextMessage(String message, BotEnum bot) {
         List<Long> lockUserId = new ArrayList<>();
         try {
             // 解析message
@@ -234,7 +234,7 @@ public class BotService {
         String quoteMessageId = botMessageAction.getQuoteMessageId();
         Long quoteSenderId = botMessageAction.getQuoteSenderId();
         if (quoteMessageId == null) return null;
-        BotEmum bot = BotEmum.getBotById(botSender.getBot());
+        BotEnum bot = BotEnum.getBotById(botSender.getBot());
         if (bot == null) return null;
 
         if (Objects.equals(quoteSenderId, bot.qq)) {
@@ -258,7 +258,7 @@ public class BotService {
         String sendType = botSender.getSendType();
 
         String prefix = "";
-        if (Objects.equals(sendType, SendTypeEmum.GUILD_MESSAGE.sendType)) {
+        if (Objects.equals(sendType, SendTypeEnum.GUILD_MESSAGE.sendType)) {
             prefix = ".";
             actionKey = actionKey.replaceAll("^[.。]", prefix);
         }

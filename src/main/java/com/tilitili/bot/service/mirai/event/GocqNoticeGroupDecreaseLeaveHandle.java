@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai.event;
 import com.tilitili.bot.service.mirai.base.GocqAutoEventHandle;
 import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -39,7 +39,7 @@ public class GocqNoticeGroupDecreaseLeaveHandle extends GocqAutoEventHandle<Gocq
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, GocqNoticeGroupDecreaseLeave event) throws Exception {
+	public void handleEvent(BotEnum bot, GocqNoticeGroupDecreaseLeave event) throws Exception {
 		BotSender botSender = botSenderMapper.getValidBotSenderByGroup(event.getGroupId());
 		BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(event.getUserId(), BotUserConstant.USER_TYPE_QQ);
 		String message = String.format("%s离开了。", botUser == null? event.getUserId(): botUser.getName());

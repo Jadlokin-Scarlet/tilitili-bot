@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.base;
 
 import com.google.gson.reflect.TypeToken;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
 import com.tilitili.common.utils.Gsons;
 
@@ -13,10 +13,10 @@ public abstract class MiraiAutoEventHandle<T> implements BaseEventHandle {
 	}
 
 	@Override
-	public void handleEventStr(BotEmum bot, String eventMessage) throws Exception {
+	public void handleEventStr(BotEnum bot, String eventMessage) throws Exception {
 		MiraiBaseRequest<T> request = Gsons.fromJson(eventMessage, type.getType());
 		this.handleEvent(bot, request.getData());
 	}
 
-	public abstract void handleEvent(BotEmum bot, T event) throws Exception;
+	public abstract void handleEvent(BotEnum bot, T event) throws Exception;
 }

@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.base;
 
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 
 public interface BaseEventHandle {
-    void handleEventStr(BotEmum bot, String eventMessage) throws Exception;
+    void handleEventStr(BotEnum bot, String eventMessage) throws Exception;
 }

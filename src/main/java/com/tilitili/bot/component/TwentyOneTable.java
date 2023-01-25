@@ -3,7 +3,7 @@ package com.tilitili.bot.component;
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.entity.twentyOne.*;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.dto.SortObject;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -214,7 +214,7 @@ public class TwentyOneTable {
 			}
 		}
 		result.add(BotMessageChain.ofPlain("\n"));
-		if (!Objects.equals(botMessage.getBotSender().getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
+		if (!Objects.equals(botMessage.getBotSender().getSendType(), SendTypeEnum.FRIEND_MESSAGE_STR)) {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getId()));
 		}
 		List<String> chooseList = Lists.newArrayList("进货", "摆烂");

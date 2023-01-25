@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEmum;
-import com.tilitili.common.emnus.GroupEmum;
+import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.emnus.GroupEnum;
 import com.tilitili.common.entity.BotFunction;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
@@ -59,7 +59,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
-        BotEmum bot = messageAction.getBot();
+        BotEnum bot = messageAction.getBot();
         BotMessage botMessage = messageAction.getBotMessage();
         BotSender botSender = messageAction.getBotSender();
         Long qq = botSender.getQq();
@@ -102,7 +102,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if (Objects.equals(group, GroupEmum.HOMO_LIVE_GROUP.value)) {
+        if (Objects.equals(group, GroupEnum.HOMO_LIVE_GROUP.value)) {
             int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
             if (ddCount > 0) {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());

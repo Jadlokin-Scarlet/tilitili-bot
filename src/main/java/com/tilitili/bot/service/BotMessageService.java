@@ -56,9 +56,9 @@ public class BotMessageService {
 //		String sendType = botMessage.getSendType();
 //		Asserts.notNull(sendType, "找不到发送渠道");
 //		switch (sendType) {
-//			case SendTypeEmum.FRIEND_MESSAGE_STR: return true;
-//			case SendTypeEmum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
-//			case SendTypeEmum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
+//			case SendTypeEnum.FRIEND_MESSAGE_STR: return true;
+//			case SendTypeEnum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
+//			case SendTypeEnum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
 //			default: return false;
 //		}
 //	}

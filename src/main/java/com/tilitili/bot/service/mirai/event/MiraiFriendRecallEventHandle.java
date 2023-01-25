@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
@@ -33,7 +33,7 @@ public class MiraiFriendRecallEventHandle extends MiraiAutoEventHandle<MiraiFrie
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, MiraiFriendRecallEvent event) throws Exception {
+	public void handleEvent(BotEnum bot, MiraiFriendRecallEvent event) throws Exception {
 		BotSender botSender = botSenderMapper.getValidBotSenderByQq(event.getAuthorId());
 		Asserts.notNull(botSender, "无权限");
 		Asserts.checkEquals(bot.id, botSender.getBot(), "没有权限");
@@ -47,6 +47,6 @@ public class MiraiFriendRecallEventHandle extends MiraiAutoEventHandle<MiraiFrie
 		BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
 		Asserts.notNull(replySender, "没有权限");
 
-		botManager.recallMessage(BotEmum.getBotById(replySender.getBot()), replySender, replyMessageId);
+		botManager.recallMessage(BotEnum.getBotById(replySender.getBot()), replySender, replyMessageId);
 	}
 }

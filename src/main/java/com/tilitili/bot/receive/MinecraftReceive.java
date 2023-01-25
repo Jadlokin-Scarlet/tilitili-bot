@@ -2,7 +2,7 @@ package com.tilitili.bot.receive;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.service.BotService;
-import com.tilitili.common.emnus.MinecraftServerEmum;
+import com.tilitili.common.emnus.MinecraftServerEnum;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.emnus.TaskStatus;
 import com.tilitili.common.entity.BotSender;
@@ -56,15 +56,15 @@ public class MinecraftReceive {
 			String requestStr = valueList.get(0);
 			String serverName = valueList.get(1);
 
-			MinecraftServerEmum serverEmum = MinecraftServerEmum.getByName(serverName);
-			Asserts.notNull(serverEmum, "找不到服务器配置");
+			MinecraftServerEnum serverEnum = MinecraftServerEnum.getByName(serverName);
+			Asserts.notNull(serverEnum, "找不到服务器配置");
 
 			Asserts.notBlank(requestStr, "参数异常");
 			MinecraftWebHooksRequest request = gson.fromJson(requestStr, MinecraftWebHooksRequest.class);
 			Asserts.notNull(request, "参数异常");
 			Asserts.notNull(request.getEventType(), "参数异常");
 
-			BotMessage botMessage = minecraftManager.handleMessage(request, serverEmum);
+			BotMessage botMessage = minecraftManager.handleMessage(request, serverEnum);
 			if (botMessage == null) return;
 
 			BotSender botSender = botSenderMapper.getValidBotSenderById(4407L);

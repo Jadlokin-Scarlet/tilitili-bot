@@ -86,7 +86,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ").trim();
         ;
 //        String sendType = messageAction.getBotMessage().getSendType();
-//        String guildPrefix = sendType.equals(SendTypeEmum.Guild_Message.sendType)? ".": "";
+//        String guildPrefix = sendType.equals(SendTypeEnum.Guild_Message.sendType)? ".": "";
 
         BotSender botSender = messageAction.getBotSender();
         List<BotTaskDTO> botTaskDTOList = botTaskMapper.getBotTaskListForHelp(botSender.getId());

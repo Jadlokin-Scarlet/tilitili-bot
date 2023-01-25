@@ -6,7 +6,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.event.MiraiBotInvitedJoinGroupRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.MiraiMemberJoinRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.MiraiNewFriendRequestEventHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberJoinRequestEvent;
@@ -41,7 +41,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleMiraiNewFriendEvent(BotMessageAction messageAction) {
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		if (redisCache.exists(MiraiNewFriendRequestEventHandle.newFriendKey)) {
 			MiraiNewFriendRequestEvent event = (MiraiNewFriendRequestEvent) redisCache.getValue(MiraiNewFriendRequestEventHandle.newFriendKey);
 			miraiManager.handleMiraiNewFriendRequestEvent(bot, event);
@@ -52,7 +52,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleMiraiGroupInviteEvent(BotMessageAction messageAction) {
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		if (redisCache.exists(MiraiBotInvitedJoinGroupRequestEventHandle.newGroupKey)) {
 			MiraiBotInvitedJoinGroupRequestEvent event = (MiraiBotInvitedJoinGroupRequestEvent) redisCache.getValue(MiraiBotInvitedJoinGroupRequestEventHandle.newGroupKey);
 			miraiManager.handleMiraiBotInvitedJoinGroupRequestEvent(bot, event);
@@ -64,7 +64,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleMiraiMemberJoinRequestEvent(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		String value = messageAction.getValue();
 		String key = StringUtils.isBlank(value) ? MiraiMemberJoinRequestEventHandle.newMemberKey : MiraiMemberJoinRequestEventHandle.newMemberKey + "-" + value;
 		if (session.containsKey(key)) {

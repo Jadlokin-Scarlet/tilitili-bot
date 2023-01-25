@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.GocqAutoEventHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.mirai.event.GocqNoticeNotifyPoke;
 import com.tilitili.common.manager.BotManager;
@@ -28,7 +28,7 @@ public class GocqNoticeNotifyPokeHandle extends GocqAutoEventHandle<GocqNoticeNo
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, GocqNoticeNotifyPoke event) throws Exception {
+	public void handleEvent(BotEnum bot, GocqNoticeNotifyPoke event) throws Exception {
 		log.info(Gsons.toJson(event));
 		BotSender botSender;
 		if (event.getGroupId() != null) {

@@ -4,7 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.MinecraftServerEmum;
+import com.tilitili.common.emnus.MinecraftServerEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.baidu.TranslateView;
@@ -76,7 +76,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			return BotMessage.simpleListMessage(botMessageChainList).setSenderId(3384L);
 		}
 
-		for (MinecraftServerEmum server : MinecraftServerEmum.values()) {
+		for (MinecraftServerEnum server : MinecraftServerEnum.values()) {
 			if (Objects.equals(senderId, server.getSenderId())) {
 				String message = sourceMessageChainList.stream().map(chain -> {
 					switch (chain.getType()) {

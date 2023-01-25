@@ -17,8 +17,8 @@ import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEmum;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -86,20 +86,20 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			return null;
 		}
 
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		if (bot == null) {
 			return null;
 		}
-//		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEmum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
+//		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEnum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList();
 		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
-		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEmum.FRIEND_MESSAGE_STR);
+		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = !atList.isEmpty();
-		boolean isRandomReply = random == 0 && messageAction.getBotSender().getSendType().equals(SendTypeEmum.GROUP_MESSAGE_STR);
+		boolean isRandomReply = random == 0 && messageAction.getBotSender().getSendType().equals(SendTypeEnum.GROUP_MESSAGE_STR);
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
 		}
@@ -154,17 +154,17 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isNotBlank(wordReply)) {
 			return Lists.newArrayList(BotMessageChain.ofPlain(wordReply));
 		}
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		ImmutableMap.Builder<Object, Object> param;
-		if (Objects.equals(botSender.getSendType(), SendTypeEmum.FRIEND_MESSAGE_STR)) {
+		if (Objects.equals(botSender.getSendType(), SendTypeEnum.FRIEND_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 1)
 					.put("from", botUser.getQq())
 					.put("fromName", botUser.getName());
-		} else if (Objects.equals(botSender.getSendType(), SendTypeEmum.GROUP_MESSAGE_STR)) {
+		} else if (Objects.equals(botSender.getSendType(), SendTypeEnum.GROUP_MESSAGE_STR)) {
 			param = ImmutableMap.builder().put("content", text)
 					.put("type", 2)
 					.put("from", botUser.getQq())

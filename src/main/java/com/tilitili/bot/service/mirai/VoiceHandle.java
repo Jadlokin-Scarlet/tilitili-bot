@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.VitsOPManager;
@@ -29,7 +29,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
-        BotEmum bot = messageAction.getBot();
+        BotEnum bot = messageAction.getBot();
         String speaker = messageAction.getParamOrDefault("who", "派蒙");
         String speed = messageAction.getParamOrDefault("speed", "1.2");
 

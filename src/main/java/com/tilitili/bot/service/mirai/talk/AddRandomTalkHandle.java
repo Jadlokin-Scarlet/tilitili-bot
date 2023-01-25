@@ -8,7 +8,7 @@ import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotPlaceConstant;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
@@ -60,7 +60,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		if (!SendTypeEmum.GROUP_MESSAGE_STR.equals(messageAction.getBotSender().getSendType())) {
+		if (!SendTypeEnum.GROUP_MESSAGE_STR.equals(messageAction.getBotSender().getSendType())) {
 			return null;
 		}
 		List<BotMessageChain> chainList = messageAction.getBotMessage().getBotMessageChainList();

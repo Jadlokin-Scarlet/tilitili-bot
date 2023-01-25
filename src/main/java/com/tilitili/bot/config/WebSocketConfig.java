@@ -6,7 +6,7 @@ import com.tilitili.bot.socket.BaseWebSocketHandler;
 import com.tilitili.bot.socket.BotEventWebSocketHandler;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.bot.socket.KookWebSocketHandler;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MinecraftManager;
@@ -50,13 +50,13 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     @PostConstruct
     public void webSocketConnectionManager() {
-        for (BotEmum bot : BotEmum.values()) {
+        for (BotEnum bot : BotEnum.values()) {
             try {
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
 
-                if (BotEmum.TYPE_MIRAI.equals(bot.getType())) {
+                if (BotEnum.TYPE_MIRAI.equals(bot.getType())) {
                     String eventWsUrl = miraiManager.getEventWebSocketUrl(bot);
                     BotEventWebSocketHandler botEventWebSocketHandler = new BotEventWebSocketHandler(new URI(eventWsUrl), bot, botService);
                     botEventWebSocketHandler.connect();
@@ -68,13 +68,13 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         }
     }
 
-    private BotWebSocketHandler newWebSocketHandle(BotEmum bot) throws URISyntaxException {
+    private BotWebSocketHandler newWebSocketHandle(BotEnum bot) throws URISyntaxException {
         String wsUrl = botManager.getWebSocketUrl(bot);
         Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.text);
         switch (bot.getType()) {
-            case BotEmum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotEmum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotEmum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEnum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEnum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotEnum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             default: throw new AssertException("?");
         }
     }

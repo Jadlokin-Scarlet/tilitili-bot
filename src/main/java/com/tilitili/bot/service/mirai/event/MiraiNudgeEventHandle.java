@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeEvent;
 import com.tilitili.common.entity.view.bot.mirai.event.MiraiNudgeSubject;
@@ -28,7 +28,7 @@ public class MiraiNudgeEventHandle extends MiraiAutoEventHandle<MiraiNudgeEvent>
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, MiraiNudgeEvent event) throws Exception {
+	public void handleEvent(BotEnum bot, MiraiNudgeEvent event) throws Exception {
 		MiraiNudgeSubject subject = event.getSubject();
 
 		BotSender botSender;

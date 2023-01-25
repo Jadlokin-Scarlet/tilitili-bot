@@ -4,9 +4,9 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEmum;
-import com.tilitili.common.emnus.GroupEmum;
-import com.tilitili.common.emnus.SendTypeEmum;
+import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.emnus.GroupEnum;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RenameHandle extends ExceptionRespMessageHandle {
     private final int waitTime = 10;
-    private final Long listenGroup = GroupEmum.QIAN_QIAN_GROUP.value;
+    private final Long listenGroup = GroupEnum.QIAN_QIAN_GROUP.value;
 
     private final String statusKey = "rename.status";
     private final String lastSendTimeKey = "rename.last_send_time";
@@ -40,14 +40,14 @@ public class RenameHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        BotEmum bot = messageAction.getBot();
+        BotEnum bot = messageAction.getBot();
         BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		Long userId = botUser.getId();
         String name = "Jadlokin_Scarlet";
 
-        if (Objects.equals(userId, BotUserConstant.MASTER_USER_ID) && SendTypeEmum.GROUP_MESSAGE_STR.equals(botSender.getSendType())) {
+        if (Objects.equals(userId, BotUserConstant.MASTER_USER_ID) && SendTypeEnum.GROUP_MESSAGE_STR.equals(botSender.getSendType())) {
             String status = session.getOrDefault(statusKey, "冒泡！");
             String lastSendTimeStr = session.get(lastSendTimeKey);
             boolean isUp = lastSendTimeStr == null || DateUtils.parseDateYMDHMS(lastSendTimeStr).before(getLimitDate());

@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai.event;
 import com.tilitili.bot.service.mirai.base.MiraiAutoEventHandle;
 import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -39,7 +39,7 @@ public class MiraiMemberLeaveEventQuitHandle extends MiraiAutoEventHandle<MiraiM
 	}
 
 	@Override
-	public void handleEvent(BotEmum bot, MiraiMemberLeaveEventQuit event) {
+	public void handleEvent(BotEnum bot, MiraiMemberLeaveEventQuit event) {
 		BotSender botSender = botSenderMapper.getValidBotSenderByGroup(event.getMember().getGroup().getId());
 		BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(event.getMember().getId(), BotUserConstant.USER_TYPE_QQ);
 		String message = String.format("%s离开了。", event.getMember().getMemberName());

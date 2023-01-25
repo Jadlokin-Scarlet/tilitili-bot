@@ -1,6 +1,6 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -56,7 +56,7 @@ public class FunctionTalkService {
 	}
 
 	private void findNextCqToChain(BotSender botSender, Matcher cqMatcher, List<BotMessageChain> botMessageChain) {
-		BotEmum bot = BotEmum.getBotById(botSender.getBot());
+		BotEnum bot = BotEnum.getBotById(botSender.getBot());
 		String cq = cqMatcher.group();
 		String messageType = StringUtils.patten1("CQ:(\\w+)", cq);
 		Asserts.notBlank(messageType, "gocq正则解析异常, text=%s", cq);
@@ -88,7 +88,7 @@ public class FunctionTalkService {
 		}
 	}
 
-	public void supplementChain(BotEmum bot, BotSender botSender, BotMessage respMessage) {
+	public void supplementChain(BotEnum bot, BotSender botSender, BotMessage respMessage) {
 		List<BotMessageChain> botMessageChainList = respMessage.getBotMessageChainList();
 		for (BotMessageChain botMessageChain : botMessageChainList) {
 			switch (botMessageChain.getType()) {

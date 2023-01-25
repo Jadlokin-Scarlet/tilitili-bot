@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -28,7 +28,7 @@ public class EssenceHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		String quoteMessageId = messageAction.getQuoteMessageId();
 		Asserts.notNull(quoteMessageId, "格式错啦(回复)");

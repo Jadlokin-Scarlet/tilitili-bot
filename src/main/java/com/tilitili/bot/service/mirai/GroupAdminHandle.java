@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEmum;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -36,7 +36,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleAdmin(BotMessageAction messageAction) {
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		List<Long> atList = messageAction.getAtList();
 		Asserts.notEmpty(atList, "谁?");
@@ -48,7 +48,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleDeleteAdmin(BotMessageAction messageAction) {
-		BotEmum bot = messageAction.getBot();
+		BotEnum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		List<Long> atList = messageAction.getAtList();
 		Asserts.notEmpty(atList, "谁?");
