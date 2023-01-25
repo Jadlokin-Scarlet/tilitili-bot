@@ -50,9 +50,6 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         for (BotEnum bot : BotEnum.values()) {
             try {
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
-                if (botWebSocketHandler == null) {
-                    continue;
-                }
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
 
@@ -62,6 +59,8 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                     botEventWebSocketHandler.connect();
                     botWebSocketHandlerList.add(botEventWebSocketHandler);
                 }
+            } catch (AssertException e) {
+                log.error("断言异常", e);
             } catch (Exception e) {
                 log.error("异常", e);
             }
@@ -75,7 +74,6 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
             case BotEnum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             case BotEnum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             case BotEnum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotEnum.TYPE_MINECRAFT: return null;
             default: throw new AssertException("?");
         }
     }
