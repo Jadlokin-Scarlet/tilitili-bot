@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotTaskConstant;
+import com.tilitili.common.entity.BotCattle;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
@@ -14,6 +15,7 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
@@ -31,14 +33,16 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
 	private final BotUserManager botUserManager;
 	private final BotSenderMapper botSenderMapper;
+	private final BotCattleMapper botCattleMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
-	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderMapper botSenderMapper, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botSenderMapper = botSenderMapper;
+		this.botCattleMapper = botCattleMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
@@ -72,6 +76,11 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);
+
+		BotCattle sourceCattle = botCattleMapper.getBotCattleByUserId(sourceUserId);
+		if (sourceCattle != null) {
+			botCattleMapper.updateBotCattleSelective(new BotCattle().setId(sourceCattle.getId()).setStatus(-1));
+		}
 
 		return BotMessage.simpleTextMessage("合体成功！");
 	}

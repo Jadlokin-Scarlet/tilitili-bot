@@ -46,7 +46,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		} else {
 			throw new AssertException();
 		}
-		if (text.contains("流量包") || StringUtils.isBlank(text)) {
+		if (StringUtils.isBlank(text) || text.contains("流量包")) {
 			List<BotBoast> boastList = botBoastMapper.getBotBoastByCondition(new BotBoastQuery().setType(type));
 			text = boastList.get(random.nextInt(boastList.size())).getText();
 		} else {
