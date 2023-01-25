@@ -60,7 +60,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                     botWebSocketHandlerList.add(botEventWebSocketHandler);
                 }
             } catch (AssertException e) {
-                log.error("断言异常", e);
+                log.warn("断言异常", e);
             } catch (Exception e) {
                 log.error("异常", e);
             }
