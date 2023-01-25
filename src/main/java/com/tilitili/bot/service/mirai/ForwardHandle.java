@@ -76,52 +76,52 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			return BotMessage.simpleListMessage(botMessageChainList).setSenderId(3384L);
 		}
 
-		for (MinecraftServerEnum server : MinecraftServerEnum.values()) {
-			if (Objects.equals(senderId, server.getSenderId())) {
-				String message = sourceMessageChainList.stream().map(chain -> {
-					switch (chain.getType()) {
-						case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
-						case BotMessage.MESSAGE_TYPE_IMAGE:
-							TranslateView translateView = baiduManager.translateImageIgnoreError(chain.getUrl());
-							String imageText = translateView != null? translateView.getSumSrc(): null;
-							return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
-						default: return "";
-					}
-				}).collect(Collectors.joining());
-				String sender = messageAction.getBotUser().getName();
-				minecraftManager.sendMessage(server, String.format("[%s]%s：%s", server.getPrefix(), sender, message));
-				return BotMessage.emptyMessage();
-			}
-		}
+//		for (MinecraftServerEnum server : MinecraftServerEnum.values()) {
+//			if (Objects.equals(senderId, server.getSenderId())) {
+//				String message = sourceMessageChainList.stream().map(chain -> {
+//					switch (chain.getType()) {
+//						case BotMessage.MESSAGE_TYPE_PLAIN: return chain.getText();
+//						case BotMessage.MESSAGE_TYPE_IMAGE:
+//							TranslateView translateView = baiduManager.translateImageIgnoreError(chain.getUrl());
+//							String imageText = translateView != null? translateView.getSumSrc(): null;
+//							return String.format("[图片%s]", StringUtils.isBlank(imageText)? "": ":"+ imageText);
+//						default: return "";
+//					}
+//				}).collect(Collectors.joining());
+//				String sender = messageAction.getBotUser().getName();
+//				minecraftManager.sendMessage(server, String.format("[%s]%s：%s", server.getPrefix(), sender, message));
+//				return BotMessage.emptyMessage();
+//			}
+//		}
 		BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(senderId).setStatus(0).setIsSend(true);
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(forwardConfigQuery);
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
-			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName() + "-": "";
+			String sourceNameStr = forwardConfig.getSourceName() != null? forwardConfig.getSourceName(): "";
 			String userName = messageAction.getBotUser().getName();
 
 			List<BotMessageChain> newMessageChainList = new ArrayList<>();
-			newMessageChainList.add(BotMessageChain.ofPlain(String.format("[%s%s]%s：", sourceNameStr, messageAction.getBotSender().getName(), userName)));
+			newMessageChainList.add(BotMessageChain.ofPlain(String.format("[%s]%s：", sourceNameStr, userName)));
 			newMessageChainList.addAll(sourceMessageChainList);
 			return BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId);
 		}
 
-		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId) && messageAction.getText() != null) {
-			String text = messageAction.getText();
-			List<String> resultList = StringUtils.extractList("(.+) 和 (.+) 开始比划牛子，", text);
-			log.info("pkList = " + resultList);
-			if (resultList.size() == 2 && (resultList.contains("Debris") || resultList.contains("Jadlokin_Scarlet"))) {
-				if (future != null) {
-					future.cancel(false);
-				}
-				future = scheduled.schedule(() -> {
-					sendMessageManager.sendMessage(BotMessage.simpleListMessage(Arrays.asList(
-							BotMessageChain.ofPlain("好啦。"),
-							BotMessageChain.ofAt(BotUserConstant.MASTER_USER_ID)
-					)).setBotSender(messageAction.getBotSender()));
-				}, 5, TimeUnit.MINUTES);
-			}
-		}
+//		if (BotSenderConstant.MIRAI_SENDER_ID.equals(senderId) && messageAction.getText() != null) {
+//			String text = messageAction.getText();
+//			List<String> resultList = StringUtils.extractList("(.+) 和 (.+) 开始比划牛子，", text);
+//			log.info("pkList = " + resultList);
+//			if (resultList.size() == 2 && (resultList.contains("Debris") || resultList.contains("Jadlokin_Scarlet"))) {
+//				if (future != null) {
+//					future.cancel(false);
+//				}
+//				future = scheduled.schedule(() -> {
+//					sendMessageManager.sendMessage(BotMessage.simpleListMessage(Arrays.asList(
+//							BotMessageChain.ofPlain("好啦。"),
+//							BotMessageChain.ofAt(BotUserConstant.MASTER_USER_ID)
+//					)).setBotSender(messageAction.getBotSender()));
+//				}, 5, TimeUnit.MINUTES);
+//			}
+//		}
 		return null;
 	}
 }
