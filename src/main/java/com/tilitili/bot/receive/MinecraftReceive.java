@@ -51,13 +51,13 @@ public class MinecraftReceive {
 			if (taskMessage == null) {
 				return;
 			}
-			log.debug("Message Received [{}]",taskMessage);
 			Long taskId = taskMessage.getId();
 			List<String> valueList = taskMessage.getValueList();
 			Asserts.isTrue(valueList.size() == 2, "参数异常");
 			String requestStr = valueList.get(0);
 			String senderIdStr = valueList.get(1);
 			Asserts.isNumber(senderIdStr, "参数异常");
+			log.debug("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
 			botService.syncHandleTextMessage(requestStr, BotEnum.getBotById(botSender.getBot()));
