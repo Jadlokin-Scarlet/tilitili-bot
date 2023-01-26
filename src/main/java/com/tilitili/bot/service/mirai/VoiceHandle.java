@@ -60,7 +60,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         String voiceId = botManager.uploadVoice(bot, wavFile);
         Asserts.notBlank(voiceId, "上传失败");
 
-        return BotMessage.simpleVoiceIdMessage(voiceId);
+        return BotMessage.simpleVoiceIdMessage(voiceId, url);
     }
 //	@Override
 //    public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
