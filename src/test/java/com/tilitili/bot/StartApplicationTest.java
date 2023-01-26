@@ -1,7 +1,6 @@
 package com.tilitili.bot;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.bot.service.PixivCacheService;
@@ -13,8 +12,6 @@ import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.FishConfig;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
-import com.tilitili.common.entity.view.bot.mirai.MiraiBaseRequest;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.GoCqhttpManager;
@@ -22,7 +19,6 @@ import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -278,12 +274,6 @@ class StartApplicationTest {
         redisCache.addMapValue("test", "test", "lock");
         System.out.println(redisCache.removeMapValue("test", "test"));
         System.out.println(redisCache.removeMapValue("test", "test"));
-    }
-
-    private static <T> T run(String s) {
-        MiraiBaseRequest<T> request = Gsons.fromJson(s, new TypeToken<MiraiBaseRequest<T>>(){}.getType());
-        Asserts.isTrue(request.getData() instanceof MiraiBotInvitedJoinGroupRequestEvent, "?");
-        return null;
     }
 
 }

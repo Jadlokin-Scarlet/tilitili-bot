@@ -2,7 +2,7 @@ package com.tilitili.bot.socket;
 
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.emnus.BotEnum;
-import com.tilitili.common.entity.view.bot.kook.KookWsData;
+import com.tilitili.common.entity.view.bot.kook.ws.KookData;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
@@ -25,19 +25,15 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
     @Override
     public void handleTextMessage(String message) {
         log.debug("Message Received message={}", message);
-        KookWsData<?> kookWsData = Gsons.fromJson(message, KookWsData.class);
-        switch (kookWsData.getS()) {
+        KookData<?> kookData = Gsons.fromJson(message, KookData.class);
+        switch (kookData.getS()) {
             case 0: {
-                this.sn = kookWsData.getSn() == null ? 0 : kookWsData.getSn();
-                if (message.contains("type\":255")) {
-                    botService.syncHandleEvent(bot, message);
-                } else {
-                    botService.syncHandleTextMessage(message, bot);
-                }
+                this.sn = kookData.getSn() == null ? 0 : kookData.getSn();
+                botService.testHandleMessage(bot, message);
                 break;
             }
             case 1: case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 30, TimeUnit.SECONDS); break;
-            default: log.warn("记录s="+kookWsData.getS());
+            default: log.warn("记录s="+ kookData.getS());
         }
     }
 }

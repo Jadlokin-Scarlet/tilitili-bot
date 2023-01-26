@@ -60,7 +60,7 @@ public class MinecraftReceive {
 			log.debug("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
-			botService.syncHandleTextMessage(requestStr, BotEnum.getBotById(botSender.getBot()));
+			botService.syncHandleMessage(BotEnum.getBotById(botSender.getBot()), requestStr);
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
 		} catch (Exception e) {
 			if (taskMessage != null && taskMessage.getId() != null) {

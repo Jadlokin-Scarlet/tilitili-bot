@@ -3,14 +3,11 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.bot.service.mirai.event.MiraiBotInvitedJoinGroupRequestEventHandle;
-import com.tilitili.bot.service.mirai.event.MiraiMemberJoinRequestEventHandle;
-import com.tilitili.bot.service.mirai.event.MiraiNewFriendRequestEventHandle;
+import com.tilitili.bot.service.mirai.event.FriendRequestEventHandle;
+import com.tilitili.bot.service.mirai.event.InvitedJoinGroupEventHandle;
+import com.tilitili.bot.service.mirai.event.MemberJoinRequestEventHandle;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiBotInvitedJoinGroupRequestEvent;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiMemberJoinRequestEvent;
-import com.tilitili.common.entity.view.bot.mirai.event.MiraiNewFriendRequestEvent;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
@@ -42,10 +39,10 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleMiraiNewFriendEvent(BotMessageAction messageAction) {
 		BotEnum bot = messageAction.getBot();
-		if (redisCache.exists(MiraiNewFriendRequestEventHandle.newFriendKey)) {
-			MiraiNewFriendRequestEvent event = (MiraiNewFriendRequestEvent) redisCache.getValue(MiraiNewFriendRequestEventHandle.newFriendKey);
-			miraiManager.handleMiraiNewFriendRequestEvent(bot, event);
-			redisCache.delete(MiraiNewFriendRequestEventHandle.newFriendKey);
+		if (redisCache.exists(FriendRequestEventHandle.newFriendKey)) {
+			BotMessage botMessage = (BotMessage) redisCache.getValue(FriendRequestEventHandle.newFriendKey);
+			miraiManager.handleMiraiNewFriendRequestEvent(bot, botMessage);
+			redisCache.delete(FriendRequestEventHandle.newFriendKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
 		return null;
@@ -53,10 +50,10 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleMiraiGroupInviteEvent(BotMessageAction messageAction) {
 		BotEnum bot = messageAction.getBot();
-		if (redisCache.exists(MiraiBotInvitedJoinGroupRequestEventHandle.newGroupKey)) {
-			MiraiBotInvitedJoinGroupRequestEvent event = (MiraiBotInvitedJoinGroupRequestEvent) redisCache.getValue(MiraiBotInvitedJoinGroupRequestEventHandle.newGroupKey);
-			miraiManager.handleMiraiBotInvitedJoinGroupRequestEvent(bot, event);
-			redisCache.delete(MiraiBotInvitedJoinGroupRequestEventHandle.newGroupKey);
+		if (redisCache.exists(InvitedJoinGroupEventHandle.newGroupKey)) {
+			BotMessage botMessage = (BotMessage) redisCache.getValue(InvitedJoinGroupEventHandle.newGroupKey);
+			miraiManager.handleMiraiBotInvitedJoinGroupRequestEvent(bot, botMessage);
+			redisCache.delete(InvitedJoinGroupEventHandle.newGroupKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
 		return null;
@@ -66,12 +63,12 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotEnum bot = messageAction.getBot();
 		String value = messageAction.getValue();
-		String key = StringUtils.isBlank(value) ? MiraiMemberJoinRequestEventHandle.newMemberKey : MiraiMemberJoinRequestEventHandle.newMemberKey + "-" + value;
+		String key = StringUtils.isBlank(value) ? MemberJoinRequestEventHandle.newMemberKey : MemberJoinRequestEventHandle.newMemberKey + "-" + value;
 		if (session.containsKey(key)) {
-			MiraiMemberJoinRequestEvent event = Gsons.fromJson(session.get(key), MiraiMemberJoinRequestEvent.class);
-			miraiManager.handleMiraiMemberJoinRequestEvent(bot, event);
+			BotMessage botMessage = Gsons.fromJson(session.get(key), BotMessage.class);
+			miraiManager.handleMiraiMemberJoinRequestEvent(bot, botMessage);
 			session.remove(key);
-			session.remove(MiraiMemberJoinRequestEventHandle.newMemberKey);
+			session.remove(MemberJoinRequestEventHandle.newMemberKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
 		return null;

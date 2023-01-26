@@ -1,8 +1,6 @@
 package com.tilitili.bot.service;
 
-import com.google.common.base.CaseFormat;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
@@ -15,19 +13,15 @@ import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.query.BotTaskQuery;
+import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.gocqhttp.GocqhttpBaseEvent;
-import com.tilitili.common.entity.view.bot.kook.KookEventExtra;
-import com.tilitili.common.entity.view.bot.kook.KookWsEvent;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
-import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -38,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,11 +52,10 @@ public class BotService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
-    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, Map<String, BaseEventHandle> eventHandleMap, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
+    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
         this.sendMessageManager = sendMessageManager;
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
-        this.eventHandleMap = eventHandleMap;
         this.botSessionService = botSessionService;
         this.botTaskMapper = botTaskMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
@@ -68,61 +63,37 @@ public class BotService {
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
         this.botMessageRecordMapper = botMessageRecordMapper;
         gson = new Gson();
+
+        this.eventHandleMap = eventHandleList.stream().collect(Collectors.toMap(BaseEventHandle::getEventType, Function.identity()));
+    }
+
+    public void testHandleMessage(BotEnum bot, String message) {
+        this.syncHandleMessage(bot, message);
     }
 
     @Async
-    public void syncHandleEvent(BotEnum bot, String message) {
+    public void syncHandleMessage(BotEnum bot, String message) {
+        // 解析message
+        BotMessage botMessage = null;
         try {
-            String handleName;
-            if (BotEnum.TYPE_MIRAI.equals(bot.getType())) {
-                String eventType = StringUtils.patten1("\"type\":\"(\\w+)\"", message);
-                Asserts.notBlank(eventType, "获取事件类型失败");
-                handleName = "mirai" + eventType + "Handle";
-            } else if (BotEnum.TYPE_GOCQ.equals(bot.getType())) {
-                GocqhttpBaseEvent baseEvent = Gsons.fromJson(message, GocqhttpBaseEvent.class);
-                String postType = baseEvent.getPostType();
-                String noticeType = baseEvent.getNoticeType();
-                String subType = baseEvent.getSubType();
-                Asserts.notNull(postType, "啊嘞，不对劲");
-                postType = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, postType);
-                noticeType = noticeType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, noticeType);
-                subType = subType == null? "": CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, subType);
-                handleName = "gocq" + postType + noticeType + subType + "Handle";
-            } else if (BotEnum.TYPE_KOOK.equals(bot.getType())) {
-                KookWsEvent<?> data = Gsons.fromJson(message, new TypeToken<KookWsEvent<?>>() {}.getType());
-                KookEventExtra<?> extra = data.getD().getExtra();
-                String eventType = extra.getType();
-                handleName = "kook" + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, eventType) + "Handle";
-            } else {
-                throw new AssertException();
-            }
-            if (!eventHandleMap.containsKey(handleName)) {
-                log.warn("未定义的事件={}", handleName);
-                return;
-            }
-            BaseEventHandle messageHandle = eventHandleMap.get(handleName);
-            messageHandle.handleEventStr(bot, message);
-        } catch (AssertException e) {
-            log.warn(e.getMessage(), e);
+            botMessage = botManager.handleMessageToBotMessage(bot, message);
         } catch (Exception e) {
-            log.error("处理事件异常", e);
+            log.warn("解析失败", e);
+        }
+        if (botMessage == null) {
+            log.warn("解析失败");
+            return;
+        }
+        if (botMessage.getBotMessageChainList() != null) {
+            this.syncHandleChatMessage(bot, botMessage);
+        } else if (botMessage.getBotEvent() != null) {
+            this.syncHandleEventMessage(bot, botMessage);
         }
     }
 
-    public void testHandleTextMessage(String message, BotEnum bot) {
-        this.syncHandleTextMessage(message, bot);
-    }
-
-    @Async
-    public void syncHandleTextMessage(String message, BotEnum bot) {
+    private void syncHandleChatMessage(BotEnum bot, BotMessage botMessage) {
         List<Long> lockUserId = new ArrayList<>();
         try {
-            // 解析message
-            BotMessage botMessage = botManager.handleWsMessageToBotMessage(bot, message);
-            if (botMessage == null) {
-                log.info("解析失败");
-                return;
-            }
             // 获取sender，校验权限
             BotSender botSender = botMessage.getBotSender();
             // 校验权限
@@ -134,7 +105,7 @@ public class BotService {
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
             // 消息记录
-            botMessageRecordManager.asyncLogRecord(message, botMessage);
+            botMessageRecordManager.asyncLogRecord(botMessage);
 
             // 获取用户锁
             Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
@@ -207,6 +178,62 @@ public class BotService {
         }
     }
 
+    private void syncHandleEventMessage(BotEnum bot, BotMessage botMessage) {
+        try {
+            BotEvent botEvent = botMessage.getBotEvent();
+            BotSender botSender = botMessage.getBotSender();
+            // 校验权限
+            boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
+            if (!hasHelp) {
+                log.info(botMessage.getMessageId() + "无权限");
+                return;
+            }
+
+            BaseEventHandle eventHandle = eventHandleMap.get(botEvent.getType());
+            if (eventHandle == null) {
+                log.info(botMessage.getMessageId() + "无处理");
+                return;
+            }
+            BotMessage respMessage = null;
+            try {
+                // 返回null则代表跳过，继续寻找
+                // 返回空消息则代表已处理完毕但不回复，直接结束
+                respMessage = eventHandle.handleEvent(bot, botMessage);
+            } catch (AssertException e) {
+                log.debug(e.getMessage(), e);
+            }
+
+            // 如果最后为null，则标志无匹配处理器，则回复表情包
+            if (respMessage == null) {
+                log.info(botMessage.getMessageId() + "无回复");
+                return;
+            }
+            // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
+            if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
+                log.info(botMessage.getMessageId() + "已处理");
+                return;
+            }
+
+            // 没设置发送者，就默认原路发回
+            if (respMessage.getBotSender() == null) {
+                respMessage.setBotSender(botSender);
+            }
+            // 如果最后是消息，则回复
+            String messageId = sendMessageManager.sendMessage(respMessage);
+            if (messageId != null) {
+                Long respSenderId = respMessage.getBotSender() != null ? respMessage.getBotSender().getId() : respMessage.getSenderId();
+                if (respSenderId != null) {
+                    BotSessionService.MiraiSession respSession = botSessionService.getSession(respSenderId);
+                    respSession.put(lastMessageIdKey, messageId);
+                }
+            }
+        } catch (AssertException e) {
+            log.warn("异步事件处理断言异常, message=" + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("异步事件处理异常", e);
+        }
+    }
+
     private List<BotTask> queryBotTasks(BotMessageAction botMessageAction) {
         List<BotTask> botTaskDTOList = this.getBotTalkDtoList(botMessageAction);
 
@@ -244,7 +271,7 @@ public class BotService {
             }
         }
 
-        BotMessageRecord quoteMessageRecord = botMessageRecordMapper.getBotMessageRecordByMessageId(quoteMessageId);
+        BotMessageRecord quoteMessageRecord = botMessageRecordMapper.getBotMessageRecordByMessageIdAndSenderId(quoteMessageId, botSender.getId());
         if (quoteMessageRecord != null) {
             return botManager.handleMessageRecordToBotMessage(quoteMessageRecord);
         }
