@@ -57,12 +57,13 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 		Long senderId = messageAction.getBotSender().getId();
 
 		List<BotMessageChain> sourceMessageChainList = messageAction.getBotMessage().getBotMessageChainList();
-		if (senderId == 4370L) {
+		if (senderId == 4518L) {
 			List<BotMessageChain> botMessageChainList = sourceMessageChainList.stream()
 					.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_IMAGE)).collect(Collectors.toList());
 			if (!botMessageChainList.isEmpty() && blackList4370.contains(botMessageChainList.get(0).getUrl())) {
 				return null;
 			}
+			sendMessageManager.sendMessage(BotMessage.simpleListMessage(botMessageChainList).setSenderId(4528L));
 			return BotMessage.simpleListMessage(botMessageChainList).setSenderId(4454L);
 		}
 		if (senderId == 4351L) {

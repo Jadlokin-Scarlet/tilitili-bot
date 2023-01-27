@@ -7,6 +7,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.query.BotSendMessageRecordQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
@@ -34,6 +35,8 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
+        BotEnum bot = messageAction.getBot();
+        BotSender botSender = messageAction.getBotSender();
 //        Long qq = messageAction.getBotMessage().getQq();
 //        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
         String all = messageAction.getParamOrDefault("all", messageAction.getValue());
@@ -41,19 +44,22 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         boolean recallAll = Objects.equals(all, "1");
 
         if (quoteMessageId != null) {
-            Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(BotEnum.getBotById(bot), messageAction.getBotSender(), quoteMessageId);
+            botManager.recallMessage(bot, botSender, quoteMessageId);
             return BotMessage.emptyMessage();
         } else if (recallAll) {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
-                BotSender botSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                botManager.recallMessage(BotEnum.getBotById(botSender.getBot()), botSender, sendMessage.getMessageId());
+                BotSender otherBotSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
+                botManager.recallMessage(BotEnum.getBotById(otherBotSender.getBot()), otherBotSender, sendMessage.getMessageId());
             }
             return BotMessage.simpleTextMessage("搞定");
-        } else if (session.containsKey(BotService.lastMessageIdKey)) {
-            Long bot = messageAction.getBotSender().getBot();
-            botManager.recallMessage(BotEnum.getBotById(bot), messageAction.getBotSender(), session.get(BotService.lastMessageIdKey));
+        } else {
+            List<BotSendMessageRecord> recordList = botSendMessageRecordMapper.getBotSendMessageRecordByCondition(new BotSendMessageRecordQuery().setSenderId(botSender.getId()).setPageSize(1).setSorter("create_time").setSorted("desc"));
+            for (BotSendMessageRecord messageRecord : recordList) {
+                botManager.recallMessage(bot, botSender, messageRecord.getMessageId());
+            }
+//            Long bot = botSender.getBot();
+//            botManager.recallMessage(BotEnum.getBotById(bot), botSender, session.get(BotService.lastMessageIdKey));
             return BotMessage.emptyMessage();
         }
 
@@ -80,6 +86,6 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 //                return BotMessage.simpleTextMessage("搞定");
 //            }
 //        }
-        return null;
+//        return null;
     }
 }
