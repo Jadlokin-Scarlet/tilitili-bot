@@ -3,7 +3,6 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.MinecraftServerEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
@@ -62,12 +61,12 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetBotSender = botSenderMapper.getValidBotSenderById(targetSenderId);
 
-			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(targetBotSender);
+			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(targetBotSender);
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
 //		if (senderId == 3758L) {
-//			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(MinecraftServerEnum.RANK_CHANNEL_MINECRAFT);
+//			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(MinecraftServerEnum.RANK_CHANNEL_MINECRAFT);
 //			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 //			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 //		}
