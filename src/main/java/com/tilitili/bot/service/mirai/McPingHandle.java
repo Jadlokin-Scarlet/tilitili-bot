@@ -33,8 +33,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private final McPingManager mcPingManager;
 	private final MinecraftManager minecraftManager;
-	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderMapper botSenderMapper;
+	private final BotForwardConfigMapper botForwardConfigMapper;
 
 	@Autowired
 	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper) {
