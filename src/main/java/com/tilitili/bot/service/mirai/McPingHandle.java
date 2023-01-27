@@ -4,6 +4,9 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.MinecraftServerEnum;
+import com.tilitili.common.entity.BotForwardConfig;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
@@ -11,6 +14,8 @@ import com.tilitili.common.entity.view.request.MinecraftPlayer;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.McPingManager;
 import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,11 +33,15 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private final McPingManager mcPingManager;
 	private final MinecraftManager minecraftManager;
+	private final BotForwardConfigMapper botForwardConfigMapper;
+	private final BotSenderMapper botSenderMapper;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper) {
 		this.mcPingManager = mcPingManager;
 		this.minecraftManager = minecraftManager;
+		this.botForwardConfigMapper = botForwardConfigMapper;
+		this.botSenderMapper = botSenderMapper;
 	}
 
 	@Override
@@ -48,8 +57,12 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handelMcList(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
-		if (senderId == 4407L) {
-			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(MinecraftServerEnum.NIJISANJI_CHANNEL_MINECRAFT);
+		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
+		for (BotForwardConfig forwardConfig : forwardConfigList) {
+			Long targetSenderId = forwardConfig.getTargetSenderId();
+			BotSender targetBotSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+
+			List<MinecraftPlayer> playerList = minecraftManager.listPlayer(targetBotSender);
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
