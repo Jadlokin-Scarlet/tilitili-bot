@@ -45,11 +45,11 @@ public class BotService {
     private final BotSessionService botSessionService;
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
-    private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final Gson gson;
     private final BotMessageRecordManager botMessageRecordManager;
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
     private final BotMessageRecordMapper botMessageRecordMapper;
+    private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
 
     public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
