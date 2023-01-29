@@ -105,7 +105,7 @@ public class BotService {
             // 获取session
             BotSessionService.MiraiSession session = botSessionService.getSession(botSender.getId());
             // 消息记录
-            botMessageRecordManager.asyncLogRecord(botMessage);
+            botMessageRecordManager.logRecord(botMessage);
 
             // 获取用户锁
             Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
