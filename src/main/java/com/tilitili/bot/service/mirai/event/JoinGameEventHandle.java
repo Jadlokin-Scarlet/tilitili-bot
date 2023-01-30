@@ -27,9 +27,9 @@ import java.util.List;
 public class JoinGameEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderMapper botSenderMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
-	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 	private final SendMessageManager sendMessageManager;
 	private final RedisCache redisCache;
+	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
 	@Autowired
 	public JoinGameEventHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, SendMessageManager sendMessageManager, RedisCache redisCache) {
