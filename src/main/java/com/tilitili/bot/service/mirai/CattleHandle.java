@@ -236,7 +236,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		boolean isRandom;
 		List<Long> atList = messageAction.getAtList();
 		if (atList.isEmpty()) {
-			if (StringUtils.isBlank(messageAction.getValue())) {
+			if (StringUtils.isNotBlank(messageAction.getValue())) {
 				return BotMessage.emptyMessage();
 			}
 			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
