@@ -41,7 +41,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 			text = JSONPath.read(result, "$.data.text", String.class);
 			type = "夸夸他";
 		} else if (Arrays.asList("骂骂我", "mmw", "骂骂他", "mmt").contains(key)){
-			text = HttpClientUtil.httpGet("https://nmsl.yfchat.xyz/api.php?level=min");
+			text = "";//HttpClientUtil.httpGet("https://nmsl.yfchat.xyz/api.php?level=min");
 			type = "骂骂他";
 		} else {
 			throw new AssertException();
