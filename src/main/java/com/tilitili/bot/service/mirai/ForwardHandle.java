@@ -102,7 +102,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 			String userName = messageAction.getBotUser().getName();
 
 			List<BotMessageChain> newMessageChainList = new ArrayList<>();
-			newMessageChainList.add(BotMessageChain.ofPlain(String.format("%s%s：", sourceNameStr, userName)));
+			newMessageChainList.add(BotMessageChain.ofPlain(String.format("%s<%s> ", sourceNameStr, userName)));
 			newMessageChainList.addAll(sourceMessageChainList);
 			return BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId);
 		}
