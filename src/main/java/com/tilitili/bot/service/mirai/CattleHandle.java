@@ -242,6 +242,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 					.filter(Predicate.isEqual(userId).negate())
+					.map(botUserManager::getBotUserByIdWithParent)
+					.map(BotUserDTO::getId)
 					.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
 					.map(botCattleMapper::getBotCattleByUserId)
 					.filter(Objects::nonNull)
