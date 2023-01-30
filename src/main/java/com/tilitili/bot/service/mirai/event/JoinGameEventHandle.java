@@ -71,6 +71,6 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 		if (hour > 9) time = "中午";
 		if (hour > 12) time = "下午";
 		if (hour > 18) time = "晚上";
-		return BotMessage.simpleTextMessage(String.format("%s，%s，今天也是充满希望的一天。", time, botUser));
+		return BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName()));
 	}
 }
