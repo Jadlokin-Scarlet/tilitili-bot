@@ -19,10 +19,7 @@ import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotCattleRecordMapper;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.MathUtil;
-import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -239,6 +236,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		boolean isRandom;
 		List<Long> atList = messageAction.getAtList();
 		if (atList.isEmpty()) {
+			if (StringUtils.isBlank(messageAction.getValue())) {
+				return BotMessage.emptyMessage();
+			}
 			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 					.filter(Predicate.isEqual(userId).negate())
