@@ -34,8 +34,8 @@ import java.util.stream.IntStream;
 public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
-	private final BotItemService botItemService;
 	private final BotUserManager botUserManager;
+	private final BotItemService botItemService;
 	private final BotCattleMapper botCattleMapper;
 	private final BotCattleManager botCattleManager;
 	private final BotCattleRecordMapper botCattleRecordMapper;
