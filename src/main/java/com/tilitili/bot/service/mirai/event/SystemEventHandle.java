@@ -46,7 +46,6 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
 			Asserts.notNull(targetSender, "找不到渠道");
-			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
 			return BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
 		}

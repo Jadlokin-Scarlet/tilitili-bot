@@ -27,10 +27,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -123,18 +120,18 @@ public class BotService {
             botMessageAction.setQuoteMessage(this.queryQuoteMessage(botSender, botMessageAction));
 
             // 匹配并执行指令
-            BotMessage respMessage = null;
+            List<BotMessage> respMessage = null;
             for (BotTask botTask : botTaskDTOList) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
                 try {
                     // 返回null则代表跳过，继续寻找
                     // 返回空消息则代表已处理完毕但不回复，直接结束
-                    respMessage = messageHandle.handleMessage(botMessageAction);
+                    respMessage = messageHandle.handleMessageNew(botMessageAction);
                 } catch (AssertException e) {
                     log.debug(e.getMessage(), e);
                     // 如果继承了实现了全局异常处理的基类，则调用异常处理方法
                     if (messageHandle instanceof ExceptionRespMessageHandleAdapt) {
-                        respMessage = ((ExceptionRespMessageHandleAdapt)messageHandle).handleAssertException(botMessageAction, e);
+                        respMessage = Collections.singletonList(((ExceptionRespMessageHandleAdapt)messageHandle).handleAssertException(botMessageAction, e));
                     }
                 }
                 if (respMessage != null) {
@@ -148,18 +145,20 @@ public class BotService {
                 return;
             }
             // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
-            if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
+            if (CollectionUtils.isEmpty(respMessage)) {
                 log.info(botMessage.getMessageId() + "已处理");
                 return;
             }
-            // 没设置发送者，就默认原路发回
-            if (respMessage.getBotSender() == null) {
-                respMessage.setBotSender(botSender);
+            for (BotMessage message : respMessage) {
+                // 没设置发送者，就默认原路发回
+                if (message.getBotSender() == null) {
+                    message.setBotSender(botSender);
+                }
+                // 记录消息和回复消息的关系
+                message.setMessageId(botMessage.getMessageId());
             }
-            // 记录消息和回复消息的关系
-            respMessage.setMessageId(botMessage.getMessageId());
             // 如果最后是消息，则回复
-            String messageId = sendMessageManager.sendMessage(respMessage);
+            sendMessageManager.sendMessage(respMessage);
 //            if (messageId != null) {
 //                Long respSenderId = respMessage.getBotSender() != null ? respMessage.getBotSender().getId() : respMessage.getSenderId();
 //                if (respSenderId != null) {
@@ -219,7 +218,7 @@ public class BotService {
                 respMessage.setBotSender(botSender);
             }
             // 如果最后是消息，则回复
-            String messageId = sendMessageManager.sendMessage(respMessage);
+            sendMessageManager.sendMessage(respMessage);
 //            if (messageId != null) {
 //                Long respSenderId = respMessage.getBotSender() != null ? respMessage.getBotSender().getId() : respMessage.getSenderId();
 //                if (respSenderId != null) {

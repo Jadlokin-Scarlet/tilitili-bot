@@ -16,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 @Component
 public class RecallEventHandle extends BaseEventHandleAdapt {
@@ -40,14 +43,18 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 
 		BotMessageRecord messageRecord = botMessageRecordMapper.getBotMessageRecordByMessageIdAndSenderId(messageId, botSender.getId());
 		Asserts.notNull(messageRecord, "消息太久远啦");
-		String replyMessageId = messageRecord.getReplyMessageId();
-		Asserts.notNull(replyMessageId, "这条消息没有回复啦");
-		BotSendMessageRecord replyMessage = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(replyMessageId);
-		Asserts.notNull(replyMessage, "回复消息太久远啦");
-		BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
-		Asserts.notNull(replySender, "没有权限");
+		String replyMessageIdListStr = messageRecord.getReplyMessageId();
+		Asserts.notNull(replyMessageIdListStr, "这条消息没有回复啦");
 
-		botManager.recallMessage(BotEnum.getBotById(replySender.getBot()), replySender, replyMessageId);
+		List<String> replyMessageIdList = Arrays.asList(replyMessageIdListStr.split(","));
+		for (String replyMessageId : replyMessageIdList) {
+			BotSendMessageRecord replyMessage = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(replyMessageId);
+			Asserts.notNull(replyMessage, "回复消息太久远啦");
+			BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
+			Asserts.notNull(replySender, "没有权限");
+
+			botManager.recallMessage(BotEnum.getBotById(replySender.getBot()), replySender, replyMessageId);
+		}
 		return BotMessage.emptyMessage();
 	}
 }
