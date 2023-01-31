@@ -5,6 +5,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.manager.VitsOPManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -20,11 +21,13 @@ import java.io.IOException;
 public class VoiceHandle extends ExceptionRespMessageHandle {
     private final BotManager botManager;
     private final VitsOPManager vitsOPManager;
+    private final CheckManager checkManager;
 
     @Autowired
-    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager) {
+    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager, CheckManager checkManager) {
         this.botManager = botManager;
         this.vitsOPManager = vitsOPManager;
+        this.checkManager = checkManager;
     }
 
 	@Override
@@ -40,6 +43,8 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 //        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
         String text = messageAction.getValueOrDefault(messageAction.getBody());
+        Asserts.isTrue(checkManager.checkText(text), "达咩");
+
 
         if (text == null) {
             return null;
