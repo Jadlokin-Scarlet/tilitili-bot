@@ -36,7 +36,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String body = messageAction.getBody();
+        String body = messageAction.getBodyOrDefault(messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
         List<Long> atList = messageAction.getAtList();

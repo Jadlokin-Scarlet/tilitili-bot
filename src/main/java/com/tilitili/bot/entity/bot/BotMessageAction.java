@@ -127,6 +127,14 @@ public class BotMessageAction {
         return bodyMap.getOrDefault(bodyKey, defaultValue);
     }
 
+    public String getBody() {
+        return body;
+    }
+
+    public String getBodyOrDefault(String defaultValue) {
+        return StringUtil.isBlank(body)? defaultValue: body;
+    }
+
     public BotMessage getBotMessage() {
         return botMessage;
     }
@@ -149,10 +157,6 @@ public class BotMessageAction {
 
     public List<String> getImageList() {
         return imageList;
-    }
-
-    public String getBody() {
-        return body;
     }
 
     public String getMessageId() {
