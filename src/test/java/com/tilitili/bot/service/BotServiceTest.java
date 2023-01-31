@@ -23,6 +23,6 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.testHandleMessage(BotEnum.CIRNO_GUILD, "{\"post_type\":\"notice\",\"notice_type\":\"guild_channel_recall\",\"time\":1675139391,\"self_id\":536657454,\"guild_id\":\"49134681639135681\",\"channel_id\":\"43227251\",\"operator_id\":\"144115218679720063\",\"message_id\":\"BACuj7uNQKnBAAAAAAKTmHMAAAAAAAAQBA==\",\"self_tiny_id\":\"144115218680351893\",\"user_id\":144115218679720063}");
+		tester.testHandleMessage(BotEnum.MINECRAFT, "{\"player\":{\"uuid\":\"34e35969-8c80-37c9-9257-57c7672ccfbe\",\"displayName\":\"§3§k1§5帅帅§3§k1§r\",\"port\":4498,\"exhaustion\":0.02523899,\"exp\":0.42857128,\"whitelisted\":false,\"banned\":false,\"op\":true,\"balance\":0.0},\"playerName\":\"§3§k1§5帅帅§3§k1§r\",\"message\":\"kkt TachibanaHinan0\",\"eventType\":\"PlayerChat\"}");
 	}
 }
