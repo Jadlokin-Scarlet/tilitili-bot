@@ -116,13 +116,13 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 			
 			Integer favorite = botFavorite.getFavorite();
 			FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
-			int favoriteLimit = favoriteEnum.getFavoriteByLevel();
+			int favoriteLimit = favoriteEnum.getFavorite();
 			if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
 				FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
 				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
 			}
 			
-			Integer addFavorite = botFavoriteManager.safeAddFavorite(userId, favoriteActionAdd.getFavorite());
+			Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 			if (addFavorite != 0) {
 				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
@@ -174,11 +174,11 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 			// 每个人每天每个动作只能加一次好感度
 			String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, action);
 			if (!redisCache.exists(redisKey)) {
-				Integer addFavorite = botFavoriteManager.safeAddFavorite(userId, favoriteActionAdd.getFavorite());
+				Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 				if (addFavorite != 0) {
 					respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
-					redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 				}
+				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 			}
 		}
 
@@ -195,7 +195,7 @@ public class FavoriteHandle extends BaseMessageHandleAdapt {
 		Asserts.notBlank(name, "格式错啦（名）");
 		Asserts.checkNull(botFavoriteMapper.getBotFavoriteByName(name), "%s已经被认领啦", name);
 
-		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(FavoriteEnum.strange.getFavoriteByLevel()).setLevel(FavoriteEnum.strange.getLevel()));
+		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(FavoriteEnum.strange.getFavorite()).setLevel(FavoriteEnum.strange.getLevel()));
 		Asserts.notEquals(addCnt, 0, "认领失败惹");
 		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。", name));
 	}
