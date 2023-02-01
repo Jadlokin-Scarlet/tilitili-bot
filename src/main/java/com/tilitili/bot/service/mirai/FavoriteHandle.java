@@ -125,7 +125,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			
 			Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 			if (addFavorite != 0) {
-				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
+				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 			}
 		}
@@ -177,7 +177,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			if (!redisCache.exists(redisKey)) {
 				Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 				if (addFavorite != 0) {
-					respChainList.add(BotMessageChain.ofPlain(String.format("(好感度+%d)", addFavorite)));
+					respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 				}
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 			}
