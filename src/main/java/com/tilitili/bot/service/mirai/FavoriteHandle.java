@@ -114,13 +114,15 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		if (!redisCache.exists(redisKey)) {
 			Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(-1));
 			Asserts.checkEquals(subNum, -1, "啊嘞，没有道具惹。");
-			
-			Integer favorite = botFavorite.getFavorite();
-			FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
-			int favoriteLimit = favoriteEnum.getFavorite();
-			if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
-				FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
-				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
+
+			if (botFavorite.getLevel() == FavoriteEnum.strange.getLevel()) {
+//				Integer favorite = botFavorite.getFavorite();
+//				FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
+//				int favoriteLimit = favoriteEnum.getFavorite();
+//				if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
+//					FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
+//					botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
+//				}
 			}
 			
 			Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
