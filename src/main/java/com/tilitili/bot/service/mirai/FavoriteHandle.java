@@ -196,7 +196,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Asserts.notBlank(name, "格式错啦（名）");
 		Asserts.checkNull(botFavoriteMapper.getBotFavoriteByName(name), "%s已经被认领啦", name);
 
-		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(FavoriteEnum.strange.getFavorite()).setLevel(FavoriteEnum.strange.getLevel()));
+		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(0).setLevel(FavoriteEnum.strange.getLevel()));
 		Asserts.notEquals(addCnt, 0, "认领失败惹");
 		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。", name));
 	}
