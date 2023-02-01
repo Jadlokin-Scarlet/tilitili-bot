@@ -19,7 +19,7 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.testHandleMessage(BotEnum.MINECRAFT,
-				"{\"player\":{\"uuid\":\"544dab96-2300-3b74-b257-96726807931c\",\"displayName\":\"§9粟什辻§r\",\"port\":5745,\"exhaustion\":1.1834042,\"exp\":0.61571187,\"whitelisted\":false,\"banned\":false,\"op\":false,\"balance\":0.0},\"quitMessage\":\"VYIX_SSS left the game\",\"eventType\":\"PlayerQuit\"}");
+		tester.testHandleMessage(BotEnum.CIRNO_QQ,
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":143633,\"time\":1675245650},{\"type\":\"Plain\",\"text\":\"好感度查询\"}],\"sender\":{\"id\":782036280,\"memberName\":\"Somnus\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1583808958,\"lastSpeakTimestamp\":1675245650,\"muteTimeRemaining\":0,\"group\":{\"id\":902813629,\"name\":\"\uD83E\uDD3A\",\"permission\":\"MEMBER\"}}}}");
 	}
 }

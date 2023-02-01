@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FavoriteConstant;
 import com.tilitili.common.emnus.FavoriteEnum;
@@ -27,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class FavoriteHandle extends BaseMessageHandleAdapt {
+public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
 	private final BotFavoriteMapper botFavoriteMapper;
