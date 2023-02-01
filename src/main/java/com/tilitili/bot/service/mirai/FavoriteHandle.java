@@ -1,7 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FavoriteConstant;
@@ -95,7 +94,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		List<BotMessageChain> respChainList = new ArrayList<>();
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setStatus(0).setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level));
 		if (favoriteTalkList.isEmpty()) {
 			return null;
 		}
@@ -157,7 +156,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setStatus(0).setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level));
 		if (favoriteTalkList.isEmpty()) {
 			return null;
 		}
