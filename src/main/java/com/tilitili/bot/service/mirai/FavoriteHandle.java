@@ -70,7 +70,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private BotMessage handleQuery(BotMessageAction messageAction) {
 		Long userId = messageAction.getBotUser().getId();
 		BotFavorite botFavorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
-		Asserts.notNull(botFavorite, "先认领喵");
+		Asserts.notNull(botFavorite, "先认领老婆喵");
 		int favorite = botFavorite.getFavorite();
 		String level = botFavorite.getLevel();
 		int favoriteLimit = FavoriteEnum.getFavoriteLimit(level);
