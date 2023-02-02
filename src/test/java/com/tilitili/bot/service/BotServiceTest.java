@@ -20,6 +20,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		tester.testHandleMessage(BotEnum.CIRNO_QQ,
-				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":143633,\"time\":1675245650},{\"type\":\"Plain\",\"text\":\"好感度查询\"}],\"sender\":{\"id\":782036280,\"memberName\":\"Somnus\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1583808958,\"lastSpeakTimestamp\":1675245650,\"muteTimeRemaining\":0,\"group\":{\"id\":902813629,\"name\":\"\uD83E\uDD3A\",\"permission\":\"MEMBER\"}}}}");
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":143838,\"time\":1675318243},{\"type\":\"Plain\",\"text\":\"赠送 冰淇淋\"}],\"sender\":{\"id\":782036280,\"memberName\":\"Somnus\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1583808958,\"lastSpeakTimestamp\":1675318243,\"muteTimeRemaining\":0,\"group\":{\"id\":902813629,\"name\":\"\uD83E\uDD3A\",\"permission\":\"MEMBER\"}}}}");
 	}
 }
