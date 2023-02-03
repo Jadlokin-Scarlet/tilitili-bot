@@ -19,7 +19,7 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-//		tester.testHandleMessage(BotEnum.CIRNO_QQ,
-//				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":143838,\"time\":1675318243},{\"type\":\"Plain\",\"text\":\"赠送 冰淇淋\"}],\"sender\":{\"id\":782036280,\"memberName\":\"Somnus\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1583808958,\"lastSpeakTimestamp\":1675318243,\"muteTimeRemaining\":0,\"group\":{\"id\":902813629,\"name\":\"\uD83E\uDD3A\",\"permission\":\"MEMBER\"}}}}");
+		tester.testHandleMessage(BotEnum.MINECRAFT,
+				"{\"player\":{\"uuid\":\"85bee4ae-0d36-3c26-ba60-651531963f8a\",\"displayName\":\"§b琪露诺§r\",\"port\":1977,\"exhaustion\":0.0,\"exp\":0.0,\"whitelisted\":false,\"banned\":false,\"op\":false,\"balance\":0.0},\"playerName\":\"§b琪露诺§r\",\"message\":\"你好 @ cirno\",\"eventType\":\"PlayerChat\"}");
 	}
 }
