@@ -162,6 +162,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 
 		List<BotMessageChain> respChainList = new ArrayList<>();
+		respChainList.add(BotMessageChain.ofSpeaker(name));
 
 		BotFavoriteTalk favoriteTalk = favoriteTalkList.get(random.nextInt(favoriteTalkList.size()));
 		String resp = favoriteTalk.getResp();
