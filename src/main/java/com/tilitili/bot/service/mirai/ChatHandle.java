@@ -79,6 +79,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		return BotMessage.simpleTextMessage("√");
 	}
 
+	private final List<String> randomSendTypeList = Arrays.asList(SendTypeEnum.GROUP_MESSAGE_STR, SendTypeEnum.KOOK_MESSAGE_STR, SendTypeEnum.MINECRAFT_MESSAGE_STR);
 	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String redisKey = nameKey + messageAction.getBotSender().getId();
@@ -100,7 +101,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
 		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = !atList.isEmpty();
-		boolean isRandomReply = random == 0 && messageAction.getBotSender().getSendType().equals(SendTypeEnum.GROUP_MESSAGE_STR);
+		boolean isRandomReply = random == 0 && randomSendTypeList.contains(messageAction.getBotSender().getSendType());
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
 		}
