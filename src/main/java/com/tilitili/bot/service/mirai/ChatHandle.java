@@ -28,6 +28,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -118,7 +119,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				}
 				for (int index = 0; index < 3; index++) {
 					reply = reqReply(text);
-					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女")) break;
+					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女") && !reply.contains("再说一遍")) break;
+					TimeUtil.millisecondsSleep(100);
 				}
 				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
 				if (isRandomReply && (reply.contains("能再说一遍么") || reply.contains("不是姑姑我不明白，这世界变化快") || reply.contains("再说一遍可以么"))) {
