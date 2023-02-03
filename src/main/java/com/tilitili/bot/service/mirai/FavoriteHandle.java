@@ -55,9 +55,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 
 		// 其他平台必须绑定主账号
-		if (BotUserConstant.USER_TYPE_QQ != botUser.getType()) {
-			return null;
-		}
+//		if (BotUserConstant.USER_TYPE_QQ != botUser.getType()) {
+//			return null;
+//		}
 
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "认领老婆": return handleStart(messageAction);
@@ -200,7 +200,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(0).setLevel(FavoriteEnum.strange.getLevel()));
 		Asserts.notEquals(addCnt, 0, "认领失败惹");
-		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。", name));
+		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。(tips：有共同群聊最好先申请合体再领。", name));
 	}
 
 //	private BotMessage handleStart(BotMessageAction messageAction) {
