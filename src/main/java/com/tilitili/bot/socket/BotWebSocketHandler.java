@@ -1,5 +1,6 @@
 package com.tilitili.bot.socket;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -31,7 +32,7 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        BotMessage botMessage = BotMessage.simpleListMessage(Arrays.asList(
+        BotMessage botMessage = BotMessage.simpleListMessage(Lists.newArrayList(
                 BotMessageChain.ofPlain("连接已断开，请检查。")
         ));
         if (BotEnum.TYPE_GOCQ.equals(bot.getType())) {

@@ -24,6 +24,6 @@ public class TextImageHandle extends BaseMessageHandleAdapt {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String text = messageAction.getBody();
 		MiraiUploadImageResult result = templateImageManager.getLongStringImage(text);
-		return BotMessage.simpleListMessage(Collections.singletonList(BotMessageChain.ofMiraiUploadImageResult(result)));
+		return BotMessage.simpleMiraiUploadImageResultMessage(result);
 	}
 }

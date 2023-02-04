@@ -80,6 +80,9 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     @Bean
     public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
+        if (BotEnum.getBotById(6L) == null) {
+            return null;
+        }
         return new MinecraftReceive(jmsTemplate, taskMapper, environment, minecraftManager, botService, botSenderMapper);
     }
 

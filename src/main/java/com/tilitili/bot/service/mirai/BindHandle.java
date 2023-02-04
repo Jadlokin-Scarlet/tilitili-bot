@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotTaskConstant;
@@ -121,7 +122,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		redisCache.setValue(targetKey, sourceKey, 60 * 60);
 
 		String sourceName = String.join("-", forwardConfig.getSourceName(), botSender.getName());
-		return BotMessage.simpleListMessage(Arrays.asList(
+		return BotMessage.simpleListMessage(Lists.newArrayList(
 				BotMessageChain.ofAt(targetBotUser.getId()),
 				BotMessageChain.ofPlain(String.format("来自%s的%s申请和你合体。(合体！/但是我拒绝)",sourceName, botUser.getName()))
 		)).setBotSender(targetSender);

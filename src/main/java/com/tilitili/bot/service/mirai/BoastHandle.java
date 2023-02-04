@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.alibaba.fastjson.JSONPath;
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotBoast;
@@ -60,7 +61,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		if (isOther) {
 			Long firstAt = atList.stream().findFirst().orElse(null);
 			Asserts.notNull(firstAt, "谁？");
-			return BotMessage.simpleListMessage(Arrays.asList(
+			return BotMessage.simpleListMessage(Lists.newArrayList(
 					BotMessageChain.ofAt(firstAt),
 					BotMessageChain.ofPlain(" "),
 					BotMessageChain.ofPlain(text)
