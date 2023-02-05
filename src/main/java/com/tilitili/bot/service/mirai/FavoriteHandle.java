@@ -86,12 +86,14 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		if (botFavorite == null) {
 			return null;
 		}
+		String name = botFavorite.getName();
 		String level = botFavorite.getLevel();
 
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥。");
 
 		List<BotMessageChain> respChainList = new ArrayList<>();
+		respChainList.add(BotMessageChain.ofSpeaker(name));
 
 		// 获取对话
 		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setStatus(0).setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level));
@@ -106,13 +108,14 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			return null;
 		}
 
+		Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(-1));
+		Asserts.checkEquals(subNum, -1, "啊嘞，没有道具惹。");
+
 		// 凌晨4点刷新
 		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 		// 每个人每天每个道具只能加一次好感度
 		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
 		if (!redisCache.exists(redisKey)) {
-			Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(-1));
-			Asserts.checkEquals(subNum, -1, "啊嘞，没有道具惹。");
 
 			if (botFavorite.getLevel() == FavoriteEnum.strange.getLevel()) {
 //				Integer favorite = botFavorite.getFavorite();
