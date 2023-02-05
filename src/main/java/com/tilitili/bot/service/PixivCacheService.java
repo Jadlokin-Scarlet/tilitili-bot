@@ -265,41 +265,41 @@ public class PixivCacheService {
 
 	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToQQ pageCount={} url={}", pageCount, url);
-		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
-		if (pageCount > 1) {
-			int page = Integer.parseInt(list.get(2)) + 1;
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
-		} else {
-			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
-		}
-//
-//		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
-//		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
-//		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
-//		Path path = null;
-//		try {
-//			path = Files.createTempFile("pixiv", fileType);
-//			log.debug("缓存文件："+path.toString());
-//			File file = path.toFile();
-//			pixivManager.downloadPixivImage(url, file);
-//			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
-//			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-//			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
-//			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
-//			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
-//			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
-//			return uploadImageResult;
-//		} catch (IOException e) {
-//			throw new AssertException("啊嘞，不对劲", e);
-//		} finally {
-//			if (path != null) {
-//				try {
-//					Files.deleteIfExists(path);
-//				} catch (IOException e) {
-//					log.error("清理缓存失败", e);
-//				}
-//			}
+//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+//		if (pageCount > 1) {
+//			int page = Integer.parseInt(list.get(2)) + 1;
+//			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
+//		} else {
+//			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
 //		}
+//
+		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
+		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
+		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
+		Path path = null;
+		try {
+			path = Files.createTempFile("pixiv", fileType);
+			log.debug("缓存文件："+path.toString());
+			File file = path.toFile();
+			pixivManager.downloadPixivImage(url, file);
+			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
+			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
+			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
+			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
+			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
+			return uploadImageResult;
+		} catch (IOException e) {
+			throw new AssertException("啊嘞，不对劲", e);
+		} finally {
+			if (path != null) {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException e) {
+					log.error("清理缓存失败", e);
+				}
+			}
+		}
 	}
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
