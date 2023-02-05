@@ -195,10 +195,12 @@ public class PixivCacheService {
 	}
 
 	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Integer pageCount, Boolean canSS) {
+		urlList = urlList.subList(0, Math.min(5, urlList.size()));
+
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-//		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
-//		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
-		messageChainList.add(BotMessageChain.ofPlain("页数: "+pageCount));
+		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
+		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
+		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl == null || sl < 3) {
 			for (String url : urlList) {
