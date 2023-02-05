@@ -92,9 +92,9 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 		log.debug("PixivRecommendHandle get url");
 		List<String> urlList = pixivManager.getPageListProxy(recommendPid);
 
-		if (urlList.size() > 1) {
-			urlList = urlList.subList(0, 1);
-		}
+//		if (urlList.size() > 1) {
+//			urlList = urlList.subList(0, 1);
+//		}
 
 		log.debug("PixivRecommendHandle get make messageChainList");
 		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, urlList, pageCount, canSS);

@@ -58,12 +58,12 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		String userName = info.getUserName();
 		List<String> urlList = Collections.singletonList(info.getUrls().getOriginal());
 
-//		if (pageCount != null && pageCount > 1) {
-//			urlList = pixivManager.getPageListProxy(pid);
-//			if (urlList.size() > 6) {
-//				urlList = urlList.subList(0, 5);
-//			}
-//		}
+		if (pageCount != null && pageCount > 1) {
+			urlList = pixivManager.getPageListProxy(pid);
+			if (urlList.size() > 6) {
+				urlList = urlList.subList(0, 5);
+			}
+		}
 		List<BotMessageChain> messageChainList = pixivService.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}

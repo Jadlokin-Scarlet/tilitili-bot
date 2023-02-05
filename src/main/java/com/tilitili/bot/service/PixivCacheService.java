@@ -20,6 +20,7 @@ import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -31,7 +32,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,9 +108,9 @@ public class PixivCacheService {
 				}
 
 				List<String> urlList = pixivManager.getPageListProxy(pid);
-				if (urlList.size() > 1) {
-					urlList = urlList.subList(0, 1);
-				}
+//				if (urlList.size() > 1) {
+//					urlList = urlList.subList(0, 1);
+//				}
 
 				List<BotMessageChain> messageChainList;
 				try {
@@ -297,37 +302,37 @@ public class PixivCacheService {
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
-		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
-		if (pageCount > 1) {
-			int page = Integer.parseInt(list.get(2)) + 1;
-			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
-		} else {
-			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
-		}
-
-//		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
-//		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
-//		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".") + 1): null;
-//		Path path = null;
-//		try {
-//			path = Files.createTempFile("pixiv", "." + fileType);
-//			File file = path.toFile();
-//			pixivManager.downloadPixivImage(url, file);
-//			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
-//			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-//			String ossUrl = OSSUtil.uploadOSSByImageWithType(file, fileType);
-//			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
-//			return ossUrl;
-//		} catch (IOException e) {
-//			throw new AssertException("啊嘞，不对劲", e);
-//		} finally {
-//			if (path != null) {
-//				try {
-//					Files.deleteIfExists(path);
-//				} catch (IOException e) {
-//					log.error("清理缓存失败", e);
-//				}
-//			}
+//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+//		if (pageCount > 1) {
+//			int page = Integer.parseInt(list.get(2)) + 1;
+//			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
+//		} else {
+//			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 //		}
+
+		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
+		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
+		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".") + 1): null;
+		Path path = null;
+		try {
+			path = Files.createTempFile("pixiv", "." + fileType);
+			File file = path.toFile();
+			pixivManager.downloadPixivImage(url, file);
+			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
+			String ossUrl = OSSUtil.uploadOSSByImageWithType(file, fileType);
+			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
+			return ossUrl;
+		} catch (IOException e) {
+			throw new AssertException("啊嘞，不对劲", e);
+		} finally {
+			if (path != null) {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException e) {
+					log.error("清理缓存失败", e);
+				}
+			}
+		}
 	}
 }
