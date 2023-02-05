@@ -22,6 +22,6 @@ public class BaiduHandle extends BaseMessageHandleAdapt {
 			url = "https://www.baidu.com/s?ie=UTF-8&wd=" + value;
 		}
 
-		return BotMessage.simpleTextMessage(url);
+		return BotMessage.simpleLinkMessage(url);
 	}
 }

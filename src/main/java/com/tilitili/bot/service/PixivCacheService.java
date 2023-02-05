@@ -138,7 +138,7 @@ public class PixivCacheService {
 //			String ossUrl = OSSUtil.getCacheSOSSOrUploadByUrl(imageUrl);
 //			if (isSese) {
 			String ossUrl = this.downloadPixivImageAndUploadToOSS(imageUrl, 1);
-			messageChainList.add(BotMessageChain.ofPlain(ossUrl != null ? ossUrl : imageUrl));
+			messageChainList.add(BotMessageChain.ofLink(ossUrl != null ? ossUrl : imageUrl));
 //			} else {
 //				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
 //				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
@@ -210,7 +210,7 @@ public class PixivCacheService {
 			for (String url : urlList) {
 				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: url));
+				messageChainList.add(BotMessageChain.ofLink(ossUrl != null? ossUrl: url));
 			}
 		}
 		return messageChainList;
