@@ -190,8 +190,8 @@ public class PixivCacheService {
 		urlList = urlList.subList(0, Math.min(5, urlList.size()));
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
-		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
-		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
+//		messageChainList.add(BotMessageChain.ofPlain("标题: "+ title));
+//		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
 		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
