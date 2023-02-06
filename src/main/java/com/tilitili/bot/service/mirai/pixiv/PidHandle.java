@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -56,15 +55,7 @@ public class PidHandle extends ExceptionRespMessageHandle {
 		Integer sl = info.getSl();
 		Integer pageCount = info.getPageCount();
 		String userName = info.getUserName();
-		List<String> urlList = Collections.singletonList(info.getUrls().getOriginal());
-
-		if (pageCount != null && pageCount > 1) {
-			urlList = pixivManager.getPageListProxy(pid);
-			if (urlList.size() > 6) {
-				urlList = urlList.subList(0, 5);
-			}
-		}
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(title, userName, pid, sl, pageCount, canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}
 }

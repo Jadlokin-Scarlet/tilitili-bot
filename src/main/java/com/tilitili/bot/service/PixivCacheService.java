@@ -38,7 +38,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -107,14 +106,9 @@ public class PixivCacheService {
 					continue;
 				}
 
-				List<String> urlList = pixivManager.getPageListProxy(pid);
-//				if (urlList.size() > 1) {
-//					urlList = urlList.subList(0, 1);
-//				}
-
 				List<BotMessageChain> messageChainList;
 				try {
-					messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
+					messageChainList = this.getImageChainList(title, userName, pid, sl, pageCount, canSS);
 				} catch (AssertSeseException e) {
 					log.warn(e.getMessage(), e);
 					continue;
@@ -172,17 +166,9 @@ public class PixivCacheService {
 			String title = info.getTitle();
 			Integer sl = info.getSl();
 			Integer pageCount = info.getPageCount();
-			List<String> urlList = Collections.singletonList(info.getUrls().getOriginal());
-
-//			if (pageCount != null && pageCount > 1) {
-//				urlList = pixivManager.getPageListProxy(pid);
-//				if (urlList.size() > 1) {
-//					urlList = urlList.subList(0, 1);
-//				}
-//			}
 			List<BotMessageChain> messageChainList;
 			try {
-				messageChainList = this.getImageChainList(title, userName, pid, sl, urlList, pageCount, canSS);
+				messageChainList = this.getImageChainList(title, userName, pid, sl, pageCount, canSS);
 			} catch (AssertSeseException e) {
 				log.warn(e.getMessage(), e);
 				continue;
@@ -194,7 +180,11 @@ public class PixivCacheService {
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}
 
-	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, List<String> urlList, Integer pageCount, Boolean canSS) {
+	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, Integer pageCount, Boolean canSS) {
+		if (sl >= 5 && !canSS) {
+			throw new AssertSeseException();
+		}
+		List<String> urlList = pixivManager.getPageListProxy(pid);
 		urlList = urlList.subList(0, Math.min(5, urlList.size()));
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
@@ -202,7 +192,7 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\n作者: "+ userName));
 		messageChainList.add(BotMessageChain.ofPlain("\n页数: "+pageCount));
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
-		if (sl == null || sl < 3) {
+		if (sl < 5) {
 			for (String url : urlList) {
 				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
@@ -210,10 +200,6 @@ public class PixivCacheService {
 			}
 		} else {
 //			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
-			if (sl > 3 && !canSS) {
-				throw new AssertSeseException();
-//				Asserts.isTrue(canSS, "不准色色");
-			}
 			for (String url : urlList) {
 				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
