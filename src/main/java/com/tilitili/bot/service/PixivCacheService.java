@@ -50,15 +50,17 @@ public class PixivCacheService {
 	private final LoliconManager loliconManager;
 	private final PixivCacheManager pixivManager;
 	private final BotManager botManager;
+	private final ShortUrlService shortUrlService;
 	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
 
 	@Autowired
-	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, BotManager botManager) {
+	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, BotManager botManager, ShortUrlService shortUrlService) {
 		this.botPixivSendRecordMapper = botPixivSendRecordMapper;
 		this.loliconManager = loliconManager;
 		this.pixivManager = pixivManager;
 		this.botManager = botManager;
+		this.shortUrlService = shortUrlService;
 	}
 
 	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException {
@@ -310,7 +312,9 @@ public class PixivCacheService {
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
 			String ossUrl = OSSUtil.uploadOSSByImageWithType(file, fileType);
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
-			return ossUrl;
+			String shortUrl = shortUrlService.getShortUrl(ossUrl);
+			Asserts.notNull(shortUrl, "啊嘞，上传失败了。");
+			return shortUrl;
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
 		} finally {
