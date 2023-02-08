@@ -77,18 +77,10 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("投票成功，但是还没有人票数达标。");
 		}
 
-//		List<Long> oldSortedUserId = Gsons.fromJson(session.get("sortedStatisticsList"), new TypeToken<List<Long>>(){}.getType());
-//		session.put("sortedStatisticsList", Gsons.toJson(sortedStatisticsList));
-
-//		boolean isEquals = Arrays.equals(sortedStatisticsList.toArray(), oldSortedUserId.toArray());
-//		if (isEquals) {
-			return BotMessage.simpleTextMessage("投票成功，下一届管理员为：" + sortedStatisticsList.stream().map(e -> {
-				BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(e.getKey());
-				return String.format("%s(%s票)", adminUser.getName(), e.getValue());
-			}).collect(Collectors.joining(",")));
-//		}
-
-
+		return BotMessage.simpleTextMessage("投票成功，下一届管理员为：" + sortedStatisticsList.stream().map(e -> {
+			BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(e.getKey());
+			return String.format("%s(%s票)", adminUser.getName(), e.getValue());
+		}).collect(Collectors.joining(",")));
 	}
 
 	private BotMessage handleAdmin(BotMessageAction messageAction) {
