@@ -16,7 +16,7 @@ import javax.annotation.Resource;
 @SpringBootTest(classes = StartApplication.class)
 public class PixivServiceTest {
 	@Resource
-	PixivService tester;
+	PixivCacheService tester;
 	@Resource
 	private PixivImageMapper pixivImageMapper;
 	@Resource
@@ -27,5 +27,9 @@ public class PixivServiceTest {
 //		PixivImage pixivImage = pixivImageMapper.getPixivImageById(89020L);
 //		BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.MASTER_SENDER_ID);
 //		tester.sendPixivImage(new BotMessage().setSender(botSender).setMessageId("7410"), pixivImage, botSender);
+	}
+	@Test
+	public void downloadPixivImageAndUploadToQQ() {
+		System.out.println(tester.downloadPixivImageAndUploadToOSS("https://i.pximg.net/img-original/img/2021/02/14/16/10/55/87766142_p1.png", 1));
 	}
 }
