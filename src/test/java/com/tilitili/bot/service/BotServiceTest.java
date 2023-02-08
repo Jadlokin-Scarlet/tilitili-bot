@@ -19,7 +19,7 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-//		tester.testHandleMessage(BotEnum.MINECRAFT,
-//				"{\"player\":{\"uuid\":\"79e3f853-d7bb-306c-8090-fa93a18445e3\",\"displayName\":\"§B猫猫§r\",\"port\":2721,\"exhaustion\":3.6167374,\"exp\":0.20207244,\"whitelisted\":false,\"banned\":false,\"op\":false,\"balance\":0.0},\"playerName\":\"§B猫猫§r\",\"message\":\"认领老婆 小米\",\"eventType\":\"PlayerChat\"}");
+		tester.testHandleMessage(BotEnum.CIRNO_QQ,
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":13989,\"time\":1675861800},{\"type\":\"Plain\",\"text\":\"测试\"}],\"sender\":{\"id\":545459363,\"memberName\":\"Jadlokin_Scarlet\",\"specialTitle\":\"\",\"permission\":\"OWNER\",\"joinTimestamp\":1645168075,\"lastSpeakTimestamp\":1675861800,\"muteTimeRemaining\":0,\"group\":{\"id\":698034152,\"name\":\"My Homo告警群\",\"permission\":\"MEMBER\"}}}}");
 	}
 }
