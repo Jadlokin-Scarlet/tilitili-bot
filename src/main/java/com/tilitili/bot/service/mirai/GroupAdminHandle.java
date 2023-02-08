@@ -42,8 +42,8 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
 			case "投票管理员": return handleStatistics(messageAction);
-			case "取消管理员": return handleDeleteAdmin(messageAction);
 			case "管理员": return handleAdmin(messageAction);
+			case "取消管理员": return handleDeleteAdmin(messageAction);
 		}
 		return null;
 	}
