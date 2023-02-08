@@ -30,6 +30,6 @@ public class PixivServiceTest {
 	}
 	@Test
 	public void downloadPixivImageAndUploadToQQ() {
-		System.out.println(tester.downloadPixivImageAndUploadToOSS("https://i.pximg.net/img-original/img/2021/02/14/16/10/55/87766142_p1.png", 1));
+//		System.out.println(tester.downloadPixivImageAndUploadToOSS("https://i.pximg.net/img-original/img/2021/02/14/16/10/55/87766142_p1.png", 1));
 	}
 }
