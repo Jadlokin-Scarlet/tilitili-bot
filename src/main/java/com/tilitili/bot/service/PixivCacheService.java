@@ -103,6 +103,11 @@ public class PixivCacheService {
 				String userName = data.getUserName();
 				Integer sl = data.getSl();
 				Integer pageCount = data.getPageCount();
+				Integer illustType = data.getIllustType();
+				// 只看插画
+				if (illustType > 0) {
+					continue;
+				}
 				// 看过了
 				if (recordPidList.contains(pid)) {
 					continue;
