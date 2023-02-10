@@ -193,7 +193,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
-		Long userId = messageAction.getBotUser().getId();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 		BotFavorite favorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
 		Asserts.checkNull(favorite, "不准花心喵");
 
@@ -203,7 +204,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		int addCnt = botFavoriteMapper.addBotFavoriteSelective(new BotFavorite().setUserId(userId).setName(name).setFavorite(0).setLevel(FavoriteEnum.strange.getLevel()));
 		Asserts.notEquals(addCnt, 0, "认领失败惹");
-		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。(tips：有共同群聊最好先申请合体再领。", name));
+
+		String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ? "": "(tips：有共同群聊最好先申请合体再领。";
+		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。%s", name, tips));
 	}
 
 //	private BotMessage handleStart(BotMessageAction messageAction) {
