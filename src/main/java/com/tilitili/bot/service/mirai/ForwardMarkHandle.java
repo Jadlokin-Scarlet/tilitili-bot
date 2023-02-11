@@ -7,6 +7,7 @@ import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
@@ -47,26 +48,21 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
 			long qq = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
+			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(botSender, text);
 
 			// 此功能只能QQ用
-			BotUserDTO botUser;
-			String senderName;
 			if (qq == 0) {
-				botUser = null;
-				senderName = "旁白";
+				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));
 			} else {
-				botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
 				Asserts.notNull(botUser, "第%s句找不到人", i);
 				if (BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId())) {
-					senderName = customBotName;
+					Asserts.notNull(customBotName, "啊嘞，不对劲");
+					nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(customBotName).setMessageChain(botMessageChains));
 				} else {
-					senderName = botUser.getName();
+					nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 				}
 			}
-			Asserts.notNull(senderName, "啊嘞，不对劲");
-			nodeList.add(new BotMessageNode().setUserId(botUser == null? null: botUser.getId()).setSenderName(senderName).setMessageChain(
-					functionTalkService.convertCqToMessageChain(botSender, text)
-			));
 		}
 		return nodeList;
 	}

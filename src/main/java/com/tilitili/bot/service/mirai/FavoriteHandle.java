@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
@@ -184,22 +185,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			return null;
 		}
 
-		List<BotMessageChain> respChainList = new ArrayList<>();
-
-		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
-		if (favoriteTalk.getComplexResp() != null) {
-			String resp = favoriteTalk.getComplexResp();
-			resp = this.replaceResp(messageAction, name, resp);
-			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
-			respChainList.add(BotMessageChain.ofForward(nodeList));
-		} else if (favoriteTalk.getResp() != null) {
-			String resp = favoriteTalk.getResp();
-			resp = this.replaceResp(messageAction, name, resp);
-			respChainList.add(BotMessageChain.ofSpeaker(name));
-			respChainList.add(BotMessageChain.ofPlain(resp));
-		}
-
 		// 获取好感度增量
+		Integer addFavorite = 0;
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(action, level);
 		if (favoriteActionAdd != null && FavoriteConstant.TYPE_ACTION.equals(favoriteActionAdd.getType())) {
 			// 凌晨4点刷新
@@ -207,11 +194,28 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			// 每个人每天每个动作只能加一次好感度
 			String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, action);
 			if (!redisCache.exists(redisKey)) {
-				Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
-				if (addFavorite != 0) {
-					respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
-				}
+				addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+			}
+		}
+
+		List<BotMessageChain> respChainList = new ArrayList<>();
+		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
+		if (favoriteTalk.getComplexResp() != null) {
+			String resp = favoriteTalk.getComplexResp();
+			resp = this.replaceResp(messageAction, name, resp);
+			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
+			if (addFavorite != 0) {
+				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(Lists.newArrayList(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)))));
+			}
+			respChainList.add(BotMessageChain.ofForward(nodeList));
+		} else if (favoriteTalk.getResp() != null) {
+			String resp = favoriteTalk.getResp();
+			resp = this.replaceResp(messageAction, name, resp);
+			respChainList.add(BotMessageChain.ofSpeaker(name));
+			respChainList.add(BotMessageChain.ofPlain(resp));
+			if (addFavorite != 0) {
+				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 			}
 		}
 
