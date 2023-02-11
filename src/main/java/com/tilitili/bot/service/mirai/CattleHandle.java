@@ -267,7 +267,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 
-		List<BotMessageChain> respList = pk(userId, otherUserId, isRandom);
+		List<BotMessageChain> respList = this.pk(userId, otherUserId, isRandom);
 
 		redisCache.setValue(redisKey, "yes", 60*60);
 		redisCache.setValue(otherRedisKey, "yes", 60*60);
@@ -278,11 +278,14 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
 		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
 
+		int sumLength = Math.abs(cattle.getLength()) + Math.abs(otherCattle.getLength());
+		int rateLimit = Math.max(0, 5 - sumLength / 10000);
 		int rate = random.nextInt(100);
 		int length = random.nextInt(1000);
 		List<BotMessageChain> respList = new ArrayList<>();
-		if (rate < 47) {
+		if (rate < 50 - rateLimit) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(-length).setTargetLengthDiff(length).setResult(2).setLength(length));
 			if (isRandom) {
@@ -290,7 +293,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			} else {
 				respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你输了%.2fcm，还剩%.2fcm。", length / 100.0, (cattle.getLength() - length) / 100.0)));
 			}
-		} else if (rate < 94) {
+		} else if (rate < 100 - rateLimit * 2) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, length, -length);
 			botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 			if (isRandom) {
