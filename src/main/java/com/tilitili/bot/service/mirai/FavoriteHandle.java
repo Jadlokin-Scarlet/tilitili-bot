@@ -229,7 +229,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		resp = resp.replaceAll("\\{name}", name);
 		resp = resp.replaceAll("\\{master}", botUser.getName());
-		resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
+		resp = resp.replaceAll("\\{botQQ}", "1");
 		resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
 		resp = resp.replaceAll("\\{narration}", "0");
 		return resp;

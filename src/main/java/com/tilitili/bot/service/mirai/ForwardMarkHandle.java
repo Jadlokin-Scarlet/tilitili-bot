@@ -53,15 +53,13 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			// 此功能只能QQ用
 			if (qq == 0) {
 				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));
+			} else if (qq == 1) {
+				Asserts.notNull(customBotName, "啊嘞，不对劲");
+				nodeList.add(new BotMessageNode().setSenderName(customBotName).setMessageChain(botMessageChains));
 			} else {
 				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
 				Asserts.notNull(botUser, "第%s句找不到人", i);
-				if (BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId())) {
-					Asserts.notNull(customBotName, "啊嘞，不对劲");
-					nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(customBotName).setMessageChain(botMessageChains));
-				} else {
-					nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
-				}
+				nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 			}
 		}
 		return nodeList;
