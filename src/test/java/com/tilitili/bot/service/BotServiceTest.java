@@ -20,6 +20,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		tester.testHandleMessage(BotEnum.CIRNO_QQ,
-				"{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":16951,\"time\":1676128339},{\"type\":\"Quote\",\"id\":-14369,\"senderId\":1701008067,\"targetId\":545459363,\"groupId\":0,\"origin\":[{\"type\":\"Plain\",\"text\":\"页数: 1\\npid: 58231596\\n[图片]\"}]},{\"type\":\"Plain\",\"text\":\"相似推荐\"}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}");
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":16981,\"time\":1676128689},{\"type\":\"Quote\",\"id\":-14369,\"senderId\":1701008067,\"targetId\":545459363,\"groupId\":0,\"origin\":[{\"type\":\"Plain\",\"text\":\"页数: 1\\npid: 58231596\\n[图片]\"}]},{\"type\":\"Plain\",\"text\":\"相似推荐\"}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}");
 	}
 }
