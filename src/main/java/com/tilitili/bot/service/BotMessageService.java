@@ -50,26 +50,4 @@ public class BotMessageService {
 		Asserts.notBlank(url, "格式错啦(图片)");
 		return url;
 	}
-
-//	public boolean isAdmin(BotMessageAction messageAction) {
-//		BotMessage botMessage = messageAction.getBotMessage();
-//		String sendType = botMessage.getSendType();
-//		Asserts.notNull(sendType, "找不到发送渠道");
-//		switch (sendType) {
-//			case SendTypeEnum.FRIEND_MESSAGE_STR: return true;
-//			case SendTypeEnum.GROUP_MESSAGE_STR: return isGroupAdmin(messageAction);
-//			case SendTypeEnum.GUILD_MESSAGE_STR: return isGuildAdmin(messageAction);
-//			default: return false;
-//		}
-//	}
-
-	private boolean isGuildAdmin(BotMessageAction messageAction) {
-		return false;
-	}
-
-	private boolean isGroupAdmin(BotMessageAction messageAction) {
-		BotMessage botMessage = messageAction.getBotMessage();
-//		botManager.getMemberProfile();
-		return false;
-	}
 }
