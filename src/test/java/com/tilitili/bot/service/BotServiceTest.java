@@ -20,6 +20,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		tester.testHandleMessage(BotEnum.CIRNO_QQ,
-				"{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":13989,\"time\":1675861800},{\"type\":\"Plain\",\"text\":\"测试\"}],\"sender\":{\"id\":545459363,\"memberName\":\"Jadlokin_Scarlet\",\"specialTitle\":\"\",\"permission\":\"OWNER\",\"joinTimestamp\":1645168075,\"lastSpeakTimestamp\":1675861800,\"muteTimeRemaining\":0,\"group\":{\"id\":698034152,\"name\":\"My Homo告警群\",\"permission\":\"MEMBER\"}}}}");
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":16453,\"time\":1676121346},{\"type\":\"Plain\",\"text\":\"相似推荐\"},{\"type\":\"Image\",\"imageId\":\"{91AAF214-E1A1-3700-BA19-D51A417B2A3F}.jpg\",\"url\":\"http://c2cpicdw.qpic.cn/offpic_new/0//545459363-789069041-91AAF214E1A13700BA19D51A417B2A3F/0?term=2\",\"path\":null,\"base64\":null,\"width\":1080,\"height\":1142,\"size\":155860,\"imageType\":\"JPG\",\"isEmoji\":false}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}");
 	}
 }

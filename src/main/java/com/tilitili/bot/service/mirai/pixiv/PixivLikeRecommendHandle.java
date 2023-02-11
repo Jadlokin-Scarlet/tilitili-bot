@@ -91,7 +91,7 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 		Integer pageCount = illust.getPageCount();
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, pageCount, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), recommendPid, sl, pageCount, canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}
 }
