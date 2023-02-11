@@ -51,7 +51,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			// 此功能只能QQ用
 			BotUserDTO botUser;
 			String senderName;
-			if (qq == -1) {
+			if (qq == 0) {
 				botUser = null;
 				senderName = "旁白";
 			} else {
