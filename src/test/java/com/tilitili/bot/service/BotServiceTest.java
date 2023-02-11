@@ -20,6 +20,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		tester.testHandleMessage(BotEnum.CIRNO_QQ,
-				"{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":16453,\"time\":1676121346},{\"type\":\"Plain\",\"text\":\"相似推荐\"},{\"type\":\"Image\",\"imageId\":\"{91AAF214-E1A1-3700-BA19-D51A417B2A3F}.jpg\",\"url\":\"http://c2cpicdw.qpic.cn/offpic_new/0//545459363-789069041-91AAF214E1A13700BA19D51A417B2A3F/0?term=2\",\"path\":null,\"base64\":null,\"width\":1080,\"height\":1142,\"size\":155860,\"imageType\":\"JPG\",\"isEmoji\":false}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}");
+				"{\"syncId\":\"-1\",\"data\":{\"type\":\"FriendMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":16951,\"time\":1676128339},{\"type\":\"Quote\",\"id\":-14369,\"senderId\":1701008067,\"targetId\":545459363,\"groupId\":0,\"origin\":[{\"type\":\"Plain\",\"text\":\"页数: 1\\npid: 58231596\\n[图片]\"}]},{\"type\":\"Plain\",\"text\":\"相似推荐\"}],\"sender\":{\"id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"remark\":\"Jadlokin_Scarlet\"}}}");
 	}
 }
