@@ -20,6 +20,7 @@ import com.tilitili.common.mapper.mysql.BotCattleRecordMapper;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Component
 public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
@@ -276,14 +278,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	private List<BotMessageChain> pk(Long userId, Long otherUserId, boolean isRandom) {
 		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
-		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
+//		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+		boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT);
 
-		int sumLength = Math.abs(cattle.getLength()) + Math.abs(otherCattle.getLength());
-		int rateLimit = Math.max(0, 5 - sumLength / 10000);
+		int hasItemFlag = hasItem? 1: -1;
+		int sumLength = cattle.getLength() + otherCattle.getLength();
+		int rateLimit = MathUtil.range(0, (5 - hasItemFlag * sumLength / 10000), 5);
 		int rate = random.nextInt(100);
 		int length = random.nextInt(1000);
+		log.info(String.format("%s(%s)和%s(%s)比划，hasItem=%s, rateLimit=%s, rate=%s", userId, cattle.getLength(), otherUserId, otherCattle.getLength(), hasItem, rateLimit, rate));
+
 		List<BotMessageChain> respList = new ArrayList<>();
 		if (rate < 50 - rateLimit) {
 			botCattleManager.safeCalculateCattle(userId, otherUserId, -length, length);
@@ -302,7 +308,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (cattle.getLength() + length) / 100.0)));
 			}
 		} else {
-			if (botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT)){
+			if (hasItem){
 				botCattleManager.safeCalculateCattle(userId, otherUserId, length, length);
 				botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(userId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(length).setResult(3).setLength(length));
 				if (isRandom) {
