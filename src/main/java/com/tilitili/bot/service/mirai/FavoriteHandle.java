@@ -84,7 +84,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleGift(BotMessageAction messageAction) {
-		Long userId = messageAction.getBotUser().getId();
+		BotSender botSender = messageAction.getBotSender();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 		String itemName = messageAction.getValue();
 
 		BotFavorite botFavorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
@@ -102,11 +104,21 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		// 获取对话
 		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level).setTextType(0).setStatus(0));
-		if (favoriteTalkList.isEmpty()) {
+		List<BotFavoriteTalk> filterFavoriteTalkList = favoriteTalkList.stream().filter(talk -> talk.getComplexResp() != null || talk.getResp() != null).collect(Collectors.toList());
+		if (filterFavoriteTalkList.isEmpty()) {
 			return null;
 		}
-		BotFavoriteTalk favoriteTalk = favoriteTalkList.get(ThreadLocalRandom.current().nextInt(favoriteTalkList.size()));
-		respChainList.add(BotMessageChain.ofPlain(favoriteTalk.getResp()));
+		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(ThreadLocalRandom.current().nextInt(filterFavoriteTalkList.size()));
+		if (favoriteTalk.getComplexResp() != null) {
+			String resp = favoriteTalk.getComplexResp();
+			resp = this.replaceResp(messageAction, name, resp);
+			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
+			respChainList.add(BotMessageChain.ofForward(nodeList));
+		} else if (favoriteTalk.getResp() != null) {
+			String resp = favoriteTalk.getResp();
+			resp = this.replaceResp(messageAction, name, resp);
+			respChainList.add(BotMessageChain.ofPlain(resp));
+		}
 
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(itemName, level);
 		if (favoriteActionAdd == null || !FavoriteConstant.TYPE_ITEM.equals(favoriteActionAdd.getType())) {
@@ -143,7 +155,6 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleAction(BotMessageAction messageAction) {
-		BotEnum bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		Long userId = botUser.getId();
@@ -179,20 +190,12 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
 		if (favoriteTalk.getComplexResp() != null) {
 			String resp = favoriteTalk.getComplexResp();
-			resp = resp.replaceAll("\\{name}", name);
-			resp = resp.replaceAll("\\{master}", botUser.getName());
-			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
-			resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
-			resp = resp.replaceAll("\\{narration}", "0");
+			resp = this.replaceResp(messageAction, name, resp);
 			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
 			respChainList.add(BotMessageChain.ofForward(nodeList));
 		} else if (favoriteTalk.getResp() != null) {
 			String resp = favoriteTalk.getResp();
-			resp = resp.replaceAll("\\{name}", name);
-			resp = resp.replaceAll("\\{master}", botUser.getName());
-			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
-			resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
-			resp = resp.replaceAll("\\{narration}", "0");
+			resp = this.replaceResp(messageAction, name, resp);
 			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
@@ -214,6 +217,18 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 
 		return BotMessage.simpleListMessage(respChainList);
+	}
+
+	private String replaceResp(BotMessageAction messageAction, String name, String resp) {
+		BotEnum bot = messageAction.getBot();
+		BotUserDTO botUser = messageAction.getBotUser();
+
+		resp = resp.replaceAll("\\{name}", name);
+		resp = resp.replaceAll("\\{master}", botUser.getName());
+		resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
+		resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
+		resp = resp.replaceAll("\\{narration}", "0");
+		return resp;
 	}
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
