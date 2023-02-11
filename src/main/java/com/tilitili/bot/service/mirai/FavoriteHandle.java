@@ -4,12 +4,14 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FavoriteConstant;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.FavoriteEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotFavoriteTalkQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.mapper.mysql.BotFavoriteActionAddMapper;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 public class FavoriteHandle extends ExceptionRespMessageHandle {
@@ -35,11 +38,12 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotFavoriteActionAddMapper botFavoriteActionAddMapper;
+	private final ForwardMarkHandle forwardMarkHandle;
 
 	private final Random random;
 
 	@Autowired
-	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper) {
+	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
 		this.botFavoriteMapper = botFavoriteMapper;
@@ -47,6 +51,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
+		this.forwardMarkHandle = forwardMarkHandle;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -138,7 +143,10 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleAction(BotMessageAction messageAction) {
-		Long userId = messageAction.getBotUser().getId();
+		BotEnum bot = messageAction.getBot();
+		BotUserDTO botUser = messageAction.getBotUser();
+		BotSender botSender = messageAction.getBotSender();
+		Long userId = botUser.getId();
 		String action = messageAction.getText();
 
 		// 触发对话的关键词不会太长
@@ -160,17 +168,31 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		// 获取对话
 		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level).setTextType(0).setStatus(0));
-		if (favoriteTalkList.isEmpty()) {
+		List<BotFavoriteTalk> filterFavoriteTalkList = favoriteTalkList.stream().filter(talk -> talk.getComplexResp() != null || talk.getResp() != null).collect(Collectors.toList());
+		if (filterFavoriteTalkList.isEmpty()) {
 			return null;
 		}
 
 		List<BotMessageChain> respChainList = new ArrayList<>();
 		respChainList.add(BotMessageChain.ofSpeaker(name));
 
-		BotFavoriteTalk favoriteTalk = favoriteTalkList.get(random.nextInt(favoriteTalkList.size()));
-		String resp = favoriteTalk.getResp();
-		resp = resp.replaceAll("\\{name}", name);
-		respChainList.add(BotMessageChain.ofPlain(resp));
+		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
+		if (favoriteTalk.getComplexResp() != null) {
+			String resp = favoriteTalk.getComplexResp();
+			resp = resp.replaceAll("\\{name}", name);
+			resp = resp.replaceAll("\\{owner}", botUser.getName());
+			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
+			resp = resp.replaceAll("\\{ownerQQ}", String.valueOf(botUser.getQq()));
+			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
+			respChainList.add(BotMessageChain.ofForward(nodeList));
+		} else if (favoriteTalk.getResp() != null) {
+			String resp = favoriteTalk.getResp();
+			resp = resp.replaceAll("\\{name}", name);
+			resp = resp.replaceAll("\\{owner}", botUser.getName());
+			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
+			resp = resp.replaceAll("\\{ownerQQ}", String.valueOf(botUser.getQq()));
+			respChainList.add(BotMessageChain.ofPlain(resp));
+		}
 
 		// 获取好感度增量
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(action, level);
