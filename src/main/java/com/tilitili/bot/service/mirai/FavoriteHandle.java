@@ -180,17 +180,17 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		if (favoriteTalk.getComplexResp() != null) {
 			String resp = favoriteTalk.getComplexResp();
 			resp = resp.replaceAll("\\{name}", name);
-			resp = resp.replaceAll("\\{owner}", botUser.getName());
+			resp = resp.replaceAll("\\{master}", botUser.getName());
 			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
-			resp = resp.replaceAll("\\{ownerQQ}", String.valueOf(botUser.getQq()));
+			resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
 			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
 			respChainList.add(BotMessageChain.ofForward(nodeList));
 		} else if (favoriteTalk.getResp() != null) {
 			String resp = favoriteTalk.getResp();
 			resp = resp.replaceAll("\\{name}", name);
-			resp = resp.replaceAll("\\{owner}", botUser.getName());
+			resp = resp.replaceAll("\\{master}", botUser.getName());
 			resp = resp.replaceAll("\\{botQQ}", String.valueOf(bot.getQq()));
-			resp = resp.replaceAll("\\{ownerQQ}", String.valueOf(botUser.getQq()));
+			resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
 			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
