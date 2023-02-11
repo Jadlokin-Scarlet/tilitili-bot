@@ -45,15 +45,26 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			String row = rowList[i];
 			List<String> cellList = StringUtils.extractList("(\\d+)[：:](.+)", row);
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
-			Long qq = Long.parseLong(cellList.get(0));
+			long qq = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
 
 			// 此功能只能QQ用
-			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
-			Asserts.notNull(botUser, "第%s句找不到人", i);
-
-			String senderName = BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId()) && customBotName != null? customBotName: botUser.getName();
-			nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(senderName).setMessageChain(
+			BotUserDTO botUser;
+			String senderName;
+			if (qq == -1) {
+				botUser = null;
+				senderName = "旁白";
+			} else {
+				botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+				Asserts.notNull(botUser, "第%s句找不到人", i);
+				if (BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId())) {
+					senderName = customBotName;
+				} else {
+					senderName = botUser.getName();
+				}
+			}
+			Asserts.notNull(senderName, "啊嘞，不对劲");
+			nodeList.add(new BotMessageNode().setUserId(botUser == null? null: botUser.getId()).setSenderName(senderName).setMessageChain(
 					functionTalkService.convertCqToMessageChain(botSender, text)
 			));
 		}
