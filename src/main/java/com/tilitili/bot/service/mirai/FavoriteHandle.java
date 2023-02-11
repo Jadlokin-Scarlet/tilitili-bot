@@ -96,7 +96,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		respChainList.add(BotMessageChain.ofSpeaker(name));
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setStatus(0).setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level).setTextType(0).setStatus(0));
 		if (favoriteTalkList.isEmpty()) {
 			return null;
 		}
@@ -159,7 +159,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setStatus(0).setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level).setTextType(0).setStatus(0));
 		if (favoriteTalkList.isEmpty()) {
 			return null;
 		}
