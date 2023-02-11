@@ -100,7 +100,6 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Asserts.notNull(botItem, "那是啥。");
 
 		List<BotMessageChain> respChainList = new ArrayList<>();
-		respChainList.add(BotMessageChain.ofSpeaker(name));
 
 		// 获取对话
 		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level).setTextType(0).setStatus(0));
@@ -117,6 +116,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		} else if (favoriteTalk.getResp() != null) {
 			String resp = favoriteTalk.getResp();
 			resp = this.replaceResp(messageAction, name, resp);
+			respChainList.add(BotMessageChain.ofSpeaker(name));
 			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
@@ -185,7 +185,6 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 
 		List<BotMessageChain> respChainList = new ArrayList<>();
-		respChainList.add(BotMessageChain.ofSpeaker(name));
 
 		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
 		if (favoriteTalk.getComplexResp() != null) {
@@ -196,6 +195,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		} else if (favoriteTalk.getResp() != null) {
 			String resp = favoriteTalk.getResp();
 			resp = this.replaceResp(messageAction, name, resp);
+			respChainList.add(BotMessageChain.ofSpeaker(name));
 			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
