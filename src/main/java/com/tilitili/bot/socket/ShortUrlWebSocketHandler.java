@@ -53,7 +53,9 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
     }
 
     public String getShortUrl(String url) {
-        Asserts.isTrue(isSuccess, "等待启动");
+        if (!isSuccess) {
+            return url;
+        }
         this.send("42/socket.io.xmsl,[\"create_link\",{\"origin_url\":\""+url+"\"}]");
         // 异步等待结果
         long start = System.currentTimeMillis();
@@ -85,6 +87,8 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.error("连接关闭，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
+        this.isSuccess = false;
+        scheduled.schedule(this::reconnect,  1, TimeUnit.MINUTES);
     }
 
     @Override
