@@ -30,11 +30,11 @@ import java.util.List;
 @Slf4j
 @Configuration
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
-    private final List<BaseWebSocketHandler> botWebSocketHandlerList;
     private final BotService botService;
     private final BotManager botManager;
     private final MiraiManager miraiManager;
     private final SendMessageManager sendMessageManager;
+    private final List<BaseWebSocketHandler> botWebSocketHandlerList;
 
     @Autowired
     public WebSocketConfig(BotService botService, BotManager botManager, MiraiManager miraiManager, SendMessageManager sendMessageManager) {
