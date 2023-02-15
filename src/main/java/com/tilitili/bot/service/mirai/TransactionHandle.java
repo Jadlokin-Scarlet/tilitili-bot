@@ -34,9 +34,9 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotItemMapper botItemMapper;
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
 	private final BotIcePriceManager botIcePriceManager;
-	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotUserManager botUserManager;
 	private final BotItemService botItemService;
+	private final BotUserItemMappingManager botUserItemMappingManager;
 
 	@Autowired
 	public TransactionHandle(BotItemMapper botItemMapper, BotUserItemMappingManager botUserItemMappingManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager, BotUserManager botUserManager, BotItemService botItemService) {
