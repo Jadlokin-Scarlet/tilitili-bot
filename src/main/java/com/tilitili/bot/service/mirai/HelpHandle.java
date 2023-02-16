@@ -83,7 +83,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handelHelp(BotMessageAction messageAction) {
-        String paramListStr = messageAction.getValueOrDefault("").replaceAll("\\s+", " ").trim();
+        String paramListStr = messageAction.getValueOrDefault("").trim();//.replaceAll("\\s+", " ")
         ;
 //        String sendType = messageAction.getBotMessage().getSendType();
 //        String guildPrefix = sendType.equals(SendTypeEnum.Guild_Message.sendType)? ".": "";
@@ -106,16 +106,14 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage(reply.toString());
         } else if (! paramListStr.contains(" ")) {
-            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
-            Asserts.isTrue(botTaskList.size() < 2, "不对劲");
-            String reply;
-            if (botTaskList.isEmpty()) {
-                return null;
-//                reply = String.format("[%s]的作用是[%s]。", paramListStr, paramListStr);
-            } else {
-                BotTask botTask = botTaskList.get(0);
-                reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            BotTask botTask = botTaskMapper.getBotTaskByNick(paramListStr);
+            if (botTask == null) {
+                List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
+                Asserts.isTrue(botTaskList.size() < 2, "不对劲");
+                botTask = botTaskList.get(0);
             }
+            Asserts.notNull(botTask, "%s是啥", paramListStr);
+            String reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
             return BotMessage.simpleTextMessage(reply);
         } else {
             return null;
