@@ -6,6 +6,7 @@ import com.tilitili.common.entity.BotUserConfig;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotUserConfigMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -33,38 +34,45 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();
+        Map<String, String> paramMap = messageAction.getParamMap();
 
-        String value = messageAction.getValue();
-        Map<String, String> valueParamMap = new HashMap<>();
-        if (value.contains(" ")) {
-            String[] valueList = value.split(" ");
-            valueParamMap.put(valueList[0], valueList[1]);
+        if (messageAction.getValue().contains(" ")) {
+            String[] valueList = messageAction.getValue().split(" ");
+            paramMap.put(valueList[0], valueList[1]);
         }
 
         List<String> respList = new ArrayList<>();
 
-        String autoSellFish = messageAction.getParamOrDefault(autoSellFishKey, valueParamMap.get(autoSellFishKey));
-        if (autoSellFish != null) {
-            Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
-            if ("yes".equals(autoSellFish)) {
-                Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellRepeatFishKey), "yes", "你已经设置了(%s)", autoSellRepeatFishKey);
-                respList.add("之后钓到的鱼将会自动回收喵。");
-            } else {
-                respList.add(autoSellFishKey + "关闭喵。");
+        try {
+            String autoSellFish = paramMap.get(autoSellFishKey);
+            if (autoSellFish != null) {
+                Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
+                if ("yes".equals(autoSellFish)) {
+                    Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellRepeatFishKey), "yes", "你已经设置了(%s)", autoSellRepeatFishKey);
+                    respList.add("之后钓到的鱼将会自动回收喵。");
+                } else {
+                    respList.add(autoSellFishKey + "关闭喵。");
+                }
+                this.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
             }
-            this.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
+        } catch (AssertException e) {
+            respList.add(e.getMessage());
         }
-        String autoSellRepeatFish = messageAction.getParamOrDefault(autoSellRepeatFishKey, valueParamMap.get(autoSellRepeatFishKey));
-        if (autoSellRepeatFish != null) {
-            Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
-            if ("yes".equals(autoSellRepeatFish)) {
-                Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellFishKey), "yes", "你已经设置了(%s)", autoSellFishKey);
-                respList.add("之后钓到的重复的鱼将会自动回收喵。");
-            } else {
-                respList.add(autoSellRepeatFishKey + "关闭喵。");
-            }
-            this.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
 
+        try {
+            String autoSellRepeatFish = paramMap.get(autoSellRepeatFishKey);
+            if (autoSellRepeatFish != null) {
+                Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
+                if ("yes".equals(autoSellRepeatFish)) {
+                    Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellFishKey), "yes", "你已经设置了(%s)", autoSellFishKey);
+                    respList.add("之后钓到的重复的鱼将会自动回收喵。");
+                } else {
+                    respList.add(autoSellRepeatFishKey + "关闭喵。");
+                }
+                this.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
+            }
+        } catch (AssertException e) {
+            respList.add(e.getMessage());
         }
 
         if (!respList.isEmpty()) {

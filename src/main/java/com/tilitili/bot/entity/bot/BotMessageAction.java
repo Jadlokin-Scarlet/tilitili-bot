@@ -111,6 +111,10 @@ public class BotMessageAction {
         return virtualKey != null? head: value;
     }
 
+    public Map<String, String> getParamMap() {
+        return paramMap;
+    }
+
     public String getParam(String paramKey) {
         return paramMap.get(paramKey);
     }
