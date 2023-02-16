@@ -207,7 +207,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					Asserts.isFalse(itemName.contains(" *，,、"), "格式错啦，道具名称不能有[ *，,、]符号");
 					BotItem botItem = botItemMapper.getBotItemByName(itemName);
 					if (botItem == null) {
-						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon);
+						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon).setBag("鱼箱");
 						botItemMapper.addBotItemSelective(botItem);
 					} else {
 						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon));

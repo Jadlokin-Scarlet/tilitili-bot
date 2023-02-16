@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
@@ -17,15 +18,13 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -116,14 +115,27 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleBag(BotMessageAction messageAction) {
 		BotUserDTO botUser = messageAction.getBotUser();
 		List<BotItemDTO> itemList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
-		List<String> resultList = new ArrayList<>();
+//		List<String> resultList = new ArrayList<>();
 		if (itemList.isEmpty()) {
 			return BotMessage.simpleTextMessage("背包里一尘不染。。");
 		}
-		for (BotItemDTO botItemDTO : itemList) {
-			resultList.add(botItemDTO.getName() + (botItemDTO.getNum() > 1? "*" + botItemDTO.getNum(): ""));
-		}
-		return BotMessage.simpleTextMessage(String.join("、", resultList));
+//		for (BotItemDTO botItemDTO : itemList) {
+//			if ("背包".equals(botItemDTO.getBag())) {
+//				resultList.add(botItemDTO.getName() + (botItemDTO.getNum() > 1? "*" + botItemDTO.getNum(): ""));
+//			}
+//		}
+		Map<String, String> bagMap = itemList.stream().collect(Collectors.groupingBy(BotItemDTO::getBag, Collectors.collectingAndThen(Collectors.toList(),
+				botItemDTOList -> botItemDTOList.stream().map(botItemDTO -> botItemDTO.getName() + (botItemDTO.getNum() > 1 ? "*" + botItemDTO.getNum() : "")).collect(Collectors.joining("、"))
+		)));
+//		String bag = String.join("、", resultList);
+
+		List<String> bag = Lists.newArrayList(bagMap.get("背包"));
+		bagMap.forEach((bagName, otherBag) -> {
+			if (!"背包".equals(bagName)){
+				bag.add(String.format("%s：%s", bagName, otherBag));
+			}
+		});
+		return BotMessage.simpleTextMessage(String.join("\n", bag));
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
