@@ -104,7 +104,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		List<BotMessageChain> respChainList = new ArrayList<>();
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setLevel(level).setTextType(0).setStatus(0));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setStatus(0));
 		List<BotFavoriteTalk> filterFavoriteTalkList = favoriteTalkList.stream().filter(talk -> talk.getComplexResp() != null || talk.getResp() != null).collect(Collectors.toList());
 		if (filterFavoriteTalkList.isEmpty()) {
 			return null;
@@ -122,7 +122,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
-		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(itemName, level);
+		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevelAndType(itemName, FavoriteEnum.strange.getLevel(), FavoriteConstant.TYPE_ITEM);
 		if (favoriteActionAdd == null || !FavoriteConstant.TYPE_ITEM.equals(favoriteActionAdd.getType())) {
 			return null;
 		}
@@ -180,7 +180,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 
 		// 获取对话
-		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level).setTextType(0).setStatus(0));
+		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ACTION).setAction(action).setLevel(level).setStatus(0));
 		List<BotFavoriteTalk> filterFavoriteTalkList = favoriteTalkList.stream().filter(talk -> talk.getComplexResp() != null || talk.getResp() != null).collect(Collectors.toList());
 		if (filterFavoriteTalkList.isEmpty()) {
 			return null;
@@ -188,7 +188,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		// 获取好感度增量
 		Integer addFavorite = 0;
-		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevel(action, level);
+		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevelAndType(action, level, FavoriteConstant.TYPE_ACTION);
 		if (favoriteActionAdd != null && FavoriteConstant.TYPE_ACTION.equals(favoriteActionAdd.getType())) {
 			// 凌晨4点刷新
 			String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
