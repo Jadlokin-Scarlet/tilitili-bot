@@ -48,14 +48,22 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
             Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellRepeatFishKey), "yes", "你已经设置了(%s)", autoSellRepeatFishKey);
             Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
             this.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
-            respList.add("之后掉到的鱼将会自动回收喵。");
+            if ("yes".equals(autoSellFish)) {
+                respList.add("之后钓到的鱼将会自动回收喵。");
+            } else {
+                respList.add(autoSellFishKey + "关闭喵。");
+            }
         }
         String autoSellRepeatFish = messageAction.getParamOrDefault(autoSellRepeatFishKey, valueParamMap.get(autoSellRepeatFishKey));
         if (autoSellRepeatFish != null) {
             Asserts.notEquals(botUserConfigMapper.getValueByUserIdAndKey(userId, autoSellFishKey), "yes", "你已经设置了(%s)", autoSellFishKey);
             Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
             this.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
-            respList.add("之后掉到的重复的鱼将会自动回收喵。");
+            if ("yes".equals(autoSellRepeatFish)) {
+                respList.add("之后钓到的重复的鱼将会自动回收喵。");
+            } else {
+                respList.add(autoSellRepeatFishKey + "关闭喵。");
+            }
         }
 
         if (!respList.isEmpty()) {
