@@ -25,7 +25,7 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String source = messageAction.getParamOrDefault("s", messageAction.getParamOrDefault("source", "qq"));
+		String source = messageAction.getParamOrDefault("s", messageAction.getParamOrDefault("source", "oss"));
 		List<String> imageList = botMessageService.getImageListOrQuoteImage(messageAction);
 		List<String> resultList;
 		switch (source) {

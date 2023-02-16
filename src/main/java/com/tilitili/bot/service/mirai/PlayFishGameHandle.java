@@ -37,9 +37,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserManager botUserManager;
 	private final BotPlaceMapper botPlaceMapper;
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
+	private final ConfigHandle configHandle;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, ConfigHandle configHandle) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -49,6 +50,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.botUserManager = botUserManager;
 		this.botPlaceMapper = botPlaceMapper;
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
+		this.configHandle = configHandle;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -188,8 +190,19 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		if (itemId != null) {
 			BotItem botItem = botItemMapper.getBotItemById(itemId);
 			resultList.add(BotMessageChain.ofPlain(String.format("钓到一个%s，%s", botItem.getName(), botItem.getDescription())));
-			botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
-			resultList.add(BotMessageChain.ofPlain(String.format("(%s+1)", botItem.getName())));
+
+			boolean hasItem = botUserItemMappingManager.hasItem(botUser.getId(), botItem.getId());
+			// 自动回收
+			boolean autoSellFish = "yes".equals(configHandle.getConfigByUser(botUser, ConfigHandle.autoSellFishKey));
+			// 回收重复
+			boolean autoSellRepeatFish = hasItem && "yes".equals(configHandle.getConfigByUser(botUser, ConfigHandle.autoSellRepeatFishKey));
+			if (autoSellFish && autoSellRepeatFish) {
+				Integer updScore = botUserManager.safeUpdateScore(botUser, botItem.getSellPrice());
+				resultList.add(BotMessageChain.ofPlain(String.format("(%+d分)", updScore)));
+			} else {
+				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
+				resultList.add(BotMessageChain.ofPlain(String.format("(%s+1)", botItem.getName())));
+			}
 			icon = botItem.getIcon();
 		} else {
 			resultList.add(BotMessageChain.ofPlain(description));

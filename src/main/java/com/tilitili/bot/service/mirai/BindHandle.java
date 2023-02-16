@@ -98,7 +98,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		String sourceKey = applyKey + botUser.getId();
 		String targetKey = applyKey + targetBotUser.getId();
-		Asserts.isFalse(redisCache.exists(sourceKey), "你已经申请啦");
+//		Asserts.isFalse(redisCache.exists(sourceKey), "你已经申请啦");
 		Asserts.isFalse(redisCache.exists(targetKey), "他还在抉择中");
 
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0));
@@ -118,6 +118,11 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Asserts.notNull(targetSender, "查无此人");
 
+		if (redisCache.exists(sourceKey)) {
+			String otherTargetKey = (String) redisCache.getValue(sourceKey);
+			redisCache.delete(sourceKey);
+			redisCache.delete(otherTargetKey);
+		}
 		redisCache.setValue(sourceKey, targetKey, 60 * 60);
 		redisCache.setValue(targetKey, sourceKey, 60 * 60);
 

@@ -255,7 +255,11 @@ public class TwentyOneTable {
 				String playerStr = String.format("\n%s：%s (%s) (%s分)", player.getBotUser().getName(), cardListStr, playerResult, subScore > 0? "+" + subScore: "" + subScore);
 				resp.add(BotMessageChain.ofPlain(playerStr));
 				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(player.getBotUser().getId());
-				botUserManager.safeUpdateScore(botUser, subScore + twentyOneCardList.getScore());
+				try {
+					botUserManager.safeUpdateScore(botUser, subScore + twentyOneCardList.getScore());
+				} catch (Exception e) {
+					resp.add(BotMessageChain.ofPlain("(积分更新失败)"));
+				}
 			}
 		}
 		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();
