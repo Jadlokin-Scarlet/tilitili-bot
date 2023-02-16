@@ -22,6 +22,7 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -134,21 +135,21 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		// 每个人每天每个道具只能加一次好感度
 		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
 		if (!redisCache.exists(redisKey)) {
-
-			if (botFavorite.getLevel() == FavoriteEnum.strange.getLevel()) {
-//				Integer favorite = botFavorite.getFavorite();
-//				FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
-//				int favoriteLimit = favoriteEnum.getFavorite();
-//				if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
-//					FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
-//					botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
-//				}
-			}
-			
 			Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 			if (addFavorite != 0) {
 				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+			}
+
+			if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel())) {
+				Integer favorite = botFavorite.getFavorite();
+				FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
+				int favoriteLimit = favoriteEnum.getFavorite();
+				if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
+					FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
+					botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
+					respChainList.add(BotMessageChain.ofPlain(String.format("(关系提升为%s)", lastFavoriteEnum.getLevel())));
+				}
 			}
 		}
 
@@ -232,6 +233,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		resp = resp.replaceAll("\\{botQQ}", "1");
 		resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
 		resp = resp.replaceAll("\\{narration}", "0");
+		resp = resp.replaceAll("\\{timeTalk}", TimeUtil.getTimeTalk());
 		return resp;
 	}
 

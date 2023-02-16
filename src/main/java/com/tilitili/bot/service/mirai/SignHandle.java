@@ -18,6 +18,7 @@ import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -134,11 +135,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		}
 
 
-		int hour = Integer.parseInt(new SimpleDateFormat("HH", Locale.CHINESE).format(now));
-		String time = "早上";
-		if (hour > 9) time = "中午";
-		if (hour > 12) time = "下午";
-		if (hour > 18) time = "晚上";
+		String time = TimeUtil.getTimeTalk();
 
 		String talk = "今天也是充满希望的一天";
 		String message1 = String.format("%s好，%s", time, talk);

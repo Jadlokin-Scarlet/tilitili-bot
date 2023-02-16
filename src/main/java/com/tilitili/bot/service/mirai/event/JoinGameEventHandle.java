@@ -15,6 +15,7 @@ import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,11 +67,7 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 		}
 		redisCache.setValue(key, "yes", 10);
 
-		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-		String time = "早上";
-		if (hour > 9) time = "中午";
-		if (hour > 12) time = "下午";
-		if (hour > 18) time = "晚上";
+		String time = TimeUtil.getTimeTalk();
 		return BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName()));
 	}
 }
