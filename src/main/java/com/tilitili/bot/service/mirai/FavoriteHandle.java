@@ -19,15 +19,11 @@ import com.tilitili.common.mapper.mysql.BotFavoriteActionAddMapper;
 import com.tilitili.common.mapper.mysql.BotFavoriteMapper;
 import com.tilitili.common.mapper.mysql.BotFavoriteTalkMapper;
 import com.tilitili.common.mapper.mysql.BotItemMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.RedisCache;
-import com.tilitili.common.utils.TimeUtil;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -101,25 +97,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥。");
 
-		List<BotMessageChain> respChainList = new ArrayList<>();
-
 		// 获取对话
 		List<BotFavoriteTalk> favoriteTalkList = botFavoriteTalkMapper.getBotFavoriteTalkByCondition(new BotFavoriteTalkQuery().setType(FavoriteConstant.TYPE_ITEM).setAction(itemName).setStatus(0));
 		List<BotFavoriteTalk> filterFavoriteTalkList = favoriteTalkList.stream().filter(talk -> talk.getComplexResp() != null || talk.getResp() != null).collect(Collectors.toList());
 		if (filterFavoriteTalkList.isEmpty()) {
 			return null;
-		}
-		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(ThreadLocalRandom.current().nextInt(filterFavoriteTalkList.size()));
-		if (favoriteTalk.getComplexResp() != null) {
-			String resp = favoriteTalk.getComplexResp();
-			resp = this.replaceResp(messageAction, name, resp);
-			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
-			respChainList.add(BotMessageChain.ofForward(nodeList));
-		} else if (favoriteTalk.getResp() != null) {
-			String resp = favoriteTalk.getResp();
-			resp = this.replaceResp(messageAction, name, resp);
-			respChainList.add(BotMessageChain.ofSpeaker(name));
-			respChainList.add(BotMessageChain.ofPlain(resp));
 		}
 
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevelAndType(itemName, FavoriteEnum.strange.getLevel(), FavoriteConstant.TYPE_ITEM);
@@ -134,10 +116,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 		// 每个人每天每个道具只能加一次好感度
 		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
+		Integer addFavorite = 0;
+		String externalText = "";
 		if (!redisCache.exists(redisKey)) {
-			Integer addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
+			addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 			if (addFavorite != 0) {
-				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 			}
 
@@ -148,17 +131,17 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 				if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
 					FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
 					botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
-					respChainList.add(BotMessageChain.ofPlain(String.format("(关系提升为%s)", lastFavoriteEnum.getLevel())));
+					externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
 				}
 			}
 		}
 
+		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
 		return BotMessage.simpleListMessage(respChainList);
 	}
 
 	private BotMessage handleAction(BotMessageAction messageAction) {
 		BotUserDTO botUser = messageAction.getBotUser();
-		BotSender botSender = messageAction.getBotSender();
 		Long userId = botUser.getId();
 		String action = messageAction.getText();
 
@@ -200,6 +183,14 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			}
 		}
 
+		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, "");
+		return BotMessage.simpleListMessage(respChainList);
+	}
+
+	private List<BotMessageChain> randomTalkToMessageChain(BotMessageAction messageAction, BotFavorite botFavorite, List<BotFavoriteTalk> filterFavoriteTalkList, Integer addFavorite, String externalText) {
+		BotSender botSender = messageAction.getBotSender();
+		String name = botFavorite.getName();
+
 		List<BotMessageChain> respChainList = new ArrayList<>();
 		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
 		if (favoriteTalk.getComplexResp() != null) {
@@ -209,7 +200,16 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			if (addFavorite != 0) {
 				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(Lists.newArrayList(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)))));
 			}
-			respChainList.add(BotMessageChain.ofForward(nodeList));
+			if (StringUtils.isNotBlank(externalText)) {
+				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(Lists.newArrayList(BotMessageChain.ofPlain(externalText))));
+			}
+			if (nodeList.size() == 1) {
+				BotMessageNode node = nodeList.get(0);
+				respChainList.add(BotMessageChain.ofSpeaker(node.getSenderName()));
+				respChainList.addAll(node.getMessageChain());
+			} else {
+				respChainList.add(BotMessageChain.ofForward(nodeList));
+			}
 		} else if (favoriteTalk.getResp() != null) {
 			String resp = favoriteTalk.getResp();
 			resp = this.replaceResp(messageAction, name, resp);
@@ -218,10 +218,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			if (addFavorite != 0) {
 				respChainList.add(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)));
 			}
+			if (StringUtils.isNotBlank(externalText)) {
+				respChainList.add(BotMessageChain.ofPlain(externalText));
+			}
 		}
-
-
-		return BotMessage.simpleListMessage(respChainList);
+		return respChainList;
 	}
 
 	private String replaceResp(BotMessageAction messageAction, String name, String resp) {
