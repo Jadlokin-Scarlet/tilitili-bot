@@ -37,10 +37,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserManager botUserManager;
 	private final BotPlaceMapper botPlaceMapper;
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
-	private final ConfigHandle configHandle;
+	private final BotUserConfigMapper botUserConfigMapper;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, ConfigHandle configHandle) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -50,7 +50,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.botUserManager = botUserManager;
 		this.botPlaceMapper = botPlaceMapper;
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
-		this.configHandle = configHandle;
+		this.botUserConfigMapper = botUserConfigMapper;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -193,9 +193,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 			boolean hasItem = botUserItemMappingManager.hasItem(botUser.getId(), botItem.getId());
 			// 自动回收
-			boolean autoSellFish = "yes".equals(configHandle.getConfigByUser(botUser, ConfigHandle.autoSellFishKey));
+			boolean autoSellFish = "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.autoSellFishKey));
 			// 回收重复
-			boolean autoSellRepeatFish = hasItem && "yes".equals(configHandle.getConfigByUser(botUser, ConfigHandle.autoSellRepeatFishKey));
+			boolean autoSellRepeatFish = hasItem && "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.autoSellRepeatFishKey));
 			if (autoSellFish && autoSellRepeatFish) {
 				Integer updScore = botUserManager.safeUpdateScore(botUser, botItem.getSellPrice());
 				resultList.add(BotMessageChain.ofPlain(String.format("(%+d分)", updScore)));
