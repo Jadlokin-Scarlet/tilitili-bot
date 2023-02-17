@@ -7,6 +7,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotPlaceConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
@@ -207,7 +208,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					Asserts.isFalse(itemName.contains(" *，,、"), "格式错啦，道具名称不能有[ *，,、]符号");
 					BotItem botItem = botItemMapper.getBotItemByName(itemName);
 					if (botItem == null) {
-						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon).setBag("鱼箱");
+						botItem = new BotItem().setName(itemName).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon).setBag(BotItemConstant.FISH_BAG);
 						botItemMapper.addBotItemSelective(botItem);
 					} else {
 						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon));
