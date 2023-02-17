@@ -91,7 +91,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Integer upd = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(botUser.getId()).setItemId(giftItem.getId()).setNum(1));
 		Asserts.checkEquals(upd, 1, "啊嘞，不对劲");
 
-		return BotMessage.simpleTextMessage(String.format("抽到一个%s，%s。(-%d分)", giftItem.getName(), giftItem.getDescription(), price));
+		return BotMessage.simpleTextMessage(String.format("抽到一个%s，%s。(消耗%d)", giftItem.getName(), giftItem.getDescription(), price));
 	}
 
 	private BotMessage handleQuery(BotMessageAction messageAction) {
