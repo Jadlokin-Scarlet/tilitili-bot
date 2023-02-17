@@ -142,16 +142,16 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Asserts.checkEquals(subNum, -1, "啊嘞，没有道具惹。");
 
 		// 凌晨4点刷新
-		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
+//		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
 		// 每个人每天每个道具只能加一次好感度
-		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
+//		String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, itemName);
 		Integer addFavorite = 0;
 		String externalText = "";
-		if (!redisCache.exists(redisKey)) {
+//		if (!redisCache.exists(redisKey)) {
 			addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
-			if (addFavorite != 0) {
-				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
-			}
+//			if (addFavorite != 0) {
+//				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+//			}
 
 			if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel())) {
 				Integer favorite = botFavorite.getFavorite();
@@ -169,7 +169,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
 				externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
 			}
-		}
+//		}
 
 		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
 		return BotMessage.simpleListMessage(respChainList);
