@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FavoriteConstant;
 import com.tilitili.common.emnus.BotEnum;
@@ -10,11 +11,13 @@ import com.tilitili.common.emnus.FavoriteEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotFavoriteTalkQuery;
+import com.tilitili.common.entity.query.BotItemQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotFavoriteActionAddMapper;
 import com.tilitili.common.mapper.mysql.BotFavoriteMapper;
 import com.tilitili.common.mapper.mysql.BotFavoriteTalkMapper;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -39,9 +43,10 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final ForwardMarkHandle forwardMarkHandle;
 
 	private final Random random;
+	private final BotUserManager botUserManager;
 
 	@Autowired
-	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle) {
+	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle, BotUserManager botUserManager) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
 		this.botFavoriteMapper = botFavoriteMapper;
@@ -50,6 +55,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
 		this.forwardMarkHandle = forwardMarkHandle;
+		this.botUserManager = botUserManager;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -66,8 +72,26 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			case "认领老婆": return handleStart(messageAction);
 			case "赠送": return handleGift(messageAction);
 			case "好感度查询": return handleQuery(messageAction);
+			case "抽礼物": return handleBuyGift(messageAction);
 			default: return handleAction(messageAction);
 		}
+	}
+
+	private BotMessage handleBuyGift(BotMessageAction messageAction) {
+		BotUserDTO botUser = messageAction.getBotUser();
+		List<BotItem> giftItemList = botItemMapper.getBotItemByCondition(new BotItemQuery().setBag(BotItemConstant.GIFT_BAG));
+		Asserts.notEmpty(giftItemList, "啊嘞，礼物呢。");
+		BotItem giftItem = giftItemList.get(ThreadLocalRandom.current().nextInt(giftItemList.size()));
+
+		int price = 100;
+		Asserts.isTrue(botUser.getScore() >= price, "啊嘞，积分不够了。");
+		Integer updateScore = botUserManager.safeUpdateScore(botUser, -price);
+		Asserts.checkEquals(updateScore, -price, "啊嘞，不对劲");
+
+		Integer upd = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(botUser.getId()).setItemId(giftItem.getId()).setNum(1));
+		Asserts.checkEquals(upd, 1, "啊嘞，不对劲");
+
+		return BotMessage.simpleTextMessage(String.format("抽到一个%s，%s。(-%d分)", giftItem.getName(), giftItem.getDescription(), price));
 	}
 
 	private BotMessage handleQuery(BotMessageAction messageAction) {
