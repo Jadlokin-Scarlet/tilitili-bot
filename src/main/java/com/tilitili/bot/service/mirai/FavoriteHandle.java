@@ -163,6 +163,12 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 					externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
 				}
 			}
+
+			if (FavoriteEnum.anti.getLevel().equals(botFavorite.getLevel())) {
+				FavoriteEnum lastFavoriteEnum = FavoriteEnum.strange;
+				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
+				externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
+			}
 		}
 
 		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
