@@ -120,9 +120,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		if (botFavorite == null) {
 			return null;
 		}
-		String name = botFavorite.getName();
 		String level = botFavorite.getLevel();
 		FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
+		Asserts.notNull(favoriteEnum, "啊嘞，不对劲。");
 
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥。");
@@ -154,7 +154,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 //				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 //			}
 		FavoriteEnum previousFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() - 1);
-		if (botFavorite.getFavorite() + addFavorite < previousFavoriteEnum.getFavorite()) {
+		if (previousFavoriteEnum != null && botFavorite.getFavorite() + addFavorite < previousFavoriteEnum.getFavorite()) {
 			externalText = String.format("(关系下降为%s)", previousFavoriteEnum.getLevel());
 		}
 
@@ -162,7 +162,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			Integer favorite = botFavorite.getFavorite();
 			int favoriteLimit = favoriteEnum.getFavorite();
 			if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
-				FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
+				FavoriteEnum lastFavoriteEnum = FavoriteEnum.passer;
 				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
 				externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
 			}
