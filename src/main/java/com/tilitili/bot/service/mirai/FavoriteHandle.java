@@ -35,12 +35,12 @@ import java.util.stream.Collectors;
 public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
+	private final ForwardMarkHandle forwardMarkHandle;
 	private final BotFavoriteMapper botFavoriteMapper;
 	private final BotFavoriteManager botFavoriteManager;
 	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
 	private final BotUserItemMappingManager botUserItemMappingManager;
 	private final BotFavoriteActionAddMapper botFavoriteActionAddMapper;
-	private final ForwardMarkHandle forwardMarkHandle;
 
 	private final Random random;
 	private final BotUserManager botUserManager;
