@@ -122,6 +122,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 		String name = botFavorite.getName();
 		String level = botFavorite.getLevel();
+		FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
 
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
 		Asserts.notNull(botItem, "那是啥。");
@@ -148,27 +149,30 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Integer addFavorite = 0;
 		String externalText = "";
 //		if (!redisCache.exists(redisKey)) {
-			addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
+		addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 //			if (addFavorite != 0) {
 //				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 //			}
+		FavoriteEnum previousFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() - 1);
+		if (botFavorite.getFavorite() + addFavorite < previousFavoriteEnum.getFavorite()) {
+			externalText = String.format("(关系下降为%s)", previousFavoriteEnum.getLevel());
+		}
 
-			if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_ICE_CREAM.equals(botItem.getId())) {
-				Integer favorite = botFavorite.getFavorite();
-				FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
-				int favoriteLimit = favoriteEnum.getFavorite();
-				if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
-					FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
-					botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
-					externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
-				}
-			}
-
-			if (FavoriteEnum.anti.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_SNACK_BOX.equals(botItem.getId())) {
-				FavoriteEnum lastFavoriteEnum = FavoriteEnum.strange;
-				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
+		if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_ICE_CREAM.equals(botItem.getId())) {
+			Integer favorite = botFavorite.getFavorite();
+			int favoriteLimit = favoriteEnum.getFavorite();
+			if (favorite + favoriteActionAdd.getFavorite() > favoriteLimit) {
+				FavoriteEnum lastFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() + 1);
+				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()));
 				externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
 			}
+		}
+
+		if (FavoriteEnum.anti.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_SNACK_BOX.equals(botItem.getId())) {
+			FavoriteEnum lastFavoriteEnum = FavoriteEnum.strange;
+			botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
+			externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
+		}
 //		}
 
 		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
