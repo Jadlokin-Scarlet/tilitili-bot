@@ -196,6 +196,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		}
 		String name = botFavorite.getName();
 		String level = botFavorite.getLevel();
+		FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
+		Asserts.notNull(favoriteEnum, "啊嘞，不对劲。");
 
 		if (action.equals(name)) {
 			action = "交谈";
@@ -210,6 +212,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		// 获取好感度增量
 		Integer addFavorite = 0;
+		String externalText = "";
 		BotFavoriteActionAdd favoriteActionAdd = botFavoriteActionAddMapper.getBotFavoriteActionAddByActionAndLevelAndType(action, level, FavoriteConstant.TYPE_ACTION);
 		if (favoriteActionAdd != null && FavoriteConstant.TYPE_ACTION.equals(favoriteActionAdd.getType())) {
 			// 凌晨4点刷新
@@ -219,10 +222,15 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			if (!redisCache.exists(redisKey)) {
 				addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
 				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+
+				FavoriteEnum previousFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() - 1);
+				if (previousFavoriteEnum != null && botFavorite.getFavorite() + addFavorite < previousFavoriteEnum.getFavorite()) {
+					externalText = String.format("(关系下降为%s)", previousFavoriteEnum.getLevel());
+				}
 			}
 		}
 
-		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, "");
+		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
 		return BotMessage.simpleListMessage(respChainList);
 	}
 
