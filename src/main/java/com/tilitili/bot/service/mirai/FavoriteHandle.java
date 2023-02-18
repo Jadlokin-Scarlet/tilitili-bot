@@ -172,6 +172,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			FavoriteEnum lastFavoriteEnum = FavoriteEnum.strange;
 			botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
 			externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());
+			filterFavoriteTalkList = Collections.singletonList(new BotFavoriteTalk().setResp("只有这一次哦，如果还有下一次，再也不原谅你了哦。"));
 		}
 //		}
 
@@ -183,11 +184,6 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 		String action = messageAction.getText();
-
-		// 触发对话的关键词不会太长
-		if (action.length() > 5) {
-			return null;
-		}
 
 		// 没解锁的跳过判定
 		BotFavorite botFavorite = botFavoriteMapper.getBotFavoriteByUserId(userId);
@@ -201,6 +197,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		if (action.equals(name)) {
 			action = "交谈";
+		}
+
+		// 触发对话的关键词不会太长
+		if (action.length() > 5) {
+			return null;
 		}
 
 		// 获取对话
