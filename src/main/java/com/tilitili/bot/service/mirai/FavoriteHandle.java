@@ -61,7 +61,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		BotUserDTO botUser = messageAction.getBotUser();
+//		BotUserDTO botUser = messageAction.getBotUser();
 
 		// 其他平台必须绑定主账号
 //		if (BotUserConstant.USER_TYPE_QQ != botUser.getType()) {
