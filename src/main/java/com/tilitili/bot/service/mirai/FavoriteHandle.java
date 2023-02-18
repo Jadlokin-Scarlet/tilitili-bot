@@ -153,7 +153,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 //				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 //			}
 
-			if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel())) {
+			if (FavoriteEnum.strange.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_ICE_CREAM.equals(botItem.getId())) {
 				Integer favorite = botFavorite.getFavorite();
 				FavoriteEnum favoriteEnum = FavoriteEnum.getFavoriteByLevel(level);
 				int favoriteLimit = favoriteEnum.getFavorite();
@@ -164,7 +164,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 				}
 			}
 
-			if (FavoriteEnum.anti.getLevel().equals(botFavorite.getLevel())) {
+			if (FavoriteEnum.anti.getLevel().equals(botFavorite.getLevel()) && BotItemConstant.FAVORITE_SNACK_BOX.equals(botItem.getId())) {
 				FavoriteEnum lastFavoriteEnum = FavoriteEnum.strange;
 				botFavoriteMapper.updateBotFavoriteSelective(new BotFavorite().setId(botFavorite.getId()).setLevel(lastFavoriteEnum.getLevel()).setFavorite(FavoriteEnum.anti.getFavorite()));
 				externalText = String.format("(关系提升为%s)", lastFavoriteEnum.getLevel());

@@ -7,6 +7,7 @@ import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.FishConfig;
@@ -184,7 +185,7 @@ class StartApplicationTest {
 
     private BotItem getBotItemByNameOrIce(String itemName) {
         BotItem botItem = botItemMapper.getBotItemByName(itemName);
-        if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
+        if (BotItemConstant.ICE_NAME.equalsIgnoreCase(itemName)) {
             BotIcePrice icePrice = botIcePriceManager.getIcePrice();
             botItem.setPrice(icePrice.getBasePrice());
             botItem.setSellPrice(icePrice.getPrice());

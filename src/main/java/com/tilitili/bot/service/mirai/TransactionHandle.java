@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -224,7 +225,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 	private Integer buyItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
-		if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
+		if (BotItemConstant.ICE_NAME.equalsIgnoreCase(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkBuyTime(), "周日才能兑换哦。");
 			Integer price = botIcePriceManager.getIcePrice().getBasePrice();
 			data.setPrice(price);
@@ -234,7 +235,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 	private Integer sellItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {
 		SafeTransactionDTO data = new SafeTransactionDTO().setUserId(userId).setItemId(itemId).setItemNum(itemNum);
-		if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
+		if (BotItemConstant.ICE_NAME.equalsIgnoreCase(itemName)) {
 			Asserts.isTrue(botUserItemMappingManager.checkSellTime(), "周日不收哦。");
 			Integer price = botIcePriceManager.getIcePrice().getPrice();
 			data.setSellPrice(price);
@@ -244,7 +245,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotItem getBotItemByNameOrIce(String itemName) {
 		BotItem botItem = botItemMapper.getBotItemByName(itemName);
-		if (BotItemDTO.ICE_NAME.equalsIgnoreCase(itemName)) {
+		if (BotItemConstant.ICE_NAME.equalsIgnoreCase(itemName)) {
 			BotIcePrice icePrice = botIcePriceManager.getIcePrice();
 			if (botUserItemMappingManager.checkBuyTime()) {
 				botItem.setPrice(icePrice.getBasePrice());

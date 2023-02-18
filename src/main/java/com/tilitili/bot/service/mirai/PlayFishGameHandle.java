@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotPlaceConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FishPlayerConstant;
@@ -157,7 +158,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus()) || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus())) {
 			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
-			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
+			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
 			if (fishPlayer.getNotifyTime() == null) {
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
 				return BotMessage.simpleTextMessage("啥也没有。。");
@@ -217,7 +218,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (cost != null) {
-			BotItem botItem = botItemMapper.getBotItemById(BotItemDTO.FISH_FOOD);
+			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
 			Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1 - cost));
 			// 钓鱼的饵提前消耗掉过一个
 			subNum--;
@@ -246,16 +247,16 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		List<Long> botItemIdList = botItemList.stream().map(BotItemDTO::getItemId).collect(Collectors.toList());
 
 		// 兑换道具
-		if (!botItemIdList.contains(BotItemDTO.FISH_TOOL)) {
-			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemDTO.FISH_TOOL));
+		if (!botItemIdList.contains(BotItemConstant.FISH_TOOL)) {
+			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemConstant.FISH_TOOL));
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼竿一把(-90)，谢谢惠顾。\n"));
 			if (botUser.getType() != BotUserConstant.USER_TYPE_QQ) {
 				resultList.add(BotMessageChain.ofPlain("tips: 有共同群聊最好先申请合体再玩。\n"));
 			}
 		}
 
-		if (!botItemIdList.contains(BotItemDTO.FISH_FOOD)) {
-			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemDTO.FISH_FOOD).setItemNum(10));
+		if (!botItemIdList.contains(BotItemConstant.FISH_FOOD)) {
+			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setItemNum(10));
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)，谢谢惠顾。\n"));
 		}
 
@@ -277,7 +278,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FISHING);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setStartTime(new Date()).setSenderId(senderId));
-		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.FISH_FOOD).setNum(-1));
+		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setNum(-1));
 		resultList.add(BotMessageChain.ofPlain("抛竿成功，有动静我会再叫你哦。"));
 		return BotMessage.simpleListMessage(resultList);
 	}

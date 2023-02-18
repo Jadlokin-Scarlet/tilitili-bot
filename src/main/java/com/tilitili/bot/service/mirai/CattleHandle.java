@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotItemService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -87,7 +88,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String redisKey = String.format("CattleHandle-%s", userId);
 		Long expire = redisCache.getExpire(redisKey);
 		if (expire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
 
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
@@ -105,13 +106,13 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notEmpty(senderCattleList, "拔剑四顾心茫然。");
 		Collections.shuffle(senderCattleList);
 
-		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
+		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
 
 		List<BotMessageChain> respList = new ArrayList<>();
 		int useCnt = 0;
 		for (int index = 0; index < Math.min(5, senderCattleList.size()); index++) {
 			boolean hasCd = redisCache.getExpire(redisKey) > 0;
-			boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH);
+			boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH);
 			if (hasCd && !hasItem) {
 				break;
 			}
@@ -157,16 +158,16 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		if (otherExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "啊嘞，道具不够用了。");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
 		}
 
 		String theRedisKey = String.format("CattleHandle-%s", theUserId);
 		Long theExpire = redisCache.getExpire(theRedisKey);
 		if (theExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(theUserId, BotItemDTO.CATTLE_REFRESH), "啊嘞，道具不够用了。");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(theUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
 		}
 
-		BotItem refreshItem = botItemMapper.getBotItemById(BotItemDTO.CATTLE_REFRESH);
+		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
 
 		// 主逻辑
 		redisCache.delete(otherApplyRedisKey);
@@ -195,7 +196,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
 		if (expire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
 
 		List<Long> atList = messageAction.getAtList();
@@ -209,7 +210,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
 		if (otherExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemDTO.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
+			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 		}
 
 		// 主逻辑
@@ -281,7 +282,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 //		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
-		boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemDTO.CATTLE_ENTANGLEMENT);
+		boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_ENTANGLEMENT);
 
 		int hasItemFlag = hasItem? 1: -1;
 		int sumLength = cattle.getLength() + otherCattle.getLength();
@@ -316,7 +317,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				} else {
 					respList.add(BotMessageChain.ofPlain(String.format("不好，缠在一起了，但在纠缠之缘的作用下，双方都长了%.2fcm。", length / 100.0)));
 				}
-				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemDTO.CATTLE_ENTANGLEMENT).setNum(-1));
+				Integer subNum = botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.CATTLE_ENTANGLEMENT).setNum(-1));
 				Asserts.checkEquals(subNum, -1, "使用失败");
 			} else {
 				botCattleManager.safeCalculateCattle(userId, otherUserId, -length, -length);

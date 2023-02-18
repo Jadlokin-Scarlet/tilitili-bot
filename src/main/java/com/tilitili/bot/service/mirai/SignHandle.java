@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotSender;
@@ -73,7 +74,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				.map(botItemDTO -> botItemDTO.getNum() * botItemDTO.getSellPrice()).mapToInt(Integer::intValue).sum();
 		BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
 		Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
-		Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemDTO.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
+		Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemConstant.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
 		int sumScore = botUser.getScore() + itemScore + icePrice * iceNum;
 		return BotMessage.simpleTextMessage(String.format("当前可用积分为%s，总积分为%s分。", botUser.getScore(), sumScore));
 	}
@@ -115,7 +116,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			int itemScore = itemDTOList.stream().map(BotItemDTO::getSellPrice).filter(Objects::nonNull).mapToInt(Integer::intValue).sum();
 			BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
 			Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
-			Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemDTO.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
+			Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemConstant.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
 			int sumScore = initScore + itemScore + icePrice * iceNum;
 			if (sumScore >= 100) {
 				log.info("积分满了");
