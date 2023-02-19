@@ -54,7 +54,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage("搞定");
         } else {
-            List<BotSendMessageRecord> recordList = botSendMessageRecordMapper.getBotSendMessageRecordByCondition(new BotSendMessageRecordQuery().setSenderId(botSender.getId()).setPageSize(1).setSorter("create_time").setSorted("desc"));
+            List<BotSendMessageRecord> recordList = botSendMessageRecordMapper.getBotSendMessageRecordByCondition(new BotSendMessageRecordQuery().setSenderId(botSender.getId()).setPageNo(1).setPageSize(1).setSorter("create_time").setSorted("desc"));
             for (BotSendMessageRecord messageRecord : recordList) {
                 botManager.recallMessage(bot, botSender, messageRecord.getMessageId());
             }
