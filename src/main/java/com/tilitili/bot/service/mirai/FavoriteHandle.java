@@ -49,13 +49,13 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle, BotUserManager botUserManager) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
+		this.botUserManager = botUserManager;
 		this.botFavoriteMapper = botFavoriteMapper;
 		this.botFavoriteManager = botFavoriteManager;
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
 		this.forwardMarkHandle = forwardMarkHandle;
-		this.botUserManager = botUserManager;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
