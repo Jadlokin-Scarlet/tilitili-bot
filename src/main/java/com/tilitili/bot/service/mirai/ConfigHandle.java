@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.BotUserConfig;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -31,7 +32,17 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
         this.botUserManager = botUserManager;
     }
 
-	@Override
+    @Override
+    public String getHelpMessage(BotTask botTask, String key) {
+        switch (key) {
+            case autoSellFishKey: return "上钩后自动卖掉鱼，和回收重复互斥。格式：（配置 自动卖鱼 yes）";
+            case autoSellRepeatFishKey: return "上钩后自动卖掉已经有的鱼，和自动卖鱼互斥。格式：（配置 回收重复 yes）";
+            case favoriteUserIdKey: return "如果有需要，可以设置老婆的社交账号。格式：（配置 老婆QQ @老婆）";
+            default: return super.getHelpMessage(botTask, key);
+        }
+    }
+
+    @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();

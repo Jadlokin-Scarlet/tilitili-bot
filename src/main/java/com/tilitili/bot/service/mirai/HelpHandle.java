@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotSender;
@@ -16,14 +17,17 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class HelpHandle extends ExceptionRespMessageHandle {
     private final BotTaskMapper botTaskMapper;
+    private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
 
-    public HelpHandle(BotTaskMapper botTaskMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
+    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
         this.botTaskMapper = botTaskMapper;
+        this.messageHandleMap = messageHandleMap;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
     }
 
@@ -106,17 +110,30 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage(reply.toString());
         } else if (! paramListStr.contains(" ")) {
-            BotTask botTask = botTaskMapper.getBotTaskByNick(paramListStr);
-            if (botTask == null) {
-                List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
-                Asserts.isTrue(botTaskList.size() < 2, "不对劲");
-                botTask = botTaskList.get(0);
-            }
-            Asserts.notNull(botTask, "%s是啥", paramListStr);
-            String reply = String.format("[%s]的作用是[%s]。", paramListStr, botTask.getDescription());
+            BotTask botTask = getBotTaskByTaskName(botSender, paramListStr);
+            BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
+            String reply = String.format("[%s]的作用是[%s]。", paramListStr, messageHandle.getHelpMessage(botTask));
             return BotMessage.simpleTextMessage(reply);
         } else {
-            return null;
+            int paramIndex = paramListStr.indexOf(" ");
+            String taskName = paramListStr.substring(0, paramIndex).trim();
+            String taskKey = paramListStr.substring(paramIndex).trim();
+
+            BotTask botTask = getBotTaskByTaskName(botSender, taskName);
+            BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
+            String reply = String.format("[%s]的作用是[%s]。", paramListStr, messageHandle.getHelpMessage(botTask, taskKey));
+            return BotMessage.simpleTextMessage(reply);
         }
+    }
+
+    private BotTask getBotTaskByTaskName(BotSender botSender, String paramListStr) {
+        BotTask botTask = botTaskMapper.getBotTaskByNick(paramListStr);
+        if (botTask == null) {
+            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
+            Asserts.isTrue(botTaskList.size() < 2, "不对劲");
+            botTask = botTaskList.get(0);
+        }
+        Asserts.notNull(botTask, "%s是啥", paramListStr);
+        return botTask;
     }
 }

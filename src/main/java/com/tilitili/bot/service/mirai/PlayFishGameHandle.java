@@ -232,6 +232,13 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofImage(icon));
 		}
 
+		try {
+			BotMessage startMessage = this.handleStart(messageAction);
+			resultList.add(BotMessageChain.ofPlain("\n"));
+			resultList.addAll(startMessage.getBotMessageChainList());
+		} catch (AssertException e) {
+			resultList.add(BotMessageChain.ofPlain("自动抛竿失败，" + e.getMessage()));
+		}
 		return BotMessage.simpleListMessage(resultList);
 	}
 

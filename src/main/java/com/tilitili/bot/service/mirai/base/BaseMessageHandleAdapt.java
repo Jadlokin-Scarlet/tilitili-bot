@@ -1,8 +1,8 @@
 package com.tilitili.bot.service.mirai.base;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import org.apache.commons.compress.utils.Lists;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,5 +24,15 @@ public abstract class BaseMessageHandleAdapt implements BaseMessageHandle {
 	@Override
 	public String isThisTask(BotMessageAction botMessageAction) {
 		return null;
+	}
+
+	@Override
+	public String getHelpMessage(BotTask botTask) {
+		return botTask.getDescription();
+	}
+
+	@Override
+	public String getHelpMessage(BotTask botTask, String key) {
+		return botTask.getDescription();
 	}
 }
