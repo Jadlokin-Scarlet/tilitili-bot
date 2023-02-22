@@ -40,6 +40,8 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
         if (messageAction.getValue().contains(" ")) {
             String[] valueList = messageAction.getValue().split(" ");
             paramMap.put(valueList[0], valueList[1]);
+        } else {
+            paramMap.put(messageAction.getValue(), null);
         }
 
         List<String> respList = new ArrayList<>();
@@ -77,8 +79,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
         }
 
         try {
-            String favoriteUserId = paramMap.get(favoriteUserIdKey);
-            if (favoriteUserId != null) {
+            if (paramMap.containsKey(favoriteUserIdKey)) {
                 List<Long> atList = messageAction.getAtList();
                 Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
                 if (!atList.isEmpty()) {
