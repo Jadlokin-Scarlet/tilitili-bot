@@ -90,7 +90,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			BotUserRankDTO rankDTO = rankDTOList.get(index);
 //			List<BotItemDTO> itemDTOList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
 //			int itemScore = itemDTOList.stream().map(BotItemDTO::getSellPrice).filter(Objects::nonNull).mapToInt(Integer::intValue).sum();
-			if (rankDTO.getScore() <= 100) continue;
+			if (rankDTO.getScore() <= 150) continue;
 			result.add(BotMessageChain.ofPlain(String.format("\n%s:%s\t%s", index + 1, rankDTO.getScore(), rankDTO.getName())));
 		}
 		return BotMessage.simpleListMessage(result);
@@ -118,7 +118,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
 			Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemConstant.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
 			int sumScore = initScore + itemScore + icePrice * iceNum;
-			if (sumScore >= 100) {
+			if (sumScore >= 150) {
 				log.info("积分满了");
 				return null;
 			}
@@ -126,7 +126,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				log.info("已经签到过了");
 				return null;
 			}
-			addScore = Math.max(100 - sumScore, 0);
+			addScore = Math.max(150 - sumScore, 0);
 			botUserManager.updateBotUserSelective(botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
 			if (addScore != 0) {
 				botUserManager.safeUpdateScore(botUser, addScore);
