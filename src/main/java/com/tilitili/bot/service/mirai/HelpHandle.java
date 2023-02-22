@@ -131,9 +131,9 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         if (botTask == null) {
             List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), paramListStr, "");
             Asserts.isTrue(botTaskList.size() < 2, "不对劲");
+            Asserts.notEmpty(botTaskList, "%s是啥", paramListStr);
             botTask = botTaskList.get(0);
         }
-        Asserts.notNull(botTask, "%s是啥", paramListStr);
         return botTask;
     }
 }
