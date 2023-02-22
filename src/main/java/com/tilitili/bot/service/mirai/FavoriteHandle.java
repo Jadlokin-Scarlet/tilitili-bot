@@ -222,7 +222,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			String redisKey = String.format("favorite-%s-%s-%s", dayStr, userId, action);
 			if (!redisCache.exists(redisKey)) {
 				addFavorite = botFavoriteManager.addFavorite(userId, favoriteActionAdd.getFavorite());
-				redisCache.setValue(redisKey, "yes", Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
+				redisCache.increment(redisKey);
+				redisCache.expire(redisKey, Math.toIntExact(TimeUnit.DAYS.toSeconds(1)));
 
 				FavoriteEnum previousFavoriteEnum = FavoriteEnum.getFavoriteById(favoriteEnum.getId() - 1);
 				if (previousFavoriteEnum != null && botFavorite.getFavorite() + addFavorite < previousFavoriteEnum.getFavorite()) {
