@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
@@ -18,10 +19,7 @@ import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.mapper.mysql.BotFavoriteActionAddMapper;
-import com.tilitili.common.mapper.mysql.BotFavoriteMapper;
-import com.tilitili.common.mapper.mysql.BotFavoriteTalkMapper;
-import com.tilitili.common.mapper.mysql.BotItemMapper;
+import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,9 +42,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 	private final Random random;
 	private final BotUserManager botUserManager;
+	private final BotUserConfigMapper botUserConfigMapper;
+	private final FunctionTalkService functionTalkService;
 
 	@Autowired
-	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle, BotUserManager botUserManager) {
+	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle, BotUserManager botUserManager, BotUserConfigMapper botUserConfigMapper, FunctionTalkService functionTalkService) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
 		this.botUserManager = botUserManager;
@@ -56,6 +56,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
 		this.forwardMarkHandle = forwardMarkHandle;
+		this.botUserConfigMapper = botUserConfigMapper;
+		this.functionTalkService = functionTalkService;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -244,14 +246,21 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		BotFavoriteTalk favoriteTalk = filterFavoriteTalkList.get(random.nextInt(filterFavoriteTalkList.size()));
 		if (favoriteTalk.getComplexResp() != null) {
 			String resp = favoriteTalk.getComplexResp();
-			resp = this.replaceResp(messageAction, name, resp);
-			List<BotMessageNode> nodeList = forwardMarkHandle.getForwardMessageByText(botSender, resp, name);
+			// 插入好感度变动
 			if (addFavorite != 0) {
-				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(Lists.newArrayList(BotMessageChain.ofPlain(String.format("(好感度%+d)", addFavorite)))));
+				resp += String.format("(好感度%+d)", addFavorite);
 			}
+
+			// 插入好感度阶段变动
 			if (StringUtils.isNotBlank(externalText)) {
-				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(Lists.newArrayList(BotMessageChain.ofPlain(externalText))));
+				resp += externalText;
 			}
+
+			// 处理剧本
+			resp = this.replaceResp(messageAction, name, resp);
+			List<BotMessageNode> nodeList = this.getForwardMessageByText(botSender, resp, name);
+
+			// 如果剧本就一个节点，就用普通模式回答
 			if (nodeList.size() == 1) {
 				BotMessageNode node = nodeList.get(0);
 				respChainList.add(BotMessageChain.ofSpeaker(node.getSenderName()));
@@ -275,16 +284,47 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private String replaceResp(BotMessageAction messageAction, String name, String resp) {
-		BotEnum bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
+
+		String favoriteUserIdStr = botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.favoriteUserIdKey);
 
 		resp = resp.replaceAll("\\{name}", name);
 		resp = resp.replaceAll("\\{master}", botUser.getName());
-		resp = resp.replaceAll("\\{botQQ}", "1");
-		resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getQq()));
+		if (favoriteUserIdStr == null) {
+			resp = resp.replaceAll("\\{botQQ}", "1");
+		} else {
+			resp = resp.replaceAll("\\{botQQ}", favoriteUserIdStr);
+		}
+		resp = resp.replaceAll("\\{masterQQ}", String.valueOf(botUser.getId()));
 		resp = resp.replaceAll("\\{narration}", "0");
 		resp = resp.replaceAll("\\{timeTalk}", TimeUtil.getTimeTalk());
 		return resp;
+	}
+
+	public List<BotMessageNode> getForwardMessageByText(BotSender botSender, String body, String customBotName) {
+		String[] rowList = body.split("\n");
+
+		List<BotMessageNode> nodeList = new ArrayList<>();
+		for (int i = 0; i < rowList.length; i++) {
+			String row = rowList[i];
+			List<String> cellList = StringUtils.extractList("(\\d+)[：:](.+)", row);
+			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
+			long userId = Long.parseLong(cellList.get(0));
+			String text = cellList.get(1);
+			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(botSender, text);
+
+			if (userId == 0) {
+				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));
+			} else if (userId == 1) {
+				Asserts.notNull(customBotName, "啊嘞，不对劲");
+				nodeList.add(new BotMessageNode().setSenderName(customBotName).setMessageChain(botMessageChains));
+			} else {
+				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
+				Asserts.notNull(botUser, "第%s句找不到人", i);
+				nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
+			}
+		}
+		return nodeList;
 	}
 
 	private BotMessage handleStart(BotMessageAction messageAction) {

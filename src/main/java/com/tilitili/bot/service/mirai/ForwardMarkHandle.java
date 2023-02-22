@@ -34,11 +34,11 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender botSender = messageAction.getBotSender();
 		String body = messageAction.getBody();
 		Asserts.notBlank(body, "格式错啦(台本)");
-		List<BotMessageNode> nodeList = getForwardMessageByText(botSender, body, null);
+		List<BotMessageNode> nodeList = getForwardMessageByText(botSender, body);
 		return BotMessage.simpleForwardMessage(nodeList);
 	}
 
-	public List<BotMessageNode> getForwardMessageByText(BotSender botSender, String body, String customBotName) {
+	private List<BotMessageNode> getForwardMessageByText(BotSender botSender, String body) {
 		String[] rowList = body.split("\n");
 
 		List<BotMessageNode> nodeList = new ArrayList<>();
@@ -51,16 +51,9 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(botSender, text);
 
 			// 此功能只能QQ用
-			if (qq == 0) {
-				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));
-			} else if (qq == 1) {
-				Asserts.notNull(customBotName, "啊嘞，不对劲");
-				nodeList.add(new BotMessageNode().setSenderName(customBotName).setMessageChain(botMessageChains));
-			} else {
-				BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
-				Asserts.notNull(botUser, "第%s句找不到人", i);
-				nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
-			}
+			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+			Asserts.notNull(botUser, "第%s句找不到人", i);
+			nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 		}
 		return nodeList;
 	}

@@ -5,17 +5,15 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotUserConfig;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserConfigMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -23,11 +21,14 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
     private final List<String> booleanTextList = Arrays.asList("yes", "no");
     public static final String autoSellFishKey = "自动卖鱼";
     public static final String autoSellRepeatFishKey = "回收重复";
+    public static final String favoriteUserIdKey = "老婆QQ";
     private final BotUserConfigMapper botUserConfigMapper;
+    private final BotUserManager botUserManager;
 
     @Autowired
-    public ConfigHandle(BotUserConfigMapper botUserConfigMapper) {
+    public ConfigHandle(BotUserConfigMapper botUserConfigMapper, BotUserManager botUserManager) {
         this.botUserConfigMapper = botUserConfigMapper;
+        this.botUserManager = botUserManager;
     }
 
 	@Override
@@ -75,10 +76,35 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
             respList.add(e.getMessage());
         }
 
+        try {
+            String favoriteUserId = paramMap.get(favoriteUserIdKey);
+            if (favoriteUserId != null) {
+                List<Long> atList = messageAction.getAtList();
+                Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
+                if (!atList.isEmpty()) {
+                    BotUserDTO favoriteUser = botUserManager.getBotUserByIdWithParent(atList.get(0));
+                    this.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, String.valueOf(favoriteUser.getId()));
+                    respList.add("设置老婆QQ成功喵。");
+                } else {
+                    this.deleteUserConfig(userId, autoSellRepeatFishKey);
+                    respList.add("已移除老婆QQ喵。");
+                }
+            }
+        } catch (AssertException e) {
+            respList.add(e.getMessage());
+        }
+
         if (!respList.isEmpty()) {
             return BotMessage.simpleTextMessage(String.join("\n", respList));
         }
         return null;
+    }
+
+    private void deleteUserConfig(Long userId, String key) {
+        BotUserConfig userConfig = botUserConfigMapper.getBotUserConfigByUserIdAndKey(userId, key);
+        if (userConfig != null) {
+            botUserConfigMapper.deleteBotUserConfigByPrimary(userConfig.getId());
+        }
     }
 
     private void addOrUpdateUserConfig(Long userId, String key, String value) {
