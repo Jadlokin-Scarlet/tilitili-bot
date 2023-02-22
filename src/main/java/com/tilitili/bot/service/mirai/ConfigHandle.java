@@ -84,10 +84,10 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
                 Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
                 if (!atList.isEmpty()) {
                     BotUserDTO favoriteUser = botUserManager.getBotUserByIdWithParent(atList.get(0));
-                    this.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, String.valueOf(favoriteUser.getId()));
+                    this.addOrUpdateUserConfig(userId, favoriteUserIdKey, String.valueOf(favoriteUser.getId()));
                     respList.add("设置老婆QQ成功喵。");
                 } else {
-                    this.deleteUserConfig(userId, autoSellRepeatFishKey);
+                    this.deleteUserConfig(userId, favoriteUserIdKey);
                     respList.add("已移除老婆QQ喵。");
                 }
             }
