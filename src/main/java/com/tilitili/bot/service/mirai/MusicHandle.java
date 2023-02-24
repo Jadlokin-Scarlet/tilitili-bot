@@ -50,10 +50,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         List<MusicCloudSong> songList = (List<MusicCloudSong>) redisCache.getValue(redisKey);
         MusicCloudSong song = songList.get(index);
-        return BotMessage.simpleTextMessage(String.format("%s\t%s\t%s",
-                song.getName(),
-                song.getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/")),
-                song.getAlbum().getName()));
+        String owner = song.getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/"));
+        String jumpUrl = "https://y.music.163.com/m/song?id=" + song.getId();
+        String pictureUrl = song.getAlbum().getPicUrl();
+        String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
+
+        redisCache.delete(redisKey);
+        return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction) {
