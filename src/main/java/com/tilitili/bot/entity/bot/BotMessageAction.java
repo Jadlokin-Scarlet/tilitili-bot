@@ -208,6 +208,10 @@ public class BotMessageAction {
         return virtualKey;
     }
 
+    public String getVirtualKeyOrDefault(String other) {
+        return virtualKey != null? virtualKey: other;
+    }
+
     public BotMessageAction setVirtualKey(String virtualKey) {
         this.virtualKey = virtualKey;
         return this;
