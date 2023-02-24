@@ -32,8 +32,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
-            case "点歌": return handleSearch(messageAction);
             case "选歌": return handleChoose(messageAction);
+            case "点歌": return handleSearch(messageAction);
             default: throw new AssertException();
         }
     }
