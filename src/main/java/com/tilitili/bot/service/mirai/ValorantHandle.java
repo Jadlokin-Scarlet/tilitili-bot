@@ -27,7 +27,7 @@ public class ValorantHandle extends ExceptionRespMessageHandle {
             case "瓦的店铺": return handleQuertEveryDayShop(messageAction);
             case "瓦罗兰特": {
                 Asserts.notBlank(messageAction.getValue(), "格式错啦");
-                String subKey = messageAction.getValue().split("")[0];
+                String subKey = messageAction.getValue().split(" ")[0];
                 switch (subKey) {
                     case "每日商店": return handleQuertEveryDayShop(messageAction);
                     case "邮箱验证": return handleEmailVery(messageAction);
