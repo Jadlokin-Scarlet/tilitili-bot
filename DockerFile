@@ -1,4 +1,4 @@
-From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre
+From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre-with-ffmpeg
 
 #COPY SimSun.ttf /usr/share/fonts/
 #COPY SimSun.ttf /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/fonts/SimSun.ttf
@@ -11,8 +11,6 @@ COPY libAqUsrDic.so.4 /usr/lib/
 CMD ldconfig
 
 COPY silk /home/admin/silk/
-CMD chmod -R 744 lib/
-COPY lib /usr/bin/
 
 ADD target/*.jar tilitili-bot.jar
 
