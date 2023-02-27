@@ -13,8 +13,6 @@ import java.nio.file.Files;
 @Slf4j
 @Service
 public class MusicService {
-    // ffmpeg位置，最好写在配置文件中
-    String ffmpegPath = "/lib/";
     private Process process;
 
     @Async
@@ -31,7 +29,7 @@ public class MusicService {
             // cmd命令拼接，注意命令中存在空格
             String command = "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
             command += " -i " + file.getPath(); // 指定要推送的视频
-            command += " -vn -f flv rtmp://localhost/live/livestream"; // 指定推送服务器，-f：指定格式
+            command += " -vn -f flv rtmp://121.5.247.29/live/livestream"; // 指定推送服务器，-f：指定格式
             System.out.println("ffmpeg推流命令：" + command);
 
             // 运行cmd命令，获取其进程
