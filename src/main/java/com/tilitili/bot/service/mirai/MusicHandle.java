@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.BotSessionService;
+import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -10,23 +10,26 @@ import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.MusicCloudManager;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Component
 public class MusicHandle extends ExceptionRespMessageHandle {
     private final RedisCache redisCache;
     private final MusicCloudManager musicCloudManager;
+    private final MusicService musicService;
 
-    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager) {
+    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService) {
         this.redisCache = redisCache;
         this.musicCloudManager = musicCloudManager;
+        this.musicService = musicService;
     }
 
     @Override
@@ -56,6 +59,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
+        musicService.asyncPushVideoAsRTSP(musicUrl);
         return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
