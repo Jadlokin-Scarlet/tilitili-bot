@@ -29,8 +29,7 @@ public class MusicService {
                 System.out.println(">>>>>>>>>>推流视频切换<<<<<<<<<<");
             }
             // cmd命令拼接，注意命令中存在空格
-            String command = ffmpegPath; // ffmpeg位置
-            command += "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
+            String command = "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
             command += " -i " + file.getPath(); // 指定要推送的视频
             command += " -vn -f flv rtmp://localhost/live/livestream"; // 指定推送服务器，-f：指定格式
             System.out.println("ffmpeg推流命令：" + command);
