@@ -11,6 +11,7 @@ COPY libAqUsrDic.so.4 /usr/lib/
 CMD ldconfig
 
 COPY silk /home/admin/silk/
+CMD chmod -R 744 lib/
 COPY lib /usr/bin/
 
 ADD target/*.jar tilitili-bot.jar
