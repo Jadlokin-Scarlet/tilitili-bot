@@ -1,10 +1,12 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
@@ -67,14 +69,28 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         String searchKey = messageAction.getValue();
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
-        String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s\t%s\t%s",
-                index + 1,
-                songList.get(index).getName(),
-                songList.get(index).getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/")),
-                songList.get(index).getAlbum().getName()
-        )).collect(Collectors.joining("\n"));
-        redisCache.setValue("songList-"+botUser.getId(), songList, 60);
-        return BotMessage.simpleTextMessage("搜索结果如下，输入序号选择歌曲\n" + resp);
+        if (songList.size() == 1) {
+            MusicCloudSong song = songList.get(0);
+            String owner = song.getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/"));
+            String jumpUrl = "https://y.music.163.com/m/song?id=" + song.getId();
+            String pictureUrl = song.getAlbum().getPicUrl();
+            String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
+
+            musicService.asyncPushVideoAsRTSP(musicUrl);
+            return BotMessage.simpleListMessage(Lists.newArrayList(
+                    BotMessageChain.ofPlain(String.format("%s\t%s\t%s", song.getName(), owner, song.getAlbum().getName())),
+                    BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl,pictureUrl, musicUrl)
+            ));
+        } else {
+            String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s\t%s\t%s",
+                    index + 1,
+                    songList.get(index).getName(),
+                    songList.get(index).getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/")),
+                    songList.get(index).getAlbum().getName()
+            )).collect(Collectors.joining("\n"));
+            redisCache.setValue("songList-" + botUser.getId(), songList, 60);
+            return BotMessage.simpleTextMessage("搜索结果如下，输入序号选择歌曲\n" + resp);
+        }
     }
 
     @Override
