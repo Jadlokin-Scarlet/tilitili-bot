@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 
 @Slf4j
 @Service
@@ -43,6 +44,7 @@ public class MusicService {
                 System.out.println("视频推流信息[" + line + "]");
             }
             System.out.println("结果"+process.waitFor());
+            Files.deleteIfExists(file.toPath());
         } catch (Exception e) {
             log.warn("推流失败", e);
         }
