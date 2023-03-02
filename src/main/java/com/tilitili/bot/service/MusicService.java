@@ -53,19 +53,19 @@ public class MusicService {
 //            command += " -vn -f flv " + rtmpUrl; // 指定推送服务器，-f：指定格式
             // ffmpeg -re -i "/tmp/music-cloud-4397789076346411063.mp3" -vn -f flv rtp://124.222.94.228:42042?rtcpport=36767
             // ffmpeg -re -i "/tmp/music-cloud-4397789076346411063.mp3" -nostats -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:1234
-            String command = String.format("ffmpeg -re -loglevel level+info -nostats -i \"%s\" -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", file.getPath(), rtmpUrl);
+            String command = String.format("ffmpeg -re -loglevel level+info -nostats -i %s -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", file.getPath(), rtmpUrl);
             log.info("ffmpeg推流命令：" + command);
 
             // 运行cmd命令，获取其进程
             musicProcess = Runtime.getRuntime().exec(command);
             // 输出ffmpeg推流日志
             BufferedReader br= new BufferedReader(new InputStreamReader(musicProcess.getErrorStream()));
-            String line = "";
+            String line;
             while ((line = br.readLine()) != null) {
                 log.info("视频推流信息[" + line + "]");
             }
             log.info("结果"+ musicProcess.waitFor());
-            Files.deleteIfExists(file.toPath());
+//            Files.deleteIfExists(file.toPath());
         } catch (Exception e) {
             log.warn("推流失败", e);
         }
