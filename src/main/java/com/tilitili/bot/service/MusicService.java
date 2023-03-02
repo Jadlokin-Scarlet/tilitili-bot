@@ -16,12 +16,14 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
 public class MusicService {
     private Process musicProcess;
     private Long playerChannelId;
+    private String rtmpUrl;
 
     private final BotSenderMapper botSenderMapper;
     private final KhlVoiceConnector khlVoiceConnector;
@@ -35,6 +37,7 @@ public class MusicService {
     public void asyncPushVideoAsRTSP(Long senderId, String musicUrl) {
         try {
             this.checkPlayerProcess(senderId);
+            Asserts.notNull(rtmpUrl, "找不到地址");
 
             File file = File.createTempFile("music-cloud-", ".mp3");
             HttpClientUtil.downloadFile(musicUrl, file);
@@ -47,7 +50,7 @@ public class MusicService {
             // cmd命令拼接，注意命令中存在空格
             String command = "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
             command += " -i " + file.getPath(); // 指定要推送的视频
-            command += " -vn -f flv rtmp://121.5.247.29/live/livestream"; // 指定推送服务器，-f：指定格式
+            command += " -vn -f flv " + rtmpUrl; // 指定推送服务器，-f：指定格式
             log.info("ffmpeg推流命令：" + command);
 
             // 运行cmd命令，获取其进程
@@ -72,7 +75,7 @@ public class MusicService {
         }
     }
     
-    private void checkPlayerProcess(Long senderId) {
+    private void checkPlayerProcess(Long senderId) throws ExecutionException, InterruptedException {
         BotSender sourceSender = botSenderMapper.getValidBotSenderById(senderId);
         List<BotSender> otherSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setKookGuildId(sourceSender.getKookGuildId()).setStatus(0));
         BotSender ktvSender = otherSenderList.stream().filter(sender -> Objects.equals(sender.getName(), "KTV")).findFirst().orElse(null);
@@ -89,10 +92,10 @@ public class MusicService {
             khlVoiceConnector.disconnect();
         }
 
-        khlVoiceConnector.connect(channelId, () -> {
+        this.playerChannelId = channelId;
+        rtmpUrl = khlVoiceConnector.connect(channelId, () -> {
             playerChannelId = null;
             return null;
-        });
-        this.playerChannelId = channelId;
+        }).get();
     }
 }
