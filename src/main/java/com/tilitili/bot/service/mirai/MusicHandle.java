@@ -39,12 +39,26 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
             case "选歌": return handleChoose(messageAction);
             case "点歌": return handleSearch(messageAction);
+            case "切歌": return handleLast(messageAction);
+//            case "绑定KTV": return handleBindKTV(messageAction);
             default: throw new AssertException();
         }
     }
 
+//    private BotMessage handleBindKTV(BotMessageAction messageAction) {
+//        Long senderId = messageAction.getBotSender().getId();
+//        messageAction.get
+//        redisCache.setValue("MusicHandle-handleBindKTV-"+senderId, );
+//    }
+
+    private BotMessage handleLast(BotMessageAction messageAction) {
+        musicService.lastMusic();
+        return BotMessage.emptyMessage();
+    }
+
     private BotMessage handleChoose(BotMessageAction messageAction) {
         BotUserDTO botUser = messageAction.getBotUser();
+        Long senderId = messageAction.getBotSender().getId();
         String redisKey = "songList-" + botUser.getId();
         if (!redisCache.exists(redisKey)) {
             return null;
@@ -61,12 +75,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        musicService.asyncPushVideoAsRTSP(musicUrl);
+        musicService.asyncPushVideoAsRTSP(senderId, musicUrl);
         return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction) {
         BotUserDTO botUser = messageAction.getBotUser();
+        Long senderId = messageAction.getBotSender().getId();
         String searchKey = messageAction.getValue();
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
@@ -76,7 +91,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            musicService.asyncPushVideoAsRTSP(musicUrl);
+            musicService.asyncPushVideoAsRTSP(senderId, musicUrl);
             return BotMessage.simpleListMessage(Lists.newArrayList(
                     BotMessageChain.ofPlain(String.format("%s\t%s\t%s", song.getName(), owner, song.getAlbum().getName())),
                     BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl,pictureUrl, musicUrl)
