@@ -15,6 +15,7 @@ import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotIcePriceManager;
+import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.manager.GoCqhttpManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.mapper.mysql.*;
@@ -22,15 +23,18 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @SpringBootTest
@@ -58,17 +62,16 @@ class StartApplicationTest {
     private PixivCacheService pixivCacheService;
     @Autowired
     private FishConfigMapper fishConfigMapper;
+    @Resource
+    CheckManager tester;
+
+    @Test
+    public void reqCheckText() throws UnsupportedEncodingException {
+        System.out.println(tester.checkAndReplaceTextCache("みすみゆうか/わたがしうのう"));
+    }
 
     public static void main(String[] args) {
-        System.out.println(compare("石头", "剪刀"));
-        System.out.println(compare("石头", "石头"));
-        System.out.println(compare("石头", "布"));
-        System.out.println(compare("剪刀", "剪刀"));
-        System.out.println(compare("剪刀", "石头"));
-        System.out.println(compare("剪刀", "布"));
-        System.out.println(compare("布", "剪刀"));
-        System.out.println(compare("布", "石头"));
-        System.out.println(compare("布", "布"));
+        OkHttpClient client = new OkHttpClient.Builder().pingInterval(30, TimeUnit.SECONDS).build();
     }
 
     private final static Map<String, Integer> map = ImmutableMap.of("石头", 0, "剪刀", 1, "布", 2);
