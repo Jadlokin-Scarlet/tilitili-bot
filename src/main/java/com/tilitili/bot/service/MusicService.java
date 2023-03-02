@@ -1,19 +1,17 @@
 package com.tilitili.bot.service;
 
+import com.tilitili.bot.util.khl.KhlVoiceConnector;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotSenderQuery;
-import com.tilitili.common.manager.BotSenderManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.List;
@@ -23,13 +21,14 @@ import java.util.Objects;
 @Service
 public class MusicService {
     private Process musicProcess;
-    private Process playerProcess;
     private Long playerChannelId;
 
     private final BotSenderMapper botSenderMapper;
+    private final KhlVoiceConnector khlVoiceConnector;
 
-    public MusicService(BotSenderMapper botSenderMapper) {
+    public MusicService(BotSenderMapper botSenderMapper, KhlVoiceConnector khlVoiceConnector) {
         this.botSenderMapper = botSenderMapper;
+        this.khlVoiceConnector = khlVoiceConnector;
     }
 
     @Async
@@ -73,28 +72,27 @@ public class MusicService {
         }
     }
     
-    private void checkPlayerProcess(Long senderId) throws IOException {
+    private void checkPlayerProcess(Long senderId) {
         BotSender sourceSender = botSenderMapper.getValidBotSenderById(senderId);
         List<BotSender> otherSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setKookGuildId(sourceSender.getKookGuildId()).setStatus(0));
         BotSender ktvSender = otherSenderList.stream().filter(sender -> Objects.equals(sender.getName(), "KTV")).findFirst().orElse(null);
         Asserts.notNull(ktvSender, "无KTV");
         Long channelId = ktvSender.getKookChannelId();
 
-        if(playerProcess != null && playerProcess.isAlive() && Objects.equals(this.playerChannelId, channelId)) {
+        if(Objects.equals(this.playerChannelId, channelId)) {
             log.info("无需切换播放器");
             return;
         }
 
-        if (playerProcess != null) {
+        if (playerChannelId != null) {
             log.info("重启播放器");
-            playerProcess.destroy();
+            khlVoiceConnector.disconnect();
         }
-        // cmd命令拼接，注意命令中存在空格
-        String command = "/home/www/lib/khl-voice -t 1/MTMzOTY=/i2q8M4KvMWCWwndT9ask7Q== -i rtmp://121.5.247.29:1935/live/livestream -c " + channelId;
-        log.info("khl-voice命令：" + command);
 
-        // 运行cmd命令，获取其进程
-        this.playerProcess = Runtime.getRuntime().exec(command);
+        khlVoiceConnector.connect(channelId, () -> {
+            playerChannelId = null;
+            return null;
+        });
         this.playerChannelId = channelId;
     }
 }
