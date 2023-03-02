@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 public class MusicService {
+    private Process playerProcess;
     private Process musicProcess;
     private Long playerChannelId;
     private String rtmpUrl;
@@ -65,7 +66,7 @@ public class MusicService {
             while ((line = br.readLine()) != null) {
                 log.info("视频推流信息[" + line + "]");
             }
-            log.info("结果"+ musicProcess.waitFor());
+            log.info("视频推流结果"+ musicProcess.waitFor());
 //            Files.deleteIfExists(file.toPath());
         } catch (Exception e) {
             log.warn("推流失败", e);
@@ -107,13 +108,12 @@ public class MusicService {
         log.info("ffmpeg开启推流命令：" + command);
 
         // 运行cmd命令，获取其进程
-        musicProcess = Runtime.getRuntime().exec(command);
+        playerProcess = Runtime.getRuntime().exec(command);
         // 输出ffmpeg推流日志
-        BufferedReader br= new BufferedReader(new InputStreamReader(musicProcess.getErrorStream()));
+        BufferedReader br= new BufferedReader(new InputStreamReader(playerProcess.getErrorStream()));
         String line;
         while ((line = br.readLine()) != null) {
             log.info("开启推流信息[" + line + "]");
         }
-        log.info("开启推流结果"+ musicProcess.waitFor());
     }
 }
