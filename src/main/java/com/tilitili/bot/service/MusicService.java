@@ -6,6 +6,7 @@ import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -106,14 +107,7 @@ public class MusicService {
 
         String command = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
         log.info("ffmpeg开启推流命令：" + command);
-
-        // 运行cmd命令，获取其进程
-        playerProcess = Runtime.getRuntime().exec(command);
-        // 输出ffmpeg推流日志
-        BufferedReader br= new BufferedReader(new InputStreamReader(playerProcess.getErrorStream()));
-        String line;
-        while ((line = br.readLine()) != null) {
-            log.info("开启推流信息[" + line + "]");
-        }
+        Runtime.getRuntime().exec(command);
+        TimeUtil.millisecondsSleep(1000);
     }
 }
