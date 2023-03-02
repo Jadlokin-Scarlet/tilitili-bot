@@ -90,7 +90,7 @@ public class MusicService {
             playerProcess.destroy();
         }
         // cmd命令拼接，注意命令中存在空格
-        String command = "/home/admin/silk/khl-voice -t 1/MTMzOTY=/i2q8M4KvMWCWwndT9ask7Q== -i rtmp://121.5.247.29:1935/live/livestream -c " + channelId;
+        String command = "/home/www/lib/khl-voice -t 1/MTMzOTY=/i2q8M4KvMWCWwndT9ask7Q== -i rtmp://121.5.247.29:1935/live/livestream -c " + channelId;
         log.info("khl-voice命令：" + command);
 
         // 运行cmd命令，获取其进程
