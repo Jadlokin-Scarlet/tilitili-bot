@@ -48,9 +48,12 @@ public class MusicService {
                 log.info(">>>>>>>>>>推流视频切换<<<<<<<<<<");
             }
             // cmd命令拼接，注意命令中存在空格
-            String command = "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
-            command += " -i " + file.getPath(); // 指定要推送的视频
-            command += " -vn -f flv " + rtmpUrl; // 指定推送服务器，-f：指定格式
+//            String command = "ffmpeg -re"; // ffmpeg开头，-re代表按照帧率发送，在推流时必须有
+//            command += " -i \"" + file.getPath() + "\" "; // 指定要推送的视频
+//            command += " -vn -f flv " + rtmpUrl; // 指定推送服务器，-f：指定格式
+            // ffmpeg -re -i "/tmp/music-cloud-4397789076346411063.mp3" -vn -f flv rtp://124.222.94.228:42042?rtcpport=36767
+            // ffmpeg -re -i "/tmp/music-cloud-4397789076346411063.mp3" -nostats -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:1234
+            String command = String.format("ffmpeg -re -loglevel level+info -nostats -i \"%s\" -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", file.getPath(), rtmpUrl);
             log.info("ffmpeg推流命令：" + command);
 
             // 运行cmd命令，获取其进程
