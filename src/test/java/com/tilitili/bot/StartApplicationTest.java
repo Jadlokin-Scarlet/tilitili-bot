@@ -3,6 +3,7 @@ package com.tilitili.bot;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
+import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
@@ -22,6 +23,7 @@ import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Test;
@@ -63,11 +65,12 @@ class StartApplicationTest {
     @Autowired
     private FishConfigMapper fishConfigMapper;
     @Resource
-    CheckManager tester;
+    MusicService musicService;
 
     @Test
-    public void reqCheckText() throws UnsupportedEncodingException {
-        System.out.println(tester.checkAndReplaceTextCache("みすみゆうか/わたがしうのう"));
+    public void musicService() throws UnsupportedEncodingException {
+        musicService.asyncPushVideoAsRTSP(4504L, "http://music.163.com/song/media/outer/url?sc=wmv&id=28018303");
+        TimeUtil.millisecondsSleep(9999999);
     }
 
     public static void main(String[] args) {
