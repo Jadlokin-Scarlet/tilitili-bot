@@ -30,12 +30,10 @@ public class MusicService {
     private Long playerChannelId;
 
     private final BotManager botManager;
-    private final BotSenderMapper botSenderMapper;
     private final KhlVoiceConnector khlVoiceConnector;
 
-    public MusicService(BotManager botManager, BotSenderMapper botSenderMapper, KhlVoiceConnector khlVoiceConnector) {
+    public MusicService(BotManager botManager, KhlVoiceConnector khlVoiceConnector) {
         this.botManager = botManager;
-        this.botSenderMapper = botSenderMapper;
         this.khlVoiceConnector = khlVoiceConnector;
     }
 
