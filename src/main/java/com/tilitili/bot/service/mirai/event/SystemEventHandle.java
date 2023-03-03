@@ -2,9 +2,11 @@ package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -35,6 +37,9 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 
 	@Override
 	public BotMessage handleEvent(BotEnum bot, BotMessage botMessage) {
+		BotUserDTO botUser = botMessage.getBotUser();
+		Asserts.isFalse(BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId()), "系统消息屏蔽bot");
+
 		BotSender botSender = botMessage.getBotSender();
 		BotEvent botEvent = botMessage.getBotEvent();
 		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.ForwardTaskId), "无转发权限");
