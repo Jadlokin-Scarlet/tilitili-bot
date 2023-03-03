@@ -2,7 +2,10 @@ package com.tilitili.bot.service;
 
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUser;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotSenderQuery;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -15,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -23,24 +25,25 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 public class MusicService {
-    private Process playerProcess;
+//    private Process playerProcess;
     private Process musicProcess;
     private Long playerChannelId;
-    private String rtmpUrl;
 
+    private final BotManager botManager;
     private final BotSenderMapper botSenderMapper;
     private final KhlVoiceConnector khlVoiceConnector;
 
-    public MusicService(BotSenderMapper botSenderMapper, KhlVoiceConnector khlVoiceConnector) {
+    public MusicService(BotManager botManager, BotSenderMapper botSenderMapper, KhlVoiceConnector khlVoiceConnector) {
+        this.botManager = botManager;
         this.botSenderMapper = botSenderMapper;
         this.khlVoiceConnector = khlVoiceConnector;
     }
 
     @Async
-    public void asyncPushVideoAsRTSP(Long senderId, String musicUrl) {
+    public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, String musicUrl) {
         try {
-            this.checkPlayerProcess(senderId);
-            Asserts.notNull(rtmpUrl, "找不到地址");
+            this.checkPlayerProcess(botSender, botUser);
+            Asserts.notNull(playerChannelId, "启动播放器失败");
 
             File file = File.createTempFile("music-cloud-", ".mp3");
             HttpClientUtil.downloadFile(musicUrl, file);
@@ -81,12 +84,10 @@ public class MusicService {
         }
     }
     
-    private void checkPlayerProcess(Long senderId) throws ExecutionException, InterruptedException, IOException {
-        BotSender sourceSender = botSenderMapper.getValidBotSenderById(senderId);
-        List<BotSender> otherSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setKookGuildId(sourceSender.getKookGuildId()).setStatus(0));
-        BotSender ktvSender = otherSenderList.stream().filter(sender -> Objects.equals(sender.getName(), "KTV")).findFirst().orElse(null);
-        Asserts.notNull(ktvSender, "无KTV");
-        Long channelId = ktvSender.getKookChannelId();
+    private void checkPlayerProcess(BotSender botSender, BotUserDTO botUser) throws ExecutionException, InterruptedException, IOException {
+        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        Asserts.notNull(voiceSender, "未在语音频道");
+        Long channelId = voiceSender.getKookChannelId();
 
         if(Objects.equals(this.playerChannelId, channelId)) {
             log.info("无需切换播放器");
@@ -99,7 +100,7 @@ public class MusicService {
         }
 
         this.playerChannelId = channelId;
-        rtmpUrl = khlVoiceConnector.connect(channelId, () -> {
+        String rtmpUrl = khlVoiceConnector.connect(channelId, () -> {
             playerChannelId = null;
             return null;
         }).get();

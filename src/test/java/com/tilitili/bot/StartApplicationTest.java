@@ -69,8 +69,8 @@ class StartApplicationTest {
 
     @Test
     public void musicService() throws UnsupportedEncodingException {
-        musicService.asyncPushVideoAsRTSP(4504L, "http://music.163.com/song/media/outer/url?sc=wmv&id=28018303");
-        TimeUtil.millisecondsSleep(9999999);
+//        musicService.asyncPushVideoAsRTSP(4504L, "http://music.163.com/song/media/outer/url?sc=wmv&id=28018303");
+//        TimeUtil.millisecondsSleep(9999999);
     }
 
     public static void main(String[] args) {

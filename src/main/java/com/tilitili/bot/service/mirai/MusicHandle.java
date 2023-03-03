@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -58,7 +59,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleChoose(BotMessageAction messageAction) {
         BotUserDTO botUser = messageAction.getBotUser();
-        Long senderId = messageAction.getBotSender().getId();
+        BotSender botSender = messageAction.getBotSender();
         String redisKey = "songList-" + botUser.getId();
         if (!redisCache.exists(redisKey)) {
             return null;
@@ -75,13 +76,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        musicService.asyncPushVideoAsRTSP(senderId, musicUrl);
+        musicService.asyncPushVideoAsRTSP(botSender, botUser, musicUrl);
         return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction) {
         BotUserDTO botUser = messageAction.getBotUser();
-        Long senderId = messageAction.getBotSender().getId();
+        BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
@@ -91,7 +92,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            musicService.asyncPushVideoAsRTSP(senderId, musicUrl);
+            musicService.asyncPushVideoAsRTSP(botSender, botUser, musicUrl);
             return BotMessage.simpleListMessage(Lists.newArrayList(
                     BotMessageChain.ofPlain(String.format("%s\t%s\t%s", song.getName(), owner, song.getAlbum().getName())),
                     BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl,pictureUrl, musicUrl)
