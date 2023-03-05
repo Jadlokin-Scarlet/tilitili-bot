@@ -89,9 +89,8 @@ public class KhlVoiceConnector {
         String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
         log.info("ffmpeg开启推流命令：" + playerCommand);
         playerProcess = Runtime.getRuntime().exec(playerCommand);
-        TimeUtil.millisecondsSleep(1000);
 
-        musicFuture = scheduled.schedule(() -> {
+        musicFuture = scheduled.scheduleAtFixedRate(() -> {
             if (playerQueue.isEmpty()) {
                 return;
             }
@@ -117,7 +116,7 @@ public class KhlVoiceConnector {
                 FileUtil.deleteIfExists(playerMusic.getFile());
                 log.info("结束播放{}", playerMusic.getName());
             }
-        }, 1, TimeUnit.SECONDS);
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     public void lastMusic() {
