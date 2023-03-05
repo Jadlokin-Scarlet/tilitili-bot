@@ -97,7 +97,7 @@ public class KhlVoiceConnector {
             PlayerMusic playerMusic = playerQueue.poll();
             log.info("播放{}", playerMusic.getName());
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", playerMusic.getFile().getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", playerMusic.getFile().getPath());
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
