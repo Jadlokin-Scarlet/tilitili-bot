@@ -6,11 +6,13 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.MusicCloudManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,11 +31,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private final RedisCache redisCache;
     private final MusicCloudManager musicCloudManager;
     private final MusicService musicService;
+    private final BilibiliManager bilibiliManager;
 
-    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService) {
+    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
         this.redisCache = redisCache;
         this.musicCloudManager = musicCloudManager;
         this.musicService = musicService;
+        this.bilibiliManager = bilibiliManager;
     }
 
     @Override
@@ -85,6 +90,20 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
+        if (Pattern.matches("BV\\w+", searchKey)) {
+            return this.handleBilibiliSearch(botSender, botUser, searchKey);
+        } else {
+            return this.handleMusicCouldSearch(botSender, botUser, searchKey);
+        }
+    }
+
+    private BotMessage handleBilibiliSearch(BotSender botSender, BotUserDTO botUser, String bv) {
+        VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+        String videoUrl = bilibiliManager.getVideoToOSS(videoInfo.getBvid(), videoInfo.getPages().get(0).getCid());
+        return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
+    }
+
+    private BotMessage handleMusicCouldSearch(BotSender botSender, BotUserDTO botUser, String searchKey) {
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
@@ -96,7 +115,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             musicService.asyncPushVideoAsRTSP(botSender, botUser, song, musicUrl);
             return BotMessage.simpleListMessage(Lists.newArrayList(
                     BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s", song.getName(), owner, song.getAlbum().getName())),
-                    BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl,pictureUrl, musicUrl)
+                    BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl)
             ));
         } else {
             String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s%s\t%s\t%s",
