@@ -112,7 +112,7 @@ public class KhlVoiceConnector {
             } catch (Exception e) {
                 log.warn("播放列表播放异常", e);
             } finally {
-                FileUtil.deleteIfExists(playerMusic.getFile());
+//                FileUtil.deleteIfExists(playerMusic.getFile());
                 log.info("结束播放{}", playerMusic.getName());
             }
         }, 1, 2, TimeUnit.SECONDS);
