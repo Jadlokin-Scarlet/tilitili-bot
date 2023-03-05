@@ -109,7 +109,6 @@ public class KhlVoiceConnector {
                     log.info("视频推流信息[" + line + "]");
                 }
                 log.info("视频推流结果" + musicProcess.waitFor());
-                musicProcess.destroy();
             } catch (Exception e) {
                 log.warn("播放列表播放异常", e);
             } finally {
