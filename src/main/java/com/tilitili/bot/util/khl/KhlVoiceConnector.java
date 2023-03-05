@@ -68,20 +68,20 @@ public class KhlVoiceConnector {
             log.info("重启播放器");
             this.disconnect();
         }
+        if (playerProcess != null) {
+            playerProcess.destroy();
+        }
+        if (musicProcess != null) {
+            musicProcess.destroy();
+        }
+        if (musicFuture != null) {
+            musicFuture.cancel(true);
+        }
 
         this.playerChannelId = channelId;
         String rtmpUrl = this.connect(token, channelId, () -> {
             log.info("播放器关闭");
             playerChannelId = null;
-            if (playerProcess != null) {
-                playerProcess.destroy();
-            }
-            if (musicProcess != null) {
-                musicProcess.destroy();
-            }
-            if (musicFuture != null) {
-                musicFuture.cancel(true);
-            }
             return null;
         }).get();
 
