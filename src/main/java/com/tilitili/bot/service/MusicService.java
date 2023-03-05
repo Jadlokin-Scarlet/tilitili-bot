@@ -2,11 +2,12 @@ package com.tilitili.bot.service;
 
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUser;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.query.BotSenderQuery;
+import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.TimeUtil;
@@ -18,7 +19,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -31,16 +31,27 @@ public class MusicService {
 
     private final BotManager botManager;
     private final KhlVoiceConnector khlVoiceConnector;
+    private final SendMessageManager sendMessageManager;
 
-    public MusicService(BotManager botManager, KhlVoiceConnector khlVoiceConnector) {
+    public MusicService(BotManager botManager, KhlVoiceConnector khlVoiceConnector, SendMessageManager sendMessageManager) {
         this.botManager = botManager;
         this.khlVoiceConnector = khlVoiceConnector;
+        this.sendMessageManager = sendMessageManager;
     }
 
     @Async
-    public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, String musicUrl) {
+    public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String musicUrl) {
         try {
-            this.checkPlayerProcess(botSender, botUser);
+            Asserts.checkEquals(song.getFee(), 0, "KTV没有VIP喵");
+            Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
+
+            BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+            if (voiceSender == null) {
+                log.info("未在语音频道");
+                return;
+            }
+
+            this.checkPlayerProcess(voiceSender);
             Asserts.notNull(playerChannelId, "启动播放器失败");
 
             File file = File.createTempFile("music-cloud-", ".mp3");
@@ -70,6 +81,9 @@ public class MusicService {
             }
             log.info("视频推流结果"+ musicProcess.waitFor());
 //            Files.deleteIfExists(file.toPath());
+        } catch (AssertException e) {
+            log.warn("推流失败", e);
+            sendMessageManager.sendMessage(BotMessage.simpleTextMessage(e.getMessage()).setBotSender(botSender));
         } catch (Exception e) {
             log.warn("推流失败", e);
         }
@@ -82,9 +96,7 @@ public class MusicService {
         }
     }
     
-    private void checkPlayerProcess(BotSender botSender, BotUserDTO botUser) throws ExecutionException, InterruptedException, IOException {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
-        Asserts.notNull(voiceSender, "未在语音频道");
+    private void checkPlayerProcess(BotSender voiceSender) throws ExecutionException, InterruptedException, IOException {
         Long channelId = voiceSender.getKookChannelId();
 
         if(Objects.equals(this.playerChannelId, channelId)) {

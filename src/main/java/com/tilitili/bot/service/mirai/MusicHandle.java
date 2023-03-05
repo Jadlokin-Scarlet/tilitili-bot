@@ -76,7 +76,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        musicService.asyncPushVideoAsRTSP(botSender, botUser, musicUrl);
+        musicService.asyncPushVideoAsRTSP(botSender, botUser, song, musicUrl);
         return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
@@ -84,6 +84,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
+        Asserts.notBlank(searchKey, "格式错啦(搜索词)");
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
@@ -92,15 +93,16 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            musicService.asyncPushVideoAsRTSP(botSender, botUser, musicUrl);
+            musicService.asyncPushVideoAsRTSP(botSender, botUser, song, musicUrl);
             return BotMessage.simpleListMessage(Lists.newArrayList(
-                    BotMessageChain.ofPlain(String.format("%s\t%s\t%s", song.getName(), owner, song.getAlbum().getName())),
+                    BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s", song.getName(), owner, song.getAlbum().getName())),
                     BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl,pictureUrl, musicUrl)
             ));
         } else {
-            String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s\t%s\t%s",
+            String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s%s\t%s\t%s",
                     index + 1,
                     songList.get(index).getName(),
+                    songList.get(index).getFee() == 1? "（VIP）": songList.get(index).getNoCopyrightRcmd() != null? "（下架）": "",
                     songList.get(index).getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/")),
                     songList.get(index).getAlbum().getName()
             )).collect(Collectors.joining("\n"));
