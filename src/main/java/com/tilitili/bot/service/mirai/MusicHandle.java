@@ -55,11 +55,36 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 case "点歌": return handleSearch(messageAction);
                 case "切歌": return handleLast(messageAction);
     //            case "绑定KTV": return handleBindKTV(messageAction);
+                case "暂停": return handleStop(messageAction);
+                case "继续": return handleStart(messageAction);
                 default: throw new AssertException();
             }
         } finally {
             botIdLockMap.remove(messageAction.getBot().getId());
         }
+    }
+
+    private BotMessage handleStart(BotMessageAction messageAction) {
+        List<PlayerMusic> playerMusicList = musicService.startMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        if (playerMusicList == null) {
+            return null;
+        }
+        if (playerMusicList.isEmpty()) {
+            return BotMessage.simpleTextMessage("播放列表空空如也。");
+        } else {
+            return BotMessage.simpleTextMessage(String.format("即将播放[%s]。", playerMusicList.get(0).getName()));
+        }
+    }
+
+    private BotMessage handleStop(BotMessageAction messageAction) {
+        List<PlayerMusic> playerMusicList = musicService.stopMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        if (playerMusicList == null) {
+            return null;
+        }
+        if (playerMusicList.isEmpty()) {
+            return BotMessage.simpleTextMessage("已停止，无下一首。");
+        }
+        return BotMessage.simpleTextMessage(String.format("已停止，输入继续播放下一首：[%s]。", playerMusicList.get(0).getName()));
     }
 
 //    private BotMessage handleBindKTV(BotMessageAction messageAction) {
@@ -69,9 +94,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 //    }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBotSender());
-        String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-        return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        if (playerMusicList == null) {
+            return null;
+        }
+        if (playerMusicList.isEmpty()) {
+            return BotMessage.simpleTextMessage("播放列表空空如也。");
+        }
+        return BotMessage.simpleTextMessage(String.format("即将播放[%s]。", playerMusicList.get(0).getName()));
     }
 
     private BotMessage handleChoose(BotMessageAction messageAction) throws IOException {

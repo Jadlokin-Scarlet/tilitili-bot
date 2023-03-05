@@ -19,6 +19,8 @@ import java.io.InputStreamReader;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents a connector with a voice channel. <p>
@@ -34,8 +36,9 @@ public class KhlVoiceConnector {
     private Process musicProcess;
     private Process playerProcess;
     private Long playerChannelId;
-    private PlayerMusic playerMusic;
+    private PlayerMusic thePlayerMusic;
     private ScheduledFuture<?> musicFuture;
+    private boolean stop;
 
 
     public List<PlayerMusic> pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
@@ -45,10 +48,45 @@ public class KhlVoiceConnector {
             log.warn("播放器启动失败", e);
             throw new AssertException("播放器启动失败");
         }
-        List<PlayerMusic> playerMusicList = Lists.newArrayList(playerMusic, playerQueue.peek());
+
         log.info("添加播放列表{}", playerMusic.getName());
         this.playerQueue.add(playerMusic);
+        return this.getPlayerMusicList();
+    }
+
+    public List<PlayerMusic> lastMusic() {
+        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        musicProcess.destroy();
+        if (playerMusicList.size() < 2) {
+            return Collections.emptyList();
+        }
+        return playerMusicList.subList(1, playerMusicList.size());
+    }
+
+    public List<PlayerMusic> stopMusic() {
+        this.stop = true;
+        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        musicProcess.destroy();
+        if (playerMusicList.size() < 2) {
+            this.stop = false;
+            return Collections.emptyList();
+        }
+        return playerMusicList.subList(1, playerMusicList.size());
+    }
+
+    public List<PlayerMusic> startMusic() {
+        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        this.stop = false;
         return playerMusicList;
+    }
+
+    private List<PlayerMusic> getPlayerMusicList() {
+        PlayerMusic lastPlayerMusic = playerQueue.peek();
+        PlayerMusic thePlayerMusic = this.thePlayerMusic;
+        if (thePlayerMusic != null && lastPlayerMusic != null && thePlayerMusic.getFile().getPath().equals(lastPlayerMusic.getFile().getPath())) {
+            lastPlayerMusic = playerQueue.peek();
+        }
+        return Stream.of(thePlayerMusic, lastPlayerMusic).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
@@ -74,6 +112,7 @@ public class KhlVoiceConnector {
         }
 
         this.playerChannelId = channelId;
+        this.stop = false;
         String rtmpUrl = this.connect(token, channelId, () -> {
             log.info("播放器关闭");
             playerChannelId = null;
@@ -89,10 +128,13 @@ public class KhlVoiceConnector {
             if (playerQueue.isEmpty()) {
                 return;
             }
-            playerMusic = playerQueue.poll();
-            log.info("播放{}", playerMusic.getName());
+            if (stop) {
+                return;
+            }
+            thePlayerMusic = playerQueue.poll();
+            log.info("播放{}", thePlayerMusic.getName());
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", playerMusic.getFile().getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
@@ -108,16 +150,10 @@ public class KhlVoiceConnector {
                 log.warn("播放列表播放异常", e);
             } finally {
 //                FileUtil.deleteIfExists(playerMusic.getFile());
-                log.info("结束播放{}", playerMusic.getName());
-                playerMusic = null;
+                log.info("结束播放{}", thePlayerMusic.getName());
+                thePlayerMusic = null;
             }
-        }, 1, 2, TimeUnit.SECONDS);
-    }
-
-    public List<PlayerMusic> lastMusic() {
-        List<PlayerMusic> playerMusicList = new ArrayList<>(this.playerQueue);
-        musicProcess.destroy();
-        return playerMusicList;
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
 

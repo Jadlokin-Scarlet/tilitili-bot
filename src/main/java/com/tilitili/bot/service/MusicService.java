@@ -76,9 +76,37 @@ public class MusicService {
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
     }
 
-    public List<PlayerMusic> lastMusic(BotSender botSender) {
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(botSender.getBot(), key -> new KhlVoiceConnector());
+    public List<PlayerMusic> lastMusic(BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
         return khlVoiceConnector.lastMusic();
+    }
+
+    public List<PlayerMusic> stopMusic(BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        return khlVoiceConnector.stopMusic();
+    }
+
+    public List<PlayerMusic> startMusic(BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        return khlVoiceConnector.startMusic();
     }
 
 
