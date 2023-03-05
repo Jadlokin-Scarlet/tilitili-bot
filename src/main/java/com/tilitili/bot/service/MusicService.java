@@ -1,35 +1,27 @@
 package com.tilitili.bot.service;
 
+import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
-import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
-import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.FileUtil;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
 public class MusicService {
-    @Value("#{${kook.token.maps}}")
     private Map<Long, String> kookTokenMap;
 
     private final BotManager botManager;
@@ -38,6 +30,11 @@ public class MusicService {
     public MusicService(BotManager botManager) {
         this.khlVoiceConnectorMap = new HashMap<>();
         this.botManager = botManager;
+    }
+
+    @Value("#{${kook.token.maps}}")
+    public void setKookTokenMap(String kookTokenMap) {
+        this.kookTokenMap = Gsons.fromJson(kookTokenMap, new TypeToken<Map<Long, String>>(){}.getType());
     }
 
     public void pushVideoToQuote(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
@@ -81,6 +78,7 @@ public class MusicService {
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(botSender.getBot(), key -> new KhlVoiceConnector());
         khlVoiceConnector.lastMusic();
     }
+
 
 //    @Async
 //    public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) {
