@@ -5,8 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.FileUtil;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -38,22 +40,22 @@ public class KhlVoiceConnector {
 
     private static final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 
-    private final Queue<File> playerQueue = new LinkedList<>();
+    private final Queue<PlayerMusic> playerQueue = new LinkedList<>();
     private Process musicProcess;
     private Process playerProcess;
     private Long playerChannelId;
     private ScheduledFuture<?> musicFuture;
 
 
-    public void pushFileToQueue(String token, Long channelId, File file) {
+    public void pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
         try {
             this.checkPlayerProcess(token, channelId);
         } catch (Exception e) {
             log.warn("播放器启动失败", e);
             throw new AssertException("播放器启动失败");
         }
-
-        this.playerQueue.add(file);
+        log.info("添加播放列表{}", playerMusic.getName());
+        this.playerQueue.add(playerMusic);
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
@@ -90,13 +92,13 @@ public class KhlVoiceConnector {
         TimeUtil.millisecondsSleep(1000);
 
         musicFuture = scheduled.schedule(() -> {
+            if (playerQueue.isEmpty()) {
+                return;
+            }
+            PlayerMusic playerMusic = playerQueue.poll();
+            log.info("播放{}", playerMusic.getName());
             try {
-                if (playerQueue.isEmpty()) {
-                    return;
-                }
-                File file = playerQueue.poll();
-
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", file.getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", playerMusic.getFile().getPath());
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
@@ -109,9 +111,11 @@ public class KhlVoiceConnector {
                 }
                 log.info("视频推流结果" + musicProcess.waitFor());
                 musicProcess.destroy();
-                Files.deleteIfExists(file.toPath());
             } catch (Exception e) {
                 log.warn("播放列表播放异常", e);
+            } finally {
+                FileUtil.deleteIfExists(playerMusic.getFile());
+                log.info("结束播放{}", playerMusic.getName());
             }
         }, 1, TimeUnit.SECONDS);
     }

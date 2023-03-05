@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.BotManager;
@@ -51,7 +52,7 @@ public class MusicService {
 
         File file = File.createTempFile("bilibili-video-", ".mp4");
         HttpClientUtil.downloadFile(videoUrl, file);
-        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), file);
+        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
     }
 
     public void pushVideoToQuote(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
@@ -71,7 +72,7 @@ public class MusicService {
 
         File file = File.createTempFile("music-cloud-", ".mp3");
         HttpClientUtil.downloadFile(videoUrl, file);
-        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), file);
+        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
     }
 
     public void lastMusic(BotSender botSender) {
