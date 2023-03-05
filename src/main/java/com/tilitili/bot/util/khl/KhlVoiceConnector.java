@@ -116,7 +116,7 @@ public class KhlVoiceConnector {
                 FileUtil.deleteIfExists(playerMusic.getFile());
                 log.info("结束播放{}", playerMusic.getName());
             }
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 1, 2, TimeUnit.SECONDS);
     }
 
     public void lastMusic() {
