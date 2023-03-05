@@ -42,7 +42,7 @@ public class MusicService {
     @Async
     public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String musicUrl) {
         try {
-            Asserts.checkEquals(song.getFee(), 0, "KTV没有VIP喵");
+            Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
             Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
 
             BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
