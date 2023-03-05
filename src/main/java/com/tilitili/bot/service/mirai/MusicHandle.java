@@ -29,9 +29,9 @@ import java.util.stream.IntStream;
 @Component
 public class MusicHandle extends ExceptionRespMessageHandle {
     private final RedisCache redisCache;
-    private final MusicCloudManager musicCloudManager;
     private final MusicService musicService;
     private final BilibiliManager bilibiliManager;
+    private final MusicCloudManager musicCloudManager;
 
     public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
         this.redisCache = redisCache;
