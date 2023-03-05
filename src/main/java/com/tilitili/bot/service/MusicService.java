@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -26,7 +27,7 @@ public class MusicService {
     private Map<Long, String> kookTokenMap;
 
     private final BotManager botManager;
-    private Map<Long, KhlVoiceConnector> khlVoiceConnectorMap;
+    private final Map<Long, KhlVoiceConnector> khlVoiceConnectorMap;
 
     public MusicService(BotManager botManager) {
         this.khlVoiceConnectorMap = new HashMap<>();
@@ -38,11 +39,11 @@ public class MusicService {
         this.kookTokenMap = Gsons.fromJson(kookTokenMap, new TypeToken<Map<Long, String>>(){}.getType());
     }
 
-    public void pushVideoToQuote(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
         BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
-            return;
+            return null;
         }
 
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
@@ -52,17 +53,17 @@ public class MusicService {
 
         File file = File.createTempFile("bilibili-video-", ".mp4");
         HttpClientUtil.downloadFile(videoUrl, file);
-        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
     }
 
-    public void pushVideoToQuote(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
         Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
         Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
 
         BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
-            return;
+            return null;
         }
 
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
@@ -72,12 +73,12 @@ public class MusicService {
 
         File file = File.createTempFile("music-cloud-", ".mp3");
         HttpClientUtil.downloadFile(videoUrl, file);
-        khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
     }
 
-    public void lastMusic(BotSender botSender) {
+    public List<PlayerMusic> lastMusic(BotSender botSender) {
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(botSender.getBot(), key -> new KhlVoiceConnector());
-        khlVoiceConnector.lastMusic();
+        return khlVoiceConnector.lastMusic();
     }
 
 

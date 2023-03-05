@@ -1,33 +1,23 @@
 package com.tilitili.bot.util.khl;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.tilitili.common.emnus.BotEnum;
-import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.FileUtil;
-import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.security.SecureRandom;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -44,18 +34,21 @@ public class KhlVoiceConnector {
     private Process musicProcess;
     private Process playerProcess;
     private Long playerChannelId;
+    private PlayerMusic playerMusic;
     private ScheduledFuture<?> musicFuture;
 
 
-    public void pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
+    public List<PlayerMusic> pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
         try {
             this.checkPlayerProcess(token, channelId);
         } catch (Exception e) {
             log.warn("播放器启动失败", e);
             throw new AssertException("播放器启动失败");
         }
+        List<PlayerMusic> playerMusicList = Lists.newArrayList(playerMusic, playerQueue.peek());
         log.info("添加播放列表{}", playerMusic.getName());
         this.playerQueue.add(playerMusic);
+        return playerMusicList;
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
@@ -63,6 +56,8 @@ public class KhlVoiceConnector {
             log.info("无需切换播放器");
             return;
         }
+
+        Asserts.checkEmpty(this.playerQueue, "还在忙啦，别急。");
 
         if (playerChannelId != null) {
             log.info("重启播放器");
@@ -94,7 +89,7 @@ public class KhlVoiceConnector {
             if (playerQueue.isEmpty()) {
                 return;
             }
-            PlayerMusic playerMusic = playerQueue.poll();
+            playerMusic = playerQueue.poll();
             log.info("播放{}", playerMusic.getName());
             try {
                 String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", playerMusic.getFile().getPath());
@@ -114,12 +109,15 @@ public class KhlVoiceConnector {
             } finally {
 //                FileUtil.deleteIfExists(playerMusic.getFile());
                 log.info("结束播放{}", playerMusic.getName());
+                playerMusic = null;
             }
         }, 1, 2, TimeUnit.SECONDS);
     }
 
-    public void lastMusic() {
+    public List<PlayerMusic> lastMusic() {
+        List<PlayerMusic> playerMusicList = new ArrayList<>(this.playerQueue);
         musicProcess.destroy();
+        return playerMusicList;
     }
 
 

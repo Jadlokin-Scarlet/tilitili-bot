@@ -6,6 +6,7 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -67,8 +69,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 //    }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        musicService.lastMusic(messageAction.getBotSender());
-        return BotMessage.emptyMessage();
+        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBotSender());
+        String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+        return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
     }
 
     private BotMessage handleChoose(BotMessageAction messageAction) throws IOException {
@@ -90,8 +93,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
-        return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
+        if (playerMusicList == null) {
+            return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
+        } else {
+            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+        }
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction) throws IOException {
@@ -110,8 +118,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
         String videoUrl = bilibiliManager.getVideoToOSS(bv, videoInfo.getPages().get(0).getCid());
 
-        musicService.pushVideoToQuote(botSender, botUser, videoInfo, videoUrl);
-        return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, videoInfo, videoUrl);
+        if (playerMusicList == null) {
+            return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
+        } else {
+            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+        }
     }
 
     private BotMessage handleMusicCouldSearch(BotSender botSender, BotUserDTO botUser, String searchKey) throws IOException {
@@ -123,11 +136,17 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
-            return BotMessage.simpleListMessage(Lists.newArrayList(
-                    BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s", song.getName(), owner, song.getAlbum().getName())),
-                    BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl)
-            ));
+            List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
+
+            List<BotMessageChain> respList = new ArrayList<>();
+            respList.add(BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s\n", song.getName(), owner, song.getAlbum().getName())));
+            if (playerMusicList == null) {
+                respList.add(BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl));
+            } else {
+                String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+                respList.add(BotMessageChain.ofPlain(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr)));
+            }
+            return BotMessage.simpleListMessage(respList);
         } else {
             String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s%s\t%s\t%s",
                     index + 1,
