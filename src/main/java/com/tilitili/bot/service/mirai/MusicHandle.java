@@ -20,7 +20,10 @@ import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -32,6 +35,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private final MusicService musicService;
     private final BilibiliManager bilibiliManager;
     private final MusicCloudManager musicCloudManager;
+    private final ConcurrentHashMap<Long, Boolean> botIdLockMap = new ConcurrentHashMap<>();
 
     public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
         this.redisCache = redisCache;
@@ -42,12 +46,17 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-        switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
-            case "选歌": return handleChoose(messageAction);
-            case "点歌": return handleSearch(messageAction);
-            case "切歌": return handleLast(messageAction);
-//            case "绑定KTV": return handleBindKTV(messageAction);
-            default: throw new AssertException();
+        try {
+            Asserts.checkNull(botIdLockMap.putIfAbsent(messageAction.getBot().getId(), true), "听我说你先别急。");
+            switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
+                case "选歌": return handleChoose(messageAction);
+                case "点歌": return handleSearch(messageAction);
+                case "切歌": return handleLast(messageAction);
+    //            case "绑定KTV": return handleBindKTV(messageAction);
+                default: throw new AssertException();
+            }
+        } finally {
+            botIdLockMap.remove(messageAction.getBot().getId());
         }
     }
 
@@ -58,11 +67,11 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 //    }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        musicService.lastMusic();
+        musicService.lastMusic(messageAction.getBotSender());
         return BotMessage.emptyMessage();
     }
 
-    private BotMessage handleChoose(BotMessageAction messageAction) {
+    private BotMessage handleChoose(BotMessageAction messageAction) throws IOException {
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
         String redisKey = "songList-" + botUser.getId();
@@ -81,11 +90,11 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        musicService.asyncPushVideoAsRTSP(botSender, botUser, song, musicUrl);
+        musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
         return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl,pictureUrl, musicUrl);
     }
 
-    private BotMessage handleSearch(BotMessageAction messageAction) {
+    private BotMessage handleSearch(BotMessageAction messageAction) throws IOException {
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
@@ -97,15 +106,15 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
     }
 
-    private BotMessage handleBilibiliSearch(BotSender botSender, BotUserDTO botUser, String bv) {
+    private BotMessage handleBilibiliSearch(BotSender botSender, BotUserDTO botUser, String bv) throws IOException {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
         String videoUrl = bilibiliManager.getVideoToOSS(bv, videoInfo.getPages().get(0).getCid());
 
-        musicService.asyncPushVideoAsRTSP(botSender, botUser, videoInfo, videoUrl);
+        musicService.pushVideoToQuote(botSender, botUser, videoInfo, videoUrl);
         return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
     }
 
-    private BotMessage handleMusicCouldSearch(BotSender botSender, BotUserDTO botUser, String searchKey) {
+    private BotMessage handleMusicCouldSearch(BotSender botSender, BotUserDTO botUser, String searchKey) throws IOException {
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
@@ -114,7 +123,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            musicService.asyncPushVideoAsRTSP(botSender, botUser, song, musicUrl);
+            musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
             return BotMessage.simpleListMessage(Lists.newArrayList(
                     BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s", song.getName(), owner, song.getAlbum().getName())),
                     BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl)

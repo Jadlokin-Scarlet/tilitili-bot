@@ -3,6 +3,12 @@ package com.tilitili.bot.util.khl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.TimeUtil;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -10,23 +16,124 @@ import okhttp3.WebSocket;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.security.SecureRandom;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 /**
  * Represents a connector with a voice channel. <p>
  * You can use this instance again and again.
  */
-@Component
+@Slf4j
 public class KhlVoiceConnector {
     private WebSocket webSocket;
 
-    @Value("${kook.token}")
-    private String token;
+    private static final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
+
+    private final Queue<File> playerQueue = new LinkedList<>();
+    private Process musicProcess;
+    private Process playerProcess;
+    private Long playerChannelId;
+    private ScheduledFuture<?> musicFuture;
+
+
+    public void pushFileToQueue(String token, Long channelId, File file) {
+        try {
+            this.checkPlayerProcess(token, channelId);
+        } catch (Exception e) {
+            log.warn("播放器启动失败", e);
+            throw new AssertException("播放器启动失败");
+        }
+
+        this.playerQueue.add(file);
+    }
+
+    private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
+        if(Objects.equals(this.playerChannelId, channelId)) {
+            log.info("无需切换播放器");
+            return;
+        }
+
+        if (playerChannelId != null) {
+            log.info("重启播放器");
+            this.disconnect();
+        }
+
+        this.playerChannelId = channelId;
+        String rtmpUrl = this.connect(token, channelId, () -> {
+            log.info("播放器关闭");
+            playerChannelId = null;
+            if (playerProcess != null) {
+                playerProcess.destroy();
+            }
+            if (musicProcess != null) {
+                musicProcess.destroy();
+            }
+            if (musicFuture != null) {
+                musicFuture.cancel(true);
+            }
+            return null;
+        }).get();
+
+
+        String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
+        log.info("ffmpeg开启推流命令：" + playerCommand);
+        playerProcess = Runtime.getRuntime().exec(playerCommand);
+        TimeUtil.millisecondsSleep(1000);
+
+        musicFuture = scheduled.schedule(() -> {
+            try {
+                if (playerQueue.isEmpty()) {
+                    return;
+                }
+                File file = playerQueue.poll();
+
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", file.getPath());
+                log.info("ffmpeg推流命令：" + command);
+
+                // 运行cmd命令，获取其进程
+                musicProcess = Runtime.getRuntime().exec(command);
+                // 输出ffmpeg推流日志
+                BufferedReader br = new BufferedReader(new InputStreamReader(musicProcess.getErrorStream()));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    log.info("视频推流信息[" + line + "]");
+                }
+                log.info("视频推流结果" + musicProcess.waitFor());
+                musicProcess.destroy();
+                Files.deleteIfExists(file.toPath());
+            } catch (Exception e) {
+                log.warn("播放列表播放异常", e);
+            }
+        }, 1, TimeUnit.SECONDS);
+    }
+
+    public void lastMusic() {
+        musicProcess.destroy();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Call this to create connection with the channel that specified by this instance.
@@ -35,7 +142,9 @@ public class KhlVoiceConnector {
      * @return The Future representation, it contains the RTP link for you to pushing stream using ffmpeg or other program.
      * @throws IllegalStateException Thrown if something unexpected happened, is the Bot not in your guild?
      */
-    public Future<String> connect(Long channelId, Callable<Void> onDead) throws IllegalStateException {
+    private Future<String> connect(String token, Long channelId, Callable<Void> onDead) throws IllegalStateException {
+        Asserts.notNull(token, "啊嘞，不对劲");
+
         disconnect(); // make sure the connection actually dead, or something unexpected will happen?
         webSocket = null; // help GC
 
