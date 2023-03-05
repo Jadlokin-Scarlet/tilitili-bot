@@ -80,13 +80,16 @@ public class KhlVoiceConnector {
         return playerMusicList;
     }
 
+    public List<PlayerMusic> listMusic() {
+        List<PlayerMusic> playerMusicList = new ArrayList<>(playerQueue);
+        playerMusicList.add(0, thePlayerMusic);
+        return playerMusicList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
+
     private List<PlayerMusic> getPlayerMusicList() {
         PlayerMusic lastPlayerMusic = playerQueue.peek();
         PlayerMusic thePlayerMusic = this.thePlayerMusic;
-        if (thePlayerMusic != null && lastPlayerMusic != null && thePlayerMusic.getFile().getPath().equals(lastPlayerMusic.getFile().getPath())) {
-            lastPlayerMusic = playerQueue.peek();
-        }
-        return Stream.of(thePlayerMusic, lastPlayerMusic).filter(Objects::nonNull).collect(Collectors.toList());
+        return Stream.of(thePlayerMusic, lastPlayerMusic, playerQueue.peek()).filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {

@@ -57,10 +57,29 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     //            case "绑定KTV": return handleBindKTV(messageAction);
                 case "暂停": return handleStop(messageAction);
                 case "继续": return handleStart(messageAction);
+                case "播放列表": return handleList(messageAction);
                 default: throw new AssertException();
             }
         } finally {
             botIdLockMap.remove(messageAction.getBot().getId());
+        }
+    }
+
+    private BotMessage handleList(BotMessageAction messageAction) {
+        List<PlayerMusic> playerMusicList = musicService.listMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        if (playerMusicList == null) {
+            return null;
+        }
+        if (playerMusicList.isEmpty()) {
+            return BotMessage.simpleTextMessage("播放列表空空如也。");
+        } else {
+            List<String> respList = new ArrayList<>();
+            for (int index = 0; index < playerMusicList.size(); index++) {
+                PlayerMusic playerMusic = playerMusicList.get(index);
+                String indexStr = index == 0? "当前": index == 1? "下一首": String.valueOf(index);
+                respList.add(String.format("%s：%s", indexStr, playerMusic.getName()));
+            }
+            return BotMessage.simpleTextMessage(String.join("\n", respList));
         }
     }
 
