@@ -100,6 +100,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleBilibiliSearch(BotSender botSender, BotUserDTO botUser, String bv) {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
         String videoUrl = bilibiliManager.getVideoToOSS(bv, videoInfo.getPages().get(0).getCid());
+
+        musicService.asyncPushVideoAsRTSP(botSender, botUser, videoInfo, videoUrl);
         return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
     }
 
