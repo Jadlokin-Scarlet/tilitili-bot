@@ -37,7 +37,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private final MusicService musicService;
     private final BilibiliManager bilibiliManager;
     private final MusicCloudManager musicCloudManager;
-    private final ConcurrentHashMap<Long, Boolean> botIdLockMap = new ConcurrentHashMap<>();
+    private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 
     public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
         this.redisCache = redisCache;
@@ -49,7 +49,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         try {
-            Asserts.checkNull(botIdLockMap.putIfAbsent(messageAction.getBot().getId(), true), "听我说你先别急。");
+            Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
             switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
                 case "选歌": return handleChoose(messageAction);
                 case "点歌": return handleSearch(messageAction);
@@ -61,7 +61,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 default: throw new AssertException();
             }
         } finally {
-            botIdLockMap.remove(messageAction.getBot().getId());
+            lockFlag.set(false);
         }
     }
 
