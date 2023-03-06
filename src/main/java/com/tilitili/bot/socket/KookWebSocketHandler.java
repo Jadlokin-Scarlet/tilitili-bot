@@ -32,7 +32,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
                 botService.testHandleMessage(bot, message);
                 break;
             }
-            case 1: case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 30, TimeUnit.SECONDS); break;
+            case 1: case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 20, TimeUnit.SECONDS); break;
             default: log.warn("记录s="+ kookData.getS());
         }
     }
