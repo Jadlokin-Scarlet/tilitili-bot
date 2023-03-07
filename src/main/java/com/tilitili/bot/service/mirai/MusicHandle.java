@@ -156,8 +156,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
-        if (Pattern.matches("BV\\w+", searchKey)) {
-            return this.handleBilibiliSearch(botSender, botUser, searchKey);
+
+        String bv = StringUtils.patten1("(BV\\w{10})", searchKey);
+        if (StringUtils.isNotBlank(bv)) {
+            return this.handleBilibiliSearch(botSender, botUser, bv);
         } else {
             return this.handleMusicCouldSearch(botSender, botUser, searchKey);
         }
