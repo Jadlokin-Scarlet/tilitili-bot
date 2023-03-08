@@ -49,7 +49,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         String redisKey = ReplyHandle.timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
         Long theTimeNum = redisCache.increment(redisKey, 1L);
         redisCache.expire(redisKey, 60 * 60 * 24);
-        if (theTimeNum >= 1) {
+        if (theTimeNum > 1) {
             return BotMessage.simpleTextMessage("不要太贪心哦。");
         }
 
