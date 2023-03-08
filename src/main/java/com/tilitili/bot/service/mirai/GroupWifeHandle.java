@@ -14,10 +14,7 @@ import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -54,7 +53,10 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         }
 
         List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
-        List<BotUserDTO> userList = mappingList.stream().map(BotUserSenderMapping::getUserId).map(botUserManager::getBotUserByIdWithParent).filter(Objects::nonNull).collect(Collectors.toList());
+        List<BotUserDTO> userList = mappingList.stream()
+                .map(BotUserSenderMapping::getUserId).filter(Predicate.isEqual(botUser.getId()).negate())
+                .map(botUserManager::getBotUserByIdWithParent)
+                .filter(Objects::nonNull).collect(Collectors.toList());
         BotUserDTO wifeUser = userList.get(ThreadLocalRandom.current().nextInt(userList.size()));
         String resp = String.format("你今天的群老婆是：%s(%s)", wifeUser.getName(), wifeUser.getQq());
         String image = wifeUser.getFace();
