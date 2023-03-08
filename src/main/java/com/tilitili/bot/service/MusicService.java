@@ -53,6 +53,8 @@ public class MusicService {
 
         File file = File.createTempFile("bilibili-video-", ".mp4");
         HttpClientUtil.downloadFile(videoUrl, file);
+        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",videoView.getBvid());
+        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",videoView.getBvid());
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
     }
 
@@ -73,6 +75,8 @@ public class MusicService {
 
         File file = File.createTempFile("music-cloud-", ".mp3");
         HttpClientUtil.downloadFile(videoUrl, file);
+        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",song.getName());
+        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",song.getName());
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
     }
 
