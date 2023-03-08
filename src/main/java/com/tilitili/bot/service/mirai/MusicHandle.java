@@ -38,9 +38,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
         this.redisCache = redisCache;
-        this.musicCloudManager = musicCloudManager;
         this.musicService = musicService;
         this.bilibiliManager = bilibiliManager;
+        this.musicCloudManager = musicCloudManager;
     }
 
     @Override
