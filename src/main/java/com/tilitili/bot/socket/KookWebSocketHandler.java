@@ -29,7 +29,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
         switch (kookData.getS()) {
             case 0: {
                 this.sn = kookData.getSn() == null ? 0 : kookData.getSn();
-                botService.testHandleMessage(bot, message);
+                botService.syncHandleMessage(bot, message);
                 break;
             }
             case 1: case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 20, TimeUnit.SECONDS); break;
