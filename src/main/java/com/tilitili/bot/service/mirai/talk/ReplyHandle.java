@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 
 @Component
 public class ReplyHandle extends ExceptionRespMessageHandle {
-    private final String timeNumKey = "ReplyHandle.timeNum";
+    public static final String timeNumKey = "ReplyHandle.timeNum";
     @Value("${mirai.master-qq}")
     private Long MASTER_QQ;
     private final BotTalkManager botTalkManager;
@@ -79,7 +79,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
             BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
             functionTalkService.supplementChain(bot, botSender, respMessage);
-            String redisKey = timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
+            String redisKey = timeNumKey + "-" + botFunction.getFunction() + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
             Long theTimeNum = redisCache.increment(redisKey, 1L);
             redisCache.expire(redisKey, 60 * 60 * 24);
             if (theTimeNum > botFunction.getTimeNum()) {
