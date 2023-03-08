@@ -57,8 +57,8 @@ public class BotService {
         this.botTaskMapper = botTaskMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botMessageRecordManager = botMessageRecordManager;
-        this.botSenderTaskMappingManager = botSenderTaskMappingManager;
         this.botMessageRecordMapper = botMessageRecordMapper;
+        this.botSenderTaskMappingManager = botSenderTaskMappingManager;
         gson = new Gson();
 
         this.eventHandleMap = eventHandleList.stream().collect(Collectors.toMap(BaseEventHandle::getEventType, Function.identity()));
