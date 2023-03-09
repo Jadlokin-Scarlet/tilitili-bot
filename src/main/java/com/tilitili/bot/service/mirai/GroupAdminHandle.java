@@ -18,6 +18,7 @@ import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -56,12 +57,13 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 		BotAdminStatistics adminStatistics = botAdminStatisticsMapper.getBotAdminStatisticsBySenderIdAndUserId(botSender.getId(), botUser.getId());
 		if (adminStatistics != null) {
-			Asserts.isTrue(adminStatistics.getCreateTime().before(DateUtils.getCurrentDay()), "今天已经投过票啦");
+			Asserts.isTrue(adminStatistics.getUpdateTime().before(DateUtils.getCurrentDay()), "今天已经投过票啦，不能反悔哦，明天再来吧。");
 		}
 
 		Asserts.notEmpty(atList, "谁?");
 		Asserts.checkEquals(atList.size(), 1, "不要太贪心哦。");
 		Long atUserId = atList.get(0);
+		BotUserDTO atUser = botUserManager.getBotUserByIdWithParent(atUserId);
 
 		if (adminStatistics != null) {
 			botAdminStatisticsMapper.updateBotAdminStatisticsSelective(new BotAdminStatistics().setId(adminStatistics.getId()).setTargetUserId(atUserId));
@@ -73,14 +75,26 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		Map<Long, Long> statisticsMap = adminStatisticsList.stream().map(BotAdminStatistics::getTargetUserId).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 
+		StringBuilder respBuilder = new StringBuilder();
+		respBuilder.append(String.format("投票成功，%s票数+1(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
+		if (adminStatistics != null) {
+			BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(adminStatistics.getTargetUserId());
+			respBuilder.append(String.format("，%s票数-1(当前%s)", oldTargetUser.getName(), statisticsMap.getOrDefault(oldTargetUser.getId(), 0L)));
+		}
+		respBuilder.append("。\n");
+
 		if (sortedStatisticsList.isEmpty()) {
-			return BotMessage.simpleTextMessage("投票成功，但是还没有人票数达标。");
+			respBuilder.append("还没有人票数达标。");
+		} else {
+			String adminList = sortedStatisticsList.stream().map(e -> {
+				BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(e.getKey());
+				return String.format("%s(%s票)", adminUser.getName(), e.getValue());
+			}).collect(Collectors.joining(","));
+
+			respBuilder.append(String.format("下一届管理员为：%s", adminList));
 		}
 
-		return BotMessage.simpleTextMessage("投票成功，下一届管理员为：" + sortedStatisticsList.stream().map(e -> {
-			BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(e.getKey());
-			return String.format("%s(%s票)", adminUser.getName(), e.getValue());
-		}).collect(Collectors.joining(",")));
+		return BotMessage.simpleTextMessage(respBuilder.toString()).setQuote(messageAction.getMessageId());
 	}
 
 	private BotMessage handleAdmin(BotMessageAction messageAction) {
