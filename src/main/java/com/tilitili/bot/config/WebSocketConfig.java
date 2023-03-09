@@ -32,15 +32,13 @@ import java.util.List;
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final BotService botService;
     private final BotManager botManager;
-    private final MiraiManager miraiManager;
     private final SendMessageManager sendMessageManager;
     private final List<BaseWebSocketHandler> botWebSocketHandlerList;
 
     @Autowired
-    public WebSocketConfig(BotService botService, BotManager botManager, MiraiManager miraiManager, SendMessageManager sendMessageManager) {
+    public WebSocketConfig(BotService botService, BotManager botManager, SendMessageManager sendMessageManager) {
         this.sendMessageManager = sendMessageManager;
         botWebSocketHandlerList = new ArrayList<>();
-        this.miraiManager = miraiManager;
         this.botService = botService;
         this.botManager = botManager;
     }
@@ -52,13 +50,6 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
-
-                if (BotEnum.TYPE_MIRAI.equals(bot.getType())) {
-                    String eventWsUrl = miraiManager.getEventWebSocketUrl(bot);
-                    BotEventWebSocketHandler botEventWebSocketHandler = new BotEventWebSocketHandler(new URI(eventWsUrl), bot, botService);
-                    botEventWebSocketHandler.connect();
-                    botWebSocketHandlerList.add(botEventWebSocketHandler);
-                }
             } catch (AssertException e) {
                 log.warn("断言异常", e);
             } catch (Exception e) {

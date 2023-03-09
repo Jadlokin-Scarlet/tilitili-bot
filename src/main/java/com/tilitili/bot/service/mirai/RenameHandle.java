@@ -11,6 +11,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RenameHandle extends ExceptionRespMessageHandle {
     private final int waitTime = 10;
-    private final Long listenGroup = GroupEnum.QIAN_QIAN_GROUP.value;
+    private final BotSender listenGroup;
 
     private final String statusKey = "rename.status";
     private final String lastSendTimeKey = "rename.last_send_time";
@@ -34,8 +35,9 @@ public class RenameHandle extends ExceptionRespMessageHandle {
     private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 
     @Autowired
-    public RenameHandle(BotManager botManager) {
+    public RenameHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
         this.botManager = botManager;
+        this.listenGroup = botSenderMapper.getValidBotSenderById(3445L);
     }
 
 	@Override
@@ -52,10 +54,10 @@ public class RenameHandle extends ExceptionRespMessageHandle {
             String lastSendTimeStr = session.get(lastSendTimeKey);
             boolean isUp = lastSendTimeStr == null || DateUtils.parseDateYMDHMS(lastSendTimeStr).before(getLimitDate());
             if (status.equals("冒泡！") && !isUp) {
-                botManager.changeGroupNick(bot, listenGroup, botUser.getQq(), name + " | 水群ing");
+                botManager.changeGroupNick(bot, listenGroup, botUser, name + " | 水群ing");
                 session.put(statusKey, "水群ing");
             } else if (isUp) {
-                botManager.changeGroupNick(bot, listenGroup, botUser.getQq(), name + " | 冒泡！");
+                botManager.changeGroupNick(bot, listenGroup, botUser, name + " | 冒泡！");
                 session.put(statusKey, "冒泡！");
             }
 
@@ -63,7 +65,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
                 String lastSendTime2Str = session.get(lastSendTimeKey);
                 boolean isDown = lastSendTime2Str == null || DateUtils.parseDateYMDHMS(lastSendTime2Str).before(getLimitDate());
                 if (isDown) {
-                    botManager.changeGroupNick(bot, listenGroup, botUser.getQq(), name + " | 潜水。");
+                    botManager.changeGroupNick(bot, listenGroup, botUser, name + " | 潜水。");
                     session.put(statusKey, "潜水。");
                 }
             }, waitTime, TimeUnit.MINUTES);

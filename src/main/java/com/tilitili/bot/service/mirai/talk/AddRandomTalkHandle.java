@@ -83,7 +83,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private BotMessage handleRandomTalkFile(BotMessageAction messageAction, BotMessageChain fileChain) {
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
-		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
+		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender(), fileId);
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
@@ -162,7 +162,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private BotMessage handleFishFile(BotMessageAction messageAction, BotMessageChain fileChain) {
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
-		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender().getGroup(), fileId);
+		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender(), fileId);
 		ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
 		List<FishConfigDTO> resultList = excelResult.getResultList();
 		log.info("{}", resultList);

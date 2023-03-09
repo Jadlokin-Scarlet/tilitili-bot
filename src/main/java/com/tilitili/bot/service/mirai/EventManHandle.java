@@ -8,6 +8,7 @@ import com.tilitili.bot.service.mirai.event.InvitedJoinGroupEventHandle;
 import com.tilitili.bot.service.mirai.event.MemberJoinRequestEventHandle;
 import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
@@ -18,12 +19,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventManHandle extends ExceptionRespMessageHandle {
 	private final RedisCache redisCache;
-	private final MiraiManager miraiManager;
+	private final BotManager botManager;
 
 	@Autowired
-	public EventManHandle(RedisCache redisCache, MiraiManager miraiManager) {
+	public EventManHandle(RedisCache redisCache, BotManager botManager) {
 		this.redisCache = redisCache;
-		this.miraiManager = miraiManager;
+		this.botManager = botManager;
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 		BotEnum bot = messageAction.getBot();
 		if (redisCache.exists(FriendRequestEventHandle.newFriendKey)) {
 			BotMessage botMessage = (BotMessage) redisCache.getValue(FriendRequestEventHandle.newFriendKey);
-			miraiManager.handleMiraiNewFriendRequestEvent(bot, botMessage);
+			botManager.handleFriendRequestEvent(bot, botMessage);
 			redisCache.delete(FriendRequestEventHandle.newFriendKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
@@ -52,7 +53,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 		BotEnum bot = messageAction.getBot();
 		if (redisCache.exists(InvitedJoinGroupEventHandle.newGroupKey)) {
 			BotMessage botMessage = (BotMessage) redisCache.getValue(InvitedJoinGroupEventHandle.newGroupKey);
-			miraiManager.handleMiraiBotInvitedJoinGroupRequestEvent(bot, botMessage);
+			botManager.handleInvitedJoinGroupEvent(bot, botMessage);
 			redisCache.delete(InvitedJoinGroupEventHandle.newGroupKey);
 			return BotMessage.simpleTextMessage("好的");
 		}
@@ -66,7 +67,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 		String key = StringUtils.isBlank(value) ? MemberJoinRequestEventHandle.newMemberKey : MemberJoinRequestEventHandle.newMemberKey + "-" + value;
 		if (session.containsKey(key)) {
 			BotMessage botMessage = Gsons.fromJson(session.get(key), BotMessage.class);
-			miraiManager.handleMiraiMemberJoinRequestEvent(bot, botMessage);
+			botManager.handleMemberJoinRequestEvent(bot, botMessage);
 			session.remove(key);
 			session.remove(MemberJoinRequestEventHandle.newMemberKey);
 			return BotMessage.simpleTextMessage("好的");
