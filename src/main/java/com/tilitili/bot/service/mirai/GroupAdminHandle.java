@@ -105,7 +105,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotSender botSender = messageAction.getBotSender();
 		List<Long> atList = messageAction.getAtList();
 
-		if (BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
+		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
 			return null;
 		}
 
@@ -123,7 +123,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotSender botSender = messageAction.getBotSender();
 		List<Long> atList = messageAction.getAtList();
 
-		if (BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
+		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
 			return null;
 		}
 
