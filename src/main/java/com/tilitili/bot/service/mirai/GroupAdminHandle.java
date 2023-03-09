@@ -18,10 +18,7 @@ import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -76,10 +73,15 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 
 		StringBuilder respBuilder = new StringBuilder();
-		respBuilder.append(String.format("投票成功，%s票数+1(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
-		if (adminStatistics != null) {
-			BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(adminStatistics.getTargetUserId());
-			respBuilder.append(String.format("，%s票数-1(当前%s)", oldTargetUser.getName(), statisticsMap.getOrDefault(oldTargetUser.getId(), 0L)));
+		respBuilder.append("投票成功");
+		if (adminStatistics != null && Objects.equals(adminStatistics.getTargetUserId(), atUserId)) {
+			respBuilder.append(String.format("，%s票数+0(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
+		} else {
+			respBuilder.append(String.format("，%s票数+1(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
+			if (adminStatistics != null) {
+				BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(adminStatistics.getTargetUserId());
+				respBuilder.append(String.format("，%s票数-1(当前%s)", oldTargetUser.getName(), statisticsMap.getOrDefault(oldTargetUser.getId(), 0L)));
+			}
 		}
 		respBuilder.append("。\n");
 
