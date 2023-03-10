@@ -39,7 +39,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         String body = messageAction.getBodyOrDefault(messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
-        List<Long> atList = messageAction.getAtList();
+        List<BotUserDTO> atList = messageAction.getAtList();
         String sendType = botSender.getSendType();
 
         Asserts.notBlank(body, "格式错啦(正文)");
@@ -62,12 +62,12 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
         log.info("day={} a={} hour={} minute={} somebody={} something={}", day, a, hour, minute, somebody, something);
         boolean isAtOther = Objects.equals(somebody, "提醒");
-        List<Long> respAtList = new ArrayList<>();
+        List<BotUserDTO> respAtList = new ArrayList<>();
         if (isAtOther) {
             Asserts.notEmpty(atList, "提醒的话就要at要提醒的人哦");
             respAtList.addAll(atList);
         } else if (!SendTypeEnum.FRIEND_MESSAGE_STR.equals(sendType)) {
-            respAtList.add(botUser.getId());
+            respAtList.add(botUser);
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -87,7 +87,7 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
         }
         calendar.set(Calendar.SECOND, 0);
 
-        String atListStr = respAtList.isEmpty()? null: respAtList.stream().map(String::valueOf).collect(Collectors.joining(","));
+        String atListStr = respAtList.isEmpty()? null: respAtList.stream().map(BotUserDTO::getId).map(String::valueOf).collect(Collectors.joining(","));
         BotCalendar botCalendar = new BotCalendar().setSendTime(calendar.getTime()).setText(AESUtils.encrypt(something)).setAtList(atListStr).setSenderId(botSender.getId());
         botCalendarMapper.addBotCalendarSelective(botCalendar);
 

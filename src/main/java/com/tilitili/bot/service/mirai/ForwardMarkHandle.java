@@ -53,7 +53,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			// 此功能只能QQ用
 			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
 			Asserts.notNull(botUser, "第%s句找不到人", i);
-			nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
+			nodeList.add(new BotMessageNode().setUser(botUser).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 		}
 		return nodeList;
 	}

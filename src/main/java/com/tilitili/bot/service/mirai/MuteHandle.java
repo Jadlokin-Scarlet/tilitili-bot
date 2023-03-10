@@ -31,12 +31,12 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotEnum bot = messageAction.getBot();
 		String key = messageAction.getKeyWithoutPrefix();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 		BotSender botSender = messageAction.getBotSender();
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEnum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
 		Asserts.notEmpty(atList, "格式不对喵(at)");
-		Long atUserId = atList.get(0);
-		BotUserDTO atUser = botUserManager.getBotUserByIdWithParent(atUserId);
+		BotUserDTO atUser = atList.get(0);
+		Long atUserId = atUser.getId();
 
 		if ("禁言".equals(key)) {
 			String timeStr = messageAction.getValueOrDefault("60");

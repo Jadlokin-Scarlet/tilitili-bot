@@ -36,12 +36,12 @@ public class SpecialTitleHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		String specialTitle = messageAction.getValue();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 		Asserts.notBlank(specialTitle, "格式错啦(头衔)");
 		Asserts.checkEquals(botSender.getSendType(), SendTypeEnum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
 
 		if (CollectionUtils.isNotEmpty(atList)) {
-			botUser = botUserManager.getBotUserByIdWithParent(atList.get(0));
+			botUser = atList.get(0);
 		}
 		specialTitle = checkManager.checkAndReplaceTextCache(specialTitle);
 		botManager.changeMemberInfo(bot, botSender, botUser, null, specialTitle);

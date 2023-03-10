@@ -319,9 +319,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 				Asserts.notNull(customBotName, "啊嘞，不对劲");
 				nodeList.add(new BotMessageNode().setSenderName(customBotName).setMessageChain(botMessageChains));
 			} else {
-				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(userId);
+				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), userId);
 				Asserts.notNull(botUser, "第%s句找不到人", i);
-				nodeList.add(new BotMessageNode().setUserId(botUser.getId()).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
+				nodeList.add(new BotMessageNode().setUser(botUser).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 			}
 		}
 		return nodeList;

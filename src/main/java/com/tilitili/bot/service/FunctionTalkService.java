@@ -67,7 +67,7 @@ public class FunctionTalkService {
 				String externalId = StringUtils.patten1(",qq=(\\d+|all)", cq);
 				if (!Objects.equals(externalId, "all")) {
 					BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, Long.valueOf(externalId));
-					botMessageChain.add(BotMessageChain.ofAt(botUser.getId()));
+					botMessageChain.add(BotMessageChain.ofAt(botUser));
 				}
 				break;
 			}
@@ -75,13 +75,13 @@ public class FunctionTalkService {
 			case "memberName": {
 				Long externalId = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
 				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, externalId);
-				botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(botUser.getId()));
+				botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(botUser));
 				break;
 			}
 			case "portrait": {
 				Long externalId = Long.valueOf(StringUtils.patten1(",qq=([0-9\\-]+)", cq));
 				BotUserDTO botUser = botManager.addOrUpdateBotUser(bot, botSender, externalId);
-				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser.getId()));
+				botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(botUser));
 				break;
 			}
 			case "enter": botMessageChain.add(BotMessageChain.ofPlain("\n"));
@@ -93,7 +93,7 @@ public class FunctionTalkService {
 		for (BotMessageChain botMessageChain : botMessageChainList) {
 			switch (botMessageChain.getType()) {
 				case "memberName": {
-					BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botMessageChain.getTarget());
+					BotUserDTO botUser = botMessageChain.getTarget();
 					Asserts.notNull(botUser, "啊嘞，不对劲");
 					Asserts.notNull(botUser.getName(), "查无此人");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_PLAIN);
@@ -101,7 +101,7 @@ public class FunctionTalkService {
 					break;
 				}
 				case "portrait": {
-					BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botMessageChain.getTarget());
+					BotUserDTO botUser = botMessageChain.getTarget();
 					Asserts.notNull(botUser, "啊嘞，不对劲");
 					Asserts.notNull(botUser.getFace(), "查无此人");
 					botMessageChain.setType(BotMessage.MESSAGE_TYPE_IMAGE);

@@ -33,9 +33,7 @@ public class TwentyOneTable {
 	public static final String BOOM_CARD = "时运不济";
 	private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 	private final static Random random = new Random(System.currentTimeMillis());
-	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
-	private final BotManager botManager;
 	private final SendMessageManager sendMessageManager;
 	private final Long tableId;
 	private String status;
@@ -44,10 +42,8 @@ public class TwentyOneTable {
 	private final TwentyOneAdmin admin;
 	private Long waitPeoplePrepareId;
 
-	public TwentyOneTable(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, SendMessageManager sendMessageManager, BotMessageAction messageAction) {
-		this.botUserMapper = botUserMapper;
+	public TwentyOneTable(BotUserManager botUserManager, SendMessageManager sendMessageManager, BotMessageAction messageAction) {
 		this.botUserManager = botUserManager;
-		this.botManager = botManager;
 		this.sendMessageManager = sendMessageManager;
 		this.tableId = messageAction.getBotSender().getId();
 		this.status = STATUS_WAIT;
@@ -215,7 +211,7 @@ public class TwentyOneTable {
 		}
 		result.add(BotMessageChain.ofPlain("\n"));
 		if (!Objects.equals(botMessage.getBotSender().getSendType(), SendTypeEnum.FRIEND_MESSAGE_STR)) {
-			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser().getId()));
+			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser()));
 		}
 		List<String> chooseList = Lists.newArrayList("进货", "摆烂");
 		if (nowTwentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
@@ -244,7 +240,7 @@ public class TwentyOneTable {
 			admin.addCard(cardList.remove());
 		}
 		List<BotMessageChain> resp = new ArrayList<>();
-		String adminStr = String.format("%s (%s)", admin.toString(), adminCardResult);
+		String adminStr = String.format("%s (%s)", admin, adminCardResult);
 		resp.add(BotMessageChain.ofPlain(adminStr));
 		// 对比
 		for (TwentyOnePlayer player : gamingPlayerList) {
@@ -254,7 +250,7 @@ public class TwentyOneTable {
 				String cardListStr = twentyOneCardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
 				String playerStr = String.format("\n%s：%s (%s) (%s分)", player.getBotUser().getName(), cardListStr, playerResult, subScore > 0? "+" + subScore: "" + subScore);
 				resp.add(BotMessageChain.ofPlain(playerStr));
-				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(player.getBotUser().getId());
+				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(tableId, player.getBotUser().getId());
 				try {
 					botUserManager.safeUpdateScore(botUser, subScore + twentyOneCardList.getScore());
 				} catch (Exception e) {
@@ -264,7 +260,7 @@ public class TwentyOneTable {
 		}
 		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();
 		for (TwentyOnePlayer player : this.playerList) {
-			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(player.getBotUser().getId());
+			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(tableId, player.getBotUser().getId());
 			if (botUser.getScore() > 0) newPlayerList.add(player);
 		}
 		if (newPlayerList.isEmpty()) {

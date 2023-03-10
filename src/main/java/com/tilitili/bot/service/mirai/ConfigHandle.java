@@ -91,10 +91,10 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
 
         try {
             if (paramMap.containsKey(favoriteUserIdKey)) {
-                List<Long> atList = messageAction.getAtList();
+                List<BotUserDTO> atList = messageAction.getAtList();
                 Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
                 if (!atList.isEmpty()) {
-                    BotUserDTO favoriteUser = botUserManager.getBotUserByIdWithParent(atList.get(0));
+                    BotUserDTO favoriteUser = atList.get(0);
                     this.addOrUpdateUserConfig(userId, favoriteUserIdKey, String.valueOf(favoriteUser.getId()));
                     respList.add("设置老婆QQ成功喵。");
                 } else {

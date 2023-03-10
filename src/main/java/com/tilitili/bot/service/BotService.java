@@ -12,6 +12,7 @@ import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -109,7 +110,8 @@ public class BotService {
             lockUserId.add(botMessage.getBotUser().getId());
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
-            for (Long atUserId : botMessageAction.getAtList()) {
+            for (BotUserDTO atUser : botMessageAction.getAtList()) {
+                Long atUserId = atUser.getId();
                 if (Objects.equals(atUserId, botMessage.getBotUser().getId())) continue;
                 Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
                 lockUserId.add(atUserId);

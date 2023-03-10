@@ -50,7 +50,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 
 		BotAdminStatistics adminStatistics = botAdminStatisticsMapper.getBotAdminStatisticsBySenderIdAndUserId(botSender.getId(), botUser.getId());
 		if (adminStatistics != null) {
@@ -59,8 +59,8 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 		Asserts.notEmpty(atList, "谁?");
 		Asserts.checkEquals(atList.size(), 1, "不要太贪心哦。");
-		Long atUserId = atList.get(0);
-		BotUserDTO atUser = botUserManager.getBotUserByIdWithParent(atUserId);
+		BotUserDTO atUser = atList.get(0);
+		Long atUserId = atUser.getId();
 
 		if (adminStatistics != null) {
 			botAdminStatisticsMapper.updateBotAdminStatisticsSelective(new BotAdminStatistics().setId(adminStatistics.getId()).setTargetUserId(atUserId));
@@ -79,7 +79,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		} else {
 			respBuilder.append(String.format("，%s票数+1(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
 			if (adminStatistics != null) {
-				BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(adminStatistics.getTargetUserId());
+				BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), adminStatistics.getTargetUserId());
 				respBuilder.append(String.format("，%s票数-1(当前%s)", oldTargetUser.getName(), statisticsMap.getOrDefault(oldTargetUser.getId(), 0L)));
 			}
 		}
@@ -89,7 +89,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 			respBuilder.append("还没有人票数达标。");
 		} else {
 			String adminList = sortedStatisticsList.stream().map(e -> {
-				BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(e.getKey());
+				BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), e.getKey());
 				return String.format("%s(%s票)", adminUser.getName(), e.getValue());
 			}).collect(Collectors.joining(","));
 
@@ -103,15 +103,14 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotEnum bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 
 		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
 			return null;
 		}
 
 		Asserts.notEmpty(atList, "谁?");
-		for (Long userId : atList) {
-			BotUserDTO atBotUser = botUserManager.getBotUserByIdWithParent(userId);
+		for (BotUserDTO atBotUser : atList) {
 			botManager.setMemberAdmin(bot, botSender, atBotUser, true);
 		}
 		return BotMessage.simpleTextMessage("好了喵。");
@@ -121,15 +120,14 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotEnum bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 
 		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
 			return null;
 		}
 
 		Asserts.notEmpty(atList, "谁?");
-		for (Long userId : atList) {
-			BotUserDTO atBotUser = botUserManager.getBotUserByIdWithParent(userId);
+		for (BotUserDTO atBotUser : atList) {
 			botManager.setMemberAdmin(bot, botSender, atBotUser, false);
 		}
 		return BotMessage.simpleTextMessage("好了喵。");

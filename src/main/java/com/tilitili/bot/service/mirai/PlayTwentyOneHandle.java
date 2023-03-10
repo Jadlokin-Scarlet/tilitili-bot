@@ -281,7 +281,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		Long playerId = botUser.getId();
 		TwentyOneTable twentyOneTable = tableMap.get(tableId);
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, sendMessageManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserManager, sendMessageManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 		Asserts.isTrue(twentyOneTable.getPlayerList().size() < 1, "人数爆满啦，稍后再来吧。");
@@ -322,7 +322,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		if (twentyOneTable == null) {
-			twentyOneTable = new TwentyOneTable(botUserMapper, botUserManager, botManager, sendMessageManager, messageAction);
+			twentyOneTable = new TwentyOneTable(botUserManager, sendMessageManager, messageAction);
 			tableMap.put(tableId, twentyOneTable);
 		}
 

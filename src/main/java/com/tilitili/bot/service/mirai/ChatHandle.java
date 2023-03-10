@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -97,7 +98,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(500);
 
-		List<Long> atList = messageAction.getAtList();
+		List<Long> atList = messageAction.getAtList().stream().map(BotUserDTO::getId).collect(Collectors.toList());
 		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
 		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = !atList.isEmpty();

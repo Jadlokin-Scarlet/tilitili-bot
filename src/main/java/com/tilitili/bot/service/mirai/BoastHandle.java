@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotBoast;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotBoastQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -33,7 +34,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		String key = messageAction.getKeyWithoutPrefix();
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 		String text;
 		String type;
 		if (Arrays.asList("夸夸他", "kkt", "夸夸我", "kkw").contains(key)) {
@@ -59,7 +60,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 
 		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他", "mmt").contains(key);
 		if (isOther) {
-			Long firstAt = atList.stream().findFirst().orElse(null);
+			BotUserDTO firstAt = atList.stream().findFirst().orElse(null);
 			Asserts.notNull(firstAt, "谁？");
 			return BotMessage.simpleListMessage(Lists.newArrayList(
 					BotMessageChain.ofAt(firstAt),

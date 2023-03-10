@@ -6,7 +6,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
-import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotCattleQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
@@ -97,7 +96,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 				.filter(Predicate.isEqual(userId).negate())
-				.map(botUserManager::getBotUserByIdWithParent)
+				.map(otherUserId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId))
 				.map(BotUserDTO::getId)
 				.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
 				.map(botCattleMapper::getBotCattleByUserId)
@@ -127,7 +126,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
 
 			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
-			respList.addAll(this.pk(userId, otherUserId, true));
+			respList.addAll(this.pk(botSender.getId(), userId, otherUserId, true));
 
 			redisCache.setValue(redisKey, "yes", 60*60);
 			redisCache.setValue(otherRedisKey, "yes", 60*60);
@@ -152,7 +151,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		}
 
 		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
-		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId);
 
 		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
 		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
@@ -180,7 +179,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, theUser, refreshItem), "啊嘞，不对劲");
 		}
 
-		List<BotMessageChain> resp = this.pk(theUserId, otherUserId, false);
+		List<BotMessageChain> resp = this.pk(botSender.getId(), theUserId, otherUserId, false);
 
 		redisCache.setValue(otherApplyRedisKey, String.valueOf(theUserId), 60);
 		redisCache.setValue(otherRedisKey, "yes", 60*60);
@@ -199,10 +198,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
 
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 		Asserts.notEmpty(atList, "你要和谁决斗？");
 
-		Long otherUserId = atList.get(0);
+		BotUserDTO otherUser = atList.get(0);
+		Long otherUserId = otherUser.getId();
 		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
 
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
@@ -239,7 +239,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		BotCattle otherCattle;
 		boolean isRandom;
-		List<Long> atList = messageAction.getAtList();
+		List<BotUserDTO> atList = messageAction.getAtList();
 		if (atList.isEmpty()) {
 			if (StringUtils.isNotBlank(messageAction.getValue())) {
 				return BotMessage.emptyMessage();
@@ -258,7 +258,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			}
 			isRandom = true;
 		} else {
-			Long otherUserId = atList.get(0);
+			Long otherUserId = atList.get(0).getId();
 			Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
 			otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
 			isRandom = false;
@@ -270,15 +270,15 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 
-		List<BotMessageChain> respList = this.pk(userId, otherUserId, isRandom);
+		List<BotMessageChain> respList = this.pk(botSender.getId(), userId, otherUserId, isRandom);
 
 		redisCache.setValue(redisKey, "yes", 60*60);
 		redisCache.setValue(otherRedisKey, "yes", 60*60);
 		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
 
-	private List<BotMessageChain> pk(Long userId, Long otherUserId, boolean isRandom) {
-		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(otherUserId);
+	private List<BotMessageChain> pk(Long senderId, Long userId, Long otherUserId, boolean isRandom) {
+		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(senderId, otherUserId);
 //		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
 		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
 		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
@@ -408,7 +408,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
-		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index+1, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
+		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> {
+			BotCattle botCattle = senderCattleList.get(index);
+			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
+			return String.format("%s:%.2fcm %s", index + 1, botCattle.getLength() / 100.0, botUser.getName());
+		}).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
 	}
 
@@ -428,7 +432,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		Set<Long> senderUserIdList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId).collect(Collectors.toSet());
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
-		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> String.format("%s:%.2fcm %s", index+1, senderCattleList.get(index).getLength() / 100.0, botUserManager.getBotUserByIdWithParent(senderCattleList.get(index).getUserId()).getName())).collect(Collectors.joining("\n"));
+		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> {
+			BotCattle botCattle = senderCattleList.get(index);
+			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
+			return String.format("%s:%.2fcm %s", index + 1, botCattle.getLength() / 100.0, botUser.getName());
+		}).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
 	}
 

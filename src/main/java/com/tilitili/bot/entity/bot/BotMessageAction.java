@@ -25,7 +25,7 @@ public class BotMessageAction {
     private final BotUserDTO botUser;
     private final BotEnum bot;
     private final List<String> imageList;
-    private final List<Long> atList;
+    private final List<BotUserDTO> atList;
     private final String text;
     private final String head;
     private final String body;
@@ -175,7 +175,7 @@ public class BotMessageAction {
         return keyWithoutPrefix;
     }
 
-    public List<Long> getAtList() {
+    public List<BotUserDTO> getAtList() {
         return atList;
     }
 

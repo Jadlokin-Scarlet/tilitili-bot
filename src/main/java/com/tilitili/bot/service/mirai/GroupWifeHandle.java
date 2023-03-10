@@ -55,7 +55,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
         List<BotUserDTO> userList = mappingList.stream()
                 .map(BotUserSenderMapping::getUserId).filter(Predicate.isEqual(botUser.getId()).negate())
-                .map(botUserManager::getBotUserByIdWithParent)
+                .map(userId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), userId))
                 .filter(Objects::nonNull).collect(Collectors.toList());
         BotUserDTO wifeUser = userList.get(ThreadLocalRandom.current().nextInt(userList.size()));
         String resp = String.format("你今天的群老婆是：%s(%s)", wifeUser.getName(), wifeUser.getQq());
