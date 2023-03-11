@@ -39,9 +39,9 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
-			case "投票管理员": return handleStatistics(messageAction);
 			case "管理员": return handleAdmin(messageAction);
 			case "取消管理员": return handleDeleteAdmin(messageAction);
+			case "投票管理员": return handleStatistics(messageAction);
 		}
 		return null;
 	}
