@@ -52,13 +52,26 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 case "点歌": return handleSearch(messageAction);
                 case "切歌": return handleLast(messageAction);
     //            case "绑定KTV": return handleBindKTV(messageAction);
-                case "暂停": return handleStop(messageAction);
+                case "停止": return handleStop(messageAction);
                 case "继续": return handleStart(messageAction);
                 case "播放列表": return handleList(messageAction);
+                case "循环播放": return handleLoopPlayer(messageAction);
                 default: throw new AssertException();
             }
         } finally {
             lockFlag.set(false);
+        }
+    }
+
+    private BotMessage handleLoopPlayer(BotMessageAction messageAction) {
+        Boolean success = musicService.loopPlayer(messageAction.getBotSender(), messageAction.getBotUser());
+        if (success == null) {
+            return null;
+        }
+        if (success) {
+            return BotMessage.simpleTextMessage("当前歌曲将会循环播放，发送切歌切换下一首。");
+        } else {
+            throw new AssertException();
         }
     }
 

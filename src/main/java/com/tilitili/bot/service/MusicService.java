@@ -124,6 +124,17 @@ public class MusicService {
         return khlVoiceConnector.listMusic();
     }
 
+    public Boolean loopPlayer(BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        return khlVoiceConnector.loopPlayer();
+    }
+
 
 //    @Async
 //    public void asyncPushVideoAsRTSP(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) {

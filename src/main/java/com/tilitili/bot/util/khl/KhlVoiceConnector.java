@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -56,6 +57,7 @@ public class KhlVoiceConnector {
 
     public List<PlayerMusic> lastMusic() {
         List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        thePlayerMusic.setRollPlayer(false);
         musicProcess.destroy();
         if (playerMusicList.size() < 2) {
             return Collections.emptyList();
@@ -66,6 +68,7 @@ public class KhlVoiceConnector {
     public List<PlayerMusic> stopMusic() {
         this.stop = true;
         List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        thePlayerMusic.setRollPlayer(false);
         musicProcess.destroy();
         if (playerMusicList.size() < 2) {
             this.stop = false;
@@ -90,6 +93,11 @@ public class KhlVoiceConnector {
         PlayerMusic lastPlayerMusic = playerQueue.peek();
         PlayerMusic thePlayerMusic = this.thePlayerMusic;
         return Stream.of(thePlayerMusic, lastPlayerMusic, playerQueue.peek()).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
+
+    public Boolean loopPlayer() {
+        thePlayerMusic.setRollPlayer(true);
+        return true;
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
@@ -128,13 +136,15 @@ public class KhlVoiceConnector {
         playerProcess = Runtime.getRuntime().exec(playerCommand);
 
         musicFuture = scheduled.scheduleAtFixedRate(() -> {
-            if (playerQueue.isEmpty()) {
-                return;
-            }
             if (stop) {
                 return;
             }
-            thePlayerMusic = playerQueue.poll();
+            if (thePlayerMusic == null || !thePlayerMusic.isRollPlayer()) {
+                thePlayerMusic = playerQueue.poll();
+            }
+            if (thePlayerMusic == null) {
+                return;
+            }
             log.info("播放{}", thePlayerMusic.getName());
             try {
                 String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
@@ -152,14 +162,13 @@ public class KhlVoiceConnector {
             } catch (Exception e) {
                 log.warn("播放列表播放异常", e);
             } finally {
-//                FileUtil.deleteIfExists(playerMusic.getFile());
+                if (!thePlayerMusic.isRollPlayer()) {
+                    FileUtil.deleteIfExists(thePlayerMusic.getFile());
+                }
                 log.info("结束播放{}", thePlayerMusic.getName());
-                thePlayerMusic = null;
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
-
-
 
 
 
