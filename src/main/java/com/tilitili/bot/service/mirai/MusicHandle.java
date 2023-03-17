@@ -69,7 +69,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return null;
         }
         if (success) {
-            return BotMessage.simpleTextMessage("当前歌曲将会循环播放，发送切歌切换下一首。");
+            return BotMessage.simpleTextMessage("(仅)当前歌曲将会循环播放，发送切歌切换下一首。");
         } else {
             throw new AssertException();
         }
