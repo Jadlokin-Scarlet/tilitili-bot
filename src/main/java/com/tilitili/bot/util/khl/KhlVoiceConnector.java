@@ -96,6 +96,9 @@ public class KhlVoiceConnector {
     }
 
     public Boolean loopPlayer() {
+        if (thePlayerMusic == null) {
+            return false;
+        }
         thePlayerMusic.setRollPlayer(true);
         return true;
     }
