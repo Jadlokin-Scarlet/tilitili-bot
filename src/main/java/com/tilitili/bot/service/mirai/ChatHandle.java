@@ -43,8 +43,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ChatHandle extends ExceptionRespMessageHandle {
-	@Value("${mirai.bot-guild-qq}")
-	private String BOT_GUILD_QQ;
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final Gson gson = new Gson();
 	private final BotManager botManager;
