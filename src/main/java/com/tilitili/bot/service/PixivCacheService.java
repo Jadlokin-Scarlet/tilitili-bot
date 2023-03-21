@@ -3,6 +3,7 @@ package com.tilitili.bot.service;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotPixivSendRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -17,6 +18,7 @@ import com.tilitili.common.exception.AssertSeseException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -51,16 +53,18 @@ public class PixivCacheService {
 	private final PixivCacheManager pixivManager;
 	private final BotManager botManager;
 	private final ShortUrlService shortUrlService;
+	private final SendMessageManager sendMessageManager;
 	private final AtomicBoolean lockFlag = new AtomicBoolean(false);
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
 
 	@Autowired
-	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, BotManager botManager, ShortUrlService shortUrlService) {
+	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, BotManager botManager, ShortUrlService shortUrlService, SendMessageManager sendMessageManager) {
 		this.botPixivSendRecordMapper = botPixivSendRecordMapper;
 		this.loliconManager = loliconManager;
 		this.pixivManager = pixivManager;
 		this.botManager = botManager;
 		this.shortUrlService = shortUrlService;
+		this.sendMessageManager = sendMessageManager;
 	}
 
 	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException {
@@ -83,6 +87,7 @@ public class PixivCacheService {
 	}
 
 	private BotMessage sendPixivImage(BotMessageAction messageAction, String searchKey, String r18) {
+		BotEnum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		String messageId = messageAction.getMessageId();
@@ -115,7 +120,7 @@ public class PixivCacheService {
 
 				List<BotMessageChain> messageChainList;
 				try {
-					messageChainList = this.getImageChainList(title, userName, pid, sl, pageCount, canSS);
+					messageChainList = this.getImageChainList(bot, botSender, title, userName, pid, sl, pageCount, canSS);
 				} catch (AssertSeseException e) {
 					log.warn(e.getMessage(), e);
 					continue;
@@ -156,6 +161,7 @@ public class PixivCacheService {
 	}
 
 	private BotMessage sendPixivUserImage(BotMessageAction messageAction, String userName, String r18) {
+		BotEnum bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long senderId = botSender.getId();
@@ -175,7 +181,7 @@ public class PixivCacheService {
 			Integer pageCount = info.getPageCount();
 			List<BotMessageChain> messageChainList;
 			try {
-				messageChainList = this.getImageChainList(title, userName, pid, sl, pageCount, canSS);
+				messageChainList = this.getImageChainList(bot, botSender, title, userName, pid, sl, pageCount, canSS);
 			} catch (AssertSeseException e) {
 				log.warn(e.getMessage(), e);
 				continue;
@@ -187,7 +193,7 @@ public class PixivCacheService {
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}
 
-	public List<BotMessageChain> getImageChainList(String title, String userName, String pid, Integer sl, Integer pageCount, Boolean canSS) {
+	public List<BotMessageChain> getImageChainList(BotEnum bot, BotSender botSender, String title, String userName, String pid, Integer sl, Integer pageCount, Boolean canSS) {
 		if (sl >= 5 && !canSS) {
 			throw new AssertSeseException();
 		}
@@ -213,7 +219,8 @@ public class PixivCacheService {
 				messageChainList.add(BotMessageChain.ofLink(ossUrl != null? ossUrl: url));
 			}
 		}
-		return messageChainList;
+		// 限制一下文字部分长度
+		return sendMessageManager.handleLongTextMessage(bot, botSender, messageChainList);
 	}
 
 //	public void saveImageFromPixiv(String pid) {

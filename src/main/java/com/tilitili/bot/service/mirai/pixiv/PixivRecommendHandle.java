@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.PixivLoginUser;
@@ -50,6 +51,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		BotEnum bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
@@ -139,7 +141,7 @@ public class PixivRecommendHandle extends ExceptionRespMessageHandle {
 		Integer pageCount = illust.getPageCount();
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), pid, sl, pageCount, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, illust.getTitle(), illust.getUserName(), pid, sl, pageCount, canSS);
 
 		log.debug("PixivRecommendHandle save result");
 		redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);

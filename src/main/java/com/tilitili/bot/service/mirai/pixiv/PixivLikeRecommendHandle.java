@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -43,6 +44,7 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		BotEnum bot = messageAction.getBot();
 		String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
 		if (StringUtils.isBlank(pid)) {
 			pid = botMessageService.getQuotePid(messageAction);
@@ -91,7 +93,7 @@ public class PixivLikeRecommendHandle extends ExceptionRespMessageHandle {
 		Integer pageCount = illust.getPageCount();
 
 		log.debug("PixivRecommendHandle get make messageChainList");
-		List<BotMessageChain> messageChainList = pixivService.getImageChainList(illust.getTitle(), illust.getUserName(), recommendPid, sl, pageCount, canSS);
+		List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, illust.getTitle(), illust.getUserName(), recommendPid, sl, pageCount, canSS);
 		return BotMessage.simpleListMessage(messageChainList);
 	}
 }

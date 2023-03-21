@@ -25,6 +25,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.OpenAiManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -48,13 +49,15 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final Gson gson = new Gson();
 	private final BotManager botManager;
 	private final AnimeWordsService animeWordsService;
-	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "qln");
+	private final OpenAiManager openAiManager;
+	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
 	public static final String nameKey = "ChatHandle.nameKey";
 
 	@Autowired
-	public ChatHandle(BotManager botManager, AnimeWordsService animeWordsService) {
+	public ChatHandle(BotManager botManager, AnimeWordsService animeWordsService, OpenAiManager openAiManager) {
 		this.botManager = botManager;
 		this.animeWordsService = animeWordsService;
+		this.openAiManager = openAiManager;
 	}
 
 	@Override
@@ -82,12 +85,10 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	private final List<String> randomSendTypeList = Arrays.asList(SendTypeEnum.GROUP_MESSAGE_STR, SendTypeEnum.KOOK_MESSAGE_STR, SendTypeEnum.MINECRAFT_MESSAGE_STR);
 	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
+		BotSender botSender = messageAction.getBotSender();
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		String redisKey = nameKey + messageAction.getBotSender().getId();
+		String redisKey = nameKey + botSender.getId();
 		String source = session.getOrDefault(redisKey, "tx");
-		if (source.equals("qln")) {
-			return null;
-		}
 
 		BotEnum bot = messageAction.getBot();
 		if (bot == null) {
@@ -100,9 +101,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 		List<Long> atList = messageAction.getAtList().stream().map(BotUserDTO::getId).collect(Collectors.toList());
 		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
-		boolean isFriend = messageAction.getBotSender().getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
+		boolean isFriend = botSender.getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = !atList.isEmpty();
-		boolean isRandomReply = random == 0 && randomSendTypeList.contains(messageAction.getBotSender().getSendType());
+		boolean isRandomReply = random == 0 && randomSendTypeList.contains(botSender.getSendType());
 		if (!isFriend && !hasAtBot && !isRandomReply) {
 			return null;
 		}
@@ -132,6 +133,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
+			case "ai": reply = openAiManager.chat(botSender.getName(), text);
 		}
 
 //		if (Objects.equals(group, 674446384L)) {
