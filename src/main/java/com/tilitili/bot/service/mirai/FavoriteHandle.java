@@ -1,13 +1,11 @@
 package com.tilitili.bot.service.mirai;
 
-import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FavoriteConstant;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.FavoriteEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -239,6 +237,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	}
 
 	private List<BotMessageChain> randomTalkToMessageChain(BotMessageAction messageAction, BotFavorite botFavorite, List<BotFavoriteTalk> filterFavoriteTalkList, Integer addFavorite, String externalText) {
+		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		String name = botFavorite.getName();
 
@@ -258,7 +257,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 			// 处理剧本
 			resp = this.replaceResp(messageAction, name, resp);
-			List<BotMessageNode> nodeList = this.getForwardMessageByText(botSender, resp, name);
+			List<BotMessageNode> nodeList = this.getForwardMessageByText(bot, botSender, resp, name);
 
 			// 如果剧本就一个节点，就用普通模式回答
 			if (nodeList.size() == 1) {
@@ -301,7 +300,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		return resp;
 	}
 
-	public List<BotMessageNode> getForwardMessageByText(BotSender botSender, String body, String customBotName) {
+	public List<BotMessageNode> getForwardMessageByText(BotRobot bot, BotSender botSender, String body, String customBotName) {
 		String[] rowList = body.split("\n");
 
 		List<BotMessageNode> nodeList = new ArrayList<>();
@@ -311,7 +310,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
 			long userId = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
-			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(botSender, text);
+			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(bot, botSender, text);
 
 			if (userId == 0) {
 				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));

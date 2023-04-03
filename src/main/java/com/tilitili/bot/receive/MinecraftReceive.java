@@ -2,15 +2,12 @@ package com.tilitili.bot.receive;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.service.BotService;
-import com.tilitili.common.emnus.BotEnum;
-import com.tilitili.common.emnus.MinecraftServerEnum;
 import com.tilitili.common.emnus.TaskReason;
 import com.tilitili.common.emnus.TaskStatus;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.message.TaskMessage;
-import com.tilitili.common.entity.view.request.MinecraftWebHooksRequest;
-import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -28,19 +25,19 @@ public class MinecraftReceive {
 	private final Gson gson;
 	private final JmsTemplate jmsTemplate;
 	private final TaskMapper taskMapper;
-	private final MinecraftManager minecraftManager;
 	private final BotService botService;
 	private final BotSenderMapper botSenderMapper;
+	private final BotRobotMapper botRobotMapper;
 
 
-	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
+	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper, BotRobotMapper botRobotMapper) {
 		this.botService = botService;
 		this.botSenderMapper = botSenderMapper;
+		this.botRobotMapper = botRobotMapper;
 		gson = new Gson();
 		this.ip = environment.getProperty("ip");
 		this.jmsTemplate = jmsTemplate;
 		this.taskMapper = taskMapper;
-		this.minecraftManager = minecraftManager;
 	}
 
 	@Scheduled(fixedDelay = 1)
@@ -60,7 +57,9 @@ public class MinecraftReceive {
 			log.debug("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
-			botService.syncHandleMessage(BotEnum.getBotById(botSender.getBot()), requestStr);
+			BotRobot bot = botRobotMapper.getValidBotRobotById(botSender.getBot());
+			Asserts.notNull(bot, "啊嘞，不对劲");
+			botService.syncHandleMessage(bot, requestStr);
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
 		} catch (Exception e) {
 			if (taskMessage != null && taskMessage.getId() != null) {

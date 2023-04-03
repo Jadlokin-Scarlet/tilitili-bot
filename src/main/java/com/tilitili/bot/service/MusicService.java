@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusic;
@@ -39,8 +40,8 @@ public class MusicService {
         this.kookTokenMap = Gsons.fromJson(kookTokenMap, new TypeToken<Map<Long, String>>(){}.getType());
     }
 
-    public List<PlayerMusic> pushVideoToQuote(BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -58,11 +59,11 @@ public class MusicService {
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
     }
 
-    public List<PlayerMusic> pushVideoToQuote(BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
         Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
         Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
 
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -80,8 +81,8 @@ public class MusicService {
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
     }
 
-    public List<PlayerMusic> lastMusic(BotSender botSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public List<PlayerMusic> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -91,8 +92,8 @@ public class MusicService {
         return khlVoiceConnector.lastMusic();
     }
 
-    public List<PlayerMusic> stopMusic(BotSender botSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public List<PlayerMusic> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -102,8 +103,8 @@ public class MusicService {
         return khlVoiceConnector.stopMusic();
     }
 
-    public List<PlayerMusic> startMusic(BotSender botSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public List<PlayerMusic> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -113,8 +114,8 @@ public class MusicService {
         return khlVoiceConnector.startMusic();
     }
 
-    public List<PlayerMusic> listMusic(BotSender botSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public List<PlayerMusic> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;
@@ -124,8 +125,8 @@ public class MusicService {
         return khlVoiceConnector.listMusic();
     }
 
-    public Boolean loopPlayer(BotSender botSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(botSender, botUser);
+    public Boolean loopPlayer(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
             return null;

@@ -1,7 +1,7 @@
 package com.tilitili.bot.entity.bot;
 
 import com.tilitili.bot.service.BotSessionService;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -23,7 +23,7 @@ public class BotMessageAction {
     private final BotMessage botMessage;
     private final BotSender botSender;
     private final BotUserDTO botUser;
-    private final BotEnum bot;
+    private final BotRobot bot;
     private final List<String> imageList;
     private final List<BotUserDTO> atList;
     private final String text;
@@ -40,11 +40,11 @@ public class BotMessageAction {
     private BotMessage quoteMessage;
     private String virtualKey;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotEnum botEnum) {
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotRobot bot) {
         this.botSender = botMessage.getBotSender();
         this.botUser = botMessage.getBotUser();
         this.botMessage = botMessage;
-        this.bot = botEnum;
+        this.bot = bot;
         this.session = session;
         this.paramMap = new HashMap<>();
         this.bodyMap = new HashMap<>();
@@ -221,7 +221,7 @@ public class BotMessageAction {
         return botUser;
     }
 
-    public BotEnum getBot() {
+    public BotRobot getBot() {
         return bot;
     }
 }

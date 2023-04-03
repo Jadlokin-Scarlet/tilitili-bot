@@ -1,14 +1,15 @@
 package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotMessageRecord;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
@@ -25,19 +26,21 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderMapper botSenderMapper;
 	private final BotMessageRecordMapper botMessageRecordMapper;
 	private final BotManager botManager;
+	private final BotRobotMapper botRobotMapper;
 	private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
 	@Autowired
-	public RecallEventHandle(BotSenderMapper botSenderMapper, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+	public RecallEventHandle(BotSenderMapper botSenderMapper, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotRobotMapper botRobotMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
 		super(BotEvent.EVENT_TYPE_RECALL);
 		this.botSenderMapper = botSenderMapper;
 		this.botMessageRecordMapper = botMessageRecordMapper;
 		this.botManager = botManager;
+		this.botRobotMapper = botRobotMapper;
 		this.botSendMessageRecordMapper = botSendMessageRecordMapper;
 	}
 
 	@Override
-	public BotMessage handleEvent(BotEnum bot, BotMessage botMessage) throws Exception {
+	public BotMessage handleEvent(BotRobot bot, BotMessage botMessage) throws Exception {
 		BotSender botSender = botMessage.getBotSender();
 		String messageId = botMessage.getBotEvent().getMessageId();
 
@@ -53,7 +56,9 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 			BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
 			Asserts.notNull(replySender, "没有权限");
 
-			botManager.recallMessage(BotEnum.getBotById(replySender.getBot()), replySender, replyMessageId);
+			BotRobot replyBot = botRobotMapper.getValidBotRobotById(replySender.getBot());
+			Asserts.notNull(replyBot, "啊嘞，不对劲");
+			botManager.recallMessage(replyBot, replySender, replyMessageId);
 		}
 		return BotMessage.emptyMessage();
 	}

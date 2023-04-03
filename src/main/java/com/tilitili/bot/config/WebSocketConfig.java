@@ -3,12 +3,13 @@ package com.tilitili.bot.config;
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.*;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.MinecraftManager;
-import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.manager.SendMessageManager;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -32,11 +33,13 @@ import java.util.List;
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final BotService botService;
     private final BotManager botManager;
+    private final BotRobotMapper botRobotMapper;
     private final SendMessageManager sendMessageManager;
     private final List<BaseWebSocketHandler> botWebSocketHandlerList;
 
     @Autowired
-    public WebSocketConfig(BotService botService, BotManager botManager, SendMessageManager sendMessageManager) {
+    public WebSocketConfig(BotService botService, BotManager botManager, BotRobotMapper botRobotMapper, SendMessageManager sendMessageManager) {
+        this.botRobotMapper = botRobotMapper;
         this.sendMessageManager = sendMessageManager;
         botWebSocketHandlerList = new ArrayList<>();
         this.botService = botService;
@@ -45,7 +48,8 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     @PostConstruct
     public void webSocketConnectionManager() {
-        for (BotEnum bot : BotEnum.values()) {
+        List<BotRobot> robotList = botRobotMapper.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
+        for (BotRobot bot : robotList) {
             try {
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
@@ -58,23 +62,20 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         }
     }
 
-    private BotWebSocketHandler newWebSocketHandle(BotEnum bot) throws URISyntaxException {
+    private BotWebSocketHandler newWebSocketHandle(BotRobot bot) throws URISyntaxException {
         String wsUrl = botManager.getWebSocketUrl(bot);
-        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.text);
+        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
         switch (bot.getType()) {
-            case BotEnum.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotEnum.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotEnum.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotRobotConstant.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             default: throw new AssertException("?");
         }
     }
 
     @Bean
-    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, MinecraftManager minecraftManager, BotService botService, BotSenderMapper botSenderMapper) {
-        if (BotEnum.getBotById(6L) == null) {
-            return null;
-        }
-        return new MinecraftReceive(jmsTemplate, taskMapper, environment, minecraftManager, botService, botSenderMapper);
+    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper) {
+        return new MinecraftReceive(jmsTemplate, taskMapper, environment, botService, botSenderMapper, botRobotMapper);
     }
 
     @Override

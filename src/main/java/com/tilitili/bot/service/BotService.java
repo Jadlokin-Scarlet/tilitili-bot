@@ -6,12 +6,8 @@ import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.SendTypeEnum;
-import com.tilitili.common.entity.BotMessageRecord;
-import com.tilitili.common.entity.BotSendMessageRecord;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
@@ -65,12 +61,12 @@ public class BotService {
         this.eventHandleMap = eventHandleList.stream().collect(Collectors.toMap(BaseEventHandle::getEventType, Function.identity()));
     }
 
-    public void testHandleMessage(BotEnum bot, String message) {
+    public void testHandleMessage(BotRobot bot, String message) {
         this.syncHandleMessage(bot, message);
     }
 
     @Async
-    public void syncHandleMessage(BotEnum bot, String message) {
+    public void syncHandleMessage(BotRobot bot, String message) {
         // 解析message
         BotMessage botMessage = null;
         try {
@@ -89,7 +85,7 @@ public class BotService {
         }
     }
 
-    private void syncHandleChatMessage(BotEnum bot, BotMessage botMessage) {
+    private void syncHandleChatMessage(BotRobot bot, BotMessage botMessage) {
         List<Long> lockUserId = new ArrayList<>();
         try {
             // 获取sender，校验权限
@@ -119,7 +115,7 @@ public class BotService {
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
             // 查询回复消息
-            botMessageAction.setQuoteMessage(this.queryQuoteMessage(botSender, botMessageAction));
+            botMessageAction.setQuoteMessage(this.queryQuoteMessage(bot, botSender, botMessageAction));
 
             // 匹配并执行指令
             List<BotMessage> respMessage = null;
@@ -156,6 +152,7 @@ public class BotService {
                 if (message.getBotSender() == null) {
                     message.setBotSender(botSender);
                 }
+                message.setBot(bot);
                 // 记录消息和回复消息的关系
                 message.setMessageId(botMessage.getMessageId());
             }
@@ -179,7 +176,7 @@ public class BotService {
         }
     }
 
-    private void syncHandleEventMessage(BotEnum bot, BotMessage botMessage) {
+    private void syncHandleEventMessage(BotRobot bot, BotMessage botMessage) {
         try {
             BotEvent botEvent = botMessage.getBotEvent();
             BotSender botSender = botMessage.getBotSender();
@@ -258,14 +255,12 @@ public class BotService {
         return botTaskDTOList;
     }
 
-    private BotMessage queryQuoteMessage(BotSender botSender, BotMessageAction botMessageAction) {
+    private BotMessage queryQuoteMessage(BotRobot bot, BotSender botSender, BotMessageAction botMessageAction) {
         String quoteMessageId = botMessageAction.getQuoteMessageId();
         Long quoteSenderId = botMessageAction.getQuoteSenderId();
         if (quoteMessageId == null) return null;
-        BotEnum bot = BotEnum.getBotById(botSender.getBot());
-        if (bot == null) return null;
 
-        if (Objects.equals(quoteSenderId, bot.qq)) {
+        if (Objects.equals(quoteSenderId, bot.getQq())) {
             BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
             if (sendMessageRecord != null) {
                 return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);

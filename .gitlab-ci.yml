@@ -16,6 +16,6 @@ deploy:
   script:
     - echo "start deploy ..."
     - cd /home/www/
-    - ./docker_deploy tilitili-bot 121.5.247.29 8087 10.0.0.18
+    - ./docker_deploy tilitili-bot 43.142.163.203 8087 10.0.0.17
   only:
     - master

@@ -81,9 +81,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	}
 
 	private BotMessage handleRandomTalkFile(BotMessageAction messageAction, BotMessageChain fileChain) {
+		BotRobot bot = messageAction.getBot();
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
-		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender(), fileId);
+		File file = botManager.downloadGroupFile(bot, messageAction.getBotSender(), fileId);
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
@@ -132,8 +133,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				continue;
 			}
 			BotSender firstBotSender = botSenderList.get(0);
-			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(firstBotSender, randomTalkDTO.getReq())));
-			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(firstBotSender, randomTalkDTO.getResp())));
+			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(bot, firstBotSender, randomTalkDTO.getReq())));
+			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(bot, firstBotSender, randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
 				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
 				newFunctionTalkList.add(newFunctionTalk);

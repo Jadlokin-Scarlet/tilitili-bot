@@ -1,6 +1,6 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -34,7 +34,7 @@ public class FunctionTalkService {
 		return Gsons.toJson(BotMessage.simpleListMessage(botMessage.getBotMessageChainList()));
 	}
 
-	public List<BotMessageChain> convertCqToMessageChain(BotSender botSender, String messageStr) {
+	public List<BotMessageChain> convertCqToMessageChain(BotRobot bot, BotSender botSender, String messageStr) {
 		String[] textList = messageStr.split("\\[CQ:\\w+[^\\[\\]]*]");
 		Matcher cqMatcher = Pattern.compile("\\[CQ:\\w+[^\\[\\]]*]").matcher(messageStr);
 
@@ -45,18 +45,17 @@ public class FunctionTalkService {
 				botMessageChain.add(BotMessageChain.ofPlain(s));
 			}
 			if (cqMatcher.find()) {
-				findNextCqToChain(botSender, cqMatcher, botMessageChain);
+				findNextCqToChain(bot, botSender, cqMatcher, botMessageChain);
 			}
 		}
 
 		while (cqMatcher.find()) {
-			findNextCqToChain(botSender, cqMatcher, botMessageChain);
+			findNextCqToChain(bot, botSender, cqMatcher, botMessageChain);
 		}
 		return botMessageChain;
 	}
 
-	private void findNextCqToChain(BotSender botSender, Matcher cqMatcher, List<BotMessageChain> botMessageChain) {
-		BotEnum bot = BotEnum.getBotById(botSender.getBot());
+	private void findNextCqToChain(BotRobot bot, BotSender botSender, Matcher cqMatcher, List<BotMessageChain> botMessageChain) {
 		String cq = cqMatcher.group();
 		String messageType = StringUtils.patten1("CQ:(\\w+)", cq);
 		Asserts.notBlank(messageType, "gocq正则解析异常, text=%s", cq);
@@ -88,7 +87,7 @@ public class FunctionTalkService {
 		}
 	}
 
-	public void supplementChain(BotEnum bot, BotSender botSender, BotMessage respMessage) {
+	public void supplementChain(BotRobot bot, BotSender botSender, BotMessage respMessage) {
 		List<BotMessageChain> botMessageChainList = respMessage.getBotMessageChainList();
 		for (BotMessageChain botMessageChain : botMessageChainList) {
 			switch (botMessageChain.getType()) {

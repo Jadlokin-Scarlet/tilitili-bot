@@ -4,8 +4,8 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotAdminStatistics;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotAdminStatisticsQuery;
@@ -18,7 +18,10 @@ import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -100,7 +103,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleAdmin(BotMessageAction messageAction) {
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		List<BotUserDTO> atList = messageAction.getAtList();
@@ -117,7 +120,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleDeleteAdmin(BotMessageAction messageAction) {
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		List<BotUserDTO> atList = messageAction.getAtList();

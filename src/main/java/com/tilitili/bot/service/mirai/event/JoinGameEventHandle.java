@@ -2,8 +2,8 @@ package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.entity.BotForwardConfig;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
 import java.util.List;
 
 @Slf4j
@@ -43,7 +42,7 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 	}
 
 	@Override
-	public BotMessage handleEvent(BotEnum bot, BotMessage botMessage) {
+	public BotMessage handleEvent(BotRobot bot, BotMessage botMessage) {
 		BotUserDTO botUser = botMessage.getBotUser();
 		BotSender botSender = botMessage.getBotSender();
 		BotEvent botEvent = botMessage.getBotEvent();

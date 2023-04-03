@@ -4,9 +4,8 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEnum;
-import com.tilitili.common.emnus.GroupEnum;
 import com.tilitili.common.emnus.SendTypeEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -42,7 +41,7 @@ public class RenameHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        BotEnum bot = messageAction.getBot();
+        BotRobot bot = messageAction.getBot();
         BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();

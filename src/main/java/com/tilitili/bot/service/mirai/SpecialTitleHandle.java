@@ -2,8 +2,8 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.SendTypeEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -32,7 +32,7 @@ public class SpecialTitleHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		String specialTitle = messageAction.getValue();

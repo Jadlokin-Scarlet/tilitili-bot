@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai.base;
 
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.BotMessage;
 
 public abstract class BaseEventHandleAdapt implements BaseEventHandle {
@@ -16,5 +16,5 @@ public abstract class BaseEventHandleAdapt implements BaseEventHandle {
 	}
 
 	@Override
-	public abstract BotMessage handleEvent(BotEnum bot, BotMessage botMessage) throws Exception;
+	public abstract BotMessage handleEvent(BotRobot bot, BotMessage botMessage) throws Exception;
 }

@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.CheckManager;
@@ -32,7 +32,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
-        BotEnum bot = messageAction.getBot();
+        BotRobot bot = messageAction.getBot();
         String speaker = messageAction.getParamOrDefault("who", "派蒙");
         String speed = messageAction.getParamOrDefault("speed", "1.2");
 
@@ -62,7 +62,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 //        Asserts.isTrue(slkFile.exists(), "转码slk失败");
 
-        String voiceId = botManager.uploadVoice(wavFile);
+        String voiceId = botManager.uploadVoice(bot, wavFile);
         Asserts.notBlank(voiceId, "上传失败");
 
         return BotMessage.simpleVoiceIdMessage(voiceId, url);

@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
-import com.tilitili.common.constant.BotUserConstant;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -31,14 +31,15 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
+		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		String body = messageAction.getBody();
 		Asserts.notBlank(body, "格式错啦(台本)");
-		List<BotMessageNode> nodeList = getForwardMessageByText(botSender, body);
+		List<BotMessageNode> nodeList = getForwardMessageByText(bot, botSender, body);
 		return BotMessage.simpleForwardMessage(nodeList);
 	}
 
-	private List<BotMessageNode> getForwardMessageByText(BotSender botSender, String body) {
+	private List<BotMessageNode> getForwardMessageByText(BotRobot bot, BotSender botSender, String body) {
 		String[] rowList = body.split("\n");
 
 		List<BotMessageNode> nodeList = new ArrayList<>();
@@ -48,7 +49,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
 			long qq = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
-			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(botSender, text);
+			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(bot, botSender, text);
 
 			// 此功能只能QQ用
 			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);

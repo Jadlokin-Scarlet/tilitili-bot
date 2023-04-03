@@ -1,17 +1,18 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSendMessageRecord;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotSendMessageRecordQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,14 @@ import java.util.Objects;
 public class RecallHandle extends ExceptionRespMessageHandle {
 
     private final BotManager botManager;
+    private final BotRobotMapper botRobotMapper;
     private final BotSenderMapper botSenderMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public RecallHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public RecallHandle(BotManager botManager, BotRobotMapper botRobotMapper, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
+        this.botRobotMapper = botRobotMapper;
         this.botSenderMapper = botSenderMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
     }
@@ -35,7 +38,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
-        BotEnum bot = messageAction.getBot();
+        BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
 //        Long qq = messageAction.getBotMessage().getQq();
 //        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
@@ -50,7 +53,9 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
                 BotSender otherBotSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                botManager.recallMessage(BotEnum.getBotById(otherBotSender.getBot()), otherBotSender, sendMessage.getMessageId());
+                BotRobot otherBot = botRobotMapper.getValidBotRobotById(otherBotSender.getBot());
+                Asserts.notNull(otherBot, "啊嘞，不对劲");
+                botManager.recallMessage(otherBot, otherBotSender, sendMessage.getMessageId());
             }
             return BotMessage.simpleTextMessage("搞定");
         } else {

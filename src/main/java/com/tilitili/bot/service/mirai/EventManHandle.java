@@ -6,10 +6,9 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.event.FriendRequestEventHandle;
 import com.tilitili.bot.service.mirai.event.InvitedJoinGroupEventHandle;
 import com.tilitili.bot.service.mirai.event.MemberJoinRequestEventHandle;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.MiraiManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
@@ -39,7 +38,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleMiraiNewFriendEvent(BotMessageAction messageAction) {
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		if (redisCache.exists(FriendRequestEventHandle.newFriendKey)) {
 			BotMessage botMessage = (BotMessage) redisCache.getValue(FriendRequestEventHandle.newFriendKey);
 			botManager.handleFriendRequestEvent(bot, botMessage);
@@ -50,7 +49,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleMiraiGroupInviteEvent(BotMessageAction messageAction) {
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		if (redisCache.exists(InvitedJoinGroupEventHandle.newGroupKey)) {
 			BotMessage botMessage = (BotMessage) redisCache.getValue(InvitedJoinGroupEventHandle.newGroupKey);
 			botManager.handleInvitedJoinGroupEvent(bot, botMessage);
@@ -62,7 +61,7 @@ public class EventManHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleMiraiMemberJoinRequestEvent(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		String value = messageAction.getValue();
 		String key = StringUtils.isBlank(value) ? MemberJoinRequestEventHandle.newMemberKey : MemberJoinRequestEventHandle.newMemberKey + "-" + value;
 		if (session.containsKey(key)) {

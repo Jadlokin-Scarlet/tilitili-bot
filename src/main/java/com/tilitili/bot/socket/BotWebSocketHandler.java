@@ -2,22 +2,22 @@ package com.tilitili.bot.socket;
 
 import com.google.common.collect.Lists;
 import com.tilitili.bot.service.BotService;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.SendMessageManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.util.Arrays;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
-    protected final BotEnum bot;
+    protected final BotRobot bot;
     protected final BotService botService;
     protected final SendMessageManager sendMessageManager;
 
-    public BotWebSocketHandler(URI serverUri, BotEnum bot, BotService botService, SendMessageManager sendMessageManager) {
+    public BotWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager) {
         super(serverUri);
         this.bot = bot;
         this.botService = botService;
@@ -26,7 +26,7 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void handleTextMessage(String message) {
-        log.debug("Message Received bot={} message={}", bot.text, message);
+        log.debug("Message Received bot={} message={}", bot.getName(), message);
         botService.syncHandleMessage(bot, message);
     }
 
@@ -35,10 +35,10 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         BotMessage botMessage = BotMessage.simpleListMessage(Lists.newArrayList(
                 BotMessageChain.ofPlain("连接已断开，请检查。")
         ));
-        if (BotEnum.TYPE_GOCQ.equals(bot.getType())) {
+        if (BotRobotConstant.TYPE_GOCQ.equals(bot.getType())) {
             botMessage.setSenderId(3777L);
             sendMessageManager.sendMessage(botMessage);
-        } else if (BotEnum.TYPE_MIRAI.equals(bot.getType())) {
+        } else if (BotRobotConstant.TYPE_MIRAI.equals(bot.getType())) {
             botMessage.setSenderId(4380L);
             sendMessageManager.sendMessage(botMessage);
         }

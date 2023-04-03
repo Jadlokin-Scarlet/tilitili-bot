@@ -4,12 +4,8 @@ import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.GroupEnum;
-import com.tilitili.common.entity.BotFunction;
-import com.tilitili.common.entity.BotFunctionTalk;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotTalk;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
@@ -59,7 +55,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String text = messageAction.getText();
-        BotEnum bot = messageAction.getBot();
+        BotRobot bot = messageAction.getBot();
         BotMessage botMessage = messageAction.getBotMessage();
         BotSender botSender = messageAction.getBotSender();
         Long qq = botSender.getQq();

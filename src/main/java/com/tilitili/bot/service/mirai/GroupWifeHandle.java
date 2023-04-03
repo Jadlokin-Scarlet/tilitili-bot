@@ -3,10 +3,6 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.bot.service.mirai.talk.ReplyHandle;
-import com.tilitili.bot.service.mirai.talk.TalkHandle;
-import com.tilitili.common.emnus.BotEnum;
-import com.tilitili.common.entity.BotFunction;
-import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -14,7 +10,8 @@ import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +21,6 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Component

@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusic;
@@ -64,7 +65,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleLoopPlayer(BotMessageAction messageAction) {
-        Boolean success = musicService.loopPlayer(messageAction.getBotSender(), messageAction.getBotUser());
+        Boolean success = musicService.loopPlayer(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (success == null) {
             return null;
         }
@@ -76,7 +77,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleList(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.listMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusic> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -94,7 +95,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.startMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusic> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -106,7 +107,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.stopMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusic> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -123,7 +124,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 //    }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -134,6 +135,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleChoose(BotMessageAction messageAction) throws IOException {
+        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
         String redisKey = "songList-" + botUser.getId();
@@ -152,7 +154,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
         redisCache.delete(redisKey);
-        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, song, musicUrl);
         if (playerMusicList == null) {
             return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
         } else {
@@ -162,6 +164,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction) throws IOException {
+        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
@@ -169,17 +172,17 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         String bv = StringUtils.patten1("(BV\\w{10})", searchKey);
         if (StringUtils.isNotBlank(bv)) {
-            return this.handleBilibiliSearch(botSender, botUser, bv);
+            return this.handleBilibiliSearch(bot, botSender, botUser, bv);
         } else {
-            return this.handleMusicCouldSearch(botSender, botUser, searchKey);
+            return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey);
         }
     }
 
-    private BotMessage handleBilibiliSearch(BotSender botSender, BotUserDTO botUser, String bv) throws IOException {
+    private BotMessage handleBilibiliSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String bv) throws IOException {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
         String videoUrl = bilibiliManager.getVideoToBilibiliOSS(bv);
 
-        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, videoInfo, videoUrl);
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, videoInfo, videoUrl);
         if (playerMusicList == null) {
             return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
         } else {
@@ -188,7 +191,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
     }
 
-    private BotMessage handleMusicCouldSearch(BotSender botSender, BotUserDTO botUser, String searchKey) throws IOException {
+    private BotMessage handleMusicCouldSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String searchKey) throws IOException {
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
@@ -197,7 +200,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             String pictureUrl = song.getAlbum().getPicUrl();
             String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
 
-            List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(botSender, botUser, song, musicUrl);
+            List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, song, musicUrl);
 
             List<BotMessageChain> respList = new ArrayList<>();
             respList.add(BotMessageChain.ofPlain(String.format("%s\t\t%s\t\t%s\n", song.getName(), owner, song.getAlbum().getName())));

@@ -17,8 +17,8 @@ import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.BotEnum;
 import com.tilitili.common.emnus.SendTypeEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -32,7 +32,6 @@ import com.tilitili.common.utils.StringUtils;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -88,7 +87,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String redisKey = nameKey + botSender.getId();
 		String source = session.getOrDefault(redisKey, "tx");
 
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		if (bot == null) {
 			return null;
 		}
@@ -158,7 +157,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isNotBlank(wordReply)) {
 			return Lists.newArrayList(BotMessageChain.ofPlain(wordReply));
 		}
-		BotEnum bot = messageAction.getBot();
+		BotRobot bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();

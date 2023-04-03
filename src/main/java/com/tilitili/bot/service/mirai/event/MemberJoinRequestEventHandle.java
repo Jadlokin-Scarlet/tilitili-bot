@@ -3,7 +3,7 @@ package com.tilitili.bot.service.mirai.event;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.BotEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotEvent;
@@ -28,7 +28,7 @@ public class MemberJoinRequestEventHandle extends BaseEventHandleAdapt {
 	}
 
 	@Override
-	public BotMessage handleEvent(BotEnum bot, BotMessage botMessage) {
+	public BotMessage handleEvent(BotRobot bot, BotMessage botMessage) {
 		BotSender botSender = botMessage.getBotSender();
 		BotUserDTO botUser = botMessage.getBotUser();
 		BotEvent botEvent = botMessage.getBotEvent();
