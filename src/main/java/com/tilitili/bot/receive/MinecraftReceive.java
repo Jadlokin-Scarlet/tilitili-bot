@@ -41,7 +41,7 @@ public class MinecraftReceive {
 	}
 
 	@Scheduled(fixedDelay = 1)
-	public void receiveMinecraftMessage() {
+	public void  receiveMinecraftMessage() {
 		TaskMessage taskMessage = null;
 		try {
 			taskMessage = this.getTaskMessage();
