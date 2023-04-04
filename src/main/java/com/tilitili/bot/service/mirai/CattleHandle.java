@@ -34,6 +34,9 @@ import java.util.stream.IntStream;
 @Slf4j
 @Component
 public class CattleHandle extends ExceptionRespMessageToSenderHandle {
+	private static final String cattleSleepKey = "CattleHandle-";
+	private static final String cattleApplyKey = "CattleHandle-applyPk-";
+
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
 	private final BotUserManager botUserManager;
@@ -97,7 +100,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
-		String redisKey = String.format("CattleHandle-%s", userId);
+		String redisKey = cattleSleepKey + userId;
 		Long expire = redisCache.getExpire(redisKey);
 		if (expire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
@@ -111,7 +114,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				.filter(Predicate.isEqual(userId).negate())
 				.map(otherUserId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId))
 				.map(BotUserDTO::getId)
-				.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
+				.filter(otherUserId -> redisCache.getExpire(cattleSleepKey +otherUserId) <= 0)
 				.map(botCattleMapper::getValidBotCattleByUserId)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
@@ -136,7 +139,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 			BotCattle otherCattle = senderCattleList.get(index);
 			Long otherUserId = otherCattle.getUserId();
-			String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+			String otherRedisKey = cattleSleepKey + otherUserId;
 
 			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
 			respList.addAll(this.pk(botSender.getId(), userId, otherUserId, true));
@@ -153,60 +156,111 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
 
+//	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
+//		BotSender botSender = messageAction.getBotSender();
+//		BotUserDTO theUser = messageAction.getBotUser();
+//		Long theUserId = theUser.getId();
+//
+//		String theApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), theUserId);
+//		if (!redisCache.exists(theApplyRedisKey)) {
+//			return null;
+//		}
+//
+//		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
+//		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId);
+//
+//		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
+//		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+//		Long otherExpire = redisCache.getExpire(otherRedisKey);
+//		if (otherExpire > 0) {
+//			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
+//		}
+//
+//		String theRedisKey = String.format("CattleHandle-%s", theUserId);
+//		Long theExpire = redisCache.getExpire(theRedisKey);
+//		if (theExpire > 0) {
+//			Asserts.isTrue(botUserItemMappingManager.hasItem(theUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
+//		}
+//
+//		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
+//
+//		// 主逻辑
+//		redisCache.delete(otherApplyRedisKey);
+//		redisCache.delete(theApplyRedisKey);
+//		if (otherExpire > 0) {
+//			Asserts.isTrue(botItemService.useItemWithoutError(botSender, otherUser, refreshItem), "啊嘞，不对劲");
+//		}
+//
+//		if (theExpire > 0) {
+//			Asserts.isTrue(botItemService.useItemWithoutError(botSender, theUser, refreshItem), "啊嘞，不对劲");
+//		}
+//
+//		List<BotMessageChain> resp = this.pk(botSender.getId(), theUserId, otherUserId, false);
+//
+//		redisCache.setValue(otherApplyRedisKey, String.valueOf(theUserId), 60);
+//		redisCache.setValue(otherRedisKey, "yes", 60*60);
+//		redisCache.setValue(theRedisKey, "yes", 60*60);
+//		return BotMessage.simpleListMessage(resp);
+//	}
+
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO theUser = messageAction.getBotUser();
-		Long theUserId = theUser.getId();
 
-		String theApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), theUserId);
+		// 校验PK关系完整性，需要双向校验
+		Long theUserId = theUser.getId();
+		String theApplyRedisKey = cattleApplyKey + theUserId;
 		if (!redisCache.exists(theApplyRedisKey)) {
 			return null;
 		}
 
 		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
-		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId);
-
-		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
-		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
-		Long otherExpire = redisCache.getExpire(otherRedisKey);
-		if (otherExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
+		String otherApplyRedisKey = cattleApplyKey + otherUserId;
+		if (!redisCache.exists(otherApplyRedisKey)) {
+			return null;
 		}
 
-		String theRedisKey = String.format("CattleHandle-%s", theUserId);
+		// 校验双方牛子完整性
+		BotCattle theCattle = botCattleMapper.getValidBotCattleByUserId(theUserId);
+		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
+		Asserts.notNull(theCattle, "巧妇难为无米炊。");
+		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
+
+		// 发起者需要校验牛子可用性
+		String theRedisKey = cattleSleepKey + theUserId;
 		Long theExpire = redisCache.getExpire(theRedisKey);
 		if (theExpire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(theUserId, BotItemConstant.CATTLE_REFRESH), "啊嘞，道具不够用了。");
 		}
 
-		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
-
-		// 主逻辑
-		redisCache.delete(otherApplyRedisKey);
-		redisCache.delete(theApplyRedisKey);
-		if (otherExpire > 0) {
-			Asserts.isTrue(botItemService.useItemWithoutError(botSender, otherUser, refreshItem), "啊嘞，不对劲");
-		}
-
+		// 使用道具
 		if (theExpire > 0) {
+			BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, theUser, refreshItem), "啊嘞，不对劲");
 		}
 
-		List<BotMessageChain> resp = this.pk(botSender.getId(), theUserId, otherUserId, false);
+		int length = random.nextInt(1000);
+		log.info(String.format("%s和%s比划", theUserId, otherUserId));
 
+		List<BotMessageChain> respList = new ArrayList<>();
+		botCattleManager.safeCalculateCattle(theUserId, otherUserId, length, -length);
+		botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(theUserId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
+		respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (theCattle.getLength() + length) / 100.0)));
+
+		// 刷新pk关系时间
 		redisCache.setValue(otherApplyRedisKey, String.valueOf(theUserId), 60);
-		redisCache.setValue(otherRedisKey, "yes", 60*60);
+		redisCache.setValue(theApplyRedisKey, String.valueOf(otherUserId), 60);
+		// 发起者进入cd
 		redisCache.setValue(theRedisKey, "yes", 60*60);
-		return BotMessage.simpleListMessage(resp);
+		return BotMessage.simpleListMessage(respList);
 	}
 
 	private BotMessage handleApplyPK(BotMessageAction messageAction) {
-		BotSender botSender = messageAction.getBotSender();
 		Long userId = messageAction.getBotUser().getId();
 		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
-		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
+		Long expire = redisCache.getExpire(cattleSleepKey + userId);
 		if (expire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
@@ -221,19 +275,16 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
-		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
+		Long otherExpire = redisCache.getExpire(cattleSleepKey + otherUserId);
 		if (otherExpire > 0) {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 		}
 
-		// 主逻辑
-		String otherApplyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), otherUserId);
-		redisCache.delete(otherApplyRedisKey);
-
-		String applyRedisKey = String.format("CattleHandle-applyPk-%s-%s", botSender.getId(), userId);
-		redisCache.delete(applyRedisKey);
-
+		// 记录PK关系
+		String otherApplyRedisKey = cattleApplyKey + otherUserId;
+		String applyRedisKey = cattleApplyKey + userId;
 		redisCache.setValue(otherApplyRedisKey, String.valueOf(userId), 60);
+		redisCache.setValue(applyRedisKey, String.valueOf(otherUserId), 60);
 
 		return BotMessage.emptyMessage();
 	}
@@ -243,7 +294,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
-		String redisKey = String.format("CattleHandle-%s", userId);
+		String redisKey = cattleSleepKey + userId;
 		Long expire = redisCache.getExpire(redisKey);
 		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 
@@ -260,7 +311,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 					.filter(Predicate.isEqual(userId).negate())
-					.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
+					.filter(otherUserId -> redisCache.getExpire(cattleSleepKey + otherUserId) <= 0)
 					.map(botCattleMapper::getValidBotCattleByUserId)
 					.filter(Objects::nonNull)
 					.collect(Collectors.toList());
@@ -279,7 +330,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
 		Long otherUserId = otherCattle.getUserId();
-		String otherRedisKey = String.format("CattleHandle-%s", otherUserId);
+		String otherRedisKey = cattleSleepKey + otherUserId;
 		Long otherExpire = redisCache.getExpire(otherRedisKey);
 		Asserts.isTrue(otherExpire <= 0, "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
 
@@ -434,7 +485,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = messageAction.getBotUser().getId();
 		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
-		String redisKey = String.format("CattleHandle-%s", userId);
+		String redisKey = cattleSleepKey + userId;
 		Long expire = redisCache.getExpire(redisKey);
 		String cdStr = expire > 0? "，圣光微显": "";
 		return BotMessage.simpleTextMessage(String.format("足足有%.2fcm长%s", botCattle.getLength() / 100.0, cdStr));
