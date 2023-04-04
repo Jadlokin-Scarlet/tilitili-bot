@@ -462,7 +462,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
 		if (botCattle != null) {
-			Asserts.checkEquals(botCattle.getStatus(), 0, "不要太贪心哦");
+			Asserts.checkEquals(botCattle.getStatus(), -1, "不要太贪心哦");
 
 			int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(0));
 			Asserts.checkEquals(cnt, 1, "啊嘞，不对劲");
