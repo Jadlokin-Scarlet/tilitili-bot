@@ -75,8 +75,21 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			case "决斗": case "撅斗": return handleApplyPK(messageAction);
 			case "杀": return handleAcceptPK(messageAction);
 			case "男蛮入侵": return handleAOE(messageAction);
+			case "鸣金收兵": return handleStop(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleStop(BotMessageAction messageAction) {
+		BotUserDTO botUser = messageAction.getBotUser();
+		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(botUser.getId());
+		if (botCattle == null) {
+			return null;
+		}
+		int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(-1));
+		Asserts.checkEquals(cnt, 1, "啊嘞，不对劲");
+
+		return BotMessage.simpleTextMessage("撤！");
 	}
 
 	private BotMessage handleAOE(BotMessageAction messageAction) {
@@ -90,7 +103,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 		}
 
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
@@ -99,7 +112,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				.map(otherUserId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId))
 				.map(BotUserDTO::getId)
 				.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
-				.map(botCattleMapper::getBotCattleByUserId)
+				.map(botCattleMapper::getValidBotCattleByUserId)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
 		Asserts.notEmpty(senderCattleList, "拔剑四顾心茫然。");
@@ -190,7 +203,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleApplyPK(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
 		Long userId = messageAction.getBotUser().getId();
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
 		Long expire = redisCache.getExpire(String.format("CattleHandle-%s", userId));
@@ -205,7 +218,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long otherUserId = otherUser.getId();
 		Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
 
-		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
 		Long otherExpire = redisCache.getExpire(String.format("CattleHandle-%s", otherUserId));
@@ -234,7 +247,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long expire = redisCache.getExpire(redisKey);
 		Asserts.isTrue(expire <= 0, "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
 		BotCattle otherCattle;
@@ -248,7 +261,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 					.filter(Predicate.isEqual(userId).negate())
 					.filter(otherUserId -> redisCache.getExpire(String.format("CattleHandle-%s", otherUserId)) <= 0)
-					.map(botCattleMapper::getBotCattleByUserId)
+					.map(botCattleMapper::getValidBotCattleByUserId)
 					.filter(Objects::nonNull)
 					.collect(Collectors.toList());
 			if (!senderCattleList.isEmpty()) {
@@ -260,7 +273,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		} else {
 			Long otherUserId = atList.get(0).getId();
 			Asserts.notEquals(userId, otherUserId, "你找茬是⑧");
-			otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+			otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
 			isRandom = false;
 		}
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
@@ -280,8 +293,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private List<BotMessageChain> pk(Long senderId, Long userId, Long otherUserId, boolean isRandom) {
 		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(senderId, otherUserId);
 //		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
-		BotCattle cattle = botCattleMapper.getBotCattleByUserId(userId);
-		BotCattle otherCattle = botCattleMapper.getBotCattleByUserId(otherUserId);
+		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
+		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
 		boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_ENTANGLEMENT);
 
 		int hasItemFlag = hasItem? 1: -1;
@@ -333,8 +346,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleRecord(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
 		Long userId = messageAction.getBotUser().getId();
-		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "我不倒啊。");
 		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
 		Asserts.notEmpty(botCattleRecordList, "我不倒啊");
@@ -353,7 +367,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 					result = 2 - result;
 				}
 			}
-			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(targetUserId);
+			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(senderId, targetUserId);
 
 			String targetUserName = targetUser.getName();
 			double length = botCattleRecord.getLength() / 100.0;
@@ -376,7 +390,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleRedemption(BotMessageAction messageAction) {
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
-		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
 
 		int score = MathUtil.range(0, botUser.getScore(), 1000);
@@ -418,7 +432,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleInfo(BotMessageAction messageAction) {
 		Long userId = messageAction.getBotUser().getId();
-		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "巧妇难为无米炊。");
 		String redisKey = String.format("CattleHandle-%s", userId);
 		Long expire = redisCache.getExpire(redisKey);
@@ -446,11 +460,19 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = botUser.getId();
 //		Asserts.checkEquals(botUser.getType(), BotUserConstant.USER_TYPE_QQ, "未绑定");
 
-		Asserts.checkNull(botCattleMapper.getBotCattleByUserId(userId), "不要太贪心哦");
-		int length = random.nextInt(1000);
-		botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
+		BotCattle botCattle = botCattleMapper.getBotCattleByUserId(userId);
+		if (botCattle != null) {
+			Asserts.checkEquals(botCattle.getStatus(), 0, "不要太贪心哦");
 
-		String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ? "": "(tips：有共同群聊最好先申请合体再领。";
-		return BotMessage.simpleTextMessage(String.format("恭喜领到%.2fcm%s", length / 100.0, tips)).setQuote(messageId);
+			int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(0));
+			Asserts.checkEquals(cnt, 1, "啊嘞，不对劲");
+			return BotMessage.simpleTextMessage(String.format("%s带着他的%.2fcm长刀回来了！", botUser.getName(), botCattle.getLength() / 100.0));
+		} else {
+			int length = random.nextInt(1000);
+			botCattleMapper.addBotCattleSelective(new BotCattle().setUserId(userId).setLength(length));
+
+			String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ ? "" : "(tips：有共同群聊最好先申请合体再领。";
+			return BotMessage.simpleTextMessage(String.format("恭喜领到%.2fcm%s", length / 100.0, tips)).setQuote(messageId);
+		}
 	}
 }

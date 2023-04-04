@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.emnus.GroupEnum;
+import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -14,13 +14,11 @@ import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,8 +27,6 @@ import java.util.stream.IntStream;
 @Component
 public class ReplyHandle extends ExceptionRespMessageHandle {
     public static final String timeNumKey = "ReplyHandle.timeNum";
-    @Value("${mirai.master-qq}")
-    private Long MASTER_QQ;
     private final BotTalkManager botTalkManager;
     private final BotFunctionTalkMapper botFunctionTalkMapper;
     private final Random random;
@@ -58,8 +54,6 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotMessage botMessage = messageAction.getBotMessage();
         BotSender botSender = messageAction.getBotSender();
-        Long qq = botSender.getQq();
-        Long group = botSender.getGroup();
         BotUserDTO botUser = messageAction.getBotUser();
 
         String req = TalkHandle.convertMessageToString(botMessage);
@@ -98,7 +92,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if (Objects.equals(group, GroupEnum.HOMO_LIVE_GROUP.value)) {
+        if (BotSenderConstant.HOLO_SENDER_ID.equals(botSender.getId())) {
             int ddCount = StringUtils.findCount("dd|DD|dD|Dd", text);
             if (ddCount > 0) {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "bd").collect(Collectors.joining());
@@ -112,10 +106,6 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
                 String repeat = IntStream.range(0, ddCount).mapToObj(c -> "不笨").collect(Collectors.joining());
                 return BotMessage.simpleTextMessage(repeat);
             }
-        }
-
-        if (Objects.equals(qq, MASTER_QQ) && text.equals("cww")) {
-            return BotMessage.simpleTextMessage("cww");
         }
 
         return null;
