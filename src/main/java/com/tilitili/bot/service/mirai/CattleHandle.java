@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private static final String cattleSleepKey = "CattleHandle-";
 	private static final String cattleApplyKey = "CattleHandle-applyPk-";
+	private static final String cattleApplyNowKey = "CattleHandle-nowPk-";
 
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
@@ -206,9 +207,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleAcceptPK(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO theUser = messageAction.getBotUser();
+		Long theUserId = theUser.getId();
 
 		// 校验PK关系完整性，需要双向校验
-		Long theUserId = theUser.getId();
 		String theApplyRedisKey = cattleApplyKey + theUserId;
 		if (!redisCache.exists(theApplyRedisKey)) {
 			return null;
@@ -216,7 +217,18 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
 		String otherApplyRedisKey = cattleApplyKey + otherUserId;
+		String otherApplyNowRedisKey = cattleApplyNowKey + otherUserId;
 		if (!redisCache.exists(otherApplyRedisKey)) {
+			return null;
+		}
+
+		// 校验是否自己的回合，以及回合的有效性
+		String theApplyNowRedisKey = cattleApplyNowKey + theUserId;
+		if (!redisCache.exists(theApplyNowRedisKey)) {
+			return null;
+		}
+		String theApplyNowUserId = (String) redisCache.getValue(theApplyNowRedisKey);
+		if (!Objects.equals(theApplyNowUserId, String.valueOf(otherUserId))) {
 			return null;
 		}
 
@@ -252,6 +264,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		redisCache.setValue(theApplyRedisKey, String.valueOf(otherUserId), 60);
 		// 发起者进入cd
 		redisCache.setValue(theRedisKey, "yes", 60*60);
+		// 攻守转换
+		redisCache.delete(theApplyNowRedisKey);
+		redisCache.setValue(otherApplyNowRedisKey, theUserId, 60);
 		return BotMessage.simpleListMessage(respList);
 	}
 
@@ -285,6 +300,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		String applyRedisKey = cattleApplyKey + userId;
 		redisCache.setValue(otherApplyRedisKey, String.valueOf(userId), 60);
 		redisCache.setValue(applyRedisKey, String.valueOf(otherUserId), 60);
+		// 记录下一轮的发起者
+		redisCache.setValue(cattleApplyNowKey + otherUserId, userId, 60);
 
 		return BotMessage.emptyMessage();
 	}
