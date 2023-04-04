@@ -8,6 +8,7 @@ import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
@@ -67,8 +68,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
                     return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
                 }
             }
-            BotMessage respMessage = Gsons.fromJson(functionTalk.getResp(), BotMessage.class);
-            functionTalkService.supplementChain(bot, botSender, respMessage);
+            List<BotMessageChain> respList = functionTalkService.convertFunctionRespToChain(bot, botSender, botUser, functionTalk.getResp());
             String redisKey = timeNumKey + "-" + botFunction.getFunction() + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
             Long theTimeNum = redisCache.increment(redisKey, 1L);
             redisCache.expire(redisKey, 60 * 60 * 24);
@@ -78,7 +78,7 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             if (botFunction.getScore() > 0) {
                 botUserManager.safeUpdateScore(botUser, - botFunction.getScore());
             }
-            return respMessage.setQuote(messageAction.getMessageId());
+            return BotMessage.simpleListMessage(respList).setQuote(messageAction.getMessageId());
         }
 
         BotTalk botTalk = botTalkManager.getJsonTalkOrOtherTalk(req, botMessage);

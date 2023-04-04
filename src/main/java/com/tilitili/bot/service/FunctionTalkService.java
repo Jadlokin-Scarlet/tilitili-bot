@@ -5,6 +5,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
@@ -13,9 +14,7 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,5 +107,64 @@ public class FunctionTalkService {
 				}
 			}
 		}
+	}
+
+	// 转换CQ码文本为消息串
+	// 例如 你好[CQ:at,qq=123]，我是[CQ:image,url=https://www.image.com/]，早安！
+	// 转换后为 [{"type":"Plain","text":"你好"},{"type":"At","target":123},{"type":"Plain","text":"，我是"},{"type":"Image","url":"https://www.image.com/"},{"type":"Plain","text":"，早安！"}]
+	public List<BotMessageChain> convertFunctionRespToChain(BotRobot bot, BotSender botSender, BotUserDTO botUser, String messageStr) {
+		String[] textList = messageStr.split("(?<=])|(?=\\[)");
+
+		List<BotMessageChain> botMessageChain = new ArrayList<>();
+
+		for (String cq : textList) {
+			String messageType = StringUtils.patten1("CQ:(\\w+)", cq);
+			// 没有CQ就是文本
+			if (StringUtils.isBlank(messageType)) {
+				botMessageChain.add(BotMessageChain.ofPlain(cq));
+				continue;
+			}
+
+			// 解析参数
+			String[] paramList = cq.split(",=");
+			Map<String, String> paramMap = new HashMap<>();
+			for (int index = 1; index + 1 < paramList.length; index+=2) {
+				paramMap.put(paramList[index], paramList[index + 1]);
+			}
+
+			String qq = paramMap.get("qq");
+			BotUserDTO theUser = qq == null? null: botManager.addOrUpdateBotUser(bot, botSender, Long.valueOf(qq));
+			BotUserDTO theUserOrSender = theUser == null? botUser: theUser;
+
+			switch (messageType) {
+				case "image": {
+					Asserts.isTrue(paramMap.containsKey("url"), "啊嘞，不对劲");
+					botMessageChain.add(BotMessageChain.ofImage(paramMap.get("url")));
+					break;
+				}
+				case "at": {
+					Asserts.notNull(theUser, "啊嘞，不对劲");
+					botMessageChain.add(BotMessageChain.ofAt(theUser));
+					break;
+				}
+				case "face": {
+					Asserts.isTrue(paramMap.containsKey("id"), "啊嘞，不对劲");
+					botMessageChain.add(BotMessageChain.ofFace(Integer.valueOf(paramMap.get("id"))));
+					break;
+				}
+				case "memberName": {
+					botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(theUserOrSender));
+					break;
+				}
+				case "portrait": {
+					botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(theUserOrSender));
+					break;
+				}
+				case "enter": botMessageChain.add(BotMessageChain.ofPlain("\n")); break;
+				default: throw new AssertException("cq正则解析异常, text=" + cq);
+			}
+		}
+
+		return botMessageChain;
 	}
 }

@@ -21,7 +21,6 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotPlaceManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -132,11 +131,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			if (botSenderList.isEmpty()) {
 				continue;
 			}
-			BotSender firstBotSender = botSenderList.get(0);
-			String req = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(bot, firstBotSender, randomTalkDTO.getReq())));
-			String resp = Gsons.toJson(BotMessage.simpleListMessage(functionTalkService.convertCqToMessageChain(bot, firstBotSender, randomTalkDTO.getResp())));
 			for (BotSender botSender : botSenderList) {
-				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(req).setResp(resp).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
+				BotFunctionTalk newFunctionTalk = new BotFunctionTalk().setReq(randomTalkDTO.getReq()).setResp(randomTalkDTO.getResp()).setFunction(function).setFunctionId(newFunction.getId()).setSenderId(botSender.getId()).setBlackList(randomTalkDTO.getBlackList());
 				newFunctionTalkList.add(newFunctionTalk);
 			}
 		}
