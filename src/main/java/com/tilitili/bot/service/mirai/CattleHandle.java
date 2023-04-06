@@ -215,7 +215,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			return null;
 		}
 
-		long otherUserId = Long.parseLong((String) redisCache.getValue(theApplyRedisKey));
+		long otherUserId = (Long) redisCache.getValue(theApplyRedisKey);
 		String otherApplyRedisKey = cattleApplyKey + otherUserId;
 		String otherApplyNowRedisKey = cattleApplyNowKey + otherUserId;
 		if (!redisCache.exists(otherApplyRedisKey)) {
@@ -227,8 +227,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		if (!redisCache.exists(theApplyNowRedisKey)) {
 			return null;
 		}
-		String theApplyNowUserId = (String) redisCache.getValue(theApplyNowRedisKey);
-		if (!Objects.equals(theApplyNowUserId, String.valueOf(otherUserId))) {
+		Long theApplyNowUserId = (Long) redisCache.getValue(theApplyNowRedisKey);
+		if (!Objects.equals(theApplyNowUserId, otherUserId)) {
 			return null;
 		}
 
@@ -260,8 +260,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (theCattle.getLength() + length) / 100.0)));
 
 		// 刷新pk关系时间
-		redisCache.setValue(otherApplyRedisKey, String.valueOf(theUserId), 60);
-		redisCache.setValue(theApplyRedisKey, String.valueOf(otherUserId), 60);
+		redisCache.setValue(otherApplyRedisKey, theUserId, 60);
+		redisCache.setValue(theApplyRedisKey, otherUserId, 60);
 		// 发起者进入cd
 		redisCache.setValue(theRedisKey, "yes", 60*60);
 		// 攻守转换
@@ -298,8 +298,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		// 记录PK关系
 		String otherApplyRedisKey = cattleApplyKey + otherUserId;
 		String applyRedisKey = cattleApplyKey + userId;
-		redisCache.setValue(otherApplyRedisKey, String.valueOf(userId), 60);
-		redisCache.setValue(applyRedisKey, String.valueOf(otherUserId), 60);
+		redisCache.setValue(otherApplyRedisKey, userId, 60);
+		redisCache.setValue(applyRedisKey, otherUserId, 60);
 		// 记录下一轮的发起者
 		redisCache.setValue(cattleApplyNowKey + otherUserId, userId, 60);
 
