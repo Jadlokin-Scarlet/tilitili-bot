@@ -153,11 +153,13 @@ public class FunctionTalkService {
 					break;
 				}
 				case "memberName": {
-					botMessageChain.add(new BotMessageChain().setType("memberName").setTarget(theUserOrSender));
+					Asserts.notNull(theUserOrSender.getName(), "查无此人");
+					botMessageChain.add(BotMessageChain.ofPlain(theUserOrSender.getName()));
 					break;
 				}
 				case "portrait": {
-					botMessageChain.add(new BotMessageChain().setType("portrait").setTarget(theUserOrSender));
+					Asserts.notNull(theUserOrSender.getFace(), "查无此人");
+					botMessageChain.add(BotMessageChain.ofImage(theUserOrSender.getFace()));
 					break;
 				}
 				case "enter": botMessageChain.add(BotMessageChain.ofPlain("\n")); break;
