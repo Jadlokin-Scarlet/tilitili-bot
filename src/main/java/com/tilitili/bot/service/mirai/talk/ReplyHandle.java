@@ -77,7 +77,11 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             if (botFunction.getScore() > 0) {
                 botUserManager.safeUpdateScore(botUser, - botFunction.getScore());
             }
-            return BotMessage.simpleListMessage(respList).setQuote(messageAction.getMessageId());
+            BotMessage resp = BotMessage.simpleListMessage(respList);
+            if (botFunction.getIsReply() == 1) {
+                resp.setQuote(messageAction.getMessageId());
+            }
+            return resp;
         }
 
         String req = TalkHandle.convertMessageToString(botMessage);

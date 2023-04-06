@@ -94,14 +94,16 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String scoreStr = excelResult.getParamOrDefault("积分", "0");
 		String timeUnit = excelResult.getParamOrDefault("每", "天");
 		String timeNumStr = excelResult.getParamOrDefault("次数", "99999999");
+		String isReplyStr = excelResult.getParamOrDefault("是否回复", "否");
 		Asserts.notBlank(function, "分组不能为空");
 		Asserts.isNumber(scoreStr, "积分请输入正整数");
 		Asserts.isNumber(timeNumStr, "次数请输入正整数");
 		int score = Integer.parseInt(scoreStr);
 		int timeNum = Integer.parseInt(timeNumStr);
+		int isReply = "是".equals(isReplyStr)? 1: 0;
 
 		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
-		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score).setTimeNum(timeNum);
+		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score).setTimeNum(timeNum).setIsReply(isReply);
 		botFunctionMapper.addBotFunctionSelective(newFunction);
 		List<BotSender> botSenderList = new ArrayList<>();
 		if (StringUtils.isNotBlank(friendList)) {
