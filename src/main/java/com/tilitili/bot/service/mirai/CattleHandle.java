@@ -215,7 +215,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 			return null;
 		}
 
-		long otherUserId = (Long) redisCache.getValue(theApplyRedisKey);
+		long otherUserId = redisCache.getValueLong(theApplyRedisKey);
 		String otherApplyRedisKey = cattleApplyKey + otherUserId;
 		String otherApplyNowRedisKey = cattleApplyNowKey + otherUserId;
 		if (!redisCache.exists(otherApplyRedisKey)) {
@@ -227,7 +227,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		if (!redisCache.exists(theApplyNowRedisKey)) {
 			return null;
 		}
-		Long theApplyNowUserId = (Long) redisCache.getValue(theApplyNowRedisKey);
+		Long theApplyNowUserId = redisCache.getValueLong(theApplyNowRedisKey);
 		if (!Objects.equals(theApplyNowUserId, otherUserId)) {
 			return null;
 		}
@@ -276,10 +276,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
-		Long expire = redisCache.getExpire(cattleSleepKey + userId);
-		if (expire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
-		}
+		Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "道具不够用惹");
 
 		List<BotUserDTO> atList = messageAction.getAtList();
 		Asserts.notEmpty(atList, "你要和谁决斗？");
@@ -291,10 +288,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
-		Long otherExpire = redisCache.getExpire(cattleSleepKey + otherUserId);
-		if (otherExpire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "让他再休息%s吧", otherExpire > 60? otherExpire/60+"分钟": otherExpire+"秒");
-		}
+		Asserts.isTrue(botUserItemMappingManager.hasItem(otherUserId, BotItemConstant.CATTLE_REFRESH), "对方道具不够用惹");
 
 		// 记录PK关系
 		String otherApplyRedisKey = cattleApplyKey + otherUserId;
