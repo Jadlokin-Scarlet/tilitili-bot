@@ -271,7 +271,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleApplyPK(BotMessageAction messageAction) {
-		Long userId = messageAction.getBotUser().getId();
+		BotUserDTO botUser = messageAction.getBotUser();
+		Long userId = botUser.getId();
 		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
 
@@ -303,7 +304,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		// 记录下一轮的发起者
 		redisCache.setValue(cattleApplyNowKey + otherUserId, userId, 60);
 
-		return BotMessage.emptyMessage();
+		return BotMessage.simpleTextMessage(String.format("%s发起击剑！", botUser.getName()));
 	}
 
 	private BotMessage handlePk(BotMessageAction messageAction) {
