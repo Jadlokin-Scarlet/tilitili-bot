@@ -151,8 +151,8 @@ public class BotService {
                 // 没设置发送者，就默认原路发回
                 if (message.getBotSender() == null) {
                     message.setBotSender(botSender);
+                    message.setBot(bot);
                 }
-                message.setBot(bot);
                 // 记录消息和回复消息的关系
                 message.setMessageId(botMessage.getMessageId());
             }
@@ -215,6 +215,7 @@ public class BotService {
             // 没设置发送者，就默认原路发回
             if (respMessage.getBotSender() == null) {
                 respMessage.setBotSender(botSender);
+                respMessage.setBot(bot);
             }
             // 如果最后是消息，则回复
             sendMessageManager.sendMessage(respMessage);
