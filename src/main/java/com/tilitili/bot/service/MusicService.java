@@ -1,6 +1,5 @@
 package com.tilitili.bot.service;
 
-import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.util.khl.KhlVoiceConnector;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -10,10 +9,8 @@ import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -25,19 +22,12 @@ import java.util.Map;
 @Slf4j
 @Service
 public class MusicService {
-    private Map<Long, String> kookTokenMap;
-
     private final BotManager botManager;
     private final Map<Long, KhlVoiceConnector> khlVoiceConnectorMap;
 
     public MusicService(BotManager botManager) {
         this.khlVoiceConnectorMap = new HashMap<>();
         this.botManager = botManager;
-    }
-
-    @Value("#{${kook.token.maps}}")
-    public void setKookTokenMap(String kookTokenMap) {
-        this.kookTokenMap = Gsons.fromJson(kookTokenMap, new TypeToken<Map<Long, String>>(){}.getType());
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
@@ -49,7 +39,7 @@ public class MusicService {
 
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
 
-        String token = kookTokenMap.get(voiceSender.getBot());
+        String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
         File file = File.createTempFile("bilibili-video-", ".mp4");
@@ -71,7 +61,7 @@ public class MusicService {
 
         KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
 
-        String token = kookTokenMap.get(voiceSender.getBot());
+        String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
         File file = File.createTempFile("music-cloud-", ".mp3");
