@@ -90,6 +90,11 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		if (botCattle == null) {
 			return null;
 		}
+		Asserts.notEquals(botCattle.getStatus(), -1, "找茬是⑧");
+		if (botCattle.getStartTime() != null) {
+			Date limitDate = DateUtils.addTime(new Date(), Calendar.DAY_OF_YEAR, -1);
+			Asserts.isTrue(botCattle.getStartTime().before(limitDate), "现在还不能休息哦❤");
+		}
 		int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(-1));
 		Asserts.checkEquals(cnt, 1, "啊嘞，不对劲");
 
@@ -527,7 +532,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		if (botCattle != null) {
 			Asserts.checkEquals(botCattle.getStatus(), -1, "不要太贪心哦");
 
-			int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(0));
+			int cnt = botCattleMapper.updateBotCattleSelective(new BotCattle().setId(botCattle.getId()).setStatus(0).setStartTime(new Date()));
 			Asserts.checkEquals(cnt, 1, "啊嘞，不对劲");
 			return BotMessage.simpleTextMessage(String.format("%s带着他的%.2fcm长刀回来了！", botUser.getName(), botCattle.getLength() / 100.0));
 		} else {
