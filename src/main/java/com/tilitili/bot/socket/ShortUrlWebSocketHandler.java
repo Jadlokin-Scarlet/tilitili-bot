@@ -16,12 +16,13 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class ShortUrlWebSocketHandler extends WebSocketClient implements ApplicationListener<ContextClosedEvent> {
     private static final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
     private final RedisCache redisCache;
-    private Boolean isSuccess = false;
+    private AtomicInteger status = new AtomicInteger(0);
 
     public ShortUrlWebSocketHandler(URI serverUri, RedisCache redisCache) {
         super(serverUri);
@@ -35,7 +36,7 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
             if (message.startsWith("0")) {
                 this.send("40/socket.io.xmsl?guest=nFFA8rxHbCmdi8TN,");
             } else if (Objects.equals(message, "40/socket.io.xmsl")) {
-                this.isSuccess = true;
+                status.set(2);
                 this.send("2");
             } else if (message.equals("3")) {
                 scheduled.schedule(() -> this.send("2"),  30, TimeUnit.SECONDS);
@@ -53,7 +54,10 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
     }
 
     public String getShortUrl(String url) {
-        if (!isSuccess) {
+        if (status.compareAndSet(0, 1)) {
+            this.reconnect();
+        }
+        if (!this.waitStart()) {
             return url;
         }
         this.send("42/socket.io.xmsl,[\"create_link\",{\"origin_url\":\""+url+"\"}]");
@@ -78,6 +82,26 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
         }
     }
 
+    private boolean waitStart() {
+        // 异步等待结果
+        long start = System.currentTimeMillis();
+        try {
+            while (true) {
+                if (status.get() == 2) {
+                    return true;
+                }
+                //如果大于1200ms直接返回
+                if (System.currentTimeMillis() - start > 30000) {
+                    return false;
+                } else {
+                    TimeUtil.millisecondsSleep(100);
+                }
+            }
+        } catch (Exception e) {
+            log.error("等待短连接异常", e);
+            return false;
+        }
+    }
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
@@ -87,13 +111,13 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.error("连接关闭，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
-        this.isSuccess = false;
-        scheduled.schedule(this::reconnect,  1, TimeUnit.MINUTES);
+        status.set(0);
     }
 
     @Override
     public void onError(Exception ex) {
         log.error("websocket异常", ex);
+        status.set(0);
     }
 
     @Override
