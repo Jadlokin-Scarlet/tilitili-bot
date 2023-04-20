@@ -102,15 +102,15 @@ public class BotService {
             botMessageRecordManager.logRecord(botMessage);
 
             // 获取用户锁
-            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
             lockUserId.add(botMessage.getBotUser().getId());
+            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
             for (BotUserDTO atUser : botMessageAction.getAtList()) {
                 Long atUserId = atUser.getId();
                 if (Objects.equals(atUserId, botMessage.getBotUser().getId())) continue;
-                Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
                 lockUserId.add(atUserId);
+                Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
             }
             // 查询匹配任务列表
             List<BotTask> botTaskDTOList = this.queryBotTasks(botMessageAction);
