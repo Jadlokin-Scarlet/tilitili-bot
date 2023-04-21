@@ -2,7 +2,9 @@ package com.tilitili.bot.config;
 
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
-import com.tilitili.bot.socket.*;
+import com.tilitili.bot.socket.BaseWebSocketHandler;
+import com.tilitili.bot.socket.BotWebSocketHandler;
+import com.tilitili.bot.socket.KookWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
