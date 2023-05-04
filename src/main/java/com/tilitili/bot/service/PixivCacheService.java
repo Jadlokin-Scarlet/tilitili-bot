@@ -284,7 +284,7 @@ public class PixivCacheService {
 			pixivManager.downloadPixivImage(url, file);
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			String ossUrl = OSSUtil.uploadOSSByFileWithType(file, fileType);
+			String ossUrl = OSSUtil.uploadOSSByFile(file, fileType);
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
 			return new MiraiUploadImageResult().setUrl(ossUrl);
 //			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
