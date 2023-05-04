@@ -62,8 +62,15 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String key = messageAction.getKeyWithoutPrefix();
 		switch (key) {
 			case "换人": return handleChange(messageAction);
+			case "重置": return handleRefresh(messageAction);
 			default: return handleChat(messageAction);
 		}
+	}
+
+	private BotMessage handleRefresh(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
+		openAiManager.refreshFreeChat(senderId);
+		return BotMessage.simpleTextMessage("拜拜喵");
 	}
 
 	private BotMessage handleChange(BotMessageAction messageAction) {
