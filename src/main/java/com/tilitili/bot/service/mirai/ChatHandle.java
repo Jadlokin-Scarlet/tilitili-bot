@@ -130,7 +130,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
-			case "ai": reply = openAiManager.chat(botSender.getName(), text);
+			case "ai": reply = openAiManager.freeChat(botSender.getId(), text);
 		}
 
 //		if (Objects.equals(group, 674446384L)) {
