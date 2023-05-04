@@ -98,9 +98,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		if (bot == null) {
 			return null;
 		}
+		String text = messageAction.getText();
 //		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEnum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
-		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(500);
 
 		List<Long> atList = messageAction.getAtList().stream().map(BotUserDTO::getId).collect(Collectors.toList());
