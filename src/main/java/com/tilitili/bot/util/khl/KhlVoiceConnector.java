@@ -1,6 +1,5 @@
 package com.tilitili.bot.util.khl;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -150,7 +149,7 @@ public class KhlVoiceConnector {
             }
             log.info("播放{}", thePlayerMusic.getName());
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -filter:a \"volume=0.5\" -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
