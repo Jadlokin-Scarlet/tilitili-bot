@@ -133,7 +133,7 @@ public class KhlVoiceConnector {
         }).get();
 
 
-        String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.8 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
+        String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.2 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
         log.info("ffmpeg开启推流命令：" + playerCommand);
         playerProcess = Runtime.getRuntime().exec(playerCommand);
 
@@ -149,7 +149,7 @@ public class KhlVoiceConnector {
             }
             log.info("播放{}", thePlayerMusic.getName());
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -filter:a \"volume=0.5\" -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
