@@ -55,7 +55,7 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
 
     public String getShortUrl(String url) {
         if (status.compareAndSet(0, 1)) {
-            this.reconnect();
+            scheduled.schedule(this::connect,  1, TimeUnit.MILLISECONDS);
         }
         if (!this.waitStart()) {
             return url;

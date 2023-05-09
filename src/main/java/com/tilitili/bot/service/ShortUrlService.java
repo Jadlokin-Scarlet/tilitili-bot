@@ -13,6 +13,7 @@ public class ShortUrlService {
 
     public ShortUrlService(RedisCache redisCache) throws URISyntaxException {
         webSocketHandler = new ShortUrlWebSocketHandler(new URI("wss://sl.xiaomark.com/socket.io/?guest=nFFA8rxHbCmdi8TN&EIO=3&transport=websocket"), redisCache);
+//        webSocketHandler.connect();
     }
 
     public String getShortUrl(String url) {
