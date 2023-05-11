@@ -85,7 +85,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("关闭喵");
 		} else {
 			session.put(networkKey, "true");
-			return BotMessage.simpleTextMessage("开启喵");
+			return BotMessage.simpleTextMessage("冲浪喵");
 		}
 	}
 
