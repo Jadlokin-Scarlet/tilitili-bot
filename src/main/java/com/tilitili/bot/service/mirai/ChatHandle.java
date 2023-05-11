@@ -49,6 +49,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final OpenAiManager openAiManager;
 	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
 	public static final String nameKey = "ChatHandle.nameKey";
+	private static final String networkKey = "ChatHandle.networkKey";
 
 	@Autowired
 	public ChatHandle(BotManager botManager, AnimeWordsService animeWordsService, OpenAiManager openAiManager) {
@@ -63,7 +64,28 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		switch (key) {
 			case "换人": return handleChange(messageAction);
 			case "重置": return handleRefresh(messageAction);
+			case "联网": return handleNetwork(messageAction);
 			default: return handleChat(messageAction);
+		}
+	}
+
+	private BotMessage handleNetwork(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotSender botSender = messageAction.getBotSender();
+		String redisKey = nameKey + botSender.getId();
+		String source = session.getOrDefault(redisKey, "tx");
+
+		if (!"ai".equals(source)) {
+			return null;
+		}
+
+		boolean network = "true".equals(session.getOrDefault(networkKey, "false"));
+		if (network) {
+			session.put(networkKey, "false");
+			return BotMessage.simpleTextMessage("关闭喵");
+		} else {
+			session.put(networkKey, "true");
+			return BotMessage.simpleTextMessage("开启喵");
 		}
 	}
 
@@ -89,8 +111,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 	private final List<String> randomSendTypeList = Arrays.asList(SendTypeEnum.GROUP_MESSAGE_STR, SendTypeEnum.KOOK_MESSAGE_STR, SendTypeEnum.MINECRAFT_MESSAGE_STR);
 	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
-		BotSender botSender = messageAction.getBotSender();
 		BotSessionService.MiraiSession session = messageAction.getSession();
+		boolean network = "true".equals(session.getOrDefault(networkKey, "false"));
+		BotSender botSender = messageAction.getBotSender();
 		String redisKey = nameKey + botSender.getId();
 		String source = session.getOrDefault(redisKey, "tx");
 
@@ -137,7 +160,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
-			case "ai": reply = openAiManager.freeChat(botSender.getId(), text);
+			case "ai": reply = openAiManager.freeChat(botSender.getId(), text, network);
 		}
 
 //		if (Objects.equals(group, 674446384L)) {
