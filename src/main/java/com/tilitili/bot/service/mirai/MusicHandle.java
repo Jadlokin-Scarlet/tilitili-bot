@@ -191,7 +191,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleMusicCouldProgramLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long songId) throws IOException {
         MusicCloudProgram program = musicCloudManager.getProgramById(songId);
 
-        String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + program.getId();
+        String musicUrl = musicCloudManager.getProgramUrlById(program.getMainSong().getId());
 
         List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, program, musicUrl);
         if (playerMusicList == null) {
