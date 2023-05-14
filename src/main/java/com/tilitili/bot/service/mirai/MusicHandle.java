@@ -11,6 +11,7 @@ import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
@@ -170,11 +171,51 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String searchKey = messageAction.getValue();
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
-        String bv = StringUtils.patten1("(BV\\w{10})", searchKey);
-        if (StringUtils.isNotBlank(bv)) {
+        if (searchKey.contains("bilibili.com")) {
+            // https://www.bilibili.com/video/BV12L411r7Nh/
+            String bv = StringUtils.patten1("(BV\\w{10})", searchKey);
             return this.handleBilibiliSearch(bot, botSender, botUser, bv);
+        } else if (searchKey.contains("163.com/song")) {
+            // https://music.163.com/song?id=446247397&userid=361260659
+            Long songId = Long.parseLong(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            return this.handleMusicCouldLink(bot, botSender, botUser, songId);
+        } else if (searchKey.contains("163.com/dj")) {
+            // https://music.163.com/dj?id=2071108797&userid=361260659
+            Long songId = Long.parseLong(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            return this.handleMusicCouldProgramLink(bot, botSender, botUser, songId);
         } else {
             return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey);
+        }
+    }
+
+    private BotMessage handleMusicCouldProgramLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long songId) throws IOException {
+        MusicCloudProgram program = musicCloudManager.getProgramById(songId);
+
+        String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + program.getId();
+
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, program, musicUrl);
+        if (playerMusicList == null) {
+            return null;
+        } else {
+            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+        }
+    }
+
+    private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long songId) throws IOException {
+        MusicCloudSong song = musicCloudManager.getSongById(songId);
+
+        String owner = song.getOwnerList().stream().map(MusicCloudOwner::getName).collect(Collectors.joining("/"));
+        String jumpUrl = "https://y.music.163.com/m/song?id=" + song.getId();
+        String pictureUrl = song.getAlbum().getPicUrl();
+        String musicUrl = "http://music.163.com/song/media/outer/url?sc=wmv&id=" + song.getId();
+
+        List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, song, musicUrl);
+        if (playerMusicList == null) {
+            return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
+        } else {
+            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
+            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
         }
     }
 

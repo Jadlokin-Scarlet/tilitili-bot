@@ -6,6 +6,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
@@ -30,7 +31,7 @@ public class MusicService {
         this.botManager = botManager;
     }
 
-    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, VideoView videoView, String videoUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, VideoView videoView, String musicUrl) throws IOException {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -43,7 +44,7 @@ public class MusicService {
         Asserts.notNull(token, "啊嘞，不对劲");
 
         File file = File.createTempFile("bilibili-video-", ".mp4");
-        HttpClientUtil.downloadFile(videoUrl, file);
+        HttpClientUtil.downloadFile(musicUrl, file);
         Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",videoView.getBvid());
         Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",videoView.getBvid());
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()));
@@ -69,6 +70,25 @@ public class MusicService {
         Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",song.getName());
         Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",song.getName());
         return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()));
+    }
+
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudProgram program, String musicUrl) throws IOException {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+
+        String token = bot.getVerifyKey();
+        Asserts.notNull(token, "啊嘞，不对劲");
+
+        File file = File.createTempFile("music-cloud-", ".mp3");
+        HttpClientUtil.downloadFile(musicUrl, file);
+        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",program.getName());
+        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",program.getName());
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(program.getName()));
     }
 
     public List<PlayerMusic> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
