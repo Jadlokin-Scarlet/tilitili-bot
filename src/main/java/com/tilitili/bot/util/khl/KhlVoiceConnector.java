@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 public class KhlVoiceConnector {
     private WebSocket webSocket;
 
-    private static final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService scheduled =  Executors.newScheduledThreadPool(3);
 
     private final Queue<PlayerMusic> playerQueue = new LinkedList<>();
     private Process musicProcess;
