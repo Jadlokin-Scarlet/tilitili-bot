@@ -3,6 +3,7 @@ package com.tilitili.bot.util.khl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.PlayerMusic;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
@@ -39,6 +40,11 @@ public class KhlVoiceConnector {
     private PlayerMusic thePlayerMusic;
     private ScheduledFuture<?> musicFuture;
     private boolean stop;
+    private final BotRobot bot;
+
+    public KhlVoiceConnector(BotRobot bot) {
+        this.bot = bot;
+    }
 
 
     public List<PlayerMusic> pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
@@ -132,8 +138,8 @@ public class KhlVoiceConnector {
             return null;
         }).get();
 
-
-        String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:5555 -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.2 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", rtmpUrl);
+        int port = (int) (5000 + bot.getId());
+        String playerCommand = String.format("ffmpeg -re -loglevel level+info -nostats -stream_loop -1 -i zmq:tcp://127.0.0.1:%s -map 0:a:0 -acodec libopus -ab 128k -filter:a volume=0.2 -ac 2 -ar 48000 -f tee [select=a:f=rtp:ssrc=1357:payload_type=100]%s", port, rtmpUrl);
         log.info("ffmpeg开启推流命令：" + playerCommand);
         playerProcess = Runtime.getRuntime().exec(playerCommand);
 
@@ -149,7 +155,7 @@ public class KhlVoiceConnector {
             }
             log.info("播放{}", thePlayerMusic.getName());
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:5555", thePlayerMusic.getFile().getPath());
+                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程

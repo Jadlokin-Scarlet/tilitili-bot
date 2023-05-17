@@ -38,7 +38,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
 
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
@@ -60,7 +60,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
 
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
@@ -79,7 +79,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
 
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
@@ -98,7 +98,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
         return khlVoiceConnector.lastMusic();
     }
 
@@ -109,7 +109,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
         return khlVoiceConnector.stopMusic();
     }
 
@@ -120,7 +120,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
         return khlVoiceConnector.startMusic();
     }
 
@@ -131,7 +131,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
         return khlVoiceConnector.listMusic();
     }
 
@@ -142,7 +142,7 @@ public class MusicService {
             return null;
         }
 
-        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector());
+        KhlVoiceConnector khlVoiceConnector = khlVoiceConnectorMap.computeIfAbsent(voiceSender.getBot(), key -> new KhlVoiceConnector(bot));
         return khlVoiceConnector.loopPlayer();
     }
 
