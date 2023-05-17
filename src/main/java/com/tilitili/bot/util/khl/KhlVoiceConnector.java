@@ -145,15 +145,17 @@ public class KhlVoiceConnector {
 
         musicFuture = scheduled.scheduleAtFixedRate(() -> {
             if (stop) {
+                log.info("bot{}暂停", bot.getId());
                 return;
             }
             if (thePlayerMusic == null || !thePlayerMusic.isRollPlayer()) {
                 thePlayerMusic = playerQueue.poll();
             }
             if (thePlayerMusic == null) {
+                log.info("bot{}没有下一首", bot.getId());
                 return;
             }
-            log.info("播放{}", thePlayerMusic.getName());
+            log.info("bot{}播放{}", bot.getId(), thePlayerMusic.getName());
             try {
                 String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);
                 log.info("ffmpeg推流命令：" + command);
