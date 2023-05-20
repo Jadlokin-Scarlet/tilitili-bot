@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -24,7 +23,7 @@ public class SimpleWebSocketListener extends WebSocketListener {
     }
 
     @Override
-    public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
+    public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
         if (dead) return;
         JsonObject res = JsonParser.parseString(text).getAsJsonObject();
