@@ -109,7 +109,7 @@ public class KhlVoiceConnector {
     }
 
     private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
-        if(Objects.equals(this.playerChannelId, channelId)) {
+        if(Objects.equals(this.playerChannelId, channelId) && playerProcess != null && playerProcess.isAlive()) {
             log.info("无需切换播放器");
             return;
         }
