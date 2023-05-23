@@ -44,7 +44,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         super.onClose(code, reason, remote);
-        this.send("{\"op\":6,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
-        executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
+//        this.send("{\"op\":6,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
+//        executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
     }
 }
