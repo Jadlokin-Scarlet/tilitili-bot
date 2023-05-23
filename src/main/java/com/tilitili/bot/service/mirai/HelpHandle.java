@@ -103,7 +103,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             for (int i = 0; i < botTaskDTOList.size(); i++) {
                 BotTaskDTO botTask = botTaskDTOList.get(i);
                 String key = botTask.getKeyListStr() == null ? "" : botTask.getKeyListStr();
-                reply.append(String.format("%s.%s: %s%n", i + 1, botTask.getNick(), key));
+                reply.append(String.format("%s. %s: %s\n", i + 1, botTask.getNick(), key));
             }
             if (reply.charAt(reply.length() - 1) == '\n') {
                 reply.deleteCharAt(reply.length() - 1);

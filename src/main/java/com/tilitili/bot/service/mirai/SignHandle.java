@@ -6,6 +6,7 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotIcePrice;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -24,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
@@ -98,6 +98,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 
 	public BotMessage handleSignMessage(BotMessageAction messageAction) throws Exception {
 		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotRobot bot = messageAction.getBot();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
@@ -127,7 +128,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				return null;
 			}
 			addScore = Math.max(150 - sumScore, 0);
-			botUserManager.updateBotUserSelective(botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
+			botUserManager.updateBotUserSelective(bot, botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
 			if (addScore != 0) {
 				botUserManager.safeUpdateScore(botUser, addScore);
 			}

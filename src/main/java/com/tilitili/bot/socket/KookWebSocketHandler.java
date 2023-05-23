@@ -8,18 +8,14 @@ import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class KookWebSocketHandler extends BotWebSocketHandler {
-    private final ScheduledExecutorService executorService;
     private int sn = 0;
 
     public KookWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager) {
         super(serverUri, bot, botService, sendMessageManager);
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override

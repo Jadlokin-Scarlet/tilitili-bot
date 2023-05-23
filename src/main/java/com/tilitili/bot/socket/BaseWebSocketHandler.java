@@ -2,17 +2,22 @@ package com.tilitili.bot.socket;
 
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.StringUtils;
-import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class BaseWebSocketHandler extends WebSocketClient {
+    protected final ScheduledExecutorService executorService;
+
     public BaseWebSocketHandler(URI serverUri) {
         super(serverUri);
+        this.executorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -31,9 +36,8 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.error("连接关闭，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
-        TimeUtil.millisecondsSleep(1000 * 10);
-        this.reconnect();
+        log.error("连接关闭，10秒后尝试重连，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
+        executorService.schedule(this::reconnect, 60, TimeUnit.SECONDS);
     }
 
     @Override

@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.entity.BotCattle;
-import com.tilitili.common.entity.BotForwardConfig;
-import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.BotUserSenderMapping;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
@@ -24,7 +21,6 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -59,6 +55,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleAccept(BotMessageAction messageAction) {
+		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
@@ -72,8 +69,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		long sourceUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
 		BotUserDTO sourceBotUser = botUserManager.getBotUserByIdWithParent(sourceUserId);
-		botUserManager.updateBotUserSelective(botSender, new BotUserDTO().setId(sourceUserId).setParentId(botUser.getId()));
-		botUserManager.updateBotUserSelective(botSender, new BotUserDTO().setId(botUser.getId()).setTinyId(sourceBotUser.getTinyId()).setKookUserId(sourceBotUser.getKookUserId()));
+		botUserManager.bindUser(bot, botSender, sourceBotUser, botUser);
 
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);

@@ -3,22 +3,21 @@ package com.tilitili.bot;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
+import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.bot.socket.BotWebSocketHandler;
+import com.tilitili.bot.socket.QQGuildWebSocketHandler;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.FishConfig;
-import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotIcePriceManager;
-import com.tilitili.common.manager.CheckManager;
-import com.tilitili.common.manager.GoCqhttpManager;
-import com.tilitili.common.manager.MiraiManager;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
@@ -35,6 +34,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +66,32 @@ class StartApplicationTest {
     @Autowired
     private FishConfigMapper fishConfigMapper;
     @Resource
-    MusicService musicService;
+    private MusicService musicService;
+    @Autowired
+    private BotRobotMapper botRobotMapper;
+    @Autowired
+    private BotService botService;
+    @Autowired
+    private SendMessageManager sendMessageManager;
+    @Autowired
+    private BotManager botManager;
+
+    @Test
+    public void qqGuildWebsocketTest() throws URISyntaxException {
+        QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
+                new URI("wss://api.sgroup.qq.com/websocket/"),
+                botRobotMapper.getValidBotRobotById(9L),
+                botService, sendMessageManager
+        );
+        qqGuildWebSocketHandler.connect();
+        BotWebSocketHandler gocq = new BotWebSocketHandler(
+                new URI(botManager.getWebSocketUrl(botRobotMapper.getValidBotRobotById(3L))),
+                botRobotMapper.getValidBotRobotById(3L),
+                botService, sendMessageManager
+        );
+        gocq.connect();
+        TimeUtil.millisecondsSleep(1000* 60 * 60);
+    }
 
     @Test
     public void musicService() throws UnsupportedEncodingException {

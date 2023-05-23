@@ -5,6 +5,7 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.BaseWebSocketHandler;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.bot.socket.KookWebSocketHandler;
+import com.tilitili.bot.socket.QQGuildWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
@@ -57,7 +58,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
             } catch (AssertException e) {
-                log.warn("断言异常", e);
+                log.warn("断言异常，message="+e.getMessage());
             } catch (Exception e) {
                 log.error("异常", e);
             }
@@ -68,9 +69,10 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         String wsUrl = botManager.getWebSocketUrl(bot);
         Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
         switch (bot.getType()) {
-            case BotRobotConstant.TYPE_MIRAI: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotRobotConstant.TYPE_MIRAI:
             case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+            case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
             default: throw new AssertException("?");
         }
     }
