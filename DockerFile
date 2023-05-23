@@ -1,17 +1,5 @@
 From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre-with-ffmpeg
 
-#COPY SimSun.ttf /usr/share/fonts/
-#COPY SimSun.ttf /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/fonts/SimSun.ttf
-#apt-get update && apt install fontconfig -y && fc-cache -f
-
-COPY libAquesTalk10.so.1 /usr/lib/
-COPY libAqKanji2Koe.so.4 /usr/lib/
-COPY libAqUsrDic.so.4 /usr/lib/
-
-CMD ldconfig
-
-COPY silk /home/admin/silk/
-
 ADD target/*.jar tilitili-bot.jar
 
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=pro -Xmx250M -Xms250M -Duser.timezone=GMT+8", "tilitili-bot.jar"]
