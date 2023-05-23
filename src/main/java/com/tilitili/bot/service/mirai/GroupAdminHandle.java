@@ -3,7 +3,6 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotAdminStatistics;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -11,6 +10,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotAdminStatisticsQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserConfigManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotAdminStatisticsMapper;
 import com.tilitili.common.utils.Asserts;
@@ -30,12 +30,14 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	private final BotManager botManager;
 	private final BotUserManager botUserManager;
 	private final BotAdminStatisticsMapper botAdminStatisticsMapper;
+	private final BotUserConfigManager botUserConfigManager;
 
 	@Autowired
-	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper) {
+	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper, BotUserConfigManager botUserConfigManager) {
 		this.botManager = botManager;
 		this.botUserManager = botUserManager;
 		this.botAdminStatisticsMapper = botAdminStatisticsMapper;
+		this.botUserConfigManager = botUserConfigManager;
 	}
 
 	@Override
@@ -106,33 +108,42 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
-		List<BotUserDTO> atList = messageAction.getAtList();
 
-		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
-			return null;
-		}
-
-		Asserts.notEmpty(atList, "谁?");
-		for (BotUserDTO atBotUser : atList) {
-			botManager.setMemberAdmin(bot, botSender, atBotUser, true);
-		}
-		return BotMessage.simpleTextMessage("好了喵。");
+		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", "no");
+		return BotMessage.simpleTextMessage("好的喵");
+//		List<BotUserDTO> atList = messageAction.getAtList();
+//
+//		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
+//			return null;
+//		}
+//
+//		Asserts.notEmpty(atList, "谁?");
+//		for (BotUserDTO atBotUser : atList) {
+//			botManager.setMemberAdmin(bot, botSender, atBotUser, true);
+//		}
+//		return BotMessage.simpleTextMessage("好了喵。");
 	}
 
 	private BotMessage handleDeleteAdmin(BotMessageAction messageAction) {
 		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
-		List<BotUserDTO> atList = messageAction.getAtList();
 
-		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
-			return null;
-		}
+		botManager.setMemberAdmin(bot, botSender, botUser, false);
+		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", "yes");
+		return BotMessage.simpleTextMessage("好的喵");
 
-		Asserts.notEmpty(atList, "谁?");
-		for (BotUserDTO atBotUser : atList) {
-			botManager.setMemberAdmin(bot, botSender, atBotUser, false);
-		}
-		return BotMessage.simpleTextMessage("好了喵。");
+
+//		List<BotUserDTO> atList = messageAction.getAtList();
+//
+//		if (!BotUserConstant.MASTER_USER_ID.equals(botUser.getId())) {
+//			return null;
+//		}
+//
+//		Asserts.notEmpty(atList, "谁?");
+//		for (BotUserDTO atBotUser : atList) {
+//			botManager.setMemberAdmin(bot, botSender, atBotUser, false);
+//		}
+//		return BotMessage.simpleTextMessage("好了喵。");
 	}
 }
