@@ -36,7 +36,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.error("连接关闭，10秒后尝试重连，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
+        log.error("连接关闭，60秒后尝试重连，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
         executorService.schedule(this::reconnect, 60, TimeUnit.SECONDS);
     }
 
