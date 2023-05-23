@@ -35,12 +35,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ChatHandle extends ExceptionRespMessageHandle {
-	private final static Random random = new Random(System.currentTimeMillis());
 	private final AnimeWordsService animeWordsService;
 	private final OpenAiManager openAiManager;
 	private final TencentCloudApiManager tencentCloudApiManager;
 	private final MoliManager moliManager;
 
+	private final static Random random = new Random(System.currentTimeMillis());
 	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
 	public static final String nameKey = "ChatHandle.nameKey";
 	private static final String networkKey = "ChatHandle.networkKey";
