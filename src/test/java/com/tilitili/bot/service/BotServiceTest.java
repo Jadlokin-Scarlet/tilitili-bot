@@ -23,6 +23,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		BotRobot bot = botRobotMapper.getBotRobotById(2L);
-		tester.testHandleMessage(bot, "{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":55026,\"time\":1683620250},{\"type\":\"Plain\",\"text\":\"pid 103973846\"}],\"sender\":{\"id\":1578611368,\"memberName\":\"随意\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1664609583,\"lastSpeakTimestamp\":1683620250,\"muteTimeRemaining\":0,\"group\":{\"id\":756782332,\"name\":\"我的评价是，润！\",\"permission\":\"OWNER\"}}}}");
+		tester.testHandleMessage(bot, "");
 	}
 }

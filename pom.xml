@@ -80,21 +80,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.tencentcloudapi</groupId>
-            <artifactId>tencentcloud-sdk-java</artifactId>
-            <version>3.1.462</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.squareup.okio</groupId>
-                    <artifactId>okio</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.squareup.okhttp3</groupId>
-                    <artifactId>okhttp</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>5.2.0</version>
