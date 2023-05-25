@@ -30,7 +30,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             }
             case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
             case 0: {
-                log.info("Message Received message={}", message);
+                log.info(bot.getName() + " Message Received message={}", message);
                 this.s = response.getS();
                 this.sessionId = response.getD().getSessionId();
                 botService.syncHandleMessage(bot, message);
