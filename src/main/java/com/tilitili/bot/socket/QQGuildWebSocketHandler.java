@@ -21,24 +21,27 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
 
     @Override
     public void handleTextMessage(String message) {
-        QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
-        switch (response.getOp()) {
-            case 10: {
-                this.send("{\"op\":2,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"intents\":513,\"shard\":[0,1]}}");
-                executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
-                break;
+        try {
+            QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
+            switch (response.getOp()) {
+                case 10: {
+                    this.send("{\"op\":2,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"intents\":513,\"shard\":[0,1]}}");
+                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
+                    break;
+                }
+                case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
+                case 0: {
+                    log.info(bot.getName() + " Message Received message={}", message);
+                    this.s = response.getS();
+                    this.sessionId = response.getD().getSessionId();
+                    botService.syncHandleMessage(bot, message);
+                    break;
+                }
+                default: log.warn("记录未知类型"+ message);
             }
-            case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
-            case 0: {
-                log.info(bot.getName() + " Message Received message={}", message);
-                this.s = response.getS();
-                this.sessionId = response.getD().getSessionId();
-                botService.syncHandleMessage(bot, message);
-                break;
-            }
-            default: log.warn("记录未知类型"+ message);
+        } catch (Exception e) {
+            log.error("处理websocket异常, message="+message, e);
         }
-
     }
 
     @Override
