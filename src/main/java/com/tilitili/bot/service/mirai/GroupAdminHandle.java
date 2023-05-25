@@ -75,7 +75,6 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 		List<BotAdminStatistics> adminStatisticsList = botAdminStatisticsMapper.getBotAdminStatisticsByCondition(new BotAdminStatisticsQuery().setSenderId(botSender.getId()));
 		Map<Long, Long> statisticsMap = adminStatisticsList.stream().map(BotAdminStatistics::getTargetUserId).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 
 		StringBuilder respBuilder = new StringBuilder();
 		respBuilder.append("投票成功");
@@ -90,6 +89,9 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		}
 		respBuilder.append("。\n");
 
+		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+				.filter(e -> !botUserConfigManager.getBooleanByUserIdAndKey(e.getKey(), "禁用管理员"))
+				.filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 		if (sortedStatisticsList.isEmpty()) {
 			respBuilder.append("还没有人票数达标。");
 		} else {
@@ -109,7 +111,11 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", "no");
+		if (!botUserConfigManager.getBooleanByUserIdAndKey(botUser.getId(), "禁用管理员")) {
+			return null;
+		}
+
+		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", false);
 		return BotMessage.simpleTextMessage("好的喵");
 //		List<BotUserDTO> atList = messageAction.getAtList();
 //
@@ -129,8 +135,12 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
+		if (botUserConfigManager.getBooleanByUserIdAndKey(botUser.getId(), "禁用管理员")) {
+			return null;
+		}
+
 		botManager.setMemberAdmin(bot, botSender, botUser, false);
-		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", "yes");
+		botUserConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", true);
 		return BotMessage.simpleTextMessage("好的喵");
 
 
