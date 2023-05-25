@@ -16,6 +16,7 @@ import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -57,6 +58,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
                 BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
                 botWebSocketHandlerList.add(botWebSocketHandler);
+                TimeUtil.millisecondsSleep(100);
             } catch (AssertException e) {
                 log.warn("断言异常，message="+e.getMessage());
             } catch (Exception e) {
