@@ -8,7 +8,6 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
-import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.bot.socket.QQGuildWebSocketHandler;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotItemConstant;
@@ -80,16 +79,16 @@ class StartApplicationTest {
     public void qqGuildWebsocketTest() throws URISyntaxException {
         QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
                 new URI("wss://api.sgroup.qq.com/websocket/"),
-                botRobotMapper.getValidBotRobotById(9L),
+                botRobotMapper.getValidBotRobotById(11L),
                 botService, sendMessageManager
         );
         qqGuildWebSocketHandler.connect();
-        BotWebSocketHandler gocq = new BotWebSocketHandler(
-                new URI(botManager.getWebSocketUrl(botRobotMapper.getValidBotRobotById(3L))),
-                botRobotMapper.getValidBotRobotById(3L),
-                botService, sendMessageManager
-        );
-        gocq.connect();
+//        BotWebSocketHandler gocq = new BotWebSocketHandler(
+//                new URI(botManager.getWebSocketUrl(botRobotMapper.getValidBotRobotById(3L))),
+//                botRobotMapper.getValidBotRobotById(3L),
+//                botService, sendMessageManager
+//        );
+//        gocq.connect();
         TimeUtil.millisecondsSleep(1000* 60 * 60);
     }
 
