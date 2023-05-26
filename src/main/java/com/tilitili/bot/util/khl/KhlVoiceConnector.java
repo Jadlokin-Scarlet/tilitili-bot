@@ -62,6 +62,9 @@ public class KhlVoiceConnector {
 
     public List<PlayerMusic> lastMusic() {
         List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        if (playerMusicList.isEmpty()) {
+            return Collections.emptyList();
+        }
         thePlayerMusic.setRollPlayer(false);
         musicProcess.destroy();
         if (playerMusicList.size() < 2) {
@@ -145,14 +148,12 @@ public class KhlVoiceConnector {
 
         musicFuture = scheduled.scheduleAtFixedRate(() -> {
             if (stop) {
-                log.info("bot{}暂停", bot.getId());
                 return;
             }
             if (thePlayerMusic == null || !thePlayerMusic.isRollPlayer()) {
                 thePlayerMusic = playerQueue.poll();
             }
             if (thePlayerMusic == null) {
-                log.info("bot{}没有下一首", bot.getId());
                 return;
             }
             log.info("bot{}播放{}", bot.getId(), thePlayerMusic.getName());
