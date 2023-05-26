@@ -51,9 +51,9 @@ public class KhlVoiceConnector {
     }
 
 
-    public List<PlayerMusic> pushFileToQueue(String token, BotSender sender, PlayerMusic playerMusic) {
+    public List<PlayerMusic> pushFileToQueue(String token, Long voiceChannelId, PlayerMusic playerMusic, BotSender textSender) {
         try {
-            this.checkPlayerProcess(token, sender);
+            this.checkPlayerProcess(token, voiceChannelId, textSender);
         } catch (Exception e) {
             log.warn("播放器启动失败", e);
             throw new AssertException("播放器启动失败");
@@ -108,8 +108,7 @@ public class KhlVoiceConnector {
         return true;
     }
 
-    private void checkPlayerProcess(String token, BotSender sender) throws ExecutionException, InterruptedException, IOException {
-        Long channelId = sender.getKookChannelId();
+    private void checkPlayerProcess(String token, Long channelId, BotSender sender) throws ExecutionException, InterruptedException, IOException {
         if(Objects.equals(this.playerChannelId, channelId) && playerProcess != null && playerProcess.isAlive()) {
             log.info("无需切换播放器");
             return;
@@ -155,11 +154,14 @@ public class KhlVoiceConnector {
                 return;
             }
             log.info("bot{}播放{}", bot.getId(), thePlayerMusic.getName());
-
-            PlayerMusic lastMusic = playerQueue.peek();
-            String lastStr = lastMusic == null? "": String.format("，下一首[%s]", lastMusic.getName());
-            BotMessage message = BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", thePlayerMusic.getName(), lastStr));
-            sendMessageManager.sendMessage(message.setBotSender(sender));
+            try {
+                PlayerMusic lastMusic = playerQueue.peek();
+                String lastStr = lastMusic == null? "": String.format("，下一首[%s]", lastMusic.getName());
+                BotMessage message = BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", thePlayerMusic.getName(), lastStr));
+                sendMessageManager.sendMessage(message.setBotSender(sender));
+            } catch (Exception e) {
+                log.warn("歌曲轮换播报异常", e);
+            }
 
             try {
                 String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);

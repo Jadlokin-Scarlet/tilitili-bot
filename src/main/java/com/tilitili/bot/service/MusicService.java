@@ -50,7 +50,7 @@ public class MusicService {
         HttpClientUtil.downloadFile(musicUrl, file);
         Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",videoView.getBvid());
         Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",videoView.getBvid());
-        return khlVoiceConnector.pushFileToQueue(token, voiceSender, new PlayerMusic().setFile(file).setName(videoView.getTitle()));
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()), botSender);
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
@@ -72,7 +72,7 @@ public class MusicService {
         HttpClientUtil.downloadFile(videoUrl, file);
         Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",song.getName());
         Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",song.getName());
-        return khlVoiceConnector.pushFileToQueue(token, voiceSender, new PlayerMusic().setFile(file).setName(song.getName()));
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(song.getName()), botSender);
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudProgram program, String musicUrl) throws IOException {
@@ -91,7 +91,7 @@ public class MusicService {
         HttpClientUtil.downloadFile(musicUrl, file);
         Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",program.getName());
         Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",program.getName());
-        return khlVoiceConnector.pushFileToQueue(token, voiceSender, new PlayerMusic().setFile(file).setName(program.getName()));
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(program.getName()), botSender);
     }
 
     public List<PlayerMusic> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
