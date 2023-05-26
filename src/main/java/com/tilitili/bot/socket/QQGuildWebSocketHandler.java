@@ -22,6 +22,10 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     @Override
     public void handleTextMessage(String message) {
         try {
+            if ("{\"op\":9,\"d\":false}".equals(message)) {
+                log.warn("{\"op\":9,\"d\":false}");
+                return;
+            }
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
             switch (response.getOp()) {
                 case 10: {
