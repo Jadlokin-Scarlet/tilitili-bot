@@ -109,7 +109,7 @@ public class KhlVoiceConnector {
     }
 
     private void checkPlayerProcess(String token, BotSender sender) throws ExecutionException, InterruptedException, IOException {
-        Long channelId = sender.getChannelId();
+        Long channelId = sender.getKookChannelId();
         if(Objects.equals(this.playerChannelId, channelId) && playerProcess != null && playerProcess.isAlive()) {
             log.info("无需切换播放器");
             return;
