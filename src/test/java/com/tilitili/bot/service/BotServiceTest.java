@@ -23,6 +23,6 @@ public class BotServiceTest {
 	@Test
 	public void syncHandleTextMessage() {
 		BotRobot bot = botRobotMapper.getBotRobotById(9L);
-		tester.testHandleMessage(bot, "{\"op\":0,\"s\":2,\"t\":\"MESSAGE_CREATE\",\"id\":\"MESSAGE_CREATE:08fa8f889ce4b1d796b90110d7e8693886044892d0c4a306\",\"d\":{\"author\":{\"avatar\":\"https://qqchannel-profile-1251316161.file.myqcloud.com/165242847412697fcd16614b9c?t=1652428474\",\"bot\":false,\"id\":\"1792232868513015736\",\"username\":\"Jadlokin_Scarlet\"},\"channel_id\":\"1733719\",\"content\":\"ping\",\"guild_id\":\"13343424136567982074\",\"id\":\"08fa8f889ce4b1d796b90110d7e8693886044892d0c4a306\",\"member\":{\"joined_at\":\"2021-12-08T20:50:41+08:00\",\"nick\":\"Jadlokin_Scarlet\",\"roles\":[\"4\",\"10056905\",\"25\"]},\"seq\":518,\"seq_in_channel\":\"518\",\"timestamp\":\"2023-05-27T05:43:46+08:00\"}}");
+		tester.testHandleMessage(bot, "{\"op\":0,\"s\":2,\"t\":\"MESSAGE_CREATE\",\"id\":\"MESSAGE_CREATE:08fa8f889ce4b1d796b90110d7e86938870448b4d6c4a306\",\"d\":{\"author\":{\"avatar\":\"https://qqchannel-profile-1251316161.file.myqcloud.com/165242847412697fcd16614b9c?t=1652428474\",\"bot\":false,\"id\":\"1792232868513015736\",\"username\":\"Jadlokin_Scarlet\"},\"channel_id\":\"1733719\",\"content\":\"ping\",\"guild_id\":\"13343424136567982074\",\"id\":\"08fa8f889ce4b1d796b90110d7e86938870448b4d6c4a306\",\"member\":{\"joined_at\":\"2021-12-08T20:50:41+08:00\",\"nick\":\"Jadlokin_Scarlet\",\"roles\":[\"4\",\"10056905\",\"25\"]},\"seq\":519,\"seq_in_channel\":\"519\",\"timestamp\":\"2023-05-27T05:57:08+08:00\"}}");
 	}
 }
