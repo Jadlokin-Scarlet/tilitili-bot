@@ -154,7 +154,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
         } else {
             String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size()-1);
-            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
+            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", song.getName(), lastStr));
         }
     }
 
@@ -192,7 +192,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return null;
         } else {
             String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size()-1);
-            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", program.getName(), lastStr));
+            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", program.getName(), lastStr));
         }
     }
 
@@ -209,7 +209,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
         } else {
             String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size()-1);
-            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
+            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", song.getName(), lastStr));
         }
     }
 
@@ -222,7 +222,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
         } else {
             String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size()-1);
-            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", videoInfo.getTitle(), lastStr));
+            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", videoInfo.getTitle(), lastStr));
         }
     }
 
@@ -243,7 +243,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 respList.add(BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl));
             } else {
                 String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size()-1);
-                return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
+                return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", song.getName(), lastStr));
             }
             return BotMessage.simpleListMessage(respList);
         } else {

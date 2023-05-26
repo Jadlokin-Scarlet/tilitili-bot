@@ -154,6 +154,8 @@ public class KhlVoiceConnector {
             if (thePlayerMusic == null) {
                 return;
             }
+            log.info("bot{}播放{}", bot.getId(), thePlayerMusic.getName());
+
             PlayerMusic lastMusic = playerQueue.peek();
             String lastStr = lastMusic == null? "": String.format("，下一首[%s]", lastMusic.getName());
             BotMessage message = BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", thePlayerMusic.getName(), lastStr));
