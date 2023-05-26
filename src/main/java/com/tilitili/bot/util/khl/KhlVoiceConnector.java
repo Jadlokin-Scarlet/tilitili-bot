@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.PlayerMusic;
+import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +24,6 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represents a connector with a voice channel. <p>
@@ -41,15 +43,17 @@ public class KhlVoiceConnector {
     private ScheduledFuture<?> musicFuture;
     private boolean stop;
     private final BotRobot bot;
+    private final SendMessageManager sendMessageManager;
 
-    public KhlVoiceConnector(BotRobot bot) {
+    public KhlVoiceConnector(BotRobot bot, SendMessageManager sendMessageManager) {
         this.bot = bot;
+        this.sendMessageManager = sendMessageManager;
     }
 
 
-    public List<PlayerMusic> pushFileToQueue(String token, Long channelId, PlayerMusic playerMusic) {
+    public List<PlayerMusic> pushFileToQueue(String token, BotSender sender, PlayerMusic playerMusic) {
         try {
-            this.checkPlayerProcess(token, channelId);
+            this.checkPlayerProcess(token, sender);
         } catch (Exception e) {
             log.warn("播放器启动失败", e);
             throw new AssertException("播放器启动失败");
@@ -57,36 +61,35 @@ public class KhlVoiceConnector {
 
         log.info("添加播放列表{}", playerMusic.getName());
         this.playerQueue.add(playerMusic);
-        return this.getPlayerMusicList();
+        return this.listMusic();
     }
 
     public List<PlayerMusic> lastMusic() {
-        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
-        if (playerMusicList.isEmpty()) {
+        List<PlayerMusic> musicList = this.listMusic();
+        if (musicList.isEmpty()) {
             return Collections.emptyList();
         }
-        thePlayerMusic.setRollPlayer(false);
-        musicProcess.destroy();
-        if (playerMusicList.size() < 2) {
-            return Collections.emptyList();
+        if (thePlayerMusic != null) {
+            thePlayerMusic.setRollPlayer(false);
+            musicProcess.destroy();
         }
-        return playerMusicList.subList(1, playerMusicList.size());
+        return musicList;
     }
 
     public List<PlayerMusic> stopMusic() {
-        this.stop = true;
-        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
-        thePlayerMusic.setRollPlayer(false);
-        musicProcess.destroy();
-        if (playerMusicList.size() < 2) {
-            this.stop = false;
-            return Collections.emptyList();
+        List<PlayerMusic> playerMusicList = this.listMusic();
+        if (playerMusicList.size() > 1) {
+            this.stop = true;
         }
-        return playerMusicList.subList(1, playerMusicList.size());
+        if (thePlayerMusic != null) {
+            thePlayerMusic.setRollPlayer(false);
+            musicProcess.destroy();
+        }
+        return playerMusicList;
     }
 
     public List<PlayerMusic> startMusic() {
-        List<PlayerMusic> playerMusicList = this.getPlayerMusicList();
+        List<PlayerMusic> playerMusicList = this.listMusic();
         this.stop = false;
         return playerMusicList;
     }
@@ -97,12 +100,6 @@ public class KhlVoiceConnector {
         return playerMusicList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
-    private List<PlayerMusic> getPlayerMusicList() {
-        PlayerMusic lastPlayerMusic = playerQueue.peek();
-        PlayerMusic thePlayerMusic = this.thePlayerMusic;
-        return Stream.of(thePlayerMusic, lastPlayerMusic, playerQueue.peek()).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-    }
-
     public Boolean loopPlayer() {
         if (thePlayerMusic == null) {
             return false;
@@ -111,7 +108,8 @@ public class KhlVoiceConnector {
         return true;
     }
 
-    private void checkPlayerProcess(String token, Long channelId) throws ExecutionException, InterruptedException, IOException {
+    private void checkPlayerProcess(String token, BotSender sender) throws ExecutionException, InterruptedException, IOException {
+        Long channelId = sender.getChannelId();
         if(Objects.equals(this.playerChannelId, channelId) && playerProcess != null && playerProcess.isAlive()) {
             log.info("无需切换播放器");
             return;
@@ -156,7 +154,11 @@ public class KhlVoiceConnector {
             if (thePlayerMusic == null) {
                 return;
             }
-            log.info("bot{}播放{}", bot.getId(), thePlayerMusic.getName());
+            PlayerMusic lastMusic = playerQueue.peek();
+            String lastStr = lastMusic == null? "": String.format("，下一首[%s]", lastMusic.getName());
+            BotMessage message = BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", thePlayerMusic.getName(), lastStr));
+            sendMessageManager.sendMessage(message.setBotSender(sender));
+
             try {
                 String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);
                 log.info("ffmpeg推流命令：" + command);

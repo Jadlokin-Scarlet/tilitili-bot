@@ -112,27 +112,21 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             return null;
         }
-        if (playerMusicList.isEmpty()) {
-            return BotMessage.simpleTextMessage("已停止，无下一首。");
+        if (playerMusicList.size() < 2) {
+            return BotMessage.simpleTextMessage("已停止，无下一首，点歌以继续。");
         }
-        return BotMessage.simpleTextMessage(String.format("已停止，输入继续播放下一首：[%s]。", playerMusicList.get(0).getName()));
+        return BotMessage.simpleTextMessage(String.format("已停止，输入继续播放下一首：[%s]。", playerMusicList.get(1).getName()));
     }
-
-//    private BotMessage handleBindKTV(BotMessageAction messageAction) {
-//        Long senderId = messageAction.getBotSender().getId();
-//        messageAction.get
-//        redisCache.setValue("MusicHandle-handleBindKTV-"+senderId, );
-//    }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
         List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
-        if (playerMusicList.isEmpty()) {
+        if (playerMusicList.size() < 2) {
             return BotMessage.simpleTextMessage("播放列表空空如也。");
         }
-        return BotMessage.simpleTextMessage(String.format("即将播放[%s]。", playerMusicList.get(0).getName()));
+        return BotMessage.simpleTextMessage(String.format("即将播放[%s]。", playerMusicList.get(1).getName()));
     }
 
     private BotMessage handleChoose(BotMessageAction messageAction) throws IOException {
@@ -159,8 +153,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
         } else {
-            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+            String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size());
+            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
         }
     }
 
@@ -197,8 +191,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             return null;
         } else {
-            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+            String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size());
+            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", program.getName(), lastStr));
         }
     }
 
@@ -214,8 +208,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             return BotMessage.simpleMusicCloudShareMessage(song.getName(), owner, jumpUrl, pictureUrl, musicUrl);
         } else {
-            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+            String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size());
+            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
         }
     }
 
@@ -227,8 +221,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             return BotMessage.simpleVideoMessage(videoInfo.getTitle(), videoUrl);
         } else {
-            String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-            return BotMessage.simpleTextMessage(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr));
+            String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size());
+            return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", videoInfo.getTitle(), lastStr));
         }
     }
 
@@ -248,8 +242,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             if (playerMusicList == null) {
                 respList.add(BotMessageChain.ofMusicCloudShare(song.getName(), owner, jumpUrl, pictureUrl, musicUrl));
             } else {
-                String lastStr = playerMusicList.size() < 2? "": String.format("，下一首[%s]", playerMusicList.get(1).getName());
-                respList.add(BotMessageChain.ofPlain(String.format("当前播放[%s]%s。", playerMusicList.get(0).getName(), lastStr)));
+                String lastStr = playerMusicList.isEmpty()? "": String.format("，后面还有%s首", playerMusicList.size());
+                return BotMessage.simpleTextMessage(String.format("点歌%s成功%s。", song.getName(), lastStr));
             }
             return BotMessage.simpleListMessage(respList);
         } else {
