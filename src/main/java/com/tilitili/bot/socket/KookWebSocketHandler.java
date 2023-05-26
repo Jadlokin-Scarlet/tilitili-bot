@@ -20,10 +20,10 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
 
     @Override
     public void handleTextMessage(String message) {
-        log.debug("Message Received message={}", message);
         KookData<?> kookData = Gsons.fromJson(message, KookData.class);
         switch (kookData.getS()) {
             case 0: {
+                log.info("Message Received message={}", message);
                 this.sn = kookData.getSn() == null ? 0 : kookData.getSn();
                 botService.syncHandleMessage(bot, message);
                 break;

@@ -22,7 +22,7 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 
     @Override
     public void handleTextMessage(String message) {
-        log.debug("Message Received bot={} message={}", bot.getName(), message);
+        log.info("Message Received bot={} message={}", bot.getName(), message);
         botService.syncHandleMessage(bot, message);
     }
 
