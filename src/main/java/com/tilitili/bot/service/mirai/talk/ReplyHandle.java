@@ -112,6 +112,10 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
+        if ("ping".equals(text)) {
+            return BotMessage.simpleTextMessage("pong");
+        }
+
         return null;
     }
 }
