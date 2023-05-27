@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -112,7 +113,8 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
             }
         }
 
-        if ("ping".equals(text)) {
+
+        if (Arrays.asList("ping", "/ping").contains(text)) {
             return BotMessage.simpleTextMessage("pong");
         }
 
