@@ -35,7 +35,7 @@ public class MusicService {
             return null;
         }
 
-        PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle());
+        PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle()).setHeaders("Referer: https://www.bilibili.com");
         return this.reqAddMusics(botSender, voiceSender, music);
     }
 
