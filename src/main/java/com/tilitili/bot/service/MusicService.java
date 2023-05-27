@@ -35,7 +35,7 @@ public class MusicService {
             return null;
         }
 
-        PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle()).setHeaders("Referer: https://www.bilibili.com");
+        PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle()).setHeaders("Referer: https://www.bilibili.com; User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36");
         return this.reqAddMusics(botSender, voiceSender, music);
     }
 
