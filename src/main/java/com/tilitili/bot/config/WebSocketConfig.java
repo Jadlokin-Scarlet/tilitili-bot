@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Configuration
+//@Configuration
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final BotService botService;
     private final BotManager botManager;
