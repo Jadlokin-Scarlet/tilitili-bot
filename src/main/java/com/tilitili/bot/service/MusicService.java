@@ -17,8 +17,6 @@ import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -44,7 +42,7 @@ public class MusicService {
         return resp.getData();
     }
 
-    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) {
         Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
         Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
 
@@ -54,19 +52,14 @@ public class MusicService {
             return null;
         }
 
-        File file = File.createTempFile("music-cloud-", ".mp3");
-        HttpClientUtil.downloadFile(videoUrl, file);
-        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",song.getName());
-        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",song.getName());
-        PlayerMusic music = new PlayerMusic().setFile(file).setName(song.getName());
-
+        PlayerMusic music = new PlayerMusic().setFileUrl(videoUrl).setName(song.getName());
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
         return resp.getData();
     }
 
-    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudProgram program, String musicUrl) throws IOException {
+    public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudProgram program, String musicUrl) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -76,12 +69,7 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
-        File file = File.createTempFile("music-cloud-", ".mp3");
-        HttpClientUtil.downloadFile(musicUrl, file);
-        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",program.getName());
-        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",program.getName());
-        PlayerMusic music = new PlayerMusic().setFile(file).setName(program.getName());
-
+        PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(program.getName());
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
