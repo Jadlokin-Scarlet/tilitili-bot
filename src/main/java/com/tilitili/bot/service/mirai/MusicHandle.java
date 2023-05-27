@@ -215,7 +215,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleBilibiliSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String bv) throws IOException {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
-        String videoUrl = bilibiliManager.getVideoToBilibiliOSS(bv);
+        Long cid = videoInfo.getPages().get(0).getCid();
+        String videoUrl = bilibiliManager.getVideoUrl(bv, cid);
 
         List<PlayerMusic> playerMusicList = musicService.pushVideoToQuote(bot, botSender, botUser, videoInfo, videoUrl);
         if (playerMusicList == null) {

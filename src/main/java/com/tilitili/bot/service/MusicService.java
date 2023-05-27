@@ -46,11 +46,11 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
-        File file = File.createTempFile("bilibili-video-", ".mp4");
-        HttpClientUtil.downloadFile(musicUrl, file);
-        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",videoView.getBvid());
-        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",videoView.getBvid());
-        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFile(file).setName(videoView.getTitle()), botSender);
+//        File file = File.createTempFile("bilibili-video-", ".mp4");
+//        HttpClientUtil.downloadFile(musicUrl, file);
+//        Asserts.isTrue(file.exists(), "啊嘞，下载失败了(%s)",videoView.getBvid());
+//        Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了(%s)",videoView.getBvid());
+        return khlVoiceConnector.pushFileToQueue(token, voiceSender.getKookChannelId(), new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle()), botSender);
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) throws IOException {

@@ -164,7 +164,14 @@ public class KhlVoiceConnector {
             }
 
             try {
-                String command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);
+                String command;
+                if (thePlayerMusic.getFile() != null) {
+                    command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFile().getPath(), port);
+                } else if (thePlayerMusic.getFileUrl() != null) {
+                    command = String.format("ffmpeg -re -nostats -i %s -acodec libopus -vn -ab 128k -f mpegts zmq:tcp://127.0.0.1:%s", thePlayerMusic.getFileUrl(), port);
+                } else {
+                    throw new AssertException();
+                }
                 log.info("ffmpeg推流命令：" + command);
 
                 // 运行cmd命令，获取其进程
