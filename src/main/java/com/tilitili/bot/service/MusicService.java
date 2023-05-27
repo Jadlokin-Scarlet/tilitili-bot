@@ -36,10 +36,7 @@ public class MusicService {
         }
 
         PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(videoView.getTitle());
-        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
-        return resp.getData();
+        return this.reqAddMusics(botSender, voiceSender, music);
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) {
@@ -53,10 +50,7 @@ public class MusicService {
         }
 
         PlayerMusic music = new PlayerMusic().setFileUrl(videoUrl).setName(song.getName());
-        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
-        return resp.getData();
+        return this.reqAddMusics(botSender, voiceSender, music);
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudProgram program, String musicUrl) {
@@ -70,6 +64,10 @@ public class MusicService {
         Asserts.notNull(token, "啊嘞，不对劲");
 
         PlayerMusic music = new PlayerMusic().setFileUrl(musicUrl).setName(program.getName());
+        return this.reqAddMusics(botSender, voiceSender, music);
+    }
+
+    private List<PlayerMusic> reqAddMusics(BotSender botSender, BotSender voiceSender, PlayerMusic music) {
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());

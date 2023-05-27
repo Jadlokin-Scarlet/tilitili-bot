@@ -1,4 +1,4 @@
-From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre-with-ffmpeg
+From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre
 
 ADD target/*.jar tilitili-bot.jar
 
