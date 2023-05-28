@@ -11,6 +11,7 @@ import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.MusicCloudManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -23,9 +24,11 @@ import java.util.List;
 @Service
 public class MusicService {
     private final BotManager botManager;
+    private final MusicCloudManager musicCloudManager;
 
-    public MusicService(BotManager botManager) {
+    public MusicService(BotManager botManager, MusicCloudManager musicCloudManager) {
         this.botManager = botManager;
+        this.musicCloudManager = musicCloudManager;
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, VideoView videoView, String musicUrl) {
@@ -40,8 +43,12 @@ public class MusicService {
     }
 
     public List<PlayerMusic> pushVideoToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song, String videoUrl) {
-        Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
         Asserts.checkNull(song.getNoCopyrightRcmd(), "歌曲下架了喵");
+//        Asserts.notEquals(song.getFee(), 1, "KTV没有VIP喵");
+        if (song.getFee() == 1) {
+            videoUrl = musicCloudManager.getSongUrlById(song.getId());
+            Asserts.notNull(videoUrl, "KTV没有VIP喵");
+        }
 
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
