@@ -56,7 +56,7 @@ public class MusicService {
             return null;
         }
 
-        PlayerMusic music = new PlayerMusic().setFileUrl(videoUrl).setName(song.getName());
+        PlayerMusic music = new PlayerMusic().setFileUrl(videoUrl).setName(song.getName()).setHeaders("\"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36;\"$'\\r\\n'\"Referer: https://music.163.com/\"$'\\r\\n'");;
         return this.reqAddMusics(botSender, voiceSender, music);
     }
 
