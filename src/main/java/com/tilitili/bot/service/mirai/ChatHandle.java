@@ -7,16 +7,17 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.MoliManager;
 import com.tilitili.common.manager.OpenAiManager;
 import com.tilitili.common.manager.TencentCloudApiManager;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -29,6 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final OpenAiManager openAiManager;
 	private final TencentCloudApiManager tencentCloudApiManager;
 	private final MoliManager moliManager;
+	private final BotRobotMapper botRobotMapper;
 
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
@@ -46,11 +49,12 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private static final String networkKey = "ChatHandle.networkKey";
 
 	@Autowired
-	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager) {
+	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotMapper botRobotMapper) {
 		this.animeWordsService = animeWordsService;
 		this.openAiManager = openAiManager;
 		this.tencentCloudApiManager = tencentCloudApiManager;
 		this.moliManager = moliManager;
+		this.botRobotMapper = botRobotMapper;
 	}
 
 	@Override
@@ -120,9 +124,10 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(500);
+		List<Long> botList = botRobotMapper.getBotRobotByCondition(new BotRobotQuery().setStatus(0)).stream().map(BotRobot::getUserId).filter(Objects::nonNull).collect(Collectors.toList());
 
 		List<Long> atList = messageAction.getAtList().stream().map(BotUserDTO::getId).collect(Collectors.toList());
-		atList.retainAll(BotUserConstant.BOT_USER_ID_LIST);
+		atList.retainAll(botList);
 		boolean isFriend = botSender.getSendType().equals(SendTypeEnum.FRIEND_MESSAGE_STR);
 		boolean hasAtBot = !atList.isEmpty();
 		boolean isRandomReply = random == 0 && randomSendTypeList.contains(botSender.getSendType());
