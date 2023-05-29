@@ -71,7 +71,7 @@ public class BotMessageAction {
             } else {
                 key = head;
             }
-            keyWithoutPrefix = Pattern.compile("^[.。]").matcher(key).find()? key.substring(1): key;
+            keyWithoutPrefix = Pattern.compile("^[.。/]").matcher(key).find()? key.substring(1): key;
         }
 
         for (String line : lineList) {

@@ -284,7 +284,7 @@ public class BotService {
         String prefix = "";
         if (Objects.equals(sendType, SendTypeEnum.GUILD_MESSAGE.sendType)) {
             prefix = ".";
-            actionKey = actionKey.replaceAll("^[.。]", prefix);
+            actionKey = actionKey.replaceAll("^[.。/]", prefix);
         }
 
         return botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
