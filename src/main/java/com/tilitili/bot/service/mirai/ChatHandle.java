@@ -161,7 +161,8 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
 			case "ai": {
 				List<BotMessageRecord> messageRecordList = isRandomReply? botMessageRecordMapper.getBotMessageRecordByCondition(new BotMessageRecordQuery().setSenderId(botSender.getId()).setCreateTimeStart(DateUtils.addTime(new Date(), Calendar.MINUTE, -2))): Collections.emptyList();
-				reply = openAiManager.freeChat(botSender, text, network, messageRecordList);
+				List<BotMessageRecord> filterMessageRecordList = messageRecordList.stream().filter(StreamUtil.isEqual(BotMessageRecord::getMessageId, messageAction.getMessageId()).negate()).collect(Collectors.toList());
+				reply = openAiManager.freeChat(botSender, text, network, filterMessageRecordList);
 				break;
 			}
 		}
