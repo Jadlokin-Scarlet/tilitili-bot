@@ -8,30 +8,27 @@ import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.emnus.SendTypeEnum;
+import com.tilitili.common.entity.BotMessageRecord;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.query.BotMessageRecordQuery;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.MoliManager;
 import com.tilitili.common.manager.OpenAiManager;
 import com.tilitili.common.manager.TencentCloudApiManager;
+import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.StringUtils;
-import com.tilitili.common.utils.TimeUtil;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,6 +39,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final TencentCloudApiManager tencentCloudApiManager;
 	private final MoliManager moliManager;
 	private final BotRobotMapper botRobotMapper;
+	private final BotMessageRecordMapper botMessageRecordMapper;
 
 	private final static Random random = new Random(System.currentTimeMillis());
 	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
@@ -49,12 +47,13 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private static final String networkKey = "ChatHandle.networkKey";
 
 	@Autowired
-	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotMapper botRobotMapper) {
+	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotMapper botRobotMapper, BotMessageRecordMapper botMessageRecordMapper) {
 		this.animeWordsService = animeWordsService;
 		this.openAiManager = openAiManager;
 		this.tencentCloudApiManager = tencentCloudApiManager;
 		this.moliManager = moliManager;
 		this.botRobotMapper = botRobotMapper;
+		this.botMessageRecordMapper = botMessageRecordMapper;
 	}
 
 	@Override
@@ -160,7 +159,11 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
-			case "ai": reply = openAiManager.freeChat(botSender.getId(), text, network);
+			case "ai": {
+				List<BotMessageRecord> messageRecordList = isRandomReply? botMessageRecordMapper.getBotMessageRecordByCondition(new BotMessageRecordQuery().setSenderId(botSender.getId()).setCreateTimeStart(DateUtils.addTime(new Date(), Calendar.MINUTE, -2))): Collections.emptyList();
+				reply = openAiManager.freeChat(botSender, text, network, messageRecordList);
+				break;
+			}
 		}
 
 //		if (Objects.equals(group, 674446384L)) {
