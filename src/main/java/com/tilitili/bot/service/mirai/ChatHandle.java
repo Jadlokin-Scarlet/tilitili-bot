@@ -160,9 +160,11 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
 			case "ai": {
-				List<BotMessageRecord> messageRecordList = isRandomReply? botMessageRecordMapper.getBotMessageRecordByCondition(new BotMessageRecordQuery().setSenderId(botSender.getId()).setCreateTimeStart(DateUtils.addTime(new Date(), Calendar.MINUTE, -2))): Collections.emptyList();
+				Date endTime = new Date();// endTime = DateUtils.parseDateYMDHMS("2023-05-30 03:01:00")
+				Date startTime = DateUtils.addTime(endTime, Calendar.MINUTE, -2);
+				List<BotMessageRecord> messageRecordList = isRandomReply? botMessageRecordMapper.getBotMessageRecordByCondition(new BotMessageRecordQuery().setSenderId(botSender.getId()).setCreateTimeStart(startTime).setCreateTimeEnd(endTime)): Collections.emptyList();
 				List<BotMessageRecord> filterMessageRecordList = messageRecordList.stream().filter(StreamUtil.isEqual(BotMessageRecord::getMessageId, messageAction.getMessageId()).negate()).collect(Collectors.toList());
-				reply = openAiManager.freeChat(botSender, text, network, filterMessageRecordList);
+				reply = openAiManager.freeChat(botSender, messageAction.getBotMessage(), network, filterMessageRecordList);
 				break;
 			}
 		}
