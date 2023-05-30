@@ -40,7 +40,7 @@ public abstract class BaseMessageHandleAdapt implements BaseMessageHandle {
 
 	@Override
 	public List<BotMessage> mockMessage(BotMessageAction messageAction) {
-		if (!mockSenderIdList.contains(messageAction.getBotSender().getId())) {
+		if (mockSenderIdList.contains(messageAction.getBotSender().getId())) {
 			return mockMessageInWaiteSender(messageAction);
 		}
 		return null;
