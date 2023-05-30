@@ -35,8 +35,8 @@ public class BotMenuService {
         return result;
     }
 
-    public List<BotMenuDTO> getBotMenuList() {
-        List<BotMenu> menuList = botMenuMapper.getBotMenuByCondition(new BotMenuQuery().setStatus(0));
+    public List<BotMenuDTO> getBotMenuList(BotMenuQuery query) {
+        List<BotMenu> menuList = botMenuMapper.getBotMenuByCondition(query.setStatus(0));
         menuList.sort(Comparator.comparingInt(BotMenu::getLevel));
         List<BotMenuDTO> result = new ArrayList<>();
         Map<Long, BotMenuDTO> idIndexMap = new HashMap<>();

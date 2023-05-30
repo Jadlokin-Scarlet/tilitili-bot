@@ -17,4 +17,6 @@ public abstract class BaseEventHandleAdapt implements BaseEventHandle {
 
 	@Override
 	public abstract BotMessage handleEvent(BotRobot bot, BotMessage botMessage) throws Exception;
+
+
 }

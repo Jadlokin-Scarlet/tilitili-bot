@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -29,6 +30,15 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 	@Autowired
 	public BoastHandle(BotBoastMapper botBoastMapper) {
 		this.botBoastMapper = botBoastMapper;
+	}
+	@Override
+	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+		String key = messageAction.getKeyWithoutPrefix();
+
+		switch (key) {
+			case "夸夸我": return Collections.singletonList(BotMessage.simpleTextMessage("我吃过的山珍海味，皆不及你珍贵，更不及你可口。"));
+			default: return Collections.emptyList();
+		}
 	}
 
 	@Override

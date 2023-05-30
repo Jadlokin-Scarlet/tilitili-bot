@@ -14,4 +14,6 @@ public interface BaseMessageHandle {
     String getHelpMessage(BotTask botTask);
 
     String getHelpMessage(BotTask botTask, String key);
+
+    List<BotMessage> mockMessage(BotMessageAction messageAction);
 }

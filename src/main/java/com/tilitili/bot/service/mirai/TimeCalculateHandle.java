@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class TimeCalculateHandle extends ExceptionRespMessageHandle {
@@ -19,6 +21,18 @@ public class TimeCalculateHandle extends ExceptionRespMessageHandle {
 	@Autowired
 	public TimeCalculateHandle(HolidayManager holidayManager) {
 		this.holidayManager = holidayManager;
+	}
+
+	@Override
+	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+		String value = messageAction.getValue();
+		if (value == null) return null;
+
+		switch (value) {
+			case "下班": return Collections.singletonList(BotMessage.simpleTextMessage("已经到点啦！"));
+			case "放假": return Collections.singletonList(BotMessage.simpleTextMessage("还有22天6小时2分52秒哦"));
+			default: return Collections.emptyList();
+		}
 	}
 
 	@Override

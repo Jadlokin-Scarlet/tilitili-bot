@@ -122,6 +122,19 @@ public class BotService {
             for (BotTask botTask : botTaskDTOList) {
                 BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
                 try {
+                    // 如果mock出了数据，就只返回mock数据
+                    respMessage = messageHandle.mockMessage(botMessageAction);
+                } catch (AssertException e) {
+                    log.debug(e.getMessage(), e);
+                    // 如果继承了实现了全局异常处理的基类，则调用异常处理方法
+                    if (messageHandle instanceof ExceptionRespMessageHandleAdapt) {
+                        respMessage = Collections.singletonList(((ExceptionRespMessageHandleAdapt)messageHandle).handleAssertException(botMessageAction, e));
+                    }
+                }
+                if (respMessage != null) {
+                    break;
+                }
+                try {
                     // 返回null则代表跳过，继续寻找
                     // 返回空消息则代表已处理完毕但不回复，直接结束
                     respMessage = messageHandle.handleMessageNew(botMessageAction);

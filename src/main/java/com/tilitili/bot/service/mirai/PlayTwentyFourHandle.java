@@ -62,6 +62,24 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	@Override
+	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+		String key = messageAction.getKeyWithoutPrefix();
+		String virtualKey = messageAction.getVirtualKey();
+		switch (virtualKey != null? virtualKey: key) {
+			case "玩24点": case "w24": return Collections.singletonList(BotMessage.simpleTextMessage("试试看这道题吧(1，4，3，8)，时限3分钟哦~"));
+			case "回答24点": case "hd24": {
+				String result = messageAction.getValueOrVirtualValue();
+				if ("(8-3+1)*4".equals(result)) {
+					return Collections.singletonList(BotMessage.simpleTextMessage("恭喜你回答正确！"));
+				} else {
+					return Collections.emptyList();
+				}
+			}
+			default: return Collections.emptyList();
+		}
+	}
+
+	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
 		String virtualKey = messageAction.getVirtualKey();

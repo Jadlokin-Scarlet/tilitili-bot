@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.MenuDTO;
 import com.tilitili.bot.service.BotMenuService;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotMenu;
+import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import org.springframework.stereotype.Controller;
@@ -30,8 +31,8 @@ public class BotMenuController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotMenuDTO>> list() {
-        List<BotMenuDTO> botMenuList = botMenuService.getBotMenuList();
+    public BaseModel<PageModel<BotMenuDTO>> list(@RequestBody BotMenuQuery query) {
+        List<BotMenuDTO> botMenuList = botMenuService.getBotMenuList(query);
         return PageModel.of(botMenuList.size(), botMenuList.size(), 1, botMenuList);
     }
 
