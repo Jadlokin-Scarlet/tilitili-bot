@@ -74,6 +74,7 @@ public class BotMenuService {
             botMenu.setLevel(parentMenu.getLevel() + 1);
         }
         Asserts.checkEquals(pathLevel, botMenu.getLevel(), "请正确使用//符号");
+        botMenu.setStatus(0);
         botMenuMapper.addBotMenuSelective(botMenu);
     }
 }

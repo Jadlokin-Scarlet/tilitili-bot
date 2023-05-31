@@ -31,7 +31,7 @@ public class BotMenuController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotMenuDTO>> list(@RequestBody BotMenuQuery query) {
+    public BaseModel<PageModel<BotMenuDTO>> list(BotMenuQuery query) {
         List<BotMenuDTO> botMenuList = botMenuService.getBotMenuList(query);
         return PageModel.of(botMenuList.size(), botMenuList.size(), 1, botMenuList);
     }

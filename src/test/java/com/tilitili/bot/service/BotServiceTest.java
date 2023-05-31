@@ -22,9 +22,9 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		BotRobot bot = botRobotMapper.getBotRobotById(2L);
+		BotRobot bot = botRobotMapper.getBotRobotById(9L);
 
-		tester.testHandleMessage(bot, "{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":709885,\"time\":1685386860},{\"type\":\"Plain\",\"text\":\"我是纯移动端\"}],\"sender\":{\"id\":2125890989,\"memberName\":\"Dlight\",\"specialTitle\":\"\",\"permission\":\"MEMBER\",\"joinTimestamp\":1617942259,\"lastSpeakTimestamp\":1685386861,\"muteTimeRemaining\":0,\"group\":{\"id\":907741387,\"name\":\"公主连结AKB48@记得玩碧蓝档案\",\"permission\":\"ADMINISTRATOR\"}}}}");
+		tester.testHandleMessage(bot, "{\"op\":0,\"s\":2,\"t\":\"MESSAGE_CREATE\",\"id\":\"MESSAGE_CREATE:08fa8f889ce4b1d796b90110d7e86938cd0448a9afdba306\",\"d\":{\"author\":{\"avatar\":\"https://qqchannel-profile-1251316161.file.myqcloud.com/165242847412697fcd16614b9c?t=1652428474\",\"bot\":false,\"id\":\"1792232868513015736\",\"username\":\"Jadlokin_Scarlet\"},\"channel_id\":\"6470157\",\"content\":\"\\u003c@!6528917200927240171\\u003e /夸夸我\",\"guild_id\":\"5237615478283154023\",\"id\":\"08fa8f889ce4b1d796b90110d7e86938cd0448a9afdba306\",\"member\":{\"joined_at\":\"2021-12-08T20:50:41+08:00\",\"nick\":\"Jadlokin_Scarlet\",\"roles\":[\"4\",\"10056905\",\"26\"]},\"mentions\":[{\"avatar\":\"http://thirdqq.qlogo.cn/g?b=oidb\\u0026k=icia4lyGOBQmEjKqddVNsg8w\\u0026kti=ZHbXqQAAAAA\\u0026s=0\\u0026t=1685007874\",\"bot\":true,\"id\":\"6528917200927240171\",\"username\":\"琪露诺小助手-测试中\"}],\"seq\":589,\"seq_in_channel\":\"589\",\"timestamp\":\"2023-05-31T13:14:17+08:00\"}}");
 
 //		tester.testHandleMessage(botRobotMapper.getBotRobotById(12L), "{\"post_type\":\"message\",\"message_type\":\"guild\",\"time\":1685139325,\"self_id\":536657454,\"sub_type\":\"channel\",\"message\":\"[CQ:at,qq=144115218753207094] ping\",\"self_tiny_id\":\"144115218680351893\",\"sender\":{\"nickname\":\"Jadlokin_Scarlet\",\"tiny_id\":\"144115218678093982\",\"user_id\":144115218678093982},\"guild_id\":\"14133921638967841\",\"channel_id\":\"1733719\",\"message_id\":\"BAAyNroSkuohAAAAAAAadFcAAAAAAAACDQ==\",\"user_id\":\"144115218678093982\"}");
 	}
