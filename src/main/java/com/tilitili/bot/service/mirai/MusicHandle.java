@@ -177,7 +177,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return resp;
         } else if (searchKey.contains("163.com/song")) {
             // https://music.163.com/song?id=446247397&userid=361260659
-            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey);
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
             BotMessage botMessage = null;
             for (String songId : idList) {
                 botMessage = this.handleMusicCouldLink(bot, botSender, botUser, Long.parseLong(songId));
@@ -185,7 +185,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return botMessage;
         } else if (searchKey.contains("163.com/dj")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
-            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey);
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
             BotMessage botMessage = null;
             for (String songId : idList) {
                 botMessage = this.handleMusicCouldProgramLink(bot, botSender, botUser, Long.valueOf(songId));
