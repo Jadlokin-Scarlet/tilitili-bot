@@ -5,6 +5,7 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.qqGuild.QQGuildWsResponse;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Gsons;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -25,6 +26,11 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
         try {
             if ("{\"op\":9,\"d\":false}".equals(message)) {
                 log.warn("{\"op\":9,\"d\":false}");
+                return;
+            }
+            if (message.contains("\"t\":\"RESUMED\"")) {
+                log.warn(message);
+                s = Integer.parseInt(StringUtils.patten1("\"s\":(\\d+),", message));
                 return;
             }
             log.info(bot.getName() + " Message Received message={}", message);
