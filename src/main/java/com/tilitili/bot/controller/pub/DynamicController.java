@@ -10,11 +10,16 @@ import com.tilitili.common.mapper.mysql.SubscriptionDynamicMapper;
 import com.tilitili.common.mapper.mysql.SubscriptionUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.net.URI;
 
 @Controller
 @RequestMapping("/api/pub/dynamic")
@@ -59,21 +64,22 @@ public class DynamicController extends BaseController {
     }
 
     @GetMapping("/jump/{type}/{externalId}")
-    public String jumpToSource(@PathVariable String externalId, @PathVariable Integer type) {
+    public ResponseEntity<Void> jumpToSource(@PathVariable String externalId, @PathVariable Integer type) {
         Asserts.notNull(type, "参数有误");
         Asserts.notBlank(externalId, "参数有误");
+        HttpHeaders headers = new HttpHeaders();
 
         SubscriptionDynamic dynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, externalId);
         if (dynamic.getQuoteId() != null) {
             SubscriptionDynamic quoteDynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, dynamic.getQuoteId());
             if (StringUtils.isNotBlank(quoteDynamic.getShareUrl())) {
-                return quoteDynamic.getShareUrl();
+                headers.setLocation(URI.create(quoteDynamic.getShareUrl()));
             }
         }
         if (StringUtils.isNotBlank(dynamic.getShareUrl())) {
-            return dynamic.getShareUrl();
+            headers.setLocation(URI.create(dynamic.getShareUrl()));
         }
-        return null;
+        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
     }
 
     private void uploadImage(SubscriptionDynamic dynamic) {
