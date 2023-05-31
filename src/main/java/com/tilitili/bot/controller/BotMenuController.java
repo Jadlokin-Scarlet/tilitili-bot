@@ -25,7 +25,7 @@ public class BotMenuController extends BaseController {
     @GetMapping("/menuList")
     @ResponseBody
     public BaseModel<List<MenuDTO>> menuList(@SessionAttribute("botAdmin") BotAdmin botAdmin) {
-        List<MenuDTO> menuList = botMenuService.getMenuList();
+        List<MenuDTO> menuList = botMenuService.getMenuList(botAdmin);
         return BaseModel.success(menuList);
     }
 

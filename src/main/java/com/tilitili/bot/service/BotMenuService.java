@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.BotMenuDTO;
 import com.tilitili.bot.entity.MenuDTO;
+import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotMenu;
 import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.mapper.mysql.BotMenuMapper;
@@ -18,8 +19,8 @@ public class BotMenuService {
         this.botMenuMapper = botMenuMapper;
     }
 
-    public List<MenuDTO> getMenuList() {
-        List<BotMenu> menuList = botMenuMapper.getBotMenuByCondition(new BotMenuQuery().setStatus(0));
+    public List<MenuDTO> getMenuList(BotAdmin botAdmin) {
+        List<BotMenu> menuList = botMenuMapper.getAdminMenuList(botAdmin.getId());
         menuList.sort(Comparator.comparingInt(BotMenu::getLevel));
         List<MenuDTO> result = new ArrayList<>();
         Map<Long, MenuDTO> idIndexMap = new HashMap<>();
