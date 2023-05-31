@@ -167,7 +167,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         if (searchKey.contains("bilibili.com")) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
-            List<String> bvList = StringUtils.pattenAll("(BV\\w{10})", searchKey);
+            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
             Asserts.notEmpty(bvList, "啊嘞，不对劲");
 
             BotMessage resp = null;
