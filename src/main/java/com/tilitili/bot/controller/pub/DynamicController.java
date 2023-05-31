@@ -9,6 +9,7 @@ import com.tilitili.common.manager.DynamicManager;
 import com.tilitili.common.mapper.mysql.SubscriptionDynamicMapper;
 import com.tilitili.common.mapper.mysql.SubscriptionUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +56,24 @@ public class DynamicController extends BaseController {
         }
 
         return BaseModel.success(dynamicDTO);
+    }
+
+    @GetMapping("/jump/{type}/{externalId}")
+    public String jumpToSource(@PathVariable String externalId, @PathVariable Integer type) {
+        Asserts.notNull(type, "参数有误");
+        Asserts.notBlank(externalId, "参数有误");
+
+        SubscriptionDynamic dynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, externalId);
+        if (dynamic.getQuoteId() != null) {
+            SubscriptionDynamic quoteDynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, dynamic.getQuoteId());
+            if (StringUtils.isNotBlank(quoteDynamic.getShareUrl())) {
+                return quoteDynamic.getShareUrl();
+            }
+        }
+        if (StringUtils.isNotBlank(dynamic.getShareUrl())) {
+            return dynamic.getShareUrl();
+        }
+        return null;
     }
 
     private void uploadImage(SubscriptionDynamic dynamic) {

@@ -35,7 +35,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 
         //登陆和资源下放不用登陆
         String url = request.getRequestURL().toString();
-        if (url.contains("/botAdmin")) {
+        if (url.contains("/admin")) {
             return true;
         }
         if (url.contains("/pub")) {

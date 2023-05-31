@@ -40,4 +40,8 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 //        }
         super.onClose(code, reason, remote);
     }
+
+    public BotRobot getBot() {
+        return bot;
+    }
 }

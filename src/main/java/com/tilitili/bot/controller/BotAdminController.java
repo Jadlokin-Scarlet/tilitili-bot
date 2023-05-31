@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/api/botAdmin")
+@RequestMapping("/api/admin")
 public class BotAdminController extends BaseController {
     private final BotAdminService botAdminService;
 

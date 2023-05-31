@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/botMenu")
+@RequestMapping("/api/menu")
 public class BotMenuController extends BaseController {
     private final BotMenuService botMenuService;
 
