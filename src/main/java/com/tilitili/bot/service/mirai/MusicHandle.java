@@ -167,16 +167,30 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         if (searchKey.contains("bilibili.com")) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
-            String bv = StringUtils.patten1("(BV\\w{10})", searchKey);
-            return this.handleBilibiliSearch(bot, botSender, botUser, bv);
+            List<String> bvList = StringUtils.pattenAll("(BV\\w{10})", searchKey);
+            Asserts.notEmpty(bvList, "啊嘞，不对劲");
+
+            BotMessage resp = null;
+            for (String bv : bvList) {
+                resp = this.handleBilibiliSearch(bot, botSender, botUser, bv);
+            }
+            return resp;
         } else if (searchKey.contains("163.com/song")) {
             // https://music.163.com/song?id=446247397&userid=361260659
-            Long songId = Long.parseLong(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            return this.handleMusicCouldLink(bot, botSender, botUser, songId);
+            List<String> idList = StringUtils.pattenAll("[?&]id=(\\d+)", searchKey);
+            BotMessage botMessage = null;
+            for (String songId : idList) {
+                botMessage = this.handleMusicCouldLink(bot, botSender, botUser, Long.parseLong(songId));
+            }
+            return botMessage;
         } else if (searchKey.contains("163.com/dj")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
-            Long songId = Long.parseLong(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            return this.handleMusicCouldProgramLink(bot, botSender, botUser, songId);
+            List<String> idList = StringUtils.pattenAll("[?&]id=(\\d+)", searchKey);
+            BotMessage botMessage = null;
+            for (String songId : idList) {
+                botMessage = this.handleMusicCouldProgramLink(bot, botSender, botUser, Long.valueOf(songId));
+            }
+            return botMessage;
         } else {
             return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey);
         }
