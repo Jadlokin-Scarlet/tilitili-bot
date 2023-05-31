@@ -162,7 +162,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
-        String searchKey = messageAction.getValue();
+        String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
         if (searchKey.contains("bilibili.com")) {
