@@ -13,6 +13,7 @@ import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.FishConfig;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.exception.AssertException;
@@ -77,9 +78,10 @@ class StartApplicationTest {
 
     @Test
     public void qqGuildWebsocketTest() throws URISyntaxException {
+        BotRobot bot = botRobotMapper.getValidBotRobotById(9L);
         QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
-                new URI("wss://api.sgroup.qq.com/websocket/"),
-                botRobotMapper.getValidBotRobotById(11L),
+                new URI(botManager.getWebSocketUrl(bot)),
+                bot,
                 botService, sendMessageManager
         );
         qqGuildWebSocketHandler.connect();

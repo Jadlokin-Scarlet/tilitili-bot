@@ -6,6 +6,7 @@ import com.tilitili.common.entity.view.bot.qqGuild.QQGuildWsResponse;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
+import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -26,16 +27,20 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                 log.warn("{\"op\":9,\"d\":false}");
                 return;
             }
+            log.info(bot.getName() + " Message Received message={}", message);
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
             switch (response.getOp()) {
                 case 10: {
-                    this.send("{\"op\":2,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"intents\":513,\"shard\":[0,1]}}");
-                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
+                    if (sessionId == null) {
+                        this.send("{\"op\":2,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"intents\":1073741827,\"shard\":[0,1]}}");
+                    } else {
+                        this.send("{\"op\":6,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
+                    }
+                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 50, TimeUnit.SECONDS);
                     break;
                 }
                 case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
                 case 0: {
-                    log.info(bot.getName() + " Message Received message={}", message);
                     this.s = response.getS();
                     this.sessionId = response.getD().getSessionId();
                     botService.syncHandleMessage(bot, message);
@@ -48,10 +53,19 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
         }
     }
 
+    public void send(String message) {
+        log.info("send " +message);
+        super.send(message);
+    }
+
     @Override
     public void onClose(int code, String reason, boolean remote) {
         super.onClose(code, reason, remote);
-//        this.send("{\"op\":6,\"d\":{\"token\":\"Bot 101983521.Bw0Wi9DZLzI7rVQbZmCO1Qeo0jUyuIla\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
-//        executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);
     }
+
+    @Override
+    public void onOpen(ServerHandshake handshakedata) {
+        log.info("连接websocket成功，url={}", getURI().toString());
+    }
+
 }
