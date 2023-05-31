@@ -42,5 +42,11 @@ public class BotMenuController extends BaseController {
         return BaseModel.success("添加菜单成功");
     }
 
+    @PostMapping("/delete")
+    public BaseModel<?> delete(@RequestBody BotMenu botMenu) {
+        botMenuService.deleteBotMenu(botMenu);
+        return BaseModel.success("删除菜单成功");
+    }
+
 
 }

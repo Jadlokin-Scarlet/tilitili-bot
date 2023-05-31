@@ -48,9 +48,15 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                 case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
                 case 0: {
                     this.s = response.getS();
-                    this.sessionId = response.getD().getSessionId();
+                    if (response.getD().getSessionId() != null) {
+                        this.sessionId = response.getD().getSessionId();
+                    }
                     botService.syncHandleMessage(bot, message);
                     break;
+                }
+                case 7: {
+                    log.info("尝试重连");
+                    this.reconnect();
                 }
                 default: log.warn("记录未知类型"+ message);
             }

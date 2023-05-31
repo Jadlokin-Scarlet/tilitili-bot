@@ -77,4 +77,9 @@ public class BotMenuService {
         botMenu.setStatus(0);
         botMenuMapper.addBotMenuSelective(botMenu);
     }
+
+    public void deleteBotMenu(BotMenu botMenu) {
+        Asserts.notNull(botMenu.getId(), "参数异常");
+        botMenuMapper.deleteBotMenuByPrimary(botMenu.getId());
+    }
 }
