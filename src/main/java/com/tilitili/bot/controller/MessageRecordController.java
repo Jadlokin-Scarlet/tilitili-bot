@@ -8,6 +8,7 @@ import com.tilitili.common.entity.view.PageModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/api/messageRecord")
@@ -20,6 +21,7 @@ public class MessageRecordController extends BaseController {
     }
 
     @GetMapping("/list")
+    @ResponseBody
     public BaseModel<PageModel<BotMessageRecord>> list(BotMessageRecordQuery query) {
         return messageRecordService.list(query);
     }
