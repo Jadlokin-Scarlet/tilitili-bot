@@ -54,7 +54,7 @@ public class MinecraftReceive {
 			String requestStr = valueList.get(0);
 			String senderIdStr = valueList.get(1);
 			Asserts.isNumber(senderIdStr, "参数异常");
-			log.debug("Message Received {}",requestStr);
+			log.info("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
 			BotRobot bot = botRobotMapper.getValidBotRobotById(botSender.getBot());
