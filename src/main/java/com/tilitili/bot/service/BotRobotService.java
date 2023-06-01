@@ -10,6 +10,7 @@ import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,13 +24,15 @@ public class BotRobotService {
     private final BotRobotMapper botRobotMapper;
     private final Map<Long, BotWebSocketHandler> botHandleMap;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, WebSocketConfig webSocketConfig) {
+    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig) {
         this.botRobotMapper = botRobotMapper;
         botHandleMap = new HashMap<>();
-        for (BaseWebSocketHandler handle : webSocketConfig.getBotWebSocketHandlerList()) {
-            if (handle instanceof BotWebSocketHandler) {
-                BotWebSocketHandler botHandle = (BotWebSocketHandler) handle;
-                botHandleMap.put(botHandle.getBot().getId(), botHandle);
+        if (webSocketConfig != null) {
+            for (BaseWebSocketHandler handle : webSocketConfig.getBotWebSocketHandlerList()) {
+                if (handle instanceof BotWebSocketHandler) {
+                    BotWebSocketHandler botHandle = (BotWebSocketHandler) handle;
+                    botHandleMap.put(botHandle.getBot().getId(), botHandle);
+                }
             }
         }
     }

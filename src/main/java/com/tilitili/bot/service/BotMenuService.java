@@ -4,19 +4,25 @@ import com.tilitili.bot.entity.BotMenuDTO;
 import com.tilitili.bot.entity.MenuDTO;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotMenu;
+import com.tilitili.common.entity.BotMenuMapping;
+import com.tilitili.common.entity.query.BotMenuMappingQuery;
 import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.mapper.mysql.BotMenuMapper;
+import com.tilitili.common.mapper.mysql.BotMenuMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BotMenuService {
     private final BotMenuMapper botMenuMapper;
+    private final BotMenuMappingMapper botMenuMappingMapper;
 
-    public BotMenuService(BotMenuMapper botMenuMapper) {
+    public BotMenuService(BotMenuMapper botMenuMapper, BotMenuMappingMapper botMenuMappingMapper) {
         this.botMenuMapper = botMenuMapper;
+        this.botMenuMappingMapper = botMenuMappingMapper;
     }
 
     public List<MenuDTO> getMenuList(BotAdmin botAdmin) {
@@ -66,17 +72,25 @@ public class BotMenuService {
         int pathLevel = path.split("/").length;
         BotMenu otherMenu = botMenuMapper.getBotMenuByPath(path);
         Asserts.checkNull(otherMenu, "该路径已被使用");
+        BotMenu parentMenu = null;
         if (botMenu.getParentId() == null) {
             botMenu.setParentId(0L);
             botMenu.setLevel(1);
         } else {
-            BotMenu parentMenu = botMenuMapper.getBotMenuById(botMenu.getParentId());
+            parentMenu = botMenuMapper.getBotMenuById(botMenu.getParentId());
             Asserts.notNull(parentMenu, "父菜单错误");
             botMenu.setLevel(parentMenu.getLevel() + 1);
         }
         Asserts.checkEquals(pathLevel, botMenu.getLevel(), "请正确使用//符号");
         botMenu.setStatus(0);
         botMenuMapper.addBotMenuSelective(botMenu);
+        if (parentMenu != null) {
+            List<BotMenuMapping> mappingList = botMenuMappingMapper.getBotMenuMappingByCondition(new BotMenuMappingQuery().setMenuId(parentMenu.getId()));
+            List<Long> roleIdList = mappingList.stream().map(BotMenuMapping::getRoleId).collect(Collectors.toList());
+            for (Long roleId : roleIdList) {
+                botMenuMappingMapper.addBotMenuMappingSelective(new BotMenuMapping().setMenuId(botMenu.getId()).setRoleId(roleId));
+            }
+        }
     }
 
     public void deleteBotMenu(BotMenu botMenu) {
