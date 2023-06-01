@@ -42,7 +42,7 @@ public class BotRobotService {
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             BotWebSocketHandler handler = botHandleMap.get(robot.getId());
-            robotDTO.setWsStatus(handler != null && handler.isConnecting()? 0: -1);
+            robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
             result.add(robotDTO);
         }
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
