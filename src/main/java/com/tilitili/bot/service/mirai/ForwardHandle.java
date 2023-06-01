@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.entity.BotForwardConfig;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -12,10 +13,7 @@ import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,6 +28,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 
 	@Override
 	public List<BotMessage> handleMessageNew(BotMessageAction messageAction) {
+		BotRobot bot = messageAction.getBot();
 		Long senderId = messageAction.getBotSender().getId();
 
 		List<BotMessageChain> sourceMessageChainList = messageAction.getBotMessage().getBotMessageChainList();
@@ -82,7 +81,13 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 
 			List<BotMessageChain> newMessageChainList = new ArrayList<>();
 			newMessageChainList.add(BotMessageChain.ofSpeaker(userName, sourceNameStr));
-			newMessageChainList.addAll(sourceMessageChainList);
+			newMessageChainList.addAll(sourceMessageChainList.stream().map(chain -> {
+				switch (chain.getType()) {
+					case BotMessage.MESSAGE_TYPE_SOURCE: return null;
+					case BotMessage.MESSAGE_TYPE_AT: return Objects.equals(chain.getTarget().getId(), bot.getUserId()) ? null: chain;
+					default: return chain;
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toList()));
 			respMessageList.add(BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId));
 		}
 		return respMessageList;
