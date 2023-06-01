@@ -7,7 +7,6 @@ import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +32,10 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                 s = Integer.parseInt(StringUtils.patten1("\"s\":(\\d+),", message));
                 return;
             }
-            log.info(bot.getName() + " Message Received message={}", message);
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
+            if (response.getOp() != 11) {
+                log.info(bot.getName() + " Message Received message={}", message);
+            }
             switch (response.getOp()) {
                 case 10: {
                     if (sessionId == null) {
@@ -65,19 +66,9 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
         }
     }
 
-    public void send(String message) {
-        log.info("send " +message);
-        super.send(message);
-    }
-
     @Override
     public void onClose(int code, String reason, boolean remote) {
         super.onClose(code, reason, remote);
-    }
-
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        log.info("连接websocket成功，url={}", getURI().toString());
     }
 
 }
