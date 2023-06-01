@@ -94,4 +94,8 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
             log.error("优雅停机异常");
         }
     }
+
+    public List<BaseWebSocketHandler> getBotWebSocketHandlerList() {
+        return botWebSocketHandlerList;
+    }
 }

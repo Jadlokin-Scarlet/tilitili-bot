@@ -1,6 +1,8 @@
 package com.tilitili.bot.service;
 
+import com.tilitili.bot.config.WebSocketConfig;
 import com.tilitili.bot.entity.BotRobotDTO;
+import com.tilitili.bot.socket.BaseWebSocketHandler;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
@@ -21,11 +23,14 @@ public class BotRobotService {
     private final BotRobotMapper botRobotMapper;
     private final Map<Long, BotWebSocketHandler> botHandleMap;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, List<BotWebSocketHandler> botHandleList) {
+    public BotRobotService(BotRobotMapper botRobotMapper, WebSocketConfig webSocketConfig) {
         this.botRobotMapper = botRobotMapper;
         botHandleMap = new HashMap<>();
-        for (BotWebSocketHandler botHandle : botHandleList) {
-            botHandleMap.put(botHandle.getBot().getId(), botHandle);
+        for (BaseWebSocketHandler handle : webSocketConfig.getBotWebSocketHandlerList()) {
+            if (handle instanceof BotWebSocketHandler) {
+                BotWebSocketHandler botHandle = (BotWebSocketHandler) handle;
+                botHandleMap.put(botHandle.getBot().getId(), botHandle);
+            }
         }
     }
 
@@ -37,7 +42,7 @@ public class BotRobotService {
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             BotWebSocketHandler handler = botHandleMap.get(robot.getId());
-            robotDTO.setWsStatus(handler != null && handler.isConnecting()? 1: 0);
+            robotDTO.setWsStatus(handler != null && handler.isConnecting()? 0: -1);
             result.add(robotDTO);
         }
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
