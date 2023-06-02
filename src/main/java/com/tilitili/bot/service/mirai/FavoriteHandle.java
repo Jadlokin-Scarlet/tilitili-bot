@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -340,7 +341,10 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		Asserts.notEquals(addCnt, 0, "认领失败惹");
 
 		String tips = botUser.getType() == BotUserConstant.USER_TYPE_QQ? "": "(tips：有共同群聊最好先申请合体再领。";
-		return BotMessage.simpleTextMessage(String.format("你好，初次见面，我叫%s。%s", name, tips));
+		return BotMessage.simpleListMessage(Lists.newArrayList(
+				BotMessageChain.ofSpeaker(name),
+				BotMessageChain.ofPlain(String.format("你好，初次见面，我叫%s。%s", name, tips))
+		));
 	}
 
 //	private BotMessage handleStart(BotMessageAction messageAction) {
