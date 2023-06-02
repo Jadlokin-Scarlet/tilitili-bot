@@ -18,7 +18,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     public BaseWebSocketHandler(URI serverUri) {
         super(serverUri);
-        this.executorService = Executors.newSingleThreadScheduledExecutor();
+        this.executorService = Executors.newScheduledThreadPool(10);
     }
 
     @Override
