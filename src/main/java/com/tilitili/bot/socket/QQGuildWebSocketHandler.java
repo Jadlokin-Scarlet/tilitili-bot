@@ -57,7 +57,8 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                 }
                 case 7: {
                     log.info("尝试重连");
-                    this.reconnect();
+                    this.send("{\"op\":6,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
+                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 50, TimeUnit.SECONDS);
                 }
                 default: log.warn("记录未知类型"+ message);
             }
