@@ -9,12 +9,14 @@ import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -45,8 +47,9 @@ public class BotService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
+    private final BotRobotMapper botRobotMapper;
 
-    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper) {
+    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper, BotRobotMapper botRobotMapper) {
         this.sendMessageManager = sendMessageManager;
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
@@ -56,6 +59,7 @@ public class BotService {
         this.botMessageRecordMapper = botMessageRecordMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
+        this.botRobotMapper = botRobotMapper;
         gson = new Gson();
 
         this.eventHandleMap = eventHandleList.stream().collect(Collectors.toMap(BaseEventHandle::getEventType, Function.identity()));
@@ -76,6 +80,11 @@ public class BotService {
         }
         if (botMessage == null) {
             log.warn("解析失败");
+            return;
+        }
+        Long userId = botMessage.getBotUser().getId();
+        if (botRobotMapper.countBotRobotByCondition(new BotRobotQuery().setUserId(userId)) == 1) {
+            log.info("跳过自己消息");
             return;
         }
         if (botMessage.getBotMessageChainList() != null) {
@@ -164,7 +173,6 @@ public class BotService {
                 // 没设置发送者，就默认原路发回
                 if (message.getBotSender() == null) {
                     message.setBotSender(botSender);
-                    message.setBot(bot);
                 }
                 // 记录消息和回复消息的关系
                 message.setMessageId(botMessage.getMessageId());

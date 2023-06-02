@@ -56,7 +56,7 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 			BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
 			Asserts.notNull(replySender, "没有权限");
 
-			BotRobot replyBot = botRobotMapper.getValidBotRobotById(replySender.getBot());
+			BotRobot replyBot = botRobotMapper.getValidBotRobotById(replySender.getSendBot());
 			Asserts.notNull(replyBot, "啊嘞，不对劲");
 			botManager.recallMessage(replyBot, replySender, replyMessageId);
 		}

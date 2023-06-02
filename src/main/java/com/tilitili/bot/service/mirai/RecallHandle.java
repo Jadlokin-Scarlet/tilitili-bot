@@ -53,7 +53,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
                 BotSender otherBotSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                BotRobot otherBot = botRobotMapper.getValidBotRobotById(otherBotSender.getBot());
+                BotRobot otherBot = botRobotMapper.getValidBotRobotById(otherBotSender.getSendBot());
                 Asserts.notNull(otherBot, "啊嘞，不对劲");
                 botManager.recallMessage(otherBot, otherBotSender, sendMessage.getMessageId());
             }
