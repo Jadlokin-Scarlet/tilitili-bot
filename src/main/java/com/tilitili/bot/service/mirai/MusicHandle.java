@@ -154,7 +154,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
-        if (searchKey.contains("163.com/playlist")) {
+        if (searchKey.contains("163.com/playlist") || searchKey.contains("163.com/#/playlist") || searchKey.contains("163.com/m/playlist")) {
             // https://music.163.com/playlist?id=649428962&userid=361260659
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             return this.handleMusicCouldPlayList(bot, botSender, botUser, listId);
