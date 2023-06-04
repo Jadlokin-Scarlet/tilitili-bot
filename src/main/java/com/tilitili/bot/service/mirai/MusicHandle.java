@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -156,7 +156,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
 
-        if (Pattern.matches("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey)) {
+        if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
             // https://music.163.com/playlist?id=649428962&userid=361260659
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             return this.handleMusicCouldPlayList(bot, botSender, botUser, listId);
