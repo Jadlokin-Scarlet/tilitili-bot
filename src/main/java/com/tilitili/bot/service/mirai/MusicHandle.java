@@ -51,7 +51,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
             switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
                 case "选歌": return handleChoose(messageAction);
-                case "点歌": return handleSearch(messageAction);
+                case "点歌": case "dg": return handleSearch(messageAction);
                 case "切歌": return handleLast(messageAction);
     //            case "绑定KTV": return handleBindKTV(messageAction);
                 case "停止": return handleStop(messageAction);
