@@ -14,6 +14,7 @@ import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +54,8 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         Long wifeUserId = redisCache.getValueLong(this.getWifeMappingCacheKey(botSender, botUser));
         Asserts.notNull(wifeUserId, "没老婆灌注啥？飞机吗");
+        List<BotUserDTO> atList = messageAction.getAtList();
+        Asserts.isTrue(atList.isEmpty() || (atList.stream().allMatch(StreamUtil.isEqual(BotUserDTO::getId, wifeUserId))), "不准牛喵");
         BotUserDTO wife = botUserManager.getBotUserByIdWithParent(wifeUserId);
         long add = ThreadLocalRandom.current().nextLong(100000);
         Long total = redisCache.increment(this.getWifeTotalCacheKey(botSender, wife), add);
