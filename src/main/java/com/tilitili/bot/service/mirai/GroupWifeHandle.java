@@ -49,6 +49,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         }
     }
 
+    private final Date limitTime = DateUtils.parseDateYMD("2023-06-07");
     private BotMessage handleLove(BotMessageAction messageAction) {
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
@@ -62,8 +63,15 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
             userMax = 100000L;
         }
         long add = ThreadLocalRandom.current().nextLong(userMax);
+        if (new Date().after(limitTime)) {
+            redisCache.setValue(this.getUserMaxCacheKey(botSender, botUser), add, TimeUnit.DAYS.toSeconds(1));
+            if (add < 100) {
+                return BotMessage.simpleTextMessage("诶？才%.3f毫升？你没事吧？要不休息一下？");
+            } else if (add < 1000) {
+                return BotMessage.simpleTextMessage("才%.3f毫升吗？大哥哥这就不行了呀，真是的~明天再来吧");
+            }
+        }
         Long total = redisCache.increment(this.getWifeTotalCacheKey(botSender, wife), add, TimeUnit.DAYS.toSeconds(1));
-//        redisCache.setValue(this.getUserMaxCacheKey(botSender, botUser), add, TimeUnit.DAYS.toSeconds(1));
         return BotMessage.simpleTextMessage(String.format("好欸！%s给%s注入了%.3f毫升的脱氧核糖核酸，当日总注入量为：%.3f",
                 botUser.getName(), wife.getName(), add / 1000.0, total / 1000.0));
     }
