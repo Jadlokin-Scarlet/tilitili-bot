@@ -57,10 +57,20 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         List<BotUserDTO> atList = messageAction.getAtList();
         Asserts.isTrue(atList.stream().allMatch(StreamUtil.isEqual(BotUserDTO::getId, wifeUserId)), "不准牛喵");
         BotUserDTO wife = botUserManager.getBotUserByIdWithParent(wifeUserId);
-        long add = ThreadLocalRandom.current().nextLong(100000);
-        Long total = redisCache.increment(this.getWifeTotalCacheKey(botSender, wife), add);
+        Long userMax = redisCache.getValueLong(this.getUserMaxCacheKey(botSender, botUser));
+        if (userMax == null) {
+            userMax = 100000L;
+        }
+        long add = ThreadLocalRandom.current().nextLong(userMax);
+        Long total = redisCache.increment(this.getWifeTotalCacheKey(botSender, wife), add, TimeUnit.DAYS.toSeconds(1));
+//        redisCache.setValue(this.getUserMaxCacheKey(botSender, botUser), add, TimeUnit.DAYS.toSeconds(1));
         return BotMessage.simpleTextMessage(String.format("好欸！%s给%s注入了%.3f毫升的脱氧核糖核酸，当日总注入量为：%.3f",
                 botUser.getName(), wife.getName(), add / 1000.0, total / 1000.0));
+    }
+
+    private String getUserMaxCacheKey(BotSender botSender, BotUserDTO botUser) {
+        String time = DateUtils.formatDateYMD(new Date());
+        return String.format("GroupWifeHandle.userMax-%s-%s-%s", time, botSender.getId(), botUser.getId());
     }
 
     private String getWifeTotalCacheKey(BotSender botSender, BotUserDTO wife) {
