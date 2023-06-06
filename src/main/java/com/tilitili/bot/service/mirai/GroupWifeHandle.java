@@ -66,9 +66,9 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         if (new Date().after(limitTime)) {
             redisCache.setValue(this.getUserMaxCacheKey(botSender, botUser), add, TimeUnit.DAYS.toSeconds(1));
             if (add < 100) {
-                return BotMessage.simpleTextMessage("诶？才%.3f毫升？你没事吧？要不休息一下？");
+                return BotMessage.simpleTextMessage(String.format("诶？才%.3f毫升？你没事吧？要不休息一下？", add / 1000.0));
             } else if (add < 1000) {
-                return BotMessage.simpleTextMessage("才%.3f毫升吗？大哥哥这就不行了呀，真是的~明天再来吧");
+                return BotMessage.simpleTextMessage(String.format("才%.3f毫升吗？大哥哥这就不行了呀，真是的~明天再来吧", add / 1000.0));
             }
         }
         Long total = redisCache.increment(this.getWifeTotalCacheKey(botSender, wife), add, TimeUnit.DAYS.toSeconds(1));
