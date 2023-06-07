@@ -62,6 +62,9 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         if (userMax == null) {
             userMax = 100000L;
         }
+        if (userMax == 0) {
+            return null;
+        }
         long add = ThreadLocalRandom.current().nextLong(userMax);
         if (new Date().after(limitTime)) {
             redisCache.setValue(this.getUserMaxCacheKey(botSender, botUser), add, TimeUnit.DAYS.toSeconds(1));
