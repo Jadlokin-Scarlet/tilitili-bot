@@ -15,6 +15,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.McPingManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
+import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,15 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final MinecraftManager minecraftManager;
 	private final BotSenderMapper botSenderMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
+	private final BotRobotMapper botRobotMapper;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper, BotRobotMapper botRobotMapper) {
 		this.mcPingManager = mcPingManager;
 		this.minecraftManager = minecraftManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderMapper = botSenderMapper;
+		this.botRobotMapper = botRobotMapper;
 	}
 
 	@Override
@@ -62,8 +65,9 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetBotSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			BotRobot minecraftBot = botRobotMapper.getValidBotRobotById(targetBotSender.getSendBot());
 
-			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(bot, targetBotSender);
+			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot, targetBotSender);
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
