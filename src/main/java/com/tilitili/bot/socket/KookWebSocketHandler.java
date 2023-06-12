@@ -43,7 +43,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
     public void connect() {
         if (sn != 0) {
             String token = StringUtils.patten1("&token=(\\w+?==)", this.uri.toString());
-            this.uri = uri.resolve(String.format("?compress=0&token=%s&&resume=1&sn=%d&session_id=%s", token, sn, sessionId));
+            this.uri = uri.resolve(String.format("gateway?compress=0&token=%s&&resume=1&sn=%d&session_id=%s", token, sn, sessionId));
         }
         super.connect();
     }
