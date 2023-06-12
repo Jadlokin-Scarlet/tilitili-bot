@@ -48,12 +48,13 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         this.sendMessageManager = sendMessageManager;
         this.botService = botService;
         this.botManager = botManager;
-        botWebSocketHandlerMap = new HashMap<>();
+        this.botWebSocketHandlerMap = new HashMap<>();
     }
 
     @PostConstruct
     public void webSocketConnectionManager() {
         List<BotRobot> robotList = botRobotMapper.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
+//        List<BotRobot> robotList = Collections.singletonList(botRobotMapper.getValidBotRobotById(5L));
         for (BotRobot bot : robotList) {
             try {
                 BotWebSocketHandler botWebSocketHandler = this.newWebSocketHandle(bot);
@@ -107,13 +108,17 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     public void upBot(Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
-        BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
+        Asserts.isFalse(botWebSocketHandlerMap.containsKey(bot.getId()), "啊嘞，不对劲");
+        BotWebSocketHandler botWebSocketHandler = this.newWebSocketHandle(bot);
         botWebSocketHandler.botConnect();
+        botWebSocketHandlerMap.put(bot.getId(), botWebSocketHandler);
     }
 
     public void downBot(Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
-        BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
+        Asserts.isTrue(botWebSocketHandlerMap.containsKey(bot.getId()), "啊嘞，不对劲");
+        BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.get(bot.getId());
         botWebSocketHandler.botClose();
+        botWebSocketHandlerMap.remove(bot.getId());
     }
 }
