@@ -43,7 +43,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
         log.warn("连接关闭，60秒后尝试重连，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
         executorService.schedule(() -> {
             log.info("尝试重连");
-            this.reconnect();
+            this.connect();
         }, 60, TimeUnit.SECONDS);
     }
 
