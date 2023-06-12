@@ -3,9 +3,11 @@ package com.tilitili.bot.controller;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.service.BotRobotService;
 import com.tilitili.common.entity.BotAdmin;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,15 +30,17 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/up")
     @ResponseBody
-    public BaseModel<String> upBot(Long id) {
-        botRobotService.upBot(id);
+    public BaseModel<String> upBot(@RequestBody BotRobot bot) {
+        Asserts.notNull(bot.getId(), "参数异常");
+        botRobotService.upBot(bot.getId());
         return BaseModel.success();
     }
 
     @PostMapping("/down")
     @ResponseBody
-    public BaseModel<String> downBot(Long id) {
-        botRobotService.downBot(id);
+    public BaseModel<String> downBot(@RequestBody BotRobot bot) {
+        Asserts.notNull(bot.getId(), "参数异常");
+        botRobotService.downBot(bot.getId());
         return BaseModel.success();
     }
 }
