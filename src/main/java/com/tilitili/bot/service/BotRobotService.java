@@ -36,7 +36,9 @@ public class BotRobotService {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (webSocketConfig != null) {
                 BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
-                robotDTO.setWsStatus(handler == null ? -1 : handler.getStatus());
+                if (handler != null) {
+                    robotDTO.setWsStatus(handler.getStatus());
+                }
             }
             result.add(robotDTO);
         }
@@ -44,14 +46,14 @@ public class BotRobotService {
     }
 
     public void upBot(Long id) {
-//        Asserts.notNull(webSocketConfig, "测试环境无效");
+        Asserts.notNull(webSocketConfig, "测试环境无效");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
         webSocketConfig.upBot(id);
     }
 
     public void downBot(Long id) {
-//        Asserts.notNull(webSocketConfig, "测试环境无效");
+        Asserts.notNull(webSocketConfig, "测试环境无效");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
         webSocketConfig.downBot(id);
