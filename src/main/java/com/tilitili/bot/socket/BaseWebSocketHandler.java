@@ -60,6 +60,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
     public void connect() {
         super.connect();
         init = false;
+        log.info("init="+init);
     }
 
     protected void handleTextMessage(String message) {
@@ -71,6 +72,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     public void botConnect() {
         Asserts.checkEquals(status, -1, "状态校验异常");
+        log.info("init="+init);
         if (init) {
             super.connect();
         } else {
