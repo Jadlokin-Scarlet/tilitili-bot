@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class BotRobotService {
@@ -36,7 +37,7 @@ public class BotRobotService {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (webSocketConfig != null) {
                 BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
-                if (handler != null) {
+                if (Objects.equals(robot.getPushType(), "ws") && handler != null) {
                     robotDTO.setWsStatus(handler.getStatus());
                 }
             }
