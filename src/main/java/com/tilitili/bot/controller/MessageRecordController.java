@@ -1,6 +1,6 @@
 package com.tilitili.bot.controller;
 
-import com.tilitili.bot.entity.MessageRecordDTO;
+import com.tilitili.bot.entity.MessageRecordVO;
 import com.tilitili.bot.service.MessageRecordService;
 import com.tilitili.common.entity.query.BotMessageRecordQuery;
 import com.tilitili.common.entity.view.BaseModel;
@@ -22,7 +22,7 @@ public class MessageRecordController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<MessageRecordDTO>> list(BotMessageRecordQuery query) {
+    public BaseModel<PageModel<MessageRecordVO>> list(BotMessageRecordQuery query) {
         return messageRecordService.list(query);
     }
 }

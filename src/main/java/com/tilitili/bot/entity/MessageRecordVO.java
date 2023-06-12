@@ -4,7 +4,7 @@ import com.tilitili.common.entity.dto.BaseDTO;
 
 import java.util.List;
 
-public class MessageRecordDTO extends BaseDTO {
+public class MessageRecordVO extends BaseDTO {
     private Long id;
     private String content;
     private List<String> picList;
@@ -19,7 +19,7 @@ public class MessageRecordDTO extends BaseDTO {
         return content;
     }
 
-    public MessageRecordDTO setContent(String content) {
+    public MessageRecordVO setContent(String content) {
         this.content = content;
         return this;
     }
@@ -28,7 +28,7 @@ public class MessageRecordDTO extends BaseDTO {
         return picList;
     }
 
-    public MessageRecordDTO setPicList(List<String> picList) {
+    public MessageRecordVO setPicList(List<String> picList) {
         this.picList = picList;
         return this;
     }
@@ -37,7 +37,7 @@ public class MessageRecordDTO extends BaseDTO {
         return userName;
     }
 
-    public MessageRecordDTO setUserName(String userName) {
+    public MessageRecordVO setUserName(String userName) {
         this.userName = userName;
         return this;
     }
@@ -46,7 +46,7 @@ public class MessageRecordDTO extends BaseDTO {
         return senderName;
     }
 
-    public MessageRecordDTO setSenderName(String senderName) {
+    public MessageRecordVO setSenderName(String senderName) {
         this.senderName = senderName;
         return this;
     }
@@ -55,7 +55,7 @@ public class MessageRecordDTO extends BaseDTO {
         return sendType;
     }
 
-    public MessageRecordDTO setSendType(String sendType) {
+    public MessageRecordVO setSendType(String sendType) {
         this.sendType = sendType;
         return this;
     }
@@ -64,7 +64,7 @@ public class MessageRecordDTO extends BaseDTO {
         return hasReply;
     }
 
-    public MessageRecordDTO setHasReply(Boolean hasReply) {
+    public MessageRecordVO setHasReply(Boolean hasReply) {
         this.hasReply = hasReply;
         return this;
     }
@@ -73,7 +73,7 @@ public class MessageRecordDTO extends BaseDTO {
         return id;
     }
 
-    public MessageRecordDTO setId(Long id) {
+    public MessageRecordVO setId(Long id) {
         this.id = id;
         return this;
     }
@@ -82,7 +82,7 @@ public class MessageRecordDTO extends BaseDTO {
         return replyContent;
     }
 
-    public MessageRecordDTO setReplyContent(String replyContent) {
+    public MessageRecordVO setReplyContent(String replyContent) {
         this.replyContent = replyContent;
         return this;
     }
@@ -91,7 +91,7 @@ public class MessageRecordDTO extends BaseDTO {
         return replyPicList;
     }
 
-    public MessageRecordDTO setReplyPicList(String replyPicList) {
+    public MessageRecordVO setReplyPicList(String replyPicList) {
         this.replyPicList = replyPicList;
         return this;
     }

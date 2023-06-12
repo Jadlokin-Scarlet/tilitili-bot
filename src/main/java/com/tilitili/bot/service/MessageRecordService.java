@@ -1,7 +1,7 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.entity.MessageRecordDTO;
-import com.tilitili.common.entity.BotMessageRecord;
+import com.tilitili.bot.entity.MessageRecordVO;
+import com.tilitili.common.entity.dto.MessageRecordDTO;
 import com.tilitili.common.entity.query.BotMessageRecordQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -28,12 +28,13 @@ public class MessageRecordService {
         this.botManager = botManager;
     }
 
-    public BaseModel<PageModel<MessageRecordDTO>> list(BotMessageRecordQuery query) {
+    public BaseModel<PageModel<MessageRecordVO>> list(BotMessageRecordQuery query) {
         query.setPageSize(20).setSorter("id").setSorted("desc");
         int total = botMessageRecordMapper.countBotMessageRecordByCondition(query);
-        List<BotMessageRecord> list = botMessageRecordMapper.getBotMessageRecordByCondition(query);
-        List<MessageRecordDTO> result = list.stream().map(record -> {
-            MessageRecordDTO messageRecordDTO = new MessageRecordDTO();
+        List<MessageRecordDTO> list = botMessageRecordMapper.listPageBotMessageRecord(query);
+        List<MessageRecordVO> resultList = list.stream().map(record -> {
+            log.info("list....");
+            MessageRecordVO result = new MessageRecordVO();
             BotMessage botMessage;
             try {
                 botMessage = botManager.handleMessageRecordToBotMessage(record);
@@ -50,16 +51,17 @@ public class MessageRecordService {
                 }
             }).filter(Objects::nonNull).collect(Collectors.joining());
             List<String> picList = botMessage.getBotMessageChainList().stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_IMAGE)).map(BotMessageChain::getUrl).collect(Collectors.toList());
-            messageRecordDTO.setId(messageRecordDTO.getId());
-            messageRecordDTO.setContent(content);
-            messageRecordDTO.setPicList(picList);
-            messageRecordDTO.setSendType(botMessage.getBotSender().getSendType());
-            messageRecordDTO.setSenderName(botMessage.getBotSender().getName());
-            messageRecordDTO.setUserName(botMessage.getBotUser().getName());
-            messageRecordDTO.setHasReply(record.getReplyMessageId() != null);
+            result.setId(record.getId());
+            result.setContent(content);
+            result.setPicList(picList);
+            result.setSendType(botMessage.getBotSender().getSendType());
+            result.setSenderName(botMessage.getBotSender().getName());
+            result.setUserName(botMessage.getBotUser().getName());
+            result.setHasReply(record.getReplyMessageId() != null);
 
-            return messageRecordDTO;
+            log.info("list....");
+            return result;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
+        return PageModel.of(total, query.getPageSize(), query.getCurrent(), resultList);
     }
 }

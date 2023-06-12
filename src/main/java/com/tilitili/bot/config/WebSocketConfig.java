@@ -29,8 +29,9 @@ import org.springframework.jms.core.JmsTemplate;
 import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -39,15 +40,15 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     private final BotManager botManager;
     private final BotRobotMapper botRobotMapper;
     private final SendMessageManager sendMessageManager;
-    private final List<BaseWebSocketHandler> botWebSocketHandlerList;
+    private final Map<Long, BotWebSocketHandler> botWebSocketHandlerMap;
 
     @Autowired
     public WebSocketConfig(BotService botService, BotManager botManager, BotRobotMapper botRobotMapper, SendMessageManager sendMessageManager) {
         this.botRobotMapper = botRobotMapper;
         this.sendMessageManager = sendMessageManager;
-        botWebSocketHandlerList = new ArrayList<>();
         this.botService = botService;
         this.botManager = botManager;
+        botWebSocketHandlerMap = new HashMap<>();
     }
 
     @PostConstruct
@@ -55,9 +56,9 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         List<BotRobot> robotList = botRobotMapper.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
         for (BotRobot bot : robotList) {
             try {
-                BotWebSocketHandler botWebSocketHandler = newWebSocketHandle(bot);
+                BotWebSocketHandler botWebSocketHandler = this.newWebSocketHandle(bot);
                 botWebSocketHandler.connect();
-                botWebSocketHandlerList.add(botWebSocketHandler);
+                botWebSocketHandlerMap.put(bot.getId(), botWebSocketHandler);
                 TimeUtil.millisecondsSleep(100);
             } catch (AssertException e) {
                 log.warn("断言异常，message="+e.getMessage());
@@ -67,15 +68,20 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         }
     }
 
-    private BotWebSocketHandler newWebSocketHandle(BotRobot bot) throws URISyntaxException {
-        String wsUrl = botManager.getWebSocketUrl(bot);
-        Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
-        switch (bot.getType()) {
-            case BotRobotConstant.TYPE_MIRAI:
-            case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
-            default: throw new AssertException("?");
+    private BotWebSocketHandler newWebSocketHandle(BotRobot bot) {
+        try {
+            String wsUrl = botManager.getWebSocketUrl(bot);
+            Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
+            switch (bot.getType()) {
+                case BotRobotConstant.TYPE_MIRAI:
+                case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+                case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+                case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketHandler(new URI(wsUrl), bot, botService, sendMessageManager);
+                default: throw new AssertException("?");
+            }
+        } catch (URISyntaxException e) {
+            log.warn("url解析异常", e);
+            throw new AssertException("url解析异常");
         }
     }
 
@@ -87,7 +93,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
         try {
-            for (BaseWebSocketHandler botWebSocketHandler : botWebSocketHandlerList) {
+            for (BaseWebSocketHandler botWebSocketHandler : botWebSocketHandlerMap.values()) {
                 botWebSocketHandler.closeBlocking();
             }
         } catch (InterruptedException e) {
@@ -95,7 +101,19 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
         }
     }
 
-    public List<BaseWebSocketHandler> getBotWebSocketHandlerList() {
-        return botWebSocketHandlerList;
+    public Map<Long, BotWebSocketHandler> getBotWebSocketHandlerMap() {
+        return botWebSocketHandlerMap;
+    }
+
+    public void upBot(Long id) {
+        BotRobot bot = botRobotMapper.getBotRobotById(id);
+        BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
+        botWebSocketHandler.connect();
+    }
+
+    public void downBot(Long id) {
+        BotRobot bot = botRobotMapper.getBotRobotById(id);
+        BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
+        botWebSocketHandler.close();
     }
 }
