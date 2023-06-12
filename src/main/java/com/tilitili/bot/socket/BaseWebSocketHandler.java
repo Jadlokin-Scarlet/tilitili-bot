@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class BaseWebSocketHandler extends WebSocketClient {
-    private boolean init = true;
     protected Integer status = -1;
     protected final ScheduledExecutorService executorService;
 
@@ -59,8 +58,6 @@ public class BaseWebSocketHandler extends WebSocketClient {
     @Override
     public void connect() {
         super.connect();
-        init = false;
-        log.info("init="+init);
     }
 
     protected void handleTextMessage(String message) {
@@ -72,11 +69,10 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     public void botConnect() {
         Asserts.checkEquals(status, -1, "状态校验异常");
-        log.info("init="+init);
-        if (init) {
-            super.connect();
-        } else {
+        if (super.getSocket() != null && super.getSocket().isClosed()) {
             super.reconnect();
+        } else {
+            super.connect();
         }
     }
 
