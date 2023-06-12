@@ -108,12 +108,12 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     public void upBot(Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
-        botWebSocketHandler.connect();
+        botWebSocketHandler.botConnect();
     }
 
     public void downBot(Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         BotWebSocketHandler botWebSocketHandler = botWebSocketHandlerMap.computeIfAbsent(bot.getId(), key->this.newWebSocketHandle(bot));
-        botWebSocketHandler.close();
+        botWebSocketHandler.botClose();
     }
 }

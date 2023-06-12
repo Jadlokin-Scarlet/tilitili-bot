@@ -43,7 +43,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
         log.warn("连接关闭，60秒后尝试重连，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
         executorService.schedule(() -> {
             log.info("尝试重连");
-            this.connect();
+            this.reconnect();
         }, 60, TimeUnit.SECONDS);
     }
 
@@ -60,14 +60,12 @@ public class BaseWebSocketHandler extends WebSocketClient {
         return status;
     }
 
-    @Override
-    public void connect() {
+    public void botConnect() {
         Asserts.checkEquals(status, -1, "状态校验异常");
         super.connect();
     }
 
-    @Override
-    public void close() {
+    public void botClose() {
         Asserts.checkEquals(status, 0, "状态校验异常");
         super.close();
     }
