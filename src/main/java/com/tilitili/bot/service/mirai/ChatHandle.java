@@ -169,14 +169,6 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 			}
 		}
 
-//		if (Objects.equals(group, 674446384L)) {
-//			TimeUtil.millisecondsSleep(1000);
-//			return BotMessage.simpleListMessage(Arrays.asList(
-//					BotMessageChain.ofAt(2489917059L),
-//					BotMessageChain.ofPlain(" "),
-//					BotMessageChain.ofPlain(reply)
-//			));
-//		}
 		if (chainList != null) {
 			return BotMessage.simpleListMessage(chainList);
 		} else if (StringUtils.isNotBlank(reply)) {
