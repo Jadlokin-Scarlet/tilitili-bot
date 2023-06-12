@@ -64,7 +64,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     public void botConnect() {
         Asserts.checkEquals(status, -1, "状态校验异常");
-        super.connect();
+        super.reconnect();
     }
 
     public void botClose() {
