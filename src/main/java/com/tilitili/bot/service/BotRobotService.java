@@ -37,8 +37,8 @@ public class BotRobotService {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (webSocketConfig != null) {
                 BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
-                if (Objects.equals(robot.getPushType(), "ws") && handler != null) {
-                    robotDTO.setWsStatus(handler.getStatus());
+                if (Objects.equals(robot.getPushType(), "ws")) {
+                    robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
                 }
             }
             result.add(robotDTO);
