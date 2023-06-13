@@ -43,4 +43,11 @@ public class BotRobotController extends BaseController{
         botRobotService.downBot(bot.getId());
         return BaseModel.success();
     }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public BaseModel<String> addBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
+        botRobotService.addBot(botAdmin, bot);
+        return BaseModel.success();
+    }
 }

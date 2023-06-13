@@ -279,10 +279,10 @@ public class BotService {
 
     private BotMessage queryQuoteMessage(BotRobot bot, BotSender botSender, BotMessageAction botMessageAction) {
         String quoteMessageId = botMessageAction.getQuoteMessageId();
-        Long quoteSenderId = botMessageAction.getQuoteSenderId();
+        BotUserDTO quoteUser = botMessageAction.getQuoteUser();
         if (quoteMessageId == null) return null;
 
-        if (Objects.equals(quoteSenderId, bot.getQq())) {
+        if (Objects.equals(quoteUser.getId(), bot.getUserId())) {
             BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
             if (sendMessageRecord != null) {
                 return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);

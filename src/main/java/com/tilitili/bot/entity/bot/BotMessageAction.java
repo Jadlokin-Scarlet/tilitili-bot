@@ -36,7 +36,7 @@ public class BotMessageAction {
     private String key;
     private String value;
     private String quoteMessageId;
-    private Long quoteSenderId;
+    private BotUserDTO quoteUser;
     private BotMessage quoteMessage;
     private String virtualKey;
 
@@ -103,7 +103,7 @@ public class BotMessageAction {
         if (CollectionUtils.isNotEmpty(quoteMessageList)) {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
             quoteMessageId = quoteMessageChain.getId();
-            quoteSenderId = quoteMessageChain.getSenderId();
+            quoteUser = quoteMessageChain.getQuoteUser();
         }
     }
 
@@ -187,8 +187,8 @@ public class BotMessageAction {
         return quoteMessageId;
     }
 
-    public Long getQuoteSenderId() {
-        return quoteSenderId;
+    public BotUserDTO getQuoteUser() {
+        return quoteUser;
     }
 
     public BotMessage getQuoteMessage() {
