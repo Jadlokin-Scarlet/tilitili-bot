@@ -8,6 +8,7 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
 import com.tilitili.common.entity.view.request.MinecraftPlayer;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,11 +107,13 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Asserts.notNull(response, "服务器不在线");
 		Integer onlinePlayerCnt = response.getPlayers().getOnline();
 		String version = response.getVersion().getName();
-		String message = String.format("服务器在线！版本%s, 在线玩家数：%s，地址: %s", version, onlinePlayerCnt, url);
+		List<BotMessageChain> chainList = new ArrayList<>();
+		chainList.add(BotMessageChain.ofPlain(String.format("服务器在线！版本%s, 在线玩家数：%s，地址: ", version, onlinePlayerCnt)));
+		chainList.add(BotMessageChain.ofLink(url));
 		if (key.equals("mcm")) {
 			String modListStr = response.getModinfo().getModList().stream().map(McPingMod::getModid).collect(Collectors.joining(","));
-			message += String.format("%nmod列表：%s", modListStr);
+			chainList.add(BotMessageChain.ofPlain(String.format("%nmod列表：%s", modListStr)));
 		}
-		return BotMessage.simpleTextMessage(message);
+		return BotMessage.simpleListMessage(chainList);
 	}
 }
