@@ -55,7 +55,7 @@ public class BotRobotService {
                 } else if (Objects.equals(robot.getPushType(), "hook")) {
                     List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setBot(robot.getId()));
                     Asserts.checkEquals(botSenderList.size(), 1, "啊嘞，不对劲");
-                    robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/mc/report/"+botSenderList.get(0));
+                    robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/mc/report/"+botSenderList.get(0).getId());
                 }
             }
             result.add(robotDTO);
