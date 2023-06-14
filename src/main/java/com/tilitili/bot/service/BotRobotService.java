@@ -6,14 +6,15 @@ import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotRobotIndex;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,13 @@ public class BotRobotService {
     private final BotRobotMapper botRobotMapper;
     private final WebSocketConfig webSocketConfig;
     private final BotManager botManager;
-    private final BotSenderMapper botSenderMapper;
+    private final BotRobotIndexMapper botRobotIndexMapper;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotSenderMapper botSenderMapper) {
+    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper) {
         this.botRobotMapper = botRobotMapper;
         this.webSocketConfig = webSocketConfig;
         this.botManager = botManager;
-        this.botSenderMapper = botSenderMapper;
+        this.botRobotIndexMapper = botRobotIndexMapper;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
@@ -147,5 +148,10 @@ public class BotRobotService {
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("hook");
         botRobotMapper.addBotRobotSelective(bot);
+
+        List<Integer> indexTypeList = botRobotIndexMapper.listIndexType();
+        for (Integer indexType : indexTypeList) {
+            botRobotIndexMapper.addBotRobotIndexSelective(new BotRobotIndex().setBotIndexType(indexType).setBot(bot.getId()).setIndex((int) (bot.getId() * 10)));
+        }
     }
 }
