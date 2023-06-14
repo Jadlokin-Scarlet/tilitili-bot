@@ -78,6 +78,9 @@ public class BotRobotService {
     public void addBot(BotAdmin botAdmin, BotRobot bot) {
         Asserts.notNull(bot, "参数异常");
         Asserts.notNull(bot.getType(), "参数异常");
+        bot.setStatus(-1);
+        bot.setAdminId(botAdmin.getId());
+        bot.setMasterId(botAdmin.getUserId());
         switch (bot.getType()) {
             case BotRobotConstant.TYPE_MIRAI: {
                 BotRobot botInfo = botManager.getBotInfo(bot);
@@ -130,9 +133,6 @@ public class BotRobotService {
             }
             default: throw new AssertException("参数异常");
         }
-        bot.setStatus(-1);
-        bot.setAdminId(botAdmin.getId());
-        bot.setMasterId(botAdmin.getUserId());
 
     }
 
