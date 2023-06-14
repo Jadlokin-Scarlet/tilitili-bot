@@ -60,19 +60,22 @@ public class BotRobotService {
 
     public void upBot(Long id) {
         BotRobot bot = botRobotMapper.getValidBotRobotById(id);
+        Asserts.notNull(bot, "参数异常");
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
-        if (webSocketConfig != null) {
+        if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
             webSocketConfig.upBot(id);
         }
     }
 
     public void downBot(Long id) {
+        BotRobot bot = botRobotMapper.getValidBotRobotById(id);
+        Asserts.notNull(bot, "参数异常");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
-        if (webSocketConfig != null) {
+        if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
             webSocketConfig.downBot(id);
         }
     }
