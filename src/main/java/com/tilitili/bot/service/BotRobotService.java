@@ -4,12 +4,9 @@ import com.tilitili.bot.config.WebSocketConfig;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
-import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
-import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotRobotQuery;
-import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.exception.AssertException;
@@ -19,7 +16,6 @@ import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -144,10 +140,5 @@ public class BotRobotService {
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("hook");
         botRobotMapper.addBotRobotSelective(bot);
-
-        List<BotSender> senderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setBot(bot.getId()));
-        if (CollectionUtils.isEmpty(senderList)) {
-            botSenderMapper.addBotSenderSelective(new BotSender().setSendType(SendTypeEnum.MINECRAFT_MESSAGE_STR).setName(bot.getName()).setBot(bot.getId()));
-        }
     }
 }
