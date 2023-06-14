@@ -7,7 +7,6 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
-import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,19 +27,17 @@ public class BotRobotController extends BaseController{
         return botRobotService.list(botAdmin, query);
     }
 
-    @PostMapping("/up")
+    @PostMapping("/up/{botId}")
     @ResponseBody
-    public BaseModel<String> upBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
-        Asserts.notNull(bot.getId(), "参数异常");
-        botRobotService.upBot(botAdmin, bot.getId());
+    public BaseModel<String> upBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
+        botRobotService.upBot(botAdmin, botId);
         return BaseModel.success();
     }
 
-    @PostMapping("/down")
+    @PostMapping("/down/{botId}")
     @ResponseBody
-    public BaseModel<String> downBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
-        Asserts.notNull(bot.getId(), "参数异常");
-        botRobotService.downBot(botAdmin, bot.getId());
+    public BaseModel<String> downBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
+        botRobotService.downBot(botAdmin, botId);
         return BaseModel.success();
     }
 
@@ -51,11 +48,10 @@ public class BotRobotController extends BaseController{
         return BaseModel.success();
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{botId}")
     @ResponseBody
-    public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
-        Asserts.notNull(bot.getId(), "参数异常");
-        botRobotService.deleteBot(botAdmin, bot.getId());
+    public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
+        botRobotService.deleteBot(botAdmin, botId);
         return BaseModel.success();
 
     }
