@@ -52,6 +52,7 @@ public class BotRobotController extends BaseController{
     }
 
     @DeleteMapping("/delete")
+    @ResponseBody
     public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
         Asserts.notNull(bot.getId(), "参数异常");
         botRobotService.deleteBot(botAdmin, bot.getId());
