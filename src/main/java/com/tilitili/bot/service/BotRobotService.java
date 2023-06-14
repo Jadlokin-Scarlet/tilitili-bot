@@ -6,6 +6,7 @@ import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -58,6 +59,9 @@ public class BotRobotService {
     }
 
     public void upBot(Long id) {
+        BotRobot bot = botRobotMapper.getValidBotRobotById(id);
+        List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
+        Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
         if (webSocketConfig != null) {
