@@ -48,15 +48,15 @@ public class BotRobotService {
         List<BotRobotDTO> result = new ArrayList<>();
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
-            if (webSocketConfig != null) {
-                BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
-                if (Objects.equals(robot.getPushType(), "ws")) {
+            if (Objects.equals(robot.getPushType(), "ws")) {
+                if (webSocketConfig != null) {
+                    BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
                     robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
-                } else if (Objects.equals(robot.getPushType(), "hook")) {
-                    List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setBot(robot.getId()));
-                    Asserts.checkEquals(botSenderList.size(), 1, "啊嘞，不对劲");
-                    robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/mc/report/"+botSenderList.get(0).getId());
                 }
+            } else if (Objects.equals(robot.getPushType(), "hook")) {
+                List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setBot(robot.getId()));
+                Asserts.checkEquals(botSenderList.size(), 1, "啊嘞，不对劲");
+                robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/mc/report/"+botSenderList.get(0).getId());
             }
             result.add(robotDTO);
         }
