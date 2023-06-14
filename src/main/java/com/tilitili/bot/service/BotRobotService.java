@@ -62,17 +62,19 @@ public class BotRobotService {
     }
 
     public void upBot(Long id) {
-        Asserts.notNull(webSocketConfig, "测试环境无效");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
-        webSocketConfig.upBot(id);
+        if (webSocketConfig != null) {
+            webSocketConfig.upBot(id);
+        }
     }
 
     public void downBot(Long id) {
-        Asserts.notNull(webSocketConfig, "测试环境无效");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
-        webSocketConfig.downBot(id);
+        if (webSocketConfig != null) {
+            webSocketConfig.downBot(id);
+        }
     }
 
     public void addBot(BotAdmin botAdmin, BotRobot bot) {
