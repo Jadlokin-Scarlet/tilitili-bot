@@ -30,17 +30,17 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/up")
     @ResponseBody
-    public BaseModel<String> upBot(@RequestBody BotRobot bot) {
+    public BaseModel<String> upBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
         Asserts.notNull(bot.getId(), "参数异常");
-        botRobotService.upBot(bot.getId());
+        botRobotService.upBot(botAdmin, bot.getId());
         return BaseModel.success();
     }
 
     @PostMapping("/down")
     @ResponseBody
-    public BaseModel<String> downBot(@RequestBody BotRobot bot) {
+    public BaseModel<String> downBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
         Asserts.notNull(bot.getId(), "参数异常");
-        botRobotService.downBot(bot.getId());
+        botRobotService.downBot(botAdmin, bot.getId());
         return BaseModel.success();
     }
 
@@ -49,5 +49,13 @@ public class BotRobotController extends BaseController{
     public BaseModel<String> addBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
         botRobotService.addBot(botAdmin, bot);
         return BaseModel.success();
+    }
+
+    @DeleteMapping("/delete")
+    public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
+        Asserts.notNull(bot.getId(), "参数异常");
+        botRobotService.deleteBot(botAdmin, bot.getId());
+        return BaseModel.success();
+
     }
 }

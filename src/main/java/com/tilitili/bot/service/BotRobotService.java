@@ -8,6 +8,7 @@ import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotRobotIndex;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.query.BotRobotIndexQuery;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -59,9 +60,10 @@ public class BotRobotService {
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
     }
 
-    public void upBot(Long id) {
+    public void upBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
+        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
@@ -71,9 +73,10 @@ public class BotRobotService {
         }
     }
 
-    public void downBot(Long id) {
+    public void downBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
+        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
         if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
@@ -152,6 +155,17 @@ public class BotRobotService {
         List<Integer> indexTypeList = botRobotIndexMapper.listIndexType();
         for (Integer indexType : indexTypeList) {
             botRobotIndexMapper.addBotRobotIndexSelective(new BotRobotIndex().setBotIndexType(indexType).setBot(bot.getId()).setIndex((int) (bot.getId() * 10)));
+        }
+    }
+
+    public void deleteBot(BotAdmin botAdmin, Long id) {
+        BotRobot bot = botRobotMapper.getBotRobotById(id);
+        Asserts.notNull(bot, "参数异常");
+        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        botRobotMapper.deleteBotRobotByPrimary(id);
+        List<BotRobotIndex> indexList = botRobotIndexMapper.getBotRobotIndexByCondition(new BotRobotIndexQuery().setBot(id));
+        for (BotRobotIndex index : indexList) {
+            botRobotIndexMapper.deleteBotRobotIndexByPrimary(index.getId());
         }
     }
 }
