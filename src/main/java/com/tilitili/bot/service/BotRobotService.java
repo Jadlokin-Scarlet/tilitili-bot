@@ -59,7 +59,7 @@ public class BotRobotService {
     }
 
     public void upBot(Long id) {
-        BotRobot bot = botRobotMapper.getValidBotRobotById(id);
+        BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
@@ -71,7 +71,7 @@ public class BotRobotService {
     }
 
     public void downBot(Long id) {
-        BotRobot bot = botRobotMapper.getValidBotRobotById(id);
+        BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
