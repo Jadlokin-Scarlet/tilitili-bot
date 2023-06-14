@@ -54,9 +54,7 @@ public class BotRobotService {
                     robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
                 }
             } else if (Objects.equals(robot.getPushType(), "hook")) {
-                List<BotSender> botSenderList = botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setBot(robot.getId()));
-                Asserts.checkEquals(botSenderList.size(), 1, "啊嘞，不对劲");
-                robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/mc/report/"+botSenderList.get(0).getId());
+                robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
             }
             result.add(robotDTO);
         }
