@@ -69,7 +69,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			BotSender targetBotSender = botSenderMapper.getValidBotSenderById(targetSenderId);
 			BotRobot minecraftBot = botRobotMapper.getValidBotRobotById(targetBotSender.getSendBot());
 
-			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot, targetBotSender);
+			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot);
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
