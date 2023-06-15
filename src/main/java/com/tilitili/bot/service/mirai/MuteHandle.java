@@ -39,15 +39,15 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 		Long atUserId = atUser.getId();
 
 		if ("禁言".equals(key)) {
-			String timeStr = messageAction.getValueOrDefault("60");
-			Asserts.isNumber(timeStr, "格式不对喵(秒数)");
-			int time = Integer.parseInt(timeStr);
-			Asserts.isTrue(time <= 60, "最多一分钟喵");
+//			String timeStr = messageAction.getValueOrDefault("60");
+//			Asserts.isNumber(timeStr, "格式不对喵(秒数)");
+//			int time = Integer.parseInt(timeStr);
+//			Asserts.isTrue(time <= 60, "最多一分钟喵");
 			if (!BotUserConstant.MASTER_USER_ID.equals(messageAction.getBotUser().getId())) {
 				Asserts.notEquals(atUserId, BotUserConstant.MASTER_USER_ID, "不准喵");
 			}
 
-			botManager.muteMember(bot, botSender, atUser, time);
+			botManager.muteMember(bot, botSender, atUser, 60);
 		} else if ("解除禁言".equals(key)) {
 			botManager.unMuteMember(bot, botSender, atUser);
 		}
