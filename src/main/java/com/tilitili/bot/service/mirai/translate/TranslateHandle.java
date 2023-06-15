@@ -52,11 +52,11 @@ public class TranslateHandle extends ExceptionRespMessageHandle {
 
         String message;
         if (from != null) {
-            message = botTranslateMappingManager.translate(enText, from, to);
+            message = baiduManager.translate(from, to, enText);
         } else if (to != null) {
-            message = botTranslateMappingManager.translate(enText, to);
+            message = baiduManager.translate(to, enText);
         } else if (isNotBlank(enText)) {
-            message = botTranslateMappingManager.translate(enText);
+            message = baiduManager.translate(enText);
         } else {
             TranslateView resultView = baiduManager.translateImage(url);
             message = resultView != null ? String.format("%s%n---机翻%n%s", resultView.getSumSrc(), resultView.getSumDst()) : null;
