@@ -22,9 +22,9 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		BotRobot bot = botRobotMapper.getBotRobotById(1L);
+		BotRobot bot = botRobotMapper.getBotRobotById(16L);
 
-		tester.testHandleMessage(bot, "{\"post_type\":\"message\",\"message_type\":\"private\",\"time\":1686666874,\"self_id\":2325622370,\"sub_type\":\"friend\",\"font\":0,\"sender\":{\"age\":0,\"nickname\":\"Kiryca\",\"sex\":\"unknown\",\"user_id\":1275191194},\"message_id\":-2012143917,\"user_id\":1275191194,\"target_id\":2325622370,\"message\":\"翻译[CQ:image,file=d79ed3c5bdf242c0733baca8084a79e1.image,url=https://c2cpicdw.qpic.cn/offpic_new/1275191194//1275191194-1080520736-D79ED3C5BDF242C0733BACA8084A79E1/0?term=2\\u0026amp;is_origin=0]\",\"raw_message\":\"翻译[CQ:image,file=d79ed3c5bdf242c0733baca8084a79e1.image,url=https://c2cpicdw.qpic.cn/offpic_new/1275191194//1275191194-1080520736-D79ED3C5BDF242C0733BACA8084A79E1/0?term=2\\u0026amp;is_origin=0]\"}");
+		tester.testHandleMessage(bot, "{\"player\":{\"uuid\":\"ccb182ef-08d0-33f0-85af-ac4d7b4f3e52\",\"displayName\":\"Jadlokin_Scarlet\",\"port\":3067,\"exhaustion\":0.6500002,\"exp\":0.0,\"whitelisted\":false,\"banned\":false,\"op\":false,\"balance\":1.0},\"joinMessage\":\"Jadlokin_Scarlet joined the game\",\"eventType\":\"PlayerJoin\"}");
 
 //		tester.testHandleMessage(botRobotMapper.getBotRobotById(12L), "{\"post_type\":\"message\",\"message_type\":\"guild\",\"time\":1685139325,\"self_id\":536657454,\"sub_type\":\"channel\",\"message\":\"[CQ:at,qq=144115218753207094] ping\",\"self_tiny_id\":\"144115218680351893\",\"sender\":{\"nickname\":\"Jadlokin_Scarlet\",\"tiny_id\":\"144115218678093982\",\"user_id\":144115218678093982},\"guild_id\":\"14133921638967841\",\"channel_id\":\"1733719\",\"message_id\":\"BAAyNroSkuohAAAAAAAadFcAAAAAAAACDQ==\",\"user_id\":\"144115218678093982\"}");
 	}

@@ -97,10 +97,6 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 //		Asserts.isFalse(redisCache.exists(sourceKey), "你已经申请啦");
 		Asserts.isFalse(redisCache.exists(targetKey), "他还在抉择中");
 
-		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0));
-		Asserts.notEmpty(forwardConfigList, "无权限");
-		BotForwardConfig forwardConfig = forwardConfigList.get(0);
-
 		List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setUserId(targetBotUser.getId()));
 		BotSender targetSender = null;
 		for (BotUserSenderMapping mapping : mappingList) {
@@ -122,7 +118,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		redisCache.setValue(sourceKey, targetKey, 60 * 60);
 		redisCache.setValue(targetKey, sourceKey, 60 * 60);
 
-		String sourceName = String.join("-", forwardConfig.getSourceName(), botSender.getName());
+		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0));
+
+		String sourceName = forwardConfigList.isEmpty()? botSender.getName(): String.join("-", forwardConfigList.get(0).getSourceName(), botSender.getName());
 		return BotMessage.simpleListMessage(Lists.newArrayList(
 				BotMessageChain.ofAt(targetBotUser),
 				BotMessageChain.ofPlain(String.format("来自%s的%s申请和你合体。(合体！/但是我拒绝)",sourceName, botUser.getName()))

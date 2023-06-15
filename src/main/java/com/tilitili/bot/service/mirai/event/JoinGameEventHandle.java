@@ -46,18 +46,20 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 		BotUserDTO botUser = botMessage.getBotUser();
 		BotSender botSender = botMessage.getBotSender();
 		BotEvent botEvent = botMessage.getBotEvent();
-		Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.ForwardTaskId), "无转发权限");
 
 		BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0).setIsSend(true);
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(forwardConfigQuery);
 
-		for (BotForwardConfig forwardConfig : forwardConfigList) {
-			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
-			Asserts.notNull(targetSender, "找不到渠道");
-			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
+		if (!forwardConfigList.isEmpty()) {
+			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.ForwardTaskId), "无转发权限");
+			for (BotForwardConfig forwardConfig : forwardConfigList) {
+				Long targetSenderId = forwardConfig.getTargetSenderId();
+				BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+				Asserts.notNull(targetSender, "找不到渠道");
+				Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
-			sendMessageManager.sendMessage(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
+				sendMessageManager.sendMessage(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
+			}
 		}
 
 		String key = String.format("JoinGameEventHandle-%s", botUser.getId());
