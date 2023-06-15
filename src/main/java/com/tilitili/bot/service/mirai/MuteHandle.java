@@ -3,7 +3,6 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -33,7 +32,6 @@ public class MuteHandle extends ExceptionRespMessageHandle {
 		String key = messageAction.getKeyWithoutPrefix();
 		List<BotUserDTO> atList = messageAction.getAtList();
 		BotSender botSender = messageAction.getBotSender();
-		Asserts.checkEquals(botSender.getSendType(), SendTypeEnum.GROUP_MESSAGE_STR, "啊嘞，不对劲");
 		Asserts.notEmpty(atList, "格式不对喵(at)");
 		BotUserDTO atUser = atList.get(0);
 		Long atUserId = atUser.getId();
