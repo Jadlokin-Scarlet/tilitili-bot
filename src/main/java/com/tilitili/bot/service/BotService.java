@@ -282,7 +282,7 @@ public class BotService {
         BotUserDTO quoteUser = botMessageAction.getQuoteUser();
         if (quoteMessageId == null) return null;
 
-        if (Objects.equals(quoteUser.getId(), bot.getUserId())) {
+        if (quoteUser != null && Objects.equals(quoteUser.getId(), bot.getUserId())) {
             BotSendMessageRecord sendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(quoteMessageId);
             if (sendMessageRecord != null) {
                 return gson.fromJson(sendMessageRecord.getMessage(), BotMessage.class);
