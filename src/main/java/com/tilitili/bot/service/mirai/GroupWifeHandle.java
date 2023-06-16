@@ -57,7 +57,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         Asserts.notNull(wifeUserId, "没老婆灌注啥？飞机吗");
         List<BotUserDTO> atList = messageAction.getAtList();
         Asserts.isTrue(atList.stream().allMatch(StreamUtil.isEqual(BotUserDTO::getId, wifeUserId)), "不准牛喵");
-        BotUserDTO wife = botUserManager.getBotUserByIdWithParent(wifeUserId);
+        BotUserDTO wife = botUserManager.getValidBotUserByIdWithParent(wifeUserId);
         Long userMax = redisCache.getValueLong(this.getUserMaxCacheKey(botSender, botUser));
         if (userMax == null) {
             userMax = 100000L;
@@ -108,7 +108,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
         List<BotUserDTO> userList = mappingList.stream()
                 .map(BotUserSenderMapping::getUserId).filter(Predicate.isEqual(botUser.getId()).negate())
-                .map(userId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), userId))
+                .map(userId -> botUserManager.getValidBotUserByIdWithParent(botSender.getId(), userId))
                 .filter(Objects::nonNull).collect(Collectors.toList());
         BotUserDTO wifeUser = userList.get(ThreadLocalRandom.current().nextInt(userList.size()));
         String resp = String.format("你今天的群老婆是：%s(%s)", wifeUser.getName(), wifeUser.getQq());

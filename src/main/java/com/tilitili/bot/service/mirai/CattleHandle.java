@@ -118,7 +118,8 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotUserSenderMapping> botUserSenderMappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		List<BotCattle> senderCattleList = botUserSenderMappingList.stream().map(BotUserSenderMapping::getUserId)
 				.filter(Predicate.isEqual(userId).negate())
-				.map(otherUserId -> botUserManager.getBotUserByIdWithParent(botSender.getId(), otherUserId))
+				.map(otherUserId -> botUserManager.getValidBotUserByIdWithParent(botSender.getId(), otherUserId))
+				.filter(Objects::nonNull)
 				.map(BotUserDTO::getId)
 				.filter(otherUserId -> redisCache.getExpire(cattleSleepKey +otherUserId) <= 0)
 				.map(botCattleMapper::getValidBotCattleByUserId)
@@ -359,7 +360,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private List<BotMessageChain> pk(Long senderId, Long userId, Long otherUserId, boolean isRandom) {
-		BotUserDTO otherUser = botUserManager.getBotUserByIdWithParent(senderId, otherUserId);
+		BotUserDTO otherUser = botUserManager.getValidBotUserByIdWithParent(senderId, otherUserId);
 //		BotUserDTO user = botUserManager.getBotUserByIdWithParent(userId);
 		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		BotCattle otherCattle = botCattleMapper.getValidBotCattleByUserId(otherUserId);
@@ -435,7 +436,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 					result = 2 - result;
 				}
 			}
-			BotUserDTO targetUser = botUserManager.getBotUserByIdWithParent(senderId, targetUserId);
+			BotUserDTO targetUser = botUserManager.getValidBotUserByIdWithParent(senderId, targetUserId);
 
 			String targetUserName = targetUser.getName();
 			double length = botCattleRecord.getLength() / 100.0;
@@ -492,7 +493,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
 		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> {
 			BotCattle botCattle = senderCattleList.get(index);
-			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
+			BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
 			return String.format("%s:%.2fcm %s", index + 1, botCattle.getLength() / 100.0, botUser.getName());
 		}).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);
@@ -516,7 +517,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotCattle> senderCattleList = cattleList.stream().filter(cattle -> senderUserIdList.contains(cattle.getUserId())).limit(5).collect(Collectors.toList());
 		String resp = IntStream.range(0, senderCattleList.size()).mapToObj(index -> {
 			BotCattle botCattle = senderCattleList.get(index);
-			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
+			BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), botCattle.getUserId());
 			return String.format("%s:%.2fcm %s", index + 1, botCattle.getLength() / 100.0, botUser.getName());
 		}).collect(Collectors.joining("\n"));
 		return BotMessage.simpleTextMessage(resp);

@@ -83,7 +83,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		} else {
 			respBuilder.append(String.format("，%s票数+1(当前%s)", atUser.getName(), statisticsMap.getOrDefault(atUserId, 0L)));
 			if (adminStatistics != null) {
-				BotUserDTO oldTargetUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), adminStatistics.getTargetUserId());
+				BotUserDTO oldTargetUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), adminStatistics.getTargetUserId());
 				respBuilder.append(String.format("，%s票数-1(当前%s)", oldTargetUser.getName(), statisticsMap.getOrDefault(oldTargetUser.getId(), 0L)));
 			}
 		}
@@ -96,7 +96,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 			respBuilder.append("还没有人票数达标。");
 		} else {
 			String adminList = sortedStatisticsList.stream().map(e -> {
-				BotUserDTO adminUser = botUserManager.getBotUserByIdWithParent(botSender.getId(), e.getKey());
+				BotUserDTO adminUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), e.getKey());
 				return String.format("%s(%s票)", adminUser.getName(), e.getValue());
 			}).collect(Collectors.joining(","));
 

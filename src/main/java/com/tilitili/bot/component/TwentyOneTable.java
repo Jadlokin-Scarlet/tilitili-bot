@@ -248,7 +248,7 @@ public class TwentyOneTable {
 				String cardListStr = twentyOneCardList.getCardList().stream().map(TwentyOneCard::toString).collect(Collectors.joining(","));
 				String playerStr = String.format("\n%s：%s (%s) (%s分)", player.getBotUser().getName(), cardListStr, playerResult, subScore > 0? "+" + subScore: "" + subScore);
 				resp.add(BotMessageChain.ofPlain(playerStr));
-				BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(tableId, player.getBotUser().getId());
+				BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(tableId, player.getBotUser().getId());
 				try {
 					botUserManager.safeUpdateScore(botUser, subScore + twentyOneCardList.getScore());
 				} catch (Exception e) {
@@ -258,7 +258,7 @@ public class TwentyOneTable {
 		}
 		List<TwentyOnePlayer> newPlayerList = new ArrayList<>();
 		for (TwentyOnePlayer player : this.playerList) {
-			BotUserDTO botUser = botUserManager.getBotUserByIdWithParent(tableId, player.getBotUser().getId());
+			BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(tableId, player.getBotUser().getId());
 			if (botUser.getScore() > 0) newPlayerList.add(player);
 		}
 		if (newPlayerList.isEmpty()) {

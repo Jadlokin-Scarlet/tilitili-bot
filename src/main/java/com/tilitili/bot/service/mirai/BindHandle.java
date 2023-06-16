@@ -68,7 +68,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkEquals(botUser.getType(), 0, "啊嘞，不对劲");
 
 		long sourceUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
-		BotUserDTO sourceBotUser = botUserManager.getBotUserByIdWithParent(sourceUserId);
+		BotUserDTO sourceBotUser = botUserManager.getValidBotUserByIdWithParent(sourceUserId);
 		botUserManager.bindUser(bot, botSender, sourceBotUser, botUser);
 
 		redisCache.delete(sourceKey);
@@ -89,7 +89,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		String qqStr = messageAction.getValue();
 		Asserts.isNumber(qqStr, "格式错啦(QQ号)");
 		long qq = Long.parseLong(qqStr);
-		BotUserDTO targetBotUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+		BotUserDTO targetBotUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, 0);
 		Asserts.notNull(targetBotUser, "查无此人");
 
 		String sourceKey = applyKey + botUser.getId();

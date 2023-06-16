@@ -19,7 +19,6 @@ import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +174,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			int subNum = this.sellItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
 			String numMessage = (-subNum) + "个";
-			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
+			String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
 			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + item.getName(), nowScore));
 		} else {
 			int subNum = 0;
@@ -197,7 +196,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 				return BotMessage.simpleTextMessage("似乎没有东西可以回收");
 			}
 
-			String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
+			String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
 			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore));
 		}
 	}
@@ -219,7 +218,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 		Integer subNum = this.buyItemWithIce(botUser.getId(), botItem.getId(), itemNum, itemName);
 
 		String numMessage = subNum == 1 ? "" : subNum + "个";
-		String nowScore = String.valueOf(botUserManager.getBotUserByIdWithParent(botUser.getId()).getScore());
+		String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
 		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
 	}
 

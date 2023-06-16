@@ -52,7 +52,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(bot, botSender, text);
 
 			// 此功能只能QQ用
-			BotUserDTO botUser = botUserManager.getBotUserByExternalIdWithParent(qq, 0);
+			BotUserDTO botUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, 0);
 			Asserts.notNull(botUser, "第%s句找不到人", i);
 			nodeList.add(new BotMessageNode().setUser(botUser).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 		}
