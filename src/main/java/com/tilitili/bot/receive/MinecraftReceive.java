@@ -7,6 +7,7 @@ import com.tilitili.common.emnus.TaskStatus;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.message.TaskMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
@@ -57,10 +58,16 @@ public class MinecraftReceive {
 			log.info("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
+			Asserts.notNull(botSender, "权限不足");
 			BotRobot bot = botRobotMapper.getValidBotRobotById(botSender.getBot());
-			Asserts.notNull(bot, "啊嘞，不对劲");
+			Asserts.notNull(bot, "权限不足");
 			botService.syncHandleMessage(bot, requestStr);
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
+		} catch (AssertException e) {
+			if (taskMessage != null && taskMessage.getId() != null) {
+				taskMapper.updateStatusById(taskMessage.getId(), TaskStatus.SPIDER.getValue(), TaskStatus.FAIL.getValue());
+			}
+			log.warn("消费mc消息断言异常, message=" + gson.toJson(taskMessage), e);
 		} catch (Exception e) {
 			if (taskMessage != null && taskMessage.getId() != null) {
 				taskMapper.updateStatusById(taskMessage.getId(), TaskStatus.SPIDER.getValue(), TaskStatus.FAIL.getValue());
