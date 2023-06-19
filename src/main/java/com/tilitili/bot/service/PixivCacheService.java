@@ -10,7 +10,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
-import com.tilitili.common.entity.view.bot.mirai.MiraiUploadImageResult;
+import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
@@ -152,7 +152,7 @@ public class PixivCacheService {
 			messageChainList.add(BotMessageChain.ofLink(ossUrl != null ? ossUrl : imageUrl));
 //			} else {
 //				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
-//				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
+//				UploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
 //				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
 //			}
 		}
@@ -207,7 +207,7 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
 			for (String url : urlList) {
-				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
+				UploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
 			}
@@ -263,14 +263,14 @@ public class PixivCacheService {
 	}
 
 
-	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
+	private UploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToQQ pageCount={} url={}", pageCount, url);
 //		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
 //		if (pageCount > 1) {
 //			int page = Integer.parseInt(list.get(2)) + 1;
-//			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
+//			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
 //		} else {
-//			return new MiraiUploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
+//			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
 //		}
 //
 		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
@@ -286,8 +286,8 @@ public class PixivCacheService {
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
 			String ossUrl = OSSUtil.uploadOSSByFile(file, fileType);
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
-			return new MiraiUploadImageResult().setUrl(ossUrl);
-//			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
+			return new UploadImageResult().setUrl(ossUrl);
+//			UploadImageResult uploadImageResult = botManager.uploadImage(file);
 //			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
 //			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
 //			return uploadImageResult;

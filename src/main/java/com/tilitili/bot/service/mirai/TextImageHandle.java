@@ -2,7 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.BotRobot;
-import com.tilitili.common.entity.view.bot.mirai.MiraiUploadImageResult;
+import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.manager.TemplateImageManager;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -22,7 +22,7 @@ public class TextImageHandle extends BaseMessageHandleAdapt {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		BotRobot bot = messageAction.getBot();
 		String text = messageAction.getBody();
-		MiraiUploadImageResult result = templateImageManager.getLongStringImage(bot, text);
-		return BotMessage.simpleMiraiUploadImageResultMessage(result);
+		UploadImageResult result = templateImageManager.getLongStringImage(bot, text);
+		return BotMessage.simpleImageMessage(result);
 	}
 }

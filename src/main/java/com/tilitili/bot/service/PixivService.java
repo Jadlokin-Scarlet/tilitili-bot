@@ -228,7 +228,7 @@ public class PixivService {
 ////		messageChainList.add(BotMessageChain.ofPlain("pid "+pid));
 //		if (sl == null || sl < 5) {
 //			for (String url : urlList) {
-//				MiraiUploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url);
+//				UploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url);
 //				messageChainList.add(BotMessageChain.ofPlain("\n"));
 //				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
 //			}
@@ -264,7 +264,7 @@ public class PixivService {
 //				messageChainList.add(BotMessageChain.ofPlain(ossUrl != null? ossUrl: imageUrl));
 ////			} else {
 ////				messageChainList.add(BotMessageChain.ofPlain(pid + "\n"));
-////				MiraiUploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
+////				UploadImageResult miraiUploadImageResult = this.downloadPixivImageAndUploadToQQ(imageUrl);
 ////				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(miraiUploadImageResult));
 ////			}
 //		}
@@ -393,7 +393,7 @@ public class PixivService {
 //		return pid;
 //	}
 //
-//	private MiraiUploadImageResult downloadPixivImageAndUploadToQQ(String url) {
+//	private UploadImageResult downloadPixivImageAndUploadToQQ(String url) {
 //		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
 //		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
 //		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
@@ -405,7 +405,7 @@ public class PixivService {
 //			pixivManager.downloadPixivImage(url, file);
 //			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 //			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-//			MiraiUploadImageResult uploadImageResult = botManager.uploadImage(file);
+//			UploadImageResult uploadImageResult = botManager.uploadImage(file);
 //			Asserts.notNull(uploadImageResult, "啊嘞，上传失败了。");
 //			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
 //			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
