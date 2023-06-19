@@ -209,7 +209,7 @@ public class PixivCacheService {
 			for (String url : urlList) {
 				UploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofMiraiUploadImageResult(uploadImageResult));
+				messageChainList.add(BotMessageChain.ofImage(uploadImageResult));
 			}
 		} else {
 //			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
