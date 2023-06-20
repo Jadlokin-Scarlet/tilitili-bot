@@ -83,7 +83,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         // 第二个坐标
         String index2Str = indexStrList.get(1);
         Asserts.isNumber(index2Str, "坐标不对啦");
-        int index2 = Integer.parseInt(index2Str);
+        int index2 = Integer.parseInt(index2Str) - 1;
         Asserts.isRange(0, index2,15 , "坐标不对啦");
 
         int flag = gomoku.getFlag();
