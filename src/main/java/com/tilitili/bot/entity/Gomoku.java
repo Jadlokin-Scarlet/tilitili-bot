@@ -16,6 +16,20 @@ public class Gomoku {
         return flag == -1? playerA: playerB;
     }
 
+    public int getBoardCell(int index1, int index2) {
+        return board[index2][index1];
+    }
+
+    public void setBoardCell(int index1, int index2, int cell) {
+        board[index2][index1] = cell;
+    }
+
+
+
+
+
+
+
     public BotUserDTO getPlayerA() {
         return playerA;
     }

@@ -31,7 +31,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
     @Override
     public String isThisTask(BotMessageAction messageAction) {
         String text = messageAction.getText();
-        if (Pattern.matches("[A-O][0-9]{1,2}", text)) {
+        if (Pattern.matches("[A-Oa-o][0-9]{1,2}", text)) {
             return "落子";
         } else {
             return null;
@@ -43,8 +43,18 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
             case "五子棋": return this.handleStart(messageAction);
             case "落子": return this.handleFall(messageAction);
+            case "掀桌": return this.handleStop(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handleStop(BotMessageAction messageAction) {
+        BotSessionService.MiraiSession session = messageAction.getSession();
+        if (!session.containsKey("GomokuHandle.gomoku")) {
+            return null;
+        }
+        session.remove("GomokuHandle.gomoku");
+        return BotMessage.simpleTextMessage("(╯‵□′)╯︵┻━┻");
     }
 
     private BotMessage handleFall(BotMessageAction messageAction) {
@@ -55,6 +65,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         BotUserDTO nowPlayer = gomoku.getNowPlayer();
         Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
+        BotUserDTO lastPlayer = gomoku.getLastPlayer();
 
         List<String> indexStrList = StringUtils.extractList("([A-Oa-o])([0-9]{1,2})", value);
         Asserts.checkEquals(indexStrList.size(), 2, "坐标不对啦");
@@ -77,13 +88,11 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
         int flag = gomoku.getFlag();
         int[][] board = gomoku.getBoard();
-        Asserts.checkEquals(board[index1][index2], 0, "这里已经落子啦");
-        board[index1][index2] = flag;
+        Asserts.checkEquals(gomoku.getBoardCell(index1, index2), 0, "这里已经落子啦");
+        gomoku.setBoardCell(index1, index2, flag);
 
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
-
-        BotUserDTO lastPlayer = gomoku.getLastPlayer();
         return BotMessage.simpleListMessage(Lists.newArrayList(
                 BotMessageChain.ofPlain(String.format("%s请落子", lastPlayer.getName())),
                 BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
