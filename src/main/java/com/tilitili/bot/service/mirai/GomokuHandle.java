@@ -1,12 +1,14 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
+import com.tilitili.bot.entity.Gomoku;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
@@ -15,6 +17,7 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 @Component
@@ -49,8 +52,9 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         String value = messageAction.getValueOrVirtualValue();
         BotUserDTO botUser = messageAction.getBotUser();
-        int[][] board = Gsons.fromJson(session.get("GomokuHandle.board"), int[][].class);
-        Integer flag = session.getInteger("GomokuHandle.flag-" + botUser.getId());
+        Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
+        BotUserDTO nowPlayer = gomoku.getNowPlayer();
+        Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
 
         List<String> indexStrList = StringUtils.extractList("([A-O])([0-9]{1,2})", value);
         Asserts.checkEquals(indexStrList.size(), 2, "坐标不对啦");
@@ -65,29 +69,37 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         int index2 = Integer.parseInt(index2Str);
         Asserts.isRange(0, index2,15 , "坐标不对啦");
 
+        int flag = gomoku.getFlag();
+        int[][] board = gomoku.getBoard();
         Asserts.checkEquals(board[index1][index2], 0, "这里已经落子啦");
         board[index1][index2] = flag;
 
-        UploadImageResult result = gomokuImageManager.getGomokuImage(bot, board);
-        return BotMessage.simpleImageMessage(result);
+        gomoku.setFlag(-flag);
+        session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
+        return BotMessage.simpleListMessage(Lists.newArrayList(
+                BotMessageChain.ofPlain(String.format("%s请落子", nowPlayer.getName())),
+                BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
+        ));
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
+        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         List<BotUserDTO> atList = messageAction.getAtList();
         Asserts.checkEquals(atList.size(), 1, "和谁？");
         BotUserDTO otherUser = atList.get(0);
-        Asserts.isFalse(session.containsKey("GomokuHandle.mapping-"+botUser.getId()), "你已经在下啦");
-        Asserts.isFalse(session.containsKey("GomokuHandle.mapping-"+otherUser.getId()), "他还在下啦");
+        Asserts.isFalse(session.containsKey("GomokuHandle.gomoku"), "已经有人在下啦");
 
         int[][] board = new int[15][15];
-        session.put("GomokuHandle.mapping-"+botUser.getId(), otherUser.getId());
-        session.put("GomokuHandle.mapping-"+otherUser.getId(), botUser.getId());
-        session.put("GomokuHandle.board", Gsons.toJson(board));
-        session.put("GomokuHandle.flag-"+botUser.getId(), 1);
-        session.put("GomokuHandle.flag-"+otherUser.getId(), -1);
+        int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
+        Gomoku gomoku = new Gomoku().setBoard(board).setFlag(flag).setPlayerA(botUser).setPlayerB(otherUser);
+        session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
 
-        return BotMessage.simpleTextMessage(String.format("%s执黑，请落子", otherUser.getName()));
+        BotUserDTO nowPlayer = gomoku.getNowPlayer();
+        return BotMessage.simpleListMessage(Lists.newArrayList(
+                BotMessageChain.ofPlain(String.format("%s执黑，请落子", nowPlayer.getName())),
+                BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
+        ));
     }
 }
