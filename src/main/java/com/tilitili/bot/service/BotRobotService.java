@@ -112,19 +112,11 @@ public class BotRobotService {
                 break;
             }
             case BotRobotConstant.TYPE_KOOK: {
-                bot.setHost("www.kookapp.cn");
-
-                BotRobot botInfo = botManager.getBotInfo(bot);
-                bot.setName(botInfo.getName());
-                if (botInfo.getQq() != null) {
-                    bot.setQq(botInfo.getQq());
-                }
-                bot.setTinyId(botInfo.getTinyId());
-                bot.setAuthorId(botInfo.getAuthorId());
+                this.handleKookBot(bot);
                 break;
             }
             case BotRobotConstant.TYPE_MINECRAFT: {
-                handleMinecraftBot(bot);
+                this.handleMinecraftBot(bot);
                 break;
             }
             case BotRobotConstant.TYPE_QQ_GUILD: {
@@ -145,11 +137,28 @@ public class BotRobotService {
 
     }
 
+    private void handleKookBot(BotRobot bot) {
+        Asserts.notBlank(bot.getName(), "请输入昵称");
+        Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
+        bot.setPushType("ws");
+        bot.setHost("www.kookapp.cn");
+
+        BotRobot botInfo = botManager.getBotInfo(bot);
+        Asserts.notNull(botInfo, "参数异常");
+        bot.setName(botInfo.getName());
+        bot.setAuthorId(botInfo.getAuthorId());
+        this.addBotRobot(bot);
+    }
+
     private void handleMinecraftBot(BotRobot bot) {
         Asserts.notBlank(bot.getName(), "请输入昵称");
         Asserts.notNull(bot.getHost(), "请输入服务器地址");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("hook");
+        this.addBotRobot(bot);
+    }
+
+    private void addBotRobot(BotRobot bot) {
         botRobotMapper.addBotRobotSelective(bot);
 
         List<Integer> indexTypeList = botRobotIndexMapper.listIndexType();
