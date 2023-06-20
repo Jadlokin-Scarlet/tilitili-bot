@@ -4,16 +4,20 @@ import com.tilitili.bot.config.WebSocketConfig;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.constant.BotUserConstant;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotRobotIndex;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotIndexQuery;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.utils.Asserts;
@@ -32,12 +36,14 @@ public class BotRobotService {
     private final WebSocketConfig webSocketConfig;
     private final BotManager botManager;
     private final BotRobotIndexMapper botRobotIndexMapper;
+    private final BotUserManager botUserManager;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper) {
+    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager) {
         this.botRobotMapper = botRobotMapper;
         this.webSocketConfig = webSocketConfig;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
+        this.botUserManager = botUserManager;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
@@ -146,6 +152,10 @@ public class BotRobotService {
         Asserts.notNull(botInfo, "参数异常");
         bot.setName(botInfo.getName());
         bot.setAuthorId(botInfo.getAuthorId());
+
+        BotUserDTO botUser = botUserManager.addOrUpdateBotUser(bot, new BotSender().setSendType(SendTypeEnum.KOOK_MESSAGE_STR), new BotUserDTO(BotUserConstant.USER_TYPE_KOOK, botInfo.getAuthorId()).setName(botInfo.getName()));
+        bot.setUserId(botUser.getId());
+
         this.addBotRobot(bot);
     }
 
