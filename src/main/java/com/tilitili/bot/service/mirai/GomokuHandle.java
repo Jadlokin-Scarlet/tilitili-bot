@@ -17,6 +17,7 @@ import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -50,7 +51,12 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleStop(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
+        BotUserDTO botUser = messageAction.getBotUser();
+        BotRobot bot = messageAction.getBot();
         if (!session.containsKey("GomokuHandle.gomoku")) {
+            return null;
+        }
+        if (!Objects.equals(botUser.getId(), bot.getMasterId())) {
             return null;
         }
         session.remove("GomokuHandle.gomoku");
