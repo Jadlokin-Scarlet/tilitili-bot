@@ -56,12 +56,18 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotUserDTO nowPlayer = gomoku.getNowPlayer();
         Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
 
-        List<String> indexStrList = StringUtils.extractList("([A-O])([0-9]{1,2})", value);
+        List<String> indexStrList = StringUtils.extractList("([A-Oa-o])([0-9]{1,2})", value);
         Asserts.checkEquals(indexStrList.size(), 2, "坐标不对啦");
         // 第一个坐标
         String index1Str = indexStrList.get(0);
         Asserts.notBlank(index1Str, "坐标不对啦");
-        int index1 = 'O' - index1Str.charAt(0);
+        char c = index1Str.charAt(0);
+        int index1;
+        if (c >= 'A') {
+            index1 = c - 'A';
+        } else {
+            index1 = c - 'a';
+        }
         Asserts.isRange(0, index1,15 , "坐标不对啦");
         // 第二个坐标
         String index2Str = indexStrList.get(1);
@@ -76,8 +82,10 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
+
+        BotUserDTO lastPlayer = gomoku.getLastPlayer();
         return BotMessage.simpleListMessage(Lists.newArrayList(
-                BotMessageChain.ofPlain(String.format("%s请落子", nowPlayer.getName())),
+                BotMessageChain.ofPlain(String.format("%s请落子", lastPlayer.getName())),
                 BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
         ));
     }

@@ -12,6 +12,10 @@ public class Gomoku {
         return flag == 1? playerA: playerB;
     }
 
+    public BotUserDTO getLastPlayer() {
+        return flag == -1? playerA: playerB;
+    }
+
     public BotUserDTO getPlayerA() {
         return playerA;
     }
