@@ -138,7 +138,6 @@ public class BotRobotService {
     }
 
     private void handleKookBot(BotRobot bot) {
-        Asserts.notBlank(bot.getName(), "请输入昵称");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("ws");
         bot.setHost("www.kookapp.cn");
