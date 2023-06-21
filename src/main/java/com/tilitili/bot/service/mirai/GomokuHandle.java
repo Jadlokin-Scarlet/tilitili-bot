@@ -14,10 +14,13 @@ import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
+import javafx.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -97,12 +100,33 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Asserts.checkEquals(gomoku.getBoardCell(index1, index2), 0, "这里已经落子啦");
         gomoku.setBoardCell(index1, index2, flag);
 
+        Boolean end = this.checkEnd(gomoku);
+
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
         return BotMessage.simpleListMessage(Lists.newArrayList(
                 BotMessageChain.ofPlain(String.format("%s请落子", lastPlayer.getName())),
                 BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
         ));
+    }
+
+    private final int length = 15;
+    private Boolean checkEnd(Gomoku gomoku) {
+        int flag = gomoku.getFlag();
+        int[][] board = gomoku.getBoard();
+        boolean[][] over = new boolean[length][length];
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                Queue<Pair<Integer, Integer>> queue = new LinkedList<>();
+                queue.add(new Pair<>(i, j));
+                while (!queue.isEmpty()) {
+                    Pair<Integer, Integer> now = queue.poll();
+                    over[i][j] = true;
+
+                }
+            }
+        }
+        return false;
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
