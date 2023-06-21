@@ -170,7 +170,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 resp = this.handleBilibiliSearch(bot, botSender, botUser, bv);
             }
             return resp;
-        } else if (searchKey.contains("163.com/song")) {
+        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/program")) {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
             BotMessage botMessage = null;
