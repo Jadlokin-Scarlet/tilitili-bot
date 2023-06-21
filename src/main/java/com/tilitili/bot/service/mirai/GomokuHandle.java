@@ -14,9 +14,9 @@ import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
-import javafx.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -117,10 +117,10 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         boolean[][] over = new boolean[length][length];
         for (int i = 0; i < length; i++) {
             for (int j = 0; j < length; j++) {
-                Queue<Pair<Integer, Integer>> queue = new LinkedList<>();
-                queue.add(new Pair<>(i, j));
+                Queue<Point> queue = new LinkedList<>();
+                queue.add(new Point(i, j));
                 while (!queue.isEmpty()) {
-                    Pair<Integer, Integer> now = queue.poll();
+                    Point now = queue.poll();
                     over[i][j] = true;
 
                 }
