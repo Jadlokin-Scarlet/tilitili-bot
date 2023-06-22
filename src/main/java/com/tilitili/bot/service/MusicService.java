@@ -45,6 +45,7 @@ public class MusicService {
         String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", req);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
@@ -61,6 +62,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         List<PlayerMusic> playerMusicList = resp.getData();
         if (playerMusicList == null) {
@@ -81,6 +83,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/last", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
@@ -95,6 +98,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/stop", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
@@ -109,6 +113,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/start", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
@@ -123,6 +128,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/list", data);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
@@ -137,6 +143,7 @@ public class MusicService {
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/loop", data);
         BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
