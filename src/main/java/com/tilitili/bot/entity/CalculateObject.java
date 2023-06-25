@@ -1,6 +1,7 @@
 package com.tilitili.bot.entity;
 
 import com.google.common.collect.ImmutableMap;
+import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class CalculateObject {
+public class CalculateObject extends BaseDTO {
 	private CalculateObject left;
 	private String operate;
 	private CalculateObject right;

@@ -1,6 +1,8 @@
 package com.tilitili.bot.entity.twentyOne;
 
-public class CardResult {
+import com.tilitili.common.entity.dto.BaseDTO;
+
+public class CardResult extends BaseDTO {
 	private final int sum;
 	private final int aCnt;
 	private final String superCard;

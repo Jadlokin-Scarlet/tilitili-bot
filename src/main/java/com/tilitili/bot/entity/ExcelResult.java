@@ -1,9 +1,11 @@
 package com.tilitili.bot.entity;
 
+import com.tilitili.common.entity.dto.BaseDTO;
+
 import java.util.List;
 import java.util.Map;
 
-public class ExcelResult<T> {
+public class ExcelResult<T> extends BaseDTO {
 	private String title;
 	private List<T> resultList;
 	private List<List<List<String>>> data;

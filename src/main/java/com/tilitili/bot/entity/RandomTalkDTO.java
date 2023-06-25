@@ -1,8 +1,9 @@
 package com.tilitili.bot.entity;
 
 import com.tilitili.bot.annotation.ExcelProperty;
+import com.tilitili.common.entity.dto.BaseDTO;
 
-public class RandomTalkDTO {
+public class RandomTalkDTO extends BaseDTO {
 	@ExcelProperty(value = "群号")
 	private Long group;
 	@ExcelProperty(value = "关键词")

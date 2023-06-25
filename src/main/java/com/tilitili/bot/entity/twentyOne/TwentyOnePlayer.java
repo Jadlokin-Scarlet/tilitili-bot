@@ -1,11 +1,12 @@
 package com.tilitili.bot.entity.twentyOne;
 
+import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.utils.StreamUtil;
 
 import java.util.List;
 
-public class TwentyOnePlayer {
+public class TwentyOnePlayer extends BaseDTO {
 	private BotUserDTO botUser;
 	private List<TwentyOneCardList> cardListList;
 

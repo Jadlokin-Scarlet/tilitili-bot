@@ -1,8 +1,10 @@
 package com.tilitili.bot.entity.cfcx;
 
+import com.tilitili.common.entity.dto.BaseDTO;
+
 import java.util.List;
 
-public class CfcxData {
+public class CfcxData extends BaseDTO {
     private Integer total;
     private List<CfcxItem> list;
 

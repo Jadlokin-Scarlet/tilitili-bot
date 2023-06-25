@@ -1,6 +1,8 @@
 package com.tilitili.bot.entity;
 
-public class FindImageResult {
+import com.tilitili.common.entity.dto.BaseDTO;
+
+public class FindImageResult extends BaseDTO {
 	private String link;
 	private String rate;
 	private String imageUrl;

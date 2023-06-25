@@ -1,8 +1,9 @@
 package com.tilitili.bot.entity;
 
 import com.tilitili.bot.annotation.ExcelProperty;
+import com.tilitili.common.entity.dto.BaseDTO;
 
-public class FishConfigDTO {
+public class FishConfigDTO extends BaseDTO {
 	@ExcelProperty(value = "水花规模")
 	private String scaleStr;
 	@ExcelProperty(value = "奖励类型")

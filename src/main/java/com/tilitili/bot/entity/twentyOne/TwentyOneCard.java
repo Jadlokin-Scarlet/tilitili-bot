@@ -1,9 +1,11 @@
 package com.tilitili.bot.entity.twentyOne;
 
+import com.tilitili.common.entity.dto.BaseDTO;
+
 import java.util.Arrays;
 import java.util.List;
 
-public class TwentyOneCard {
+public class TwentyOneCard extends BaseDTO {
 	private final int code;
 	private final String type;
 	private final String value;

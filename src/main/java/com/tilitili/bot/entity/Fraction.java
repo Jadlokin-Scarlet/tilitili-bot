@@ -1,8 +1,9 @@
 package com.tilitili.bot.entity;
 
+import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.utils.Asserts;
 
-public class Fraction {
+public class Fraction extends BaseDTO {
 	// 分子
 	private final int molecule;
 	// 分母

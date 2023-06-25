@@ -1,8 +1,10 @@
 package com.tilitili.bot.entity.twentyOne;
 
+import com.tilitili.common.entity.dto.BaseDTO;
+
 import java.util.List;
 
-public class TwentyOneCardList {
+public class TwentyOneCardList extends BaseDTO {
 	private Integer score;
 	private List<TwentyOneCard> cardList;
 	private int status;

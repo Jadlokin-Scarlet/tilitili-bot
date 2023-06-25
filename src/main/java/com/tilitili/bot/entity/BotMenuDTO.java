@@ -2,10 +2,11 @@ package com.tilitili.bot.entity;
 
 import com.google.common.collect.Lists;
 import com.tilitili.common.entity.BotMenu;
+import com.tilitili.common.entity.dto.BaseDTO;
 
 import java.util.List;
 
-public class BotMenuDTO {
+public class BotMenuDTO extends BaseDTO {
     private Long id;
     private String name;
     private String path;

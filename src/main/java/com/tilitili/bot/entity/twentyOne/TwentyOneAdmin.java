@@ -1,9 +1,11 @@
 package com.tilitili.bot.entity.twentyOne;
 
+import com.tilitili.common.entity.dto.BaseDTO;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TwentyOneAdmin {
+public class TwentyOneAdmin extends BaseDTO {
 	private List<TwentyOneCard> cardList;
 
 	@Override

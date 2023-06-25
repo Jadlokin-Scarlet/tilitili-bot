@@ -3,6 +3,7 @@ package com.tilitili.bot.entity.bot;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.tilitili.common.utils.StringUtils.isNotBlank;
 
-public class BotMessageAction {
+public class BotMessageAction extends BaseDTO {
     private final BotSessionService.MiraiSession session;
     private final BotMessage botMessage;
     private final BotSender botSender;

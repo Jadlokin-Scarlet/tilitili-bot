@@ -1,6 +1,8 @@
 package com.tilitili.bot.entity.cfcx;
 
-public class CfcxResponse {
+import com.tilitili.common.entity.dto.BaseDTO;
+
+public class CfcxResponse extends BaseDTO {
     private Integer code;
     private String message;
     private CfcxData data;

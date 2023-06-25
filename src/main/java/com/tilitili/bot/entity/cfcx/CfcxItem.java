@@ -1,6 +1,8 @@
 package com.tilitili.bot.entity.cfcx;
 
-public class CfcxItem {
+import com.tilitili.common.entity.dto.BaseDTO;
+
+public class CfcxItem extends BaseDTO {
     private Integer attribute;
     private String face;
     private Integer mid;

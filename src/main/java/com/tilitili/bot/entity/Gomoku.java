@@ -1,8 +1,9 @@
 package com.tilitili.bot.entity;
 
+import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 
-public class Gomoku {
+public class Gomoku extends BaseDTO {
     private BotUserDTO playerA;
     private BotUserDTO playerB;
     private int[][] board;
