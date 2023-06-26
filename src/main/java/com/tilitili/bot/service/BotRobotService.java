@@ -73,7 +73,10 @@ public class BotRobotService {
     public void upBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        }
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
@@ -86,7 +89,10 @@ public class BotRobotService {
     public void downBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        }
         int cnt = botRobotMapper.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
         if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
@@ -189,7 +195,10 @@ public class BotRobotService {
     public void deleteBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        }
         botRobotMapper.deleteBotRobotByPrimary(id);
         List<BotRobotIndex> indexList = botRobotIndexMapper.getBotRobotIndexByCondition(new BotRobotIndexQuery().setBot(id));
         for (BotRobotIndex index : indexList) {
@@ -198,7 +207,10 @@ public class BotRobotService {
     }
 
     public void editBot(BotAdmin botAdmin, BotRobot bot) {
-        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        }
         this.suppleHost(bot);
 
         BotRobot updBot = new BotRobot();
