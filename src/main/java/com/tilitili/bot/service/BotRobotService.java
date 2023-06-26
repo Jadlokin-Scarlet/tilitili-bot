@@ -150,7 +150,7 @@ public class BotRobotService {
     private void handleKookBot(BotRobot bot) {
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("ws");
-        bot.setHost("www.kookapp.cn");
+        bot.setHost("https://www.kookapp.cn/");
 
         BotRobot botInfo = botManager.getBotInfo(bot);
         Asserts.notNull(botInfo, "参数异常");
@@ -168,10 +168,16 @@ public class BotRobotService {
         Asserts.notNull(bot.getHost(), "请输入服务器地址");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType("hook");
+        String host = bot.getHost();
+        if (!host.startsWith("http")) {
+            host = "http://"+host;
+        }
+        bot.setHost(host);
         this.addBotRobot(bot);
     }
 
     private void addBotRobot(BotRobot bot) {
+        this.suppleHost(bot);
         botRobotMapper.addBotRobotSelective(bot);
 
         List<Integer> indexTypeList = botRobotIndexMapper.listIndexType();
@@ -193,6 +199,8 @@ public class BotRobotService {
 
     public void editBot(BotAdmin botAdmin, BotRobot bot) {
         Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        this.suppleHost(bot);
+
         BotRobot updBot = new BotRobot();
         BotRobot dbBot = botRobotMapper.getBotRobotById(botAdmin.getId());
         if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
@@ -209,5 +217,16 @@ public class BotRobotService {
         }
         int cnt = botRobotMapper.updateBotRobotSelective(updBot);
         Asserts.checkEquals(cnt, 1, "更新失败");
+    }
+
+    private void suppleHost(BotRobot bot) {
+        String host = bot.getHost();
+        if (!host.startsWith("http")) {
+            host = "https://"+host;
+        }
+        if (!host.endsWith("/")) {
+            host += "/";
+        }
+        bot.setHost(host);
     }
 }
