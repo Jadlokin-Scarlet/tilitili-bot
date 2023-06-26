@@ -4,12 +4,10 @@ import com.tilitili.bot.config.WebSocketConfig;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
-import com.tilitili.common.entity.BotAdmin;
-import com.tilitili.common.entity.BotRobot;
-import com.tilitili.common.entity.BotRobotIndex;
-import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotIndexQuery;
 import com.tilitili.common.entity.query.BotRobotQuery;
@@ -20,6 +18,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -37,19 +36,24 @@ public class BotRobotService {
     private final BotManager botManager;
     private final BotRobotIndexMapper botRobotIndexMapper;
     private final BotUserManager botUserManager;
+    private final BotRoleMappingMapper botRoleMappingMapper;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager) {
+    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleMappingMapper botRoleMappingMapper) {
         this.botRobotMapper = botRobotMapper;
         this.webSocketConfig = webSocketConfig;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
+        this.botRoleMappingMapper = botRoleMappingMapper;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
-        query.setAdminId(botAdmin.getId());
+        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            query.setAdminId(botAdmin.getId());
+        }
         int total = botRobotMapper.countBotRobotByCondition(query);
-        List<BotRobot> list = botRobotMapper.getBotRobotByCondition(query.setAdminId(botAdmin.getId()));
+        List<BotRobot> list = botRobotMapper.getBotRobotByCondition(query);
         List<BotRobotDTO> result = new ArrayList<>();
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
