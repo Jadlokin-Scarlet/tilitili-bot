@@ -53,6 +53,12 @@ public class BotRobotController extends BaseController{
     public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
         botRobotService.deleteBot(botAdmin, botId);
         return BaseModel.success();
+    }
 
+    @PostMapping("/edit")
+    @ResponseBody
+    public BaseModel<String> editBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
+        botRobotService.editBot(botAdmin, bot);
+        return BaseModel.success();
     }
 }

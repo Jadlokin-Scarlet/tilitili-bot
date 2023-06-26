@@ -190,4 +190,24 @@ public class BotRobotService {
             botRobotIndexMapper.deleteBotRobotIndexByPrimary(index.getId());
         }
     }
+
+    public void editBot(BotAdmin botAdmin, BotRobot bot) {
+        Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        BotRobot updBot = new BotRobot();
+        BotRobot dbBot = botRobotMapper.getBotRobotById(botAdmin.getId());
+        if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
+            updBot.setName(bot.getName());
+        }
+        if (bot.getHost() != null && !bot.getHost().equals(dbBot.getHost())) {
+            updBot.setHost(bot.getHost());
+        }
+        if (bot.getVerifyKey() != null && !bot.getVerifyKey().equals(dbBot.getVerifyKey())) {
+            updBot.setVerifyKey(bot.getVerifyKey());
+        }
+        if (bot.getQq() != null && !bot.getQq().equals(dbBot.getQq())) {
+            updBot.setQq(bot.getQq());
+        }
+        int cnt = botRobotMapper.updateBotRobotSelective(updBot);
+        Asserts.checkEquals(cnt, 1, "更新失败");
+    }
 }

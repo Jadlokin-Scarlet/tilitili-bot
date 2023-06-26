@@ -12,6 +12,9 @@ public class BotRobotDTO extends BotRobot {
         this.setType(robot.getType());
         this.setStatus(robot.getStatus());
         this.setPushType(robot.getPushType());
+        this.setHost(robot.getHost());
+        this.setVerifyKey(robot.getVerifyKey());
+        this.setQq(robot.getQq());
     }
 
     public Integer getWsStatus() {
