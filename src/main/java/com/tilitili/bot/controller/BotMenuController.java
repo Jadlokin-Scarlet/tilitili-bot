@@ -65,7 +65,7 @@ public class BotMenuController extends BaseController {
 
     @PostMapping("/role")
     @ResponseBody
-    public BaseModel<?> updateMenuMapping(UpdateRoleMappingRequest request) {
+    public BaseModel<?> updateMenuMapping(@RequestBody UpdateRoleMappingRequest request) {
         Asserts.notNull(request.getRoleId(), "参数异常");
         Asserts.notNull(request.getMenuId(), "参数异常");
         Asserts.notNull(request.getChecked(), "参数异常");

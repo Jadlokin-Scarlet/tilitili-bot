@@ -32,7 +32,6 @@ public class ShortUrlWebSocketHandler extends WebSocketClient implements Applica
     @Override
     public void onMessage(String message) {
         try {
-            log.info(message);
             if (message.startsWith("0")) {
                 this.send("40/socket.io.xmsl?guest=nFFA8rxHbCmdi8TN,");
             } else if (Objects.equals(message, "40/socket.io.xmsl")) {
