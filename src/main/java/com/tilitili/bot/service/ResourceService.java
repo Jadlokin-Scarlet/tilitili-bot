@@ -3,6 +3,7 @@ package com.tilitili.bot.service;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.view.resource.Resource;
+import com.tilitili.common.manager.BotRoleManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,10 @@ public class ResourceService {
     private final Map<String, Supplier<List<Resource>>> resourceMap = new HashMap<>();
 
     @Autowired
-    public ResourceService() {
+    public ResourceService(BotRoleManager botRoleManager) {
         resourceMap.put("robotTypeList", BotRobotConstant::getResource);
         resourceMap.put("sendTypeList", SendTypeEnum::getResource);
+        resourceMap.put("roleList", botRoleManager::getResource);
     }
 
     public List<Resource> getResource(String resourceName) {

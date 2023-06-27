@@ -1,14 +1,14 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.entity.BotMenuDTO;
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.MenuDTO;
-import com.tilitili.common.entity.BotAdmin;
-import com.tilitili.common.entity.BotMenu;
-import com.tilitili.common.entity.BotMenuMapping;
+import com.tilitili.bot.entity.request.UpdateRoleMappingRequest;
+import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.query.BotMenuMappingQuery;
 import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.mapper.mysql.BotMenuMapper;
 import com.tilitili.common.mapper.mysql.BotMenuMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,12 @@ import java.util.stream.Collectors;
 public class BotMenuService {
     private final BotMenuMapper botMenuMapper;
     private final BotMenuMappingMapper botMenuMappingMapper;
+    private final BotRoleMapper botRoleMapper;
 
-    public BotMenuService(BotMenuMapper botMenuMapper, BotMenuMappingMapper botMenuMappingMapper) {
+    public BotMenuService(BotMenuMapper botMenuMapper, BotMenuMappingMapper botMenuMappingMapper, BotRoleMapper botRoleMapper) {
         this.botMenuMapper = botMenuMapper;
         this.botMenuMappingMapper = botMenuMappingMapper;
+        this.botRoleMapper = botRoleMapper;
     }
 
     public List<MenuDTO> getMenuList(BotAdmin botAdmin) {
@@ -42,18 +44,32 @@ public class BotMenuService {
         return result;
     }
 
-    public List<BotMenuDTO> getBotMenuList(BotMenuQuery query) {
+    public List<Map<String, Object>> getBotMenuList(BotMenuQuery query) {
+        Map<Long, BotRole> roleCacheMap = new HashMap<>();
         List<BotMenu> menuList = botMenuMapper.getBotMenuByCondition(query.setStatus(0));
+        List<BotMenuMapping> menuMappingAllList = botMenuMappingMapper.getBotMenuMappingByCondition(new BotMenuMappingQuery());
+        Map<Long, List<BotMenuMapping>> menuMappingMap = menuMappingAllList.stream().collect(Collectors.groupingBy(BotMenuMapping::getMenuId));
         menuList.sort(Comparator.comparingInt(BotMenu::getLevel));
-        List<BotMenuDTO> result = new ArrayList<>();
-        Map<Long, BotMenuDTO> idIndexMap = new HashMap<>();
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<Long, Map<String, Object>> idIndexMap = new HashMap<>();
         for (BotMenu botMenu : menuList) {
-            BotMenuDTO botMenuDTO = BotMenuDTO.ofBotMenu(botMenu);
+            Map<String, Object> botMenuDTO = new HashMap<>();
+            botMenuDTO.put("id", botMenu.getId());
+            botMenuDTO.put("name", botMenu.getName());
+            botMenuDTO.put("path", botMenu.getPath());
             idIndexMap.put(botMenu.getId(), botMenuDTO);
+
+            List<BotMenuMapping> menuMappingList = menuMappingMap.getOrDefault(botMenu.getId(), Collections.emptyList());
+            for (BotMenuMapping menuMapping : menuMappingList) {
+                BotRole role = roleCacheMap.computeIfAbsent(menuMapping.getRoleId(), botRoleMapper::getBotRoleById);
+                botMenuDTO.put(String.valueOf(role.getId()), Boolean.TRUE);
+            }
+
             if (botMenu.getLevel() == 1) {
                 result.add(botMenuDTO);
             } else if (idIndexMap.containsKey(botMenu.getParentId())) {
-                idIndexMap.get(botMenu.getParentId()).addChildren(botMenuDTO);
+                ((List<Map<String, Object>>)idIndexMap.get(botMenu.getParentId()).computeIfAbsent("children", key -> Lists.newArrayList())).add(botMenuDTO);
             }
         }
         return result;
@@ -96,5 +112,14 @@ public class BotMenuService {
     public void deleteBotMenu(BotMenu botMenu) {
         Asserts.notNull(botMenu.getId(), "参数异常");
         botMenuMapper.deleteBotMenuByPrimary(botMenu.getId());
+    }
+
+    public void updateMenuMapping(UpdateRoleMappingRequest request) {
+        BotMenuMapping dbMapping = botMenuMappingMapper.getBotMenuMappingByRoleIdAndMenuId(request.getRoleId(), request.getMenuId());
+        if (request.getChecked() && dbMapping == null) {
+            botMenuMappingMapper.addBotMenuMappingSelective(request);
+        } else if(!request.getChecked() && dbMapping != null) {
+            botMenuMappingMapper.deleteBotMenuMappingByPrimary(dbMapping.getId());
+        }
     }
 }

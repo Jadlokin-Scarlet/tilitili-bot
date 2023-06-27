@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +17,11 @@ import java.lang.reflect.InvocationTargetException;
 @RequestMapping("/api/robot")
 public class BotRobotController extends BaseController{
     private final BotRobotService botRobotService;
+    private final BotRoleMappingMapper botRoleMappingMapper;
 
-    public BotRobotController(BotRobotService botRobotService) {
+    public BotRobotController(BotRobotService botRobotService, BotRoleMappingMapper botRoleMappingMapper) {
         this.botRobotService = botRobotService;
+        this.botRoleMappingMapper = botRoleMappingMapper;
     }
 
     @GetMapping("/list")
