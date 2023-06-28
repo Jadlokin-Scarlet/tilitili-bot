@@ -35,7 +35,7 @@ public class BotSenderService {
             botSenderDTO.put("id", botSender.getId());
             botSenderDTO.put("name", botSender.getName());
             botSenderDTO.put("sendType", botSender.getSendType());
-            mappingList.forEach(mapping -> botSenderDTO.put(String.valueOf(mapping.getId()), true));
+            mappingList.forEach(mapping -> botSenderDTO.put(String.valueOf(mapping.getTaskId()), true));
             return botSenderDTO;
         }).collect(Collectors.toList());
         return PageModel.of(count, query.getPageSize(), query.getCurrent(), result);
