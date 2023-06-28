@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/api/sender")
-public class BotSenderController {
+public class BotSenderController extends BaseController {
     private final BotSenderService botSenderService;
 
     public BotSenderController(BotSenderService botSenderService) {

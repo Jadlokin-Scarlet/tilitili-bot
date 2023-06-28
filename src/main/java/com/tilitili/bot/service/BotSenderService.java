@@ -1,5 +1,6 @@
 package com.tilitili.bot.service;
 
+import com.tilitili.bot.controller.BaseController;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class BotSenderService {
+public class BotSenderService extends BaseController {
     private final BotSenderMapper botSenderMapper;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
 
