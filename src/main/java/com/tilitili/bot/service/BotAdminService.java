@@ -5,14 +5,14 @@ import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotAdminCode;
-import com.tilitili.common.entity.BotRoleMapping;
+import com.tilitili.common.entity.BotRoleAdminMapping;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotAdminCodeManager;
 import com.tilitili.common.manager.QywechatManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotAdminCodeMapper;
 import com.tilitili.common.mapper.mysql.BotAdminMapper;
-import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.mail.SimpleMailMessage;
@@ -36,16 +36,16 @@ public class BotAdminService {
     private final BotAdminCodeMapper botAdminCodeMapper;
     private final BotAdminCodeManager botAdminCodeManager;
     private final SendMessageManager sendMessageManager;
-    private final BotRoleMappingMapper botRoleMappingMapper;
+    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final QywechatManager qywechatManager;
 
-    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleMappingMapper botRoleMappingMapper, QywechatManager qywechatManager) {
+    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper, QywechatManager qywechatManager) {
         this.botAdminMapper = botAdminMapper;
         this.botAdminCodeManager = botAdminCodeManager;
         this.botAdminCodeMapper = botAdminCodeMapper;
         this.redisCache = redisCache;
         this.sendMessageManager = sendMessageManager;
-        this.botRoleMappingMapper = botRoleMappingMapper;
+        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
         this.qywechatManager = qywechatManager;
     }
 
@@ -84,7 +84,7 @@ public class BotAdminService {
         String md5Password = this.md5Password(password);
         BotAdmin newAdminBot = new BotAdmin().setCode(code).setEmail(email).setUsername(username).setPassword(md5Password).setStatus(0);
         botAdminMapper.addBotAdminSelective(newAdminBot);
-        botRoleMappingMapper.addBotRoleMappingSelective(new BotRoleMapping().setAdminId(newAdminBot.getId()).setRoleId(BotRoleConstant.defaultRole));
+        botRoleAdminMappingMapper.addBotRoleAdminMappingSelective(new BotRoleAdminMapping().setAdminId(newAdminBot.getId()).setRoleId(BotRoleConstant.defaultRole));
     }
 
     public void sendEmailCode(BotAdminRequest request) {

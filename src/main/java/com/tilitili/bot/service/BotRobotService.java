@@ -18,7 +18,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
-import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -36,19 +36,19 @@ public class BotRobotService {
     private final BotManager botManager;
     private final BotRobotIndexMapper botRobotIndexMapper;
     private final BotUserManager botUserManager;
-    private final BotRoleMappingMapper botRoleMappingMapper;
+    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
 
-    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleMappingMapper botRoleMappingMapper) {
+    public BotRobotService(BotRobotMapper botRobotMapper, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper) {
         this.botRobotMapper = botRobotMapper;
         this.webSocketConfig = webSocketConfig;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
-        this.botRoleMappingMapper = botRoleMappingMapper;
+        this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             query.setAdminId(botAdmin.getId());
         }
@@ -73,7 +73,7 @@ public class BotRobotService {
     public void upBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         }
@@ -89,7 +89,7 @@ public class BotRobotService {
     public void downBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         }
@@ -195,7 +195,7 @@ public class BotRobotService {
     public void deleteBot(BotAdmin botAdmin, Long id) {
         BotRobot bot = botRobotMapper.getBotRobotById(id);
         Asserts.notNull(bot, "参数异常");
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         }
@@ -207,7 +207,7 @@ public class BotRobotService {
     }
 
     public void editBot(BotAdmin botAdmin, BotRobot bot) {
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         }
@@ -240,5 +240,15 @@ public class BotRobotService {
             host += "/";
         }
         bot.setHost(host);
+    }
+
+    public BotRobot getBot(BotAdmin botAdmin, Long botId) {
+        BotRobot bot = botRobotMapper.getValidBotRobotById(botId);
+        Asserts.notNull(bot, "参数异常");
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+        }
+        return bot;
     }
 }

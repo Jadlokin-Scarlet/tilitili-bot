@@ -6,11 +6,11 @@ import com.tilitili.bot.service.BotMenuService;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotMenu;
-import com.tilitili.common.entity.BotRoleMapping;
+import com.tilitili.common.entity.BotRoleAdminMapping;
 import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
-import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +22,11 @@ import java.util.Map;
 @RequestMapping("/api/menu")
 public class BotMenuController extends BaseController {
     private final BotMenuService botMenuService;
-    private final BotRoleMappingMapper botRoleMappingMapper;
+    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
 
-    public BotMenuController(BotMenuService botMenuService, BotRoleMappingMapper botRoleMappingMapper) {
+    public BotMenuController(BotMenuService botMenuService, BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
         this.botMenuService = botMenuService;
-        this.botRoleMappingMapper = botRoleMappingMapper;
+        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
     }
 
     @GetMapping("/menuList")
@@ -39,7 +39,7 @@ public class BotMenuController extends BaseController {
     @GetMapping("/list")
     @ResponseBody
     public BaseModel<PageModel<Map<String, Object>>> list(@SessionAttribute("botAdmin") BotAdmin botAdmin, BotMenuQuery query) {
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         Asserts.notNull(adminMapping, "权限不足");
         List<Map<String, Object>> botMenuList = botMenuService.getBotMenuList(query);
         return PageModel.of(botMenuList.size(), botMenuList.size(), 1, botMenuList);
@@ -48,7 +48,7 @@ public class BotMenuController extends BaseController {
     @PostMapping("/add")
     @ResponseBody
     public BaseModel<?> add(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotMenu botMenu) {
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         Asserts.notNull(adminMapping, "权限不足");
         botMenuService.addBotMenu(botMenu);
         return BaseModel.success("添加菜单成功");
@@ -57,7 +57,7 @@ public class BotMenuController extends BaseController {
     @PostMapping("/delete")
     @ResponseBody
     public BaseModel<?> delete(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotMenu botMenu) {
-        BotRoleMapping adminMapping = botRoleMappingMapper.getBotRoleMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         Asserts.notNull(adminMapping, "权限不足");
         botMenuService.deleteBotMenu(botMenu);
         return BaseModel.success("删除菜单成功");

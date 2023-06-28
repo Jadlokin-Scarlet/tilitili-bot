@@ -7,7 +7,6 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
-import com.tilitili.common.mapper.mysql.BotRoleMappingMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +16,9 @@ import java.lang.reflect.InvocationTargetException;
 @RequestMapping("/api/robot")
 public class BotRobotController extends BaseController{
     private final BotRobotService botRobotService;
-    private final BotRoleMappingMapper botRoleMappingMapper;
 
-    public BotRobotController(BotRobotService botRobotService, BotRoleMappingMapper botRoleMappingMapper) {
+    public BotRobotController(BotRobotService botRobotService) {
         this.botRobotService = botRobotService;
-        this.botRoleMappingMapper = botRoleMappingMapper;
     }
 
     @GetMapping("/list")
@@ -63,5 +60,11 @@ public class BotRobotController extends BaseController{
     public BaseModel<String> editBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
         botRobotService.editBot(botAdmin, bot);
         return BaseModel.success();
+    }
+
+    @GetMapping("/{botId}")
+    @ResponseBody
+    public BaseModel<BotRobot> getBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
+        return BaseModel.success(botRobotService.getBot(botAdmin, botId));
     }
 }
