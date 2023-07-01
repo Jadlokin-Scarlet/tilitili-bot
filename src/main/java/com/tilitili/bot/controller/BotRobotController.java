@@ -1,6 +1,8 @@
 package com.tilitili.bot.controller;
 
+import com.tilitili.bot.annotation.BotAuthorityCheck;
 import com.tilitili.bot.entity.BotRobotDTO;
+import com.tilitili.bot.entity.request.BotRobotAddRequest;
 import com.tilitili.bot.service.BotRobotService;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
@@ -29,6 +31,7 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/up/{botId}")
     @ResponseBody
+    @BotAuthorityCheck
     public BaseModel<String> upBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
         botRobotService.upBot(botAdmin, botId);
         return BaseModel.success();
@@ -36,6 +39,7 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/down/{botId}")
     @ResponseBody
+    @BotAuthorityCheck
     public BaseModel<String> downBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
         botRobotService.downBot(botAdmin, botId);
         return BaseModel.success();
@@ -50,6 +54,7 @@ public class BotRobotController extends BaseController{
 
     @DeleteMapping("/delete/{botId}")
     @ResponseBody
+    @BotAuthorityCheck
     public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
         botRobotService.deleteBot(botAdmin, botId);
         return BaseModel.success();
@@ -57,13 +62,16 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/edit")
     @ResponseBody
-    public BaseModel<String> editBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
+    @BotAuthorityCheck
+    public BaseModel<String> editBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobotAddRequest bot) {
+        bot.setId(bot.getBotId());
         botRobotService.editBot(botAdmin, bot);
         return BaseModel.success();
     }
 
     @GetMapping("/{botId}")
     @ResponseBody
+    @BotAuthorityCheck
     public BaseModel<BotRobot> getBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
         return BaseModel.success(botRobotService.getBot(botAdmin, botId));
     }

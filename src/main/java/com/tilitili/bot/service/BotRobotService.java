@@ -213,8 +213,8 @@ public class BotRobotService {
         }
         this.suppleHost(bot);
 
-        BotRobot updBot = new BotRobot();
-        BotRobot dbBot = botRobotMapper.getBotRobotById(botAdmin.getId());
+        BotRobot updBot = new BotRobot().setId(bot.getId());
+        BotRobot dbBot = botRobotMapper.getBotRobotById(bot.getId());
         if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
             updBot.setName(bot.getName());
         }

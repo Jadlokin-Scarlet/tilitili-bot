@@ -96,4 +96,8 @@ public class CustomHttpRequestWrapper extends HttpServletRequestWrapper {
 			}
 		};
 	}
+
+	public String getBody() {
+		return body;
+	}
 }
