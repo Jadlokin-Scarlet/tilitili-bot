@@ -70,7 +70,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
             case "pid": return handlePid(messageAction);
             case "scst": case "收藏色图": return handleBookmark(messageAction);
             case "xstj": case "相似推荐": return handleLikeRecommend(messageAction);
-            case "推荐色图": case "推荐不色": case "推荐色色": case "tjst": case "tjss": case "tjbs": return handleRecommend(messageAction);
+            case "推荐色图": case "推荐不色": case "推荐色色": case "tjst": case "tjss": case "tjbs": case "好": case "不": return handleRecommend(messageAction);
             case "puser": return handleUser(messageAction);
             case "tag": return handleTag(messageAction);
             default: throw new AssertException();
