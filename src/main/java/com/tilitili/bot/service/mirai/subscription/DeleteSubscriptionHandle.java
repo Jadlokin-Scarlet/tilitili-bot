@@ -13,6 +13,7 @@ import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -24,6 +25,16 @@ public class DeleteSubscriptionHandle extends ExceptionRespMessageHandle {
 	public DeleteSubscriptionHandle(SubscriptionMapper subscriptionMapper, BilibiliManager bilibiliManager) {
 		this.subscriptionMapper = subscriptionMapper;
 		this.bilibiliManager = bilibiliManager;
+	}
+
+	@Override
+	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+		String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+		if ("23210308".equals(key)) {
+			return Collections.singletonList(BotMessage.simpleTextMessage(String.format("切割%s喵", "Jadlokin_Scarlet")));
+		} else {
+			return Collections.singletonList(BotMessage.simpleTextMessage("格式错啦(key)"));
+		}
 	}
 
 	@Override

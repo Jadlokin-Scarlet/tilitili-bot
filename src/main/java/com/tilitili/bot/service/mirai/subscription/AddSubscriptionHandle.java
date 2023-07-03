@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @Component
 public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
@@ -26,7 +29,16 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
         this.bilibiliManager = bilibiliManager;
     }
 
-	@Override
+    @Override
+    protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+        String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+        if ("23210308".equals(key)) {
+            return Collections.singletonList(BotMessage.simpleTextMessage(String.format("关注%s成功！", "Jadlokin_Scarlet")));
+        } else {
+            return Collections.singletonList(BotMessage.simpleTextMessage("格式错啦(key)"));
+        }    }
+
+    @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
         String key = messageAction.getParamOrDefault("key", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
