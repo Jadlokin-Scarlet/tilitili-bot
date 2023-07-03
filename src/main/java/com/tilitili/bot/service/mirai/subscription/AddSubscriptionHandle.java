@@ -36,7 +36,8 @@ public class AddSubscriptionHandle extends ExceptionRespMessageHandle {
             return Collections.singletonList(BotMessage.simpleTextMessage(String.format("关注%s成功！", "Jadlokin_Scarlet")));
         } else {
             return Collections.singletonList(BotMessage.simpleTextMessage("格式错啦(key)"));
-        }    }
+        }
+    }
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
