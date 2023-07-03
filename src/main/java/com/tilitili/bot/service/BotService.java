@@ -213,11 +213,11 @@ public class BotService {
                 log.info(botMessage.getMessageId() + "无处理");
                 return;
             }
-            BotMessage respMessage = null;
+            List<BotMessage> respMessage = null;
             try {
                 // 返回null则代表跳过，继续寻找
                 // 返回空消息则代表已处理完毕但不回复，直接结束
-                respMessage = eventHandle.handleEvent(bot, botMessage);
+                respMessage = eventHandle.handleEventNew(bot, botMessage);
             } catch (AssertException e) {
                 log.debug(e.getMessage(), e);
             }
@@ -228,15 +228,19 @@ public class BotService {
                 return;
             }
             // 如果最后是空消息，则表示匹配到处理器并处理完毕但不需要回复
-            if (CollectionUtils.isEmpty(respMessage.getBotMessageChainList())) {
+            if (CollectionUtils.isEmpty(respMessage)) {
                 log.info(botMessage.getMessageId() + "已处理");
                 return;
             }
 
             // 没设置发送者，就默认原路发回
-            if (respMessage.getBotSender() == null) {
-                respMessage.setBotSender(botSender);
-                respMessage.setBot(bot);
+            for (BotMessage message : respMessage) {
+                // 没设置发送者，就默认原路发回
+                if (message.getBotSender() == null) {
+                    message.setBotSender(botSender);
+                }
+                // 记录消息和回复消息的关系
+                message.setMessageId(botMessage.getMessageId());
             }
             // 如果最后是消息，则回复
             sendMessageManager.sendMessage(respMessage);

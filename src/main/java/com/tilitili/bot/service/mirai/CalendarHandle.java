@@ -1,4 +1,4 @@
-package com.tilitili.bot.service.mirai.calendar;
+package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotCalendar;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotCalendarMapper;
 import com.tilitili.common.utils.AESUtils;
 import com.tilitili.common.utils.Asserts;
@@ -36,6 +37,20 @@ public class CalendarHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
+        switch (messageAction.getKeyWithoutPrefix()) {
+            case "日程表": case "rc": return handleAddCalendar(messageAction);
+            case "移除日程": return handleDeleteCalendar(messageAction);
+            default: throw new AssertException();
+        }
+    }
+
+    private BotMessage handleDeleteCalendar(BotMessageAction messageAction) {
+        String cid = messageAction.getValue();
+        botCalendarMapper.updateBotCalendarSelective(new BotCalendar().setId(Long.valueOf(cid)).setStatus(-1));
+        return BotMessage.simpleTextMessage("移除日程成功。");
+    }
+
+    private BotMessage handleAddCalendar(BotMessageAction messageAction) {
         String body = messageAction.getBodyOrDefault(messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();

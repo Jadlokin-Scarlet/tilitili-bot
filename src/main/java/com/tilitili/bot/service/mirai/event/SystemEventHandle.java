@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 	}
 
 	@Override
-	public BotMessage handleEvent(BotRobot bot, BotMessage botMessage) {
+	public List<BotMessage> handleEventNew(BotRobot bot, BotMessage botMessage) {
 		BotUserDTO botUser = botMessage.getBotUser();
 		Asserts.isFalse(BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId()), "系统消息屏蔽bot");
 
@@ -47,13 +48,15 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 		BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0).setIsSend(true);
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(forwardConfigQuery);
 
+		List<BotMessage> respList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
 			Asserts.notNull(targetSender, "找不到渠道");
 
-			return BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
+			BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
+			respList.add(resp);
 		}
-		return null;
+		return respList;
 	}
 }
