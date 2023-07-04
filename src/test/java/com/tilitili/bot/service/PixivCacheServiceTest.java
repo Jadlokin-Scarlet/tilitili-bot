@@ -17,6 +17,6 @@ public class PixivCacheServiceTest {
 
     @Test
     public void findImage() {
-        System.out.println(tester.findImage("https://gchat.qpic.cn/gchatpic_new/1701008067/756782332-2382760790-2AC03AC7A1713CEB1674BB6793FB17E8/0?term=2&amp"));
+        System.out.println(tester.findImage("https://gchat.qpic.cn/qmeetpic/49134681639135681/43227251-2219218480-87DB903784FC358C5C0BE9933712EC9D/0?term"));
     }
 }

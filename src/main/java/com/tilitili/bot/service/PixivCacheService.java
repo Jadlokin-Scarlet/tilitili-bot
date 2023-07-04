@@ -20,10 +20,7 @@ import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.OSSUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -230,7 +227,7 @@ public class PixivCacheService {
 	@Retryable(value= {AssertException.class},maxAttempts = 2)
 	public FindImageResult findImage(String url) {
 		Asserts.notBlank(url, "找不到图片");
-		String html = HttpClientUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
+		String html = NewProxyUtil.httpPost("https://saucenao.com/search.php?url="+url, ImmutableMap.of());
 		Asserts.notBlank(html, "网络出问题惹");
 		Document document = Jsoup.parse(html);
 		Elements imageList = document.select(".result:not(.hidden):not(#result-hidden-notification)");
