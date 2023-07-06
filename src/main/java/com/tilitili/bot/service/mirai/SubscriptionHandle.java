@@ -46,6 +46,8 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
                 String key = messageAction.getParamOrDefault("key", messageAction.getValue());
                 if ("23210308".equals(key)) {
                     return Collections.singletonList(BotMessage.simpleTextMessage(String.format("关注%s成功！", "Jadlokin_Scarlet")));
+                } else if ("1".equals(key)) {
+                    return Collections.singletonList(BotMessage.simpleTextMessage(String.format("关注%s成功！", "bishi")));
                 } else {
                     return Collections.singletonList(BotMessage.simpleTextMessage("格式错啦(key)"));
                 }
@@ -54,6 +56,8 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
                 String key = messageAction.getParamOrDefault("key", messageAction.getValue());
                 if ("23210308".equals(key)) {
                     return Collections.singletonList(BotMessage.simpleTextMessage(String.format("切割%s喵", "Jadlokin_Scarlet")));
+                } else if ("1".equals(key)) {
+                    return Collections.singletonList(BotMessage.simpleTextMessage(String.format("切割%s喵", "bishi")));
                 } else {
                     return Collections.singletonList(BotMessage.simpleTextMessage("格式错啦(key)"));
                 }

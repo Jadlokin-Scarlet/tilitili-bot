@@ -57,6 +57,19 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	@Override
+	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
+		switch (messageAction.getKeyWithoutPrefix()) {
+			case "抛竿": case "抛杆": {
+				return Collections.singletonList(BotMessage.simpleTextMessage("抛竿成功，有动静我会再叫你哦。"));
+			}
+			case "收竿": case "收杆": {
+				return Collections.singletonList(BotMessage.simpleTextMessage("啥也没有。。"));
+			}
+			default: throw new AssertException();
+		}
+	}
+
+	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "抛竿": case "抛杆": return handleStart(messageAction);
