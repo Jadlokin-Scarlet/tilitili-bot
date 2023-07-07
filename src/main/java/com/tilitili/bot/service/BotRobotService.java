@@ -153,9 +153,9 @@ public class BotRobotService {
         BotRobot botInfo = botManager.getBotInfo(bot);
         Asserts.notNull(botInfo, "参数异常");
         bot.setName(botInfo.getName());
-        bot.setTinyId(botInfo.getTinyId());
+        bot.setQqGuildUserId(botInfo.getQqGuildUserId());
 
-        BotUserDTO botUser = botUserManager.addOrUpdateBotUser(bot, new BotSender().setSendType(SendTypeEnum.KOOK_MESSAGE_STR), new BotUserDTO(BotUserConstant.USER_TYPE_KOOK, botInfo.getAuthorId()).setName(botInfo.getName()));
+        BotUserDTO botUser = botUserManager.addOrUpdateBotUser(bot, new BotSender().setSendType(SendTypeEnum.GUILD_MESSAGE_STR), new BotUserDTO(BotUserConstant.USER_TYPE_QQ_GUILD, botInfo.getQqGuildUserId()).setName(botInfo.getName()));
         bot.setUserId(botUser.getId());
 
         this.addBotRobot(bot);
