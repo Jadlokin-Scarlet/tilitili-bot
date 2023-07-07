@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseMessageHandleAdapt implements BaseMessageHandle {
-	private final List<Long> mockSenderIdList = Arrays.asList(4558L, 4557L, 4556L, 4555L, 4554L, 3752L, 4590L);
+	private final List<Long> mockSenderIdList = Arrays.asList(4558L, 4557L, 4556L, 4555L, 4554L, 3752L, 4590L, 4591L);
 
 	@Override
 	public List<BotMessage> handleMessageNew(BotMessageAction messageAction) throws Exception {
