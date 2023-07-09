@@ -26,6 +26,7 @@ import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,6 +92,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String groupList = excelResult.getParam("群号");
 		String guildList = excelResult.getParam("频道");
 		String channelList = excelResult.getParam("子频道");
+		String senderList = excelResult.getParam("渠道");
 		String scoreStr = excelResult.getParamOrDefault("积分", "0");
 		String timeUnit = excelResult.getParamOrDefault("每", "天");
 		String timeNumStr = excelResult.getParamOrDefault("次数", "99999999");
@@ -126,6 +128,11 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					.map(botSenderMapper::getBotSenderByChannelId)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
+		if (StringUtils.isNotBlank(senderList)) {
+			botSenderList.addAll(Arrays.stream(senderList.split(",")).map(Long::valueOf)
+					.map(botSenderMapper::getValidBotSenderById)
+					.filter(Objects::nonNull).collect(Collectors.toList()));
+		}
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
@@ -149,10 +156,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 			botFunctionTalkMapper.addBotFunctionTalkSelective(newFunctionTalk);
 		}
 
-		String senderMessage = (StringUtils.isNotBlank(friendList)? "私聊"+friendList: "") +
-				(StringUtils.isNotBlank(groupList)? "群号"+groupList: "") +
-				(StringUtils.isNotBlank(guildList)? "频道"+guildList: "") +
-				(StringUtils.isNotBlank(channelList)? "子频道"+channelList: "");
+		String senderMessage = CollectionUtils.isEmpty(botSenderList)? "": "渠道"+botSenderList.stream().map(BotSender::getName).collect(Collectors.joining(","));
 		String scoreMessage = score == 0? "": String.format("，积分%s", score);
 		String timeNumMessage = timeNum == 99999999? "": "，每" + timeUnit + timeNumStr + "次";
 		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage, timeNumMessage));

@@ -163,6 +163,11 @@ public class FunctionTalkService {
 					break;
 				}
 				case "enter": botMessageChain.add(BotMessageChain.ofPlain("\n")); break;
+				case "link": {
+					Asserts.isTrue(paramMap.containsKey("url"), "啊嘞，不对劲");
+					botMessageChain.add(BotMessageChain.ofLink(paramMap.get("url")));
+					break;
+				}
 				default: throw new AssertException("cq正则解析异常, text=" + cq);
 			}
 		}
