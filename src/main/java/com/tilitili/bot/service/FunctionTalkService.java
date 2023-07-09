@@ -126,10 +126,11 @@ public class FunctionTalkService {
 			}
 
 			// 解析参数
-			String[] paramList = cq.split("[,=]");
+			List<String> paramList = StringUtils.extractList(",(\\w+=[^,\\]]+)", cq);
 			Map<String, String> paramMap = new HashMap<>();
-			for (int index = 1; index + 1 < paramList.length; index+=2) {
-				paramMap.put(paramList[index], paramList[index + 1]);
+			for (String param : paramList) {
+				String[] split = param.split("=");
+				paramMap.put(split[0], split[1]);
 			}
 
 			String qq = paramMap.get("qq");
