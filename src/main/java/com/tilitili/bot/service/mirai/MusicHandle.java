@@ -226,6 +226,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleBilibiliSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String bv) {
         VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+        Asserts.notNull(videoInfo, "获取视频信息失败");
+        Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
 
         PlayerMusic playerMusic = new PlayerMusic().setType(PlayerMusic.TYPE_BILIBILI).setName(videoInfo.getTitle()).setId(bv).setSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
         return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
