@@ -126,7 +126,7 @@ public class FunctionTalkService {
 			}
 
 			// 解析参数
-			String[] paramList = cq.split(",=");
+			String[] paramList = cq.split("[,=]");
 			Map<String, String> paramMap = new HashMap<>();
 			for (int index = 1; index + 1 < paramList.length; index+=2) {
 				paramMap.put(paramList[index], paramList[index + 1]);
