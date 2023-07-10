@@ -7,10 +7,10 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusic;
+import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
-import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudPlayerListData;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
@@ -155,8 +155,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
-
-        if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
+        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
+            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            return this.handleMusicCouldProgramPlayList(bot, botSender, botUser, listId);
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
             // https://music.163.com/playlist?id=649428962&userid=361260659
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             return this.handleMusicCouldPlayList(bot, botSender, botUser, listId);
@@ -191,8 +193,19 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
     }
 
+    private BotMessage handleMusicCouldProgramPlayList(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long listId) {
+        PlayerMusicSongList playerMusicSongList = musicCloudManager.getProgramPlayerList(listId);
+
+        List<PlayerMusic> playerMusicList = musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
+        if (playerMusicList == null) {
+            return null;
+        } else {
+            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", playerMusicSongList.getName()));
+        }
+    }
+
     private BotMessage handleMusicCouldPlayList(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long listId) {
-        MusicCloudPlayerListData data = musicCloudManager.getPlayerList(listId);
+        PlayerMusicSongList data = musicCloudManager.getPlayerList(listId);
 
         List<PlayerMusic> playerMusicList = musicService.pushPlayListToQuote(bot, botSender, botUser, data);
         if (playerMusicList == null) {
