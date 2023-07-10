@@ -41,7 +41,7 @@ public class MusicService {
         Asserts.notNull(token, "啊嘞，不对劲");
 
         List<String> idList = data.getTrackIds().stream().map(MusicCloudTrackId::getId).map(String::valueOf).collect(Collectors.toList());
-        PlayerMusic music = new PlayerMusic().setName(data.getName()).setRollPlayer(true).setType(PlayerMusic.TYPE_MUSIC_CLOUD).setIdList(idList);
+        PlayerMusic music = new PlayerMusic().setName(data.getName()).setType(PlayerMusic.TYPE_MUSIC_CLOUD).setIdList(idList);
         String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", req);
         BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
