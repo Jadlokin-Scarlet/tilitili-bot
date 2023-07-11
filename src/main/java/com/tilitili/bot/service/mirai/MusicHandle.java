@@ -1,12 +1,13 @@
 package com.tilitili.bot.service.mirai;
 
+import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.dto.PlayerMusic;
+import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -16,7 +17,9 @@ import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.MusicCloudManager;
+import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +40,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private final BilibiliManager bilibiliManager;
     private final MusicCloudManager musicCloudManager;
     private final AtomicBoolean lockFlag = new AtomicBoolean(false);
+    private final PlayerMusicMapper playerMusicMapper;
 
-    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager) {
+    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, BilibiliManager bilibiliManager, PlayerMusicMapper playerMusicMapper) {
         this.redisCache = redisCache;
         this.musicService = musicService;
         this.bilibiliManager = bilibiliManager;
         this.musicCloudManager = musicCloudManager;
+        this.playerMusicMapper = playerMusicMapper;
     }
 
     @Override
@@ -58,11 +63,40 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 case "继续": return handleStart(messageAction);
                 case "播放列表": return handleList(messageAction);
                 case "循环播放": return handleLoopPlayer(messageAction);
+                case "歌单": return handleSongList(messageAction);
                 default: throw new AssertException();
             }
         } finally {
             lockFlag.set(false);
         }
+    }
+
+    private BotMessage handleSongList(BotMessageAction messageAction) {
+        switch (messageAction.getSubKey()) {
+            case "导入": return handleSongListImport(messageAction);
+        }
+        return null;
+    }
+
+    private BotMessage handleSongListImport(BotMessageAction messageAction) {
+        Long userId = messageAction.getBotUser().getId();
+        String searchKey = messageAction.getSubValue();
+        MusicSearchKeyHandleResult musicSearchKeyHandleResult = handleSearchKey(searchKey);
+        List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+        PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        if (playerMusicList == null) {
+            playerMusicList = new ArrayList<>();
+        }
+        if (playerMusicSongList != null) {
+            playerMusicList.addAll(playerMusicSongList.getMusicList());
+        }
+        for (PlayerMusicDTO playerMusic : playerMusicList) {
+            if (playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId()) == null) {
+                playerMusicMapper.addPlayerMusicSelective(playerMusic);
+            }
+        }
+
+        return BotMessage.simpleTextMessage("导入成功("+playerMusicList.size()+")");
     }
 
     private BotMessage handleLoopPlayer(BotMessageAction messageAction) {
@@ -78,7 +112,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleList(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusicDTO> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -87,7 +121,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         } else {
             List<String> respList = new ArrayList<>();
             for (int index = 0; index < playerMusicList.size(); index++) {
-                PlayerMusic playerMusic = playerMusicList.get(index);
+                PlayerMusicDTO playerMusic = playerMusicList.get(index);
                 String indexStr = index == 0? "当前": index == 1? "下一首": String.valueOf(index);
                 respList.add(String.format("%s：%s", indexStr, playerMusic.getName()));
             }
@@ -96,7 +130,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusicDTO> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -108,7 +142,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusicDTO> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -119,7 +153,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        List<PlayerMusic> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<PlayerMusicDTO> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -155,94 +189,95 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
-        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
-            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            return this.handleMusicCouldProgramPlayList(bot, botSender, botUser, listId);
-        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
-            // https://music.163.com/playlist?id=649428962&userid=361260659
-            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            return this.handleMusicCouldPlayList(bot, botSender, botUser, listId);
-        } else if (searchKey.contains("bilibili.com")) {
-            // https://www.bilibili.com/video/BV12L411r7Nh/
-            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
-            Asserts.notEmpty(bvList, "啊嘞，不对劲");
-
-            BotMessage resp = null;
-            for (String bv : bvList) {
-                resp = this.handleBilibiliSearch(bot, botSender, botUser, bv);
-            }
-            return resp;
-        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/program")) {
-            // https://music.163.com/song?id=446247397&userid=361260659
-            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
+        MusicSearchKeyHandleResult musicSearchKeyHandleResult = this.handleSearchKey(searchKey);
+        List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+        PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        if (playerMusicList != null) {
             BotMessage botMessage = null;
-            for (String songId : idList) {
-                botMessage = this.handleMusicCouldLink(bot, botSender, botUser, songId);
+            for (PlayerMusicDTO playerMusic : playerMusicList) {
+                botMessage = musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
             }
             return botMessage;
-        } else if (searchKey.contains("163.com/dj")) {
-            // https://music.163.com/dj?id=2071108797&userid=361260659
-            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
-            BotMessage botMessage = null;
-            for (String songId : idList) {
-                botMessage = this.handleMusicCouldProgramLink(bot, botSender, botUser, songId);
-            }
-            return botMessage;
+        } else if (playerMusicSongList != null) {
+            return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
         } else {
             return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey);
         }
     }
 
-    private BotMessage handleMusicCouldProgramPlayList(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long listId) {
-        PlayerMusicSongList playerMusicSongList = musicCloudManager.getProgramPlayerList(listId);
+    private MusicSearchKeyHandleResult handleSearchKey(String searchKey) {
+        PlayerMusicSongList playerMusicSongList = null;
+        List<PlayerMusicDTO> playerMusicList = null;
 
-        List<PlayerMusic> playerMusicList = musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
-        if (playerMusicList == null) {
-            return null;
-        } else {
-            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", playerMusicSongList.getName()));
+        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
+            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            playerMusicSongList = musicCloudManager.getProgramPlayerList(listId);
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
+            // https://music.163.com/playlist?id=649428962&userid=361260659
+            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            playerMusicSongList = musicCloudManager.getPlayerList(listId);
+        } else if (searchKey.contains("bilibili.com")) {
+            // https://www.bilibili.com/video/BV12L411r7Nh/
+            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
+            Asserts.notEmpty(bvList, "啊嘞，不对劲");
+
+            playerMusicList = new ArrayList<>();
+            for (String bv : bvList) {
+                VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+                Asserts.notNull(videoInfo, "获取视频信息失败");
+                Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
+
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("b23.tv")) {
+            // https://b23.tv/NtQiyU8
+            String bvUrl = HttpClientUtil.resolveShortUrl(searchKey);
+            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", bvUrl);
+            Asserts.notEmpty(bvList, "啊嘞，不对劲");
+
+            playerMusicList = new ArrayList<>();
+            for (String bv : bvList) {
+                VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+                Asserts.notNull(videoInfo, "获取视频信息失败");
+                Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
+
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/program")) {
+            // https://music.163.com/song?id=446247397&userid=361260659
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
+
+            playerMusicList = new ArrayList<>();
+            for (String songId : idList) {
+                MusicCloudSong song = musicCloudManager.getSongById(songId);
+                Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("163.com/dj")) {
+            // https://music.163.com/dj?id=2071108797&userid=361260659
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
+
+            playerMusicList = new ArrayList<>();
+            for (String songId : idList) {
+                MusicCloudProgram program = musicCloudManager.getProgramById(songId);
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName()).setExternalId(songId).setExternalSubId(String.valueOf(program.getMainSong().getId()));
+                playerMusicList.add(playerMusic);
+            }
         }
-    }
-
-    private BotMessage handleMusicCouldPlayList(BotRobot bot, BotSender botSender, BotUserDTO botUser, Long listId) {
-        PlayerMusicSongList data = musicCloudManager.getPlayerList(listId);
-
-        List<PlayerMusic> playerMusicList = musicService.pushPlayListToQuote(bot, botSender, botUser, data);
-        if (playerMusicList == null) {
-            return null;
-        } else {
-            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", data.getName()));
-        }
-    }
-
-    private BotMessage handleMusicCouldProgramLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, String songId) {
-        MusicCloudProgram program = musicCloudManager.getProgramById(songId);
-
-        PlayerMusic playerMusic = new PlayerMusic().setType(PlayerMusic.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName()).setId(songId).setSubId(String.valueOf(program.getMainSong().getId()));
-        return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
-    }
-
-    private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, String songId) {
-        MusicCloudSong song = musicCloudManager.getSongById(songId);
-        return handleMusicCouldLink(bot, botSender, botUser, song);
+        return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicSongList(playerMusicSongList);
     }
 
     private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song) {
-        PlayerMusic playerMusic;
-        if (song.getFee() == 1) {
-            playerMusic = new PlayerMusic().setType(PlayerMusic.TYPE_MUSIC_CLOUD_VIP).setName(song.getName()).setId(String.valueOf(song.getId()));
-        } else {
-            playerMusic = new PlayerMusic().setType(PlayerMusic.TYPE_MUSIC_CLOUD).setName(song.getName()).setId(String.valueOf(song.getId()));
-        }
-        return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
-    }
-
-    private BotMessage handleBilibiliSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String bv) {
-        VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
-        Asserts.notNull(videoInfo, "获取视频信息失败");
-        Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
-
-        PlayerMusic playerMusic = new PlayerMusic().setType(PlayerMusic.TYPE_BILIBILI).setName(videoInfo.getTitle()).setId(bv).setSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
+        Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
+        PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+        playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId()));
         return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
     }
 

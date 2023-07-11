@@ -36,6 +36,8 @@ public class BotMessageAction extends BaseDTO {
     private String keyWithoutPrefix;
     private String key;
     private String value;
+    private String subKey;
+    private String subValue;
     private String quoteMessageId;
     private BotUserDTO quoteUser;
     private BotMessage quoteMessage;
@@ -73,6 +75,18 @@ public class BotMessageAction extends BaseDTO {
                 key = head;
             }
             keyWithoutPrefix = Pattern.compile("^[.。/]").matcher(key).find()? key.substring(1): key;
+        }
+
+        subKey = "";
+        subValue = "";
+        if (isNotBlank(value)) {
+            if (value.contains(" ")) {
+                int splitIndex = value.indexOf(" ");
+                subKey = value.substring(0, splitIndex).trim();
+                subValue = value.substring(splitIndex).trim();
+            } else {
+                subKey = head;
+            }
         }
 
         for (String line : lineList) {
@@ -224,5 +238,13 @@ public class BotMessageAction extends BaseDTO {
 
     public BotRobot getBot() {
         return bot;
+    }
+
+    public String getSubKey() {
+        return subKey;
+    }
+
+    public String getSubValue() {
+        return subValue;
     }
 }

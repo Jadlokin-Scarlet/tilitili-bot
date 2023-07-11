@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.dto.PlayerMusic;
+import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -28,7 +28,7 @@ public class MusicService {
     }
 
 
-    public List<PlayerMusic> pushPlayListToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicSongList data) {
+    public BotMessage pushPlayListToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -38,15 +38,20 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
-        String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", data));
+        String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", req);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        List<PlayerMusicDTO> playerMusicList = resp.getData();
+        if (playerMusicList == null) {
+            return null;
+        } else {
+            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", playerMusicSongList.getName()));
+        }
     }
 
-    public BotMessage pushMusicToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusic music) {
+    public BotMessage pushMusicToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicDTO music) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -57,10 +62,10 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        List<PlayerMusic> playerMusicList = resp.getData();
+        List<PlayerMusicDTO> playerMusicList = resp.getData();
         if (playerMusicList == null) {
             return null;
         } else {
@@ -69,7 +74,7 @@ public class MusicService {
         }
     }
 
-    public List<PlayerMusic> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<PlayerMusicDTO> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -78,13 +83,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/last", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusic> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<PlayerMusicDTO> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -93,13 +98,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/stop", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusic> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<PlayerMusicDTO> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -108,13 +113,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/start", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusic> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<PlayerMusicDTO> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -123,7 +128,7 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/list", data);
-        BaseModel<List<PlayerMusic>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusic>>>(){}.getType());
+        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
