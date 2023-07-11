@@ -112,7 +112,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleList(BotMessageAction messageAction) {
-        List<PlayerMusicDTO> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<String> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -121,16 +121,16 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         } else {
             List<String> respList = new ArrayList<>();
             for (int index = 0; index < playerMusicList.size(); index++) {
-                PlayerMusicDTO playerMusic = playerMusicList.get(index);
+                String playerMusic = playerMusicList.get(index);
                 String indexStr = index == 0? "当前": index == 1? "下一首": String.valueOf(index);
-                respList.add(String.format("%s：%s", indexStr, playerMusic.getName()));
+                respList.add(String.format("%s：%s", indexStr, playerMusic));
             }
             return BotMessage.simpleTextMessage(String.join("\n", respList));
         }
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
-        List<PlayerMusicDTO> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<String> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -142,18 +142,18 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
-        List<PlayerMusicDTO> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<String> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
         if (playerMusicList.size() < 2) {
             return BotMessage.simpleTextMessage("已停止，无下一首，点歌以继续。");
         }
-        return BotMessage.simpleTextMessage(String.format("已停止，输入继续播放下一首：[%s]。", playerMusicList.get(1).getName()));
+        return BotMessage.simpleTextMessage(String.format("已停止，输入继续播放下一首：[%s]。", playerMusicList.get(1)));
     }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        List<PlayerMusicDTO> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        List<String> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }

@@ -40,11 +40,11 @@ public class MusicService {
 
         String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", req);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        List<PlayerMusicDTO> playerMusicList = resp.getData();
-        if (playerMusicList == null) {
+        List<String> playerMusicNameList = resp.getData();
+        if (playerMusicNameList == null) {
             return null;
         } else {
             return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", playerMusicSongList.getName()));
@@ -62,19 +62,19 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        List<PlayerMusicDTO> playerMusicList = resp.getData();
-        if (playerMusicList == null) {
+        List<String> playerMusicNameList = resp.getData();
+        if (playerMusicNameList == null) {
             return null;
         } else {
-            String lastStr = playerMusicList.size() < 2? "": String.format("，前面还有%s首", playerMusicList.size()-1);
+            String lastStr = playerMusicNameList.size() < 2? "": String.format("，前面还有%s首", playerMusicNameList.size()-1);
             return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", music.getName(), lastStr));
         }
     }
 
-    public List<PlayerMusicDTO> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<String> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -83,13 +83,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/last", data);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusicDTO> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<String> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -98,13 +98,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/stop", data);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusicDTO> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<String> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -113,13 +113,13 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/start", data);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
     }
 
-    public List<PlayerMusicDTO> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+    public List<String> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
@@ -128,7 +128,7 @@ public class MusicService {
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
         String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/list", data);
-        BaseModel<List<PlayerMusicDTO>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<PlayerMusicDTO>>>(){}.getType());
+        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
