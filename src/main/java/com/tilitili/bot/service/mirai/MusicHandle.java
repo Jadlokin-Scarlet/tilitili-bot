@@ -105,7 +105,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return null;
         }
         if (success) {
-            return BotMessage.simpleTextMessage("(仅)当前歌曲将会循环播放，发送停止结束循环。");
+            return BotMessage.simpleTextMessage("(仅)当前歌曲将会循环播放，发送切歌播放下一首。");
         } else {
             throw new AssertException();
         }
