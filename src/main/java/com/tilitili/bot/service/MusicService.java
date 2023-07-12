@@ -2,30 +2,44 @@ package com.tilitili.bot.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
+import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.BaseModel;
+import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.MusicCloudManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class MusicService {
     private final BotManager botManager;
+    private final BilibiliManager bilibiliManager;
+    private final MusicCloudManager musicCloudManager;
 
-    public MusicService(BotManager botManager) {
+    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager) {
         this.botManager = botManager;
+        this.bilibiliManager = bilibiliManager;
+        this.musicCloudManager = musicCloudManager;
     }
 
 
@@ -172,5 +186,75 @@ public class MusicService {
             case PlayerMusicDTO.TYPE_BILIBILI: return "https://www.bilibili.com/video/"+theMusic.getExternalId();
             default: throw new AssertException();
         }
+    }
+
+
+    public MusicSearchKeyHandleResult handleSearchKey(String searchKey) {
+        PlayerMusicSongList playerMusicSongList = null;
+        List<PlayerMusicDTO> playerMusicList = null;
+
+        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
+            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            playerMusicSongList = musicCloudManager.getProgramPlayerList(listId);
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
+            // https://music.163.com/playlist?id=649428962&userid=361260659
+            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            playerMusicSongList = musicCloudManager.getPlayerList(listId);
+        } else if (searchKey.contains("bilibili.com")) {
+            // https://www.bilibili.com/video/BV12L411r7Nh/
+            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
+            Asserts.notEmpty(bvList, "啊嘞，不对劲");
+
+            playerMusicList = new ArrayList<>();
+            for (String bv : bvList) {
+                VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+                Asserts.notNull(videoInfo, "获取视频信息失败");
+                Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
+
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("b23.tv")) {
+            // https://b23.tv/NtQiyU8
+            String bvUrl = HttpClientUtil.resolveShortUrl(searchKey);
+            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", bvUrl);
+            Asserts.notEmpty(bvList, "啊嘞，不对劲");
+
+            playerMusicList = new ArrayList<>();
+            for (String bv : bvList) {
+                VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
+                Asserts.notNull(videoInfo, "获取视频信息失败");
+                Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
+
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/program")) {
+            // https://music.163.com/song?id=446247397&userid=361260659
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
+
+            playerMusicList = new ArrayList<>();
+            for (String songId : idList) {
+                MusicCloudSong song = musicCloudManager.getSongById(songId);
+                Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId()));
+                playerMusicList.add(playerMusic);
+            }
+        } else if (searchKey.contains("163.com/dj")) {
+            // https://music.163.com/dj?id=2071108797&userid=361260659
+            List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
+
+            playerMusicList = new ArrayList<>();
+            for (String songId : idList) {
+                MusicCloudProgram program = musicCloudManager.getProgramById(songId);
+                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                playerMusic.setType(PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName()).setExternalId(songId).setExternalSubId(String.valueOf(program.getMainSong().getId()));
+                playerMusicList.add(playerMusic);
+            }
+        }
+        return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicSongList(playerMusicSongList);
     }
 }
