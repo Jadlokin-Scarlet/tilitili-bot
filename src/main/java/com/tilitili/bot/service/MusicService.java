@@ -9,6 +9,7 @@ import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -147,5 +148,29 @@ public class MusicService {
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
         return resp.getData();
+    }
+
+    public PlayerMusicDTO getTheMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        String result = HttpClientUtil.httpGet("https://oss.tilitili.club/api/ktv/get?voiceSenderId="+voiceSender.getId());
+        BaseModel<PlayerMusicDTO> resp = Gsons.fromJson(result, new TypeToken<BaseModel<PlayerMusicDTO>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
+        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+        return resp.getData();
+    }
+
+    public String getMusicJumpUrl(PlayerMusicDTO theMusic) {
+        switch (theMusic.getType()) {
+            case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
+            case PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: return "https://music.163.com/song?id="+theMusic.getExternalId();
+            case PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM: return "https://music.163.com/dj?id="+theMusic.getExternalId();
+            case PlayerMusicDTO.TYPE_BILIBILI: return "https://www.bilibili.com/video/"+theMusic.getExternalId();
+            default: throw new AssertException();
+        }
     }
 }

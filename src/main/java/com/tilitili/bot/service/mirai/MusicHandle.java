@@ -6,6 +6,7 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
@@ -74,8 +75,21 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleSongList(BotMessageAction messageAction) {
         switch (messageAction.getSubKey()) {
             case "导入": return handleSongListImport(messageAction);
+            case "删除": return handleDeleteTheMusic(messageAction);
         }
         return null;
+    }
+
+    private BotMessage handleDeleteTheMusic(BotMessageAction messageAction) {
+        BotUserDTO botUser = messageAction.getBotUser();
+        PlayerMusicDTO theMusic = musicService.getTheMusic(messageAction.getBot(), messageAction.getBotSender(), botUser);
+        if (theMusic == null) {
+            return null;
+        }
+        PlayerMusic dbPlayerMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(botUser.getId(), theMusic.getType(), theMusic.getExternalId());
+        Asserts.notNull(dbPlayerMusic, "当前歌曲不在你的歌单中");
+        playerMusicMapper.deletePlayerMusicByPrimary(dbPlayerMusic.getId());
+        return BotMessage.simpleTextMessage("删除成功，歌曲地址：" + musicService.getMusicJumpUrl(theMusic));
     }
 
     private BotMessage handleSongListImport(BotMessageAction messageAction) {
