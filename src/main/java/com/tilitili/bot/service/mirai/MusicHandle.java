@@ -91,6 +91,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             playerMusicList.addAll(playerMusicSongList.getMusicList());
         }
         for (PlayerMusicDTO playerMusic : playerMusicList) {
+            playerMusic.setUserId(userId);
             if (playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId()) == null) {
                 playerMusicMapper.addPlayerMusicSelective(playerMusic);
             }
