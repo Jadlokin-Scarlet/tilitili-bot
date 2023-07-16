@@ -12,15 +12,11 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
-import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MusicCloudManager;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -200,6 +196,10 @@ public class MusicService {
             // https://music.163.com/playlist?id=649428962&userid=361260659
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             playerMusicSongList = musicCloudManager.getPlayerList(listId);
+
+            List<String> idList = playerMusicSongList.getMusicList().stream().map(PlayerMusicDTO::getExternalId).collect(Collectors.toList());
+            List<PlayerMusicDTO> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+            playerMusicSongList.setMusicList(playerMusicListDetail);
         } else if (searchKey.contains("bilibili.com")) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
             List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
@@ -235,14 +235,7 @@ public class MusicService {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
-            playerMusicList = new ArrayList<>();
-            for (String songId : idList) {
-                MusicCloudSong song = musicCloudManager.getSongById(songId);
-                Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
-                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-                playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId()));
-                playerMusicList.add(playerMusic);
-            }
+            playerMusicList = musicCloudManager.getPlayerListDetail(idList);
         } else if (searchKey.contains("163.com/dj")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());

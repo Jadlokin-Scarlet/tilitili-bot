@@ -1,12 +1,15 @@
 package com.tilitili.bot.service;
 
+import com.tilitili.bot.entity.BotRobotSenderMappingDTO;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.query.BotRobotSenderMappingQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.mapper.mysql.BotRobotSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.automapper.BotRoleAdminMappingAutoMapper;
@@ -25,23 +28,29 @@ public class BotSenderService {
     private final BotRobotMapper botRobotMapper;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
     private final BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper;
+    private final BotRobotSenderMappingMapper botRobotSenderMappingMapper;
 
-    public BotSenderService(BotSenderMapper botSenderMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotMapper botRobotMapper, BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper) {
+    public BotSenderService(BotSenderMapper botSenderMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotMapper botRobotMapper, BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper, BotRobotSenderMappingMapper botRobotSenderMappingMapper) {
         this.botSenderMapper = botSenderMapper;
         this.botRobotMapper = botRobotMapper;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
         this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
+        this.botRobotSenderMappingMapper = botRobotSenderMappingMapper;
     }
 
     public BaseModel<PageModel<Map<String, Object>>> listBotSender(BotSenderQuery query) {
         int count = botSenderMapper.countBotSender(query);
         List<BotSender> list = botSenderMapper.listBotSender(query);
         List<Map<String, Object>> result = list.stream().map(botSender -> {
+            BotRobot listenBot = botRobotMapper.getValidBotRobotById(botSender.getBot());
+            BotRobot sendBot = botRobotMapper.getValidBotRobotById(botSender.getSendBot());
             List<BotSenderTaskMapping> mappingList = botSenderTaskMappingMapper.getBotSenderTaskMappingBySenderId(botSender.getId());
             Map<String, Object> botSenderDTO = new HashMap<>();
             botSenderDTO.put("id", botSender.getId());
             botSenderDTO.put("name", botSender.getName());
             botSenderDTO.put("sendType", botSender.getSendType());
+            botSenderDTO.put("listenBot", listenBot.getName());
+            botSenderDTO.put("sendBot", sendBot.getName());
             mappingList.forEach(mapping -> botSenderDTO.put(String.valueOf(mapping.getTaskId()), true));
             return botSenderDTO;
         }).collect(Collectors.toList());
@@ -72,5 +81,22 @@ public class BotSenderService {
         } else if (!checked && botSenderTaskMapping != null) {
             botSenderTaskMappingMapper.deleteBotSenderTaskMappingById(botSenderTaskMapping.getId());
         }
+    }
+
+    public BaseModel<PageModel<BotRobotSenderMappingDTO>> getBotSenderBotRobotList(BotRobotSenderMappingQuery query) {
+        int total = botRobotSenderMappingMapper.countBotRobotSenderMappingByCondition(query.setStatus(0));
+        List<BotRobotSenderMapping> mappingList = botRobotSenderMappingMapper.getBotRobotSenderMappingByCondition(query);
+        List<BotRobotSenderMappingDTO> list = mappingList.stream().map(mapping -> {
+            BotRobot botRobot = botRobotMapper.getValidBotRobotById(mapping.getBotId());
+
+            BotRobotSenderMappingDTO result = new BotRobotSenderMappingDTO();
+            result.setBotId(botRobot.getId());
+            result.setName(botRobot.getName());
+            result.setType(botRobot.getType());
+            result.setListenIndex(mapping.getListenIndex());
+            result.setSendIndex(mapping.getSendIndex());
+            return result;
+        }).collect(Collectors.toList());
+        return PageModel.of(total, query.getPageSize(), query.getCurrent(), list);
     }
 }
