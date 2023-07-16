@@ -1,6 +1,7 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotRobotSenderMappingDTO;
+import com.tilitili.bot.entity.request.UpdateBotRobotSenderMappingIndexRequest;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.bot.service.BotSenderService;
 import com.tilitili.common.constant.BotRoleConstant;
@@ -44,9 +45,16 @@ public class BotSenderController extends BaseController {
         return BaseModel.success();
     }
 
-    @GetMapping("/botList")
+    @GetMapping("/bot/list")
     @ResponseBody
     public BaseModel<PageModel<BotRobotSenderMappingDTO>> getBotSenderBotRobotList(BotRobotSenderMappingQuery query) {
         return botSenderService.getBotSenderBotRobotList(query);
+    }
+
+    @PostMapping("/bot/update")
+    @ResponseBody
+    public BaseModel<?> updateBotSenderBotRobotIndex(@RequestBody UpdateBotRobotSenderMappingIndexRequest request) {
+        botSenderService.updateBotSenderBotRobotIndex(request);
+        return BaseModel.success();
     }
 }

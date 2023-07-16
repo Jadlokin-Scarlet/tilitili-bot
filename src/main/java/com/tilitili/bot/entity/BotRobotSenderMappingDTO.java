@@ -3,7 +3,8 @@ package com.tilitili.bot.entity;
 import com.tilitili.common.entity.BotRobotSenderMapping;
 
 public class BotRobotSenderMappingDTO extends BotRobotSenderMapping {
-    private String name;
+    private String senderName;
+    private String botName;
     private String type;
 
     public String getType() {
@@ -15,12 +16,21 @@ public class BotRobotSenderMappingDTO extends BotRobotSenderMapping {
         return this;
     }
 
-    public String getName() {
-        return name;
+    public String getSenderName() {
+        return senderName;
     }
 
-    public BotRobotSenderMappingDTO setName(String name) {
-        this.name = name;
+    public BotRobotSenderMappingDTO setSenderName(String senderName) {
+        this.senderName = senderName;
+        return this;
+    }
+
+    public String getBotName() {
+        return botName;
+    }
+
+    public BotRobotSenderMappingDTO setBotName(String botName) {
+        this.botName = botName;
         return this;
     }
 }

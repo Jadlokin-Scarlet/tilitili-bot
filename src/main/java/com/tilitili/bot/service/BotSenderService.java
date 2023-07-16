@@ -1,6 +1,7 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.BotRobotSenderMappingDTO;
+import com.tilitili.bot.entity.request.UpdateBotRobotSenderMappingIndexRequest;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.*;
@@ -8,6 +9,7 @@ import com.tilitili.common.entity.query.BotRobotSenderMappingQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotRobotSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
@@ -84,6 +86,9 @@ public class BotSenderService {
     }
 
     public BaseModel<PageModel<BotRobotSenderMappingDTO>> getBotSenderBotRobotList(BotRobotSenderMappingQuery query) {
+        Asserts.notNull(query.getSenderId(), "参数异常");
+        BotSender botSender = botSenderMapper.getValidBotSenderById(query.getSenderId());
+        Asserts.notNull(botSender, "参数异常");
         int total = botRobotSenderMappingMapper.countBotRobotSenderMappingByCondition(query.setStatus(0));
         List<BotRobotSenderMapping> mappingList = botRobotSenderMappingMapper.getBotRobotSenderMappingByCondition(query);
         List<BotRobotSenderMappingDTO> list = mappingList.stream().map(mapping -> {
@@ -91,12 +96,34 @@ public class BotSenderService {
 
             BotRobotSenderMappingDTO result = new BotRobotSenderMappingDTO();
             result.setBotId(botRobot.getId());
-            result.setName(botRobot.getName());
+            result.setSenderName(botSender.getName());
+            result.setBotName(botRobot.getName());
             result.setType(botRobot.getType());
             result.setListenIndex(mapping.getListenIndex());
             result.setSendIndex(mapping.getSendIndex());
             return result;
         }).collect(Collectors.toList());
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), list);
+    }
+
+    public void updateBotSenderBotRobotIndex(UpdateBotRobotSenderMappingIndexRequest request) {
+        Long senderId = request.getSenderId();
+        Long fromBotId = request.getFromBotId();
+        Long toBotId = request.getToBotId();
+        Asserts.notNull(senderId, "参数异常");
+        Asserts.notNull(fromBotId, "参数异常");
+        Asserts.notNull(toBotId, "参数异常");
+        BotRobotSenderMapping fromMapping = botRobotSenderMappingMapper.getBotRobotSenderMappingBySenderIdAndBotId(senderId, fromBotId);
+        BotRobotSenderMapping toMapping = botRobotSenderMappingMapper.getBotRobotSenderMappingBySenderIdAndBotId(senderId, toBotId);
+
+        if ("listenIndex".equals(request.getIndexType())) {
+            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(fromMapping.getId()).setListenIndex(toMapping.getListenIndex()));
+            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(toMapping.getId()).setListenIndex(fromMapping.getListenIndex()));
+        } else if ("sendIndex".equals(request.getIndexType())) {
+            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(fromMapping.getId()).setSendIndex(toMapping.getSendIndex()));
+            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(toMapping.getId()).setSendIndex(fromMapping.getSendIndex()));
+        } else {
+            throw new AssertException("参数异常");
+        }
     }
 }
