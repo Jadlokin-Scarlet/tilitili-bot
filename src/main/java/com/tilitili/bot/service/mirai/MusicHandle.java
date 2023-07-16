@@ -57,7 +57,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 case "继续": return handleStart(messageAction);
                 case "播放列表": return handleList(messageAction);
                 case "循环播放": return handleLoopPlayer(messageAction);
-                case "重启Ktv": return handleRestartKtv(messageAction);
+                case "重启ktv": return handleRestartKtv(messageAction);
                 case "歌单": return handleSongList(messageAction);
                 default: throw new AssertException();
             }
