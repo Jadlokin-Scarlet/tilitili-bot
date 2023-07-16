@@ -160,6 +160,21 @@ public class MusicService {
         return resp.getData();
     }
 
+    public Boolean restartKtv(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
+        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/restart", data);
+        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
+        Asserts.notNull(resp, "网络异常");
+        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+        return resp.getData();
+    }
+
     public PlayerMusicDTO getTheMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {

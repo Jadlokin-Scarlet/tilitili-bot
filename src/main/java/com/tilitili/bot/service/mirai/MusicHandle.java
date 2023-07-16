@@ -57,6 +57,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 case "继续": return handleStart(messageAction);
                 case "播放列表": return handleList(messageAction);
                 case "循环播放": return handleLoopPlayer(messageAction);
+                case "重启Ktv": return handleRestartKtv(messageAction);
                 case "歌单": return handleSongList(messageAction);
                 default: throw new AssertException();
             }
@@ -105,6 +106,18 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
 
         return BotMessage.simpleTextMessage("导入成功("+playerMusicList.size()+")");
+    }
+
+    private BotMessage handleRestartKtv(BotMessageAction messageAction) {
+        Boolean success = musicService.restartKtv(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        if (success == null) {
+            return null;
+        }
+        if (success) {
+            return BotMessage.simpleTextMessage("重启喵。");
+        } else {
+            throw new AssertException();
+        }
     }
 
     private BotMessage handleLoopPlayer(BotMessageAction messageAction) {
