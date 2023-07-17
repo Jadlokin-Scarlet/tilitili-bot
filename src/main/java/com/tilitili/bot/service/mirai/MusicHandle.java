@@ -75,8 +75,22 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             case "导入": return handleSongListImport(messageAction);
             case "删除": return handleDeleteTheMusic(messageAction);
             case "清空": return handleClearSongList(messageAction);
+            case "播放": return handlePlaySongList(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handlePlaySongList(BotMessageAction messageAction) {
+        BotRobot bot = messageAction.getBot();
+        BotSender botSender = messageAction.getBotSender();
+        BotUserDTO botUser = messageAction.getBotUser();
+        List<PlayerMusicDTO> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId())).stream().map(music -> {
+            PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+            playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName());
+            return playerMusic;
+        }).collect(Collectors.toList());
+        PlayerMusicSongList playerMusicSongList = new PlayerMusicSongList().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
+        return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
     }
 
     private BotMessage handleConfirmClear(BotMessageAction messageAction) {
