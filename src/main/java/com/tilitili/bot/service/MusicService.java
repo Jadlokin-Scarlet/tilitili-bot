@@ -225,7 +225,7 @@ public class MusicService {
             // https://www.bilibili.com/video/BV12L411r7Nh/
             List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
             Asserts.notEmpty(bvList, "啊嘞，不对劲");
-            String pnStr = bvList.size() < 2? StringUtils.patten1("?p=(\\d+)", searchKey): null;
+            String pnStr = bvList.size() < 2? StringUtils.patten1("\\?p=(\\d+)", searchKey): null;
 
             playerMusicList = new ArrayList<>();
             for (String bv : bvList) {
