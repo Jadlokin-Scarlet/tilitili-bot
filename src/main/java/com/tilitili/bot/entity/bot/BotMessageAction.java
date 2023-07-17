@@ -85,7 +85,7 @@ public class BotMessageAction extends BaseDTO {
                 subKey = value.substring(0, splitIndex).trim();
                 subValue = value.substring(splitIndex).trim();
             } else {
-                subKey = head;
+                subKey = value;
             }
         }
 
