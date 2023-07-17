@@ -10,6 +10,7 @@ import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
@@ -67,11 +68,35 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSongList(BotMessageAction messageAction) {
+        if ("是".equals(messageAction.getValueOrVirtualValue())) {
+            return handleConfirmClear(messageAction);
+        }
         switch (messageAction.getSubKey()) {
             case "导入": return handleSongListImport(messageAction);
             case "删除": return handleDeleteTheMusic(messageAction);
+            case "清空": return handleClearSongList(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handleConfirmClear(BotMessageAction messageAction) {
+        BotSender botSender = messageAction.getBotSender();
+        BotUserDTO botUser = messageAction.getBotUser();
+        if (!redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
+            return null;
+        }
+        List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId()));
+        for (PlayerMusic music : musicList) {
+            playerMusicMapper.deletePlayerMusicByPrimary(music.getId());
+        }
+        return BotMessage.simpleTextMessage("好了喵("+musicList.size()+")");
+    }
+
+    private BotMessage handleClearSongList(BotMessageAction messageAction) {
+        BotSender botSender = messageAction.getBotSender();
+        BotUserDTO botUser = messageAction.getBotUser();
+        redisCache.setValue(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()), "yes", 60);
+        return BotMessage.simpleTextMessage("确定清空个人歌单吗(是/否)");
     }
 
     private BotMessage handleDeleteTheMusic(BotMessageAction messageAction) {
@@ -253,9 +278,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     @Override
     public String isThisTask(BotMessageAction messageAction) {
+        BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
         if (redisCache.exists("songList-"+botUser.getId()) && StringUtils.isNumber(messageAction.getText())) {
             return "选歌";
+        }
+        if (redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
+            return "歌单";
         }
         return null;
     }

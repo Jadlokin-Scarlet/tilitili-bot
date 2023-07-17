@@ -215,6 +215,12 @@ public class MusicService {
             List<String> idList = playerMusicSongList.getMusicList().stream().map(PlayerMusicDTO::getExternalId).collect(Collectors.toList());
             List<PlayerMusicDTO> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
             playerMusicSongList.setMusicList(playerMusicListDetail);
+        } else if (searchKey.contains("space.bilibili.com")) {
+            // https://space.bilibili.com/23210308/favlist?fid=940681308&ftype=create
+            String fid = StringUtils.patten1("fid=(\\d+)", searchKey);
+            Asserts.notBlank(fid, "啊嘞，不对劲");
+
+            playerMusicSongList = bilibiliManager.getFavoriteList(fid);
         } else if (searchKey.contains("bilibili.com")) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
             List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
