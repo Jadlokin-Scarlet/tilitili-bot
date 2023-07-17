@@ -108,22 +108,21 @@ public class BotSenderService {
 
     public void updateBotSenderBotRobotIndex(UpdateBotRobotSenderMappingIndexRequest request) {
         Long senderId = request.getSenderId();
-        Long fromBotId = request.getFromBotId();
-        Long toBotId = request.getToBotId();
+        List<Long> botIdList = request.getBotIdList();
+        String indexType = request.getIndexType();
         Asserts.notNull(senderId, "参数异常");
-        Asserts.notNull(fromBotId, "参数异常");
-        Asserts.notNull(toBotId, "参数异常");
-        BotRobotSenderMapping fromMapping = botRobotSenderMappingMapper.getBotRobotSenderMappingBySenderIdAndBotId(senderId, fromBotId);
-        BotRobotSenderMapping toMapping = botRobotSenderMappingMapper.getBotRobotSenderMappingBySenderIdAndBotId(senderId, toBotId);
-
-        if ("listenIndex".equals(request.getIndexType())) {
-            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(fromMapping.getId()).setListenIndex(toMapping.getListenIndex()));
-            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(toMapping.getId()).setListenIndex(fromMapping.getListenIndex()));
-        } else if ("sendIndex".equals(request.getIndexType())) {
-            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(fromMapping.getId()).setSendIndex(toMapping.getSendIndex()));
-            botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(toMapping.getId()).setSendIndex(fromMapping.getSendIndex()));
-        } else {
-            throw new AssertException("参数异常");
+        Asserts.notEmpty(botIdList, "参数异常");
+        Asserts.notNull(indexType, "参数异常");
+        for (int index = 0; index < botIdList.size(); index++) {
+            Long botId = botIdList.get(index);
+            BotRobotSenderMapping mapping = botRobotSenderMappingMapper.getBotRobotSenderMappingBySenderIdAndBotId(senderId, botId);
+            if ("listenIndex".equals(indexType)) {
+                botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(mapping.getId()).setListenIndex(index));
+            } else if ("sendIndex".equals(indexType)) {
+                botRobotSenderMappingMapper.updateBotRobotSenderMappingSelective(new BotRobotSenderMapping().setId(mapping.getId()).setSendIndex(index));
+            } else {
+                throw new AssertException("参数异常");
+            }
         }
     }
 }

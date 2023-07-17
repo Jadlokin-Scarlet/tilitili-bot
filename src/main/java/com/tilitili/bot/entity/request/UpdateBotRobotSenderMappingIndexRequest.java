@@ -2,27 +2,19 @@ package com.tilitili.bot.entity.request;
 
 import com.tilitili.common.entity.dto.BaseDTO;
 
+import java.util.List;
+
 public class UpdateBotRobotSenderMappingIndexRequest extends BaseDTO {
 	private Long senderId;
-	private Long fromBotId;
-	private Long toBotId;
+	private List<Long> botIdList;
 	private String indexType;
 
-	public Long getFromBotId() {
-		return fromBotId;
+	public List<Long> getBotIdList() {
+		return botIdList;
 	}
 
-	public UpdateBotRobotSenderMappingIndexRequest setFromBotId(Long fromBotId) {
-		this.fromBotId = fromBotId;
-		return this;
-	}
-
-	public Long getToBotId() {
-		return toBotId;
-	}
-
-	public UpdateBotRobotSenderMappingIndexRequest setToBotId(Long toBotId) {
-		this.toBotId = toBotId;
+	public UpdateBotRobotSenderMappingIndexRequest setBotIdList(List<Long> botIdList) {
+		this.botIdList = botIdList;
 		return this;
 	}
 
