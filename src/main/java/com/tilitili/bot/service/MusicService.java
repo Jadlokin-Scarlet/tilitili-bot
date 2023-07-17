@@ -232,7 +232,7 @@ public class MusicService {
                 VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
                 Asserts.notNull(videoInfo, "获取视频信息失败");
                 Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
-                int pn = StringUtils.isBlank(pnStr)? 0: Integer.parseInt(pnStr);
+                int pn = StringUtils.isBlank(pnStr)? 0: Integer.parseInt(pnStr) - 1;
 
                 PlayerMusicDTO playerMusic = new PlayerMusicDTO();
                 playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(pn).getCid()));
