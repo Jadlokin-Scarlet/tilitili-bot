@@ -89,6 +89,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName());
             return playerMusic;
         }).collect(Collectors.toList());
+        Asserts.notEmpty(musicList, "歌单空空如也");
         PlayerMusicSongList playerMusicSongList = new PlayerMusicSongList().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
         return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
     }
@@ -100,6 +101,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return null;
         }
         List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId()));
+        Asserts.notEmpty(musicList, "歌单空空如也");
         for (PlayerMusic music : musicList) {
             playerMusicMapper.deletePlayerMusicByPrimary(music.getId());
         }
