@@ -1,19 +1,18 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.service.ResourceService;
+import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.resource.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api/resources")
@@ -22,7 +21,6 @@ import java.util.List;
 public class ResourceController extends BaseController {
     private final ResourceService resourceService;
 
-
     @Autowired
     public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
@@ -30,11 +28,11 @@ public class ResourceController extends BaseController {
 
     @GetMapping("")
     @ResponseBody
-    public BaseModel<?> getResources(@RequestParam List<String> needResourcesList) {
-        HashMap<String, List<Resource>> resourceMap = new HashMap<>();
-        needResourcesList.forEach(
-                resourceName -> resourceMap.put(resourceName, resourceService.getResource(resourceName))
-        );
+    public BaseModel<?> getResources(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestParam List<String> needResourcesList) {
+        Map<String, List<Resource>> resourceMap = new HashMap<>();
+        for (String resourceName : needResourcesList) {
+            resourceMap.put(resourceName, resourceService.getResource(botAdmin, resourceName));
+        }
         return BaseModel.success(resourceMap);
     }
 }

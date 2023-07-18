@@ -9,6 +9,7 @@ import com.tilitili.common.entity.query.BotRobotSenderMappingQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.entity.view.resource.Resource;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotRobotSenderMappingMapper;
@@ -124,5 +125,15 @@ public class BotSenderService {
                 throw new AssertException("参数异常");
             }
         }
+    }
+
+    public List<Resource> listBotSenderResource(BotAdmin botAdmin) {
+        BotSenderQuery botSenderQuery = new BotSenderQuery().setStatus(0);
+        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        if (adminMapping == null) {
+            botSenderQuery.setAdminId(botAdmin.getId());
+        }
+        List<BotSender> list = botSenderMapper.listBotSender(botSenderQuery);
+        return list.stream().map(botSender -> new Resource(botSender.getId(), botSender.getName())).collect(Collectors.toList());
     }
 }

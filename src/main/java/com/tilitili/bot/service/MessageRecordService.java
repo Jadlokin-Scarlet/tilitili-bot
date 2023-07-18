@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class MessageRecordService {
+public class
+MessageRecordService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final BotManager botManager;
 
@@ -33,7 +34,6 @@ public class MessageRecordService {
         int total = botMessageRecordMapper.countBotMessageRecordByCondition(query);
         List<MessageRecordDTO> list = botMessageRecordMapper.listPageBotMessageRecord(query);
         List<MessageRecordVO> resultList = list.stream().map(record -> {
-            log.info("list....");
             MessageRecordVO result = new MessageRecordVO();
             BotMessage botMessage;
             try {
