@@ -11,7 +11,7 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.entity.view.resource.Resource;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotRobotSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 @Service
 public class BotSenderService {
     private final BotSenderMapper botSenderMapper;
-    private final BotRobotMapper botRobotMapper;
+    private final BotRobotCacheManager botRobotCacheManager;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
     private final BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper;
     private final BotRobotSenderMappingMapper botRobotSenderMappingMapper;
 
-    public BotSenderService(BotSenderMapper botSenderMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotMapper botRobotMapper, BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper, BotRobotSenderMappingMapper botRobotSenderMappingMapper) {
+    public BotSenderService(BotSenderMapper botSenderMapper, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotCacheManager botRobotCacheManager, BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper, BotRobotSenderMappingMapper botRobotSenderMappingMapper) {
         this.botSenderMapper = botSenderMapper;
-        this.botRobotMapper = botRobotMapper;
+        this.botRobotCacheManager = botRobotCacheManager;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
         this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
         this.botRobotSenderMappingMapper = botRobotSenderMappingMapper;
@@ -45,8 +45,8 @@ public class BotSenderService {
         int count = botSenderMapper.countBotSender(query);
         List<BotSender> list = botSenderMapper.listBotSender(query);
         List<Map<String, Object>> result = list.stream().map(botSender -> {
-            BotRobot listenBot = botRobotMapper.getValidBotRobotById(botSender.getBot());
-            BotRobot sendBot = botRobotMapper.getValidBotRobotById(botSender.getSendBot());
+            BotRobot listenBot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
+            BotRobot sendBot = botRobotCacheManager.getValidBotRobotById(botSender.getSendBot());
             List<BotSenderTaskMapping> mappingList = botSenderTaskMappingMapper.getBotSenderTaskMappingBySenderId(botSender.getId());
             Map<String, Object> botSenderDTO = new HashMap<>();
             botSenderDTO.put("id", botSender.getId());
@@ -73,8 +73,8 @@ public class BotSenderService {
         BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             BotSender botSender = botSenderMapper.getValidBotSenderById(id);
-            BotRobot bot1 = botRobotMapper.getValidBotRobotById(botSender.getBot());
-            BotRobot bot2 = botRobotMapper.getValidBotRobotById(botSender.getSendBot());
+            BotRobot bot1 = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
+            BotRobot bot2 = botRobotCacheManager.getValidBotRobotById(botSender.getSendBot());
             Asserts.isTrue(Objects.equals(botAdmin.getId(), bot1.getAdminId()) || Objects.equals(botAdmin.getId(), bot2.getAdminId()), "权限不足");
         }
 
@@ -93,7 +93,7 @@ public class BotSenderService {
         int total = botRobotSenderMappingMapper.countBotRobotSenderMappingByCondition(query.setStatus(0));
         List<BotRobotSenderMapping> mappingList = botRobotSenderMappingMapper.getBotRobotSenderMappingByCondition(query);
         List<BotRobotSenderMappingDTO> list = mappingList.stream().map(mapping -> {
-            BotRobot botRobot = botRobotMapper.getValidBotRobotById(mapping.getBotId());
+            BotRobot botRobot = botRobotCacheManager.getValidBotRobotById(mapping.getBotId());
 
             BotRobotSenderMappingDTO result = new BotRobotSenderMappingDTO();
             result.setBotId(botRobot.getId());

@@ -5,7 +5,9 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.kook.ws.KookData;
 import com.tilitili.common.entity.view.bot.kook.ws.KookSessionId;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +20,15 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
     private int sn = 0;
     private String sessionId;
 
-    public KookWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager) {
-        super(serverUri, bot, botService, sendMessageManager);
+    public KookWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager, BotRobotCacheManager botRobotCacheManager) {
+        super(serverUri, bot, botService, sendMessageManager, botRobotCacheManager);
         this.setReuseAddr(true);
     }
 
     @Override
     public void handleTextMessage(String message) {
+        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
+        Asserts.notNull(bot, "bot权限不足");
         log.info("Message Received message={}", message);
         KookData<KookSessionId> kookData = Gsons.fromJson(message, new TypeToken<KookData<KookSessionId>>(){}.getType());
         switch (kookData.getS()) {

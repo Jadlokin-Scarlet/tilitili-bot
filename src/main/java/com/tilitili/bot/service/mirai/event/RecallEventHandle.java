@@ -8,8 +8,8 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
@@ -26,16 +26,16 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderMapper botSenderMapper;
 	private final BotMessageRecordMapper botMessageRecordMapper;
 	private final BotManager botManager;
-	private final BotRobotMapper botRobotMapper;
+	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
 	@Autowired
-	public RecallEventHandle(BotSenderMapper botSenderMapper, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotRobotMapper botRobotMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+	public RecallEventHandle(BotSenderMapper botSenderMapper, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
 		super(BotEvent.EVENT_TYPE_RECALL);
 		this.botSenderMapper = botSenderMapper;
 		this.botMessageRecordMapper = botMessageRecordMapper;
 		this.botManager = botManager;
-		this.botRobotMapper = botRobotMapper;
+		this.botRobotCacheManager = botRobotCacheManager;
 		this.botSendMessageRecordMapper = botSendMessageRecordMapper;
 	}
 
@@ -56,7 +56,7 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 			BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
 			Asserts.notNull(replySender, "没有权限");
 
-			BotRobot replyBot = botRobotMapper.getValidBotRobotById(replySender.getSendBot());
+			BotRobot replyBot = botRobotCacheManager.getValidBotRobotById(replySender.getSendBot());
 			Asserts.notNull(replyBot, "啊嘞，不对劲");
 			botManager.recallMessage(replyBot, replySender, replyMessageId);
 		}

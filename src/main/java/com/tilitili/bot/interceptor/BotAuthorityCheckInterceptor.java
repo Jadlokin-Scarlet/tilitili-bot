@@ -6,7 +6,7 @@ import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotRoleAdminMapping;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
@@ -25,11 +25,11 @@ import javax.servlet.http.HttpSession;
 @Component
 public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
 
-    private final BotRobotMapper botRobotMapper;
+    private final BotRobotCacheManager botRobotCacheManager;
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
 
-    public BotAuthorityCheckInterceptor(BotRobotMapper botRobotMapper, BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
-        this.botRobotMapper = botRobotMapper;
+    public BotAuthorityCheckInterceptor(BotRobotCacheManager botRobotCacheManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
+        this.botRobotCacheManager = botRobotCacheManager;
         this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
     }
 
@@ -50,7 +50,7 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
                     Asserts.notNull(idStr, "参数异常");
                     Long id = Long.valueOf(idStr);
 
-                    BotRobot bot = botRobotMapper.getBotRobotById(id);
+                    BotRobot bot = botRobotCacheManager.getBotRobotById(id);
                     Asserts.notNull(bot, "参数异常");
                     Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
                 }

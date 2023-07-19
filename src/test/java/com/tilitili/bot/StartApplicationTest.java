@@ -68,7 +68,7 @@ class StartApplicationTest {
     @Resource
     private MusicService musicService;
     @Autowired
-    private BotRobotMapper botRobotMapper;
+    private BotRobotCacheManager botRobotCacheManager;
     @Autowired
     private BotService botService;
     @Autowired
@@ -78,16 +78,16 @@ class StartApplicationTest {
 
     @Test
     public void qqGuildWebsocketTest() throws URISyntaxException {
-        BotRobot bot = botRobotMapper.getValidBotRobotById(9L);
+        BotRobot bot = botRobotCacheManager.getValidBotRobotById(9L);
         QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
                 new URI(botManager.getWebSocketUrl(bot)),
                 bot,
-                botService, sendMessageManager
+                botService, sendMessageManager, botRobotCacheManager
         );
         qqGuildWebSocketHandler.connect();
 //        BotWebSocketHandler gocq = new BotWebSocketHandler(
-//                new URI(botManager.getWebSocketUrl(botRobotMapper.getValidBotRobotById(3L))),
-//                botRobotMapper.getValidBotRobotById(3L),
+//                new URI(botManager.getWebSocketUrl(botRobotCacheManager.getValidBotRobotById(3L))),
+//                botRobotCacheManager.getValidBotRobotById(3L),
 //                botService, sendMessageManager
 //        );
 //        gocq.connect();

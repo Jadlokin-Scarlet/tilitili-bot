@@ -2,26 +2,32 @@ package com.tilitili.bot.socket;
 
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
+import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
-    protected final BotRobot bot;
+    protected final Long botId;
     protected final BotService botService;
     protected final SendMessageManager sendMessageManager;
+    protected final BotRobotCacheManager botRobotCacheManager;
 
-    public BotWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager) {
+    public BotWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager, BotRobotCacheManager botRobotCacheManager) {
         super(serverUri);
-        this.bot = bot;
+        this.botId = bot.getId();
         this.botService = botService;
         this.sendMessageManager = sendMessageManager;
+        this.botRobotCacheManager = botRobotCacheManager;
     }
 
     @Override
     public void handleTextMessage(String message) {
+        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
+        Asserts.notNull(bot, "bot权限不足");
         if (!message.contains("heartbeat")) {
             log.info("Message Received bot={} message={}", bot.getName(), message);
         }
@@ -41,9 +47,5 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 //            sendMessageManager.sendMessage(botMessage);
 //        }
         super.onClose(code, reason, remote);
-    }
-
-    public BotRobot getBot() {
-        return bot;
     }
 }

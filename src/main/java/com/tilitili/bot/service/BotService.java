@@ -47,9 +47,9 @@ public class BotService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
-    private final BotRobotMapper botRobotMapper;
+    private final BotRobotCacheManager botRobotCacheManager;
 
-    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper, BotRobotMapper botRobotMapper) {
+    public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper, BotRobotCacheManager botRobotCacheManager) {
         this.sendMessageManager = sendMessageManager;
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
@@ -59,7 +59,7 @@ public class BotService {
         this.botMessageRecordMapper = botMessageRecordMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
-        this.botRobotMapper = botRobotMapper;
+        this.botRobotCacheManager = botRobotCacheManager;
         gson = new Gson();
 
         this.eventHandleMap = eventHandleList.stream().collect(Collectors.toMap(BaseEventHandle::getEventType, Function.identity()));
@@ -83,7 +83,7 @@ public class BotService {
             return;
         }
         Long userId = botMessage.getBotUser().getId();
-        if (botRobotMapper.countBotRobotByCondition(new BotRobotQuery().setUserId(userId)) == 1) {
+        if (botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setUserId(userId)) == 1) {
             log.info("跳过自己消息");
             return;
         }

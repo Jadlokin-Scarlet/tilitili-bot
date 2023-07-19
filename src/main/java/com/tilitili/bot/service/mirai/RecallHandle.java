@@ -9,7 +9,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotSendMessageRecordQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.utils.Asserts;
@@ -23,14 +23,14 @@ import java.util.Objects;
 public class RecallHandle extends ExceptionRespMessageHandle {
 
     private final BotManager botManager;
-    private final BotRobotMapper botRobotMapper;
+    private final BotRobotCacheManager botRobotCacheManager;
     private final BotSenderMapper botSenderMapper;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public RecallHandle(BotManager botManager, BotRobotMapper botRobotMapper, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public RecallHandle(BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
-        this.botRobotMapper = botRobotMapper;
+        this.botRobotCacheManager = botRobotCacheManager;
         this.botSenderMapper = botSenderMapper;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
     }
@@ -53,7 +53,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
                 BotSender otherBotSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
-                BotRobot otherBot = botRobotMapper.getValidBotRobotById(otherBotSender.getSendBot());
+                BotRobot otherBot = botRobotCacheManager.getValidBotRobotById(otherBotSender.getSendBot());
                 Asserts.notNull(otherBot, "啊嘞，不对劲");
                 botManager.recallMessage(otherBot, otherBotSender, sendMessage.getMessageId());
             }

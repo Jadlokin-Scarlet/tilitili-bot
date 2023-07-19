@@ -16,11 +16,11 @@ import com.tilitili.common.entity.query.BotMessageRecordQuery;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.MoliManager;
 import com.tilitili.common.manager.OpenAiManager;
 import com.tilitili.common.manager.TencentCloudApiManager;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
 import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final OpenAiManager openAiManager;
 	private final TencentCloudApiManager tencentCloudApiManager;
 	private final MoliManager moliManager;
-	private final BotRobotMapper botRobotMapper;
+	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotMessageRecordMapper botMessageRecordMapper;
 
 	private final static Random random = new Random(System.currentTimeMillis());
@@ -47,12 +47,12 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private static final String networkKey = "ChatHandle.networkKey";
 
 	@Autowired
-	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotMapper botRobotMapper, BotMessageRecordMapper botMessageRecordMapper) {
+	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotCacheManager botRobotCacheManager, BotMessageRecordMapper botMessageRecordMapper) {
 		this.animeWordsService = animeWordsService;
 		this.openAiManager = openAiManager;
 		this.tencentCloudApiManager = tencentCloudApiManager;
 		this.moliManager = moliManager;
-		this.botRobotMapper = botRobotMapper;
+		this.botRobotCacheManager = botRobotCacheManager;
 		this.botMessageRecordMapper = botMessageRecordMapper;
 	}
 
@@ -123,7 +123,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(300);
-		List<Long> botList = botRobotMapper.getBotRobotByCondition(new BotRobotQuery().setStatus(0)).stream().map(BotRobot::getUserId).filter(Objects::nonNull).collect(Collectors.toList());
+		List<Long> botList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0)).stream().map(BotRobot::getUserId).filter(Objects::nonNull).collect(Collectors.toList());
 
 		List<Long> atList = messageAction.getAtList().stream().map(BotUserDTO::getId).collect(Collectors.toList());
 		atList.retainAll(botList);

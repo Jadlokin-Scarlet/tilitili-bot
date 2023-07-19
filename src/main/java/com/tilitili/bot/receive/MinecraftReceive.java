@@ -8,7 +8,7 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.message.TaskMessage;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.mapper.mysql.BotRobotMapper;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotSenderMapper;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -28,13 +28,13 @@ public class MinecraftReceive {
 	private final TaskMapper taskMapper;
 	private final BotService botService;
 	private final BotSenderMapper botSenderMapper;
-	private final BotRobotMapper botRobotMapper;
+	private final BotRobotCacheManager botRobotCacheManager;
 
 
-	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper, BotRobotMapper botRobotMapper) {
+	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper, BotRobotCacheManager botRobotCacheManager) {
 		this.botService = botService;
 		this.botSenderMapper = botSenderMapper;
-		this.botRobotMapper = botRobotMapper;
+		this.botRobotCacheManager = botRobotCacheManager;
 		gson = new Gson();
 		this.ip = environment.getProperty("ip");
 		this.jmsTemplate = jmsTemplate;
@@ -59,7 +59,7 @@ public class MinecraftReceive {
 			long senderId = Long.parseLong(senderIdStr);
 			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
 			Asserts.notNull(botSender, "权限不足");
-			BotRobot bot = botRobotMapper.getValidBotRobotById(botSender.getBot());
+			BotRobot bot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
 			Asserts.notNull(bot, "权限不足");
 			botService.syncHandleMessage(bot, requestStr);
 			taskMapper.updateStatusById(taskId, TaskStatus.SPIDER.getValue(), TaskStatus.SUCCESS.getValue());
