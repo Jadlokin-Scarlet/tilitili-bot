@@ -2,13 +2,17 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
+import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -24,10 +28,12 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final List<String> blackList4370 = Arrays.asList("https://gchat.qpic.cn/qmeetpic/49134681639135681/7091721-2888756874-C116108D71E375A0A37E168B6C97889A/0?term");
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final RedisCache redisCache;
+	private final BotSenderMapper botSenderMapper;
 
-	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper, RedisCache redisCache) {
+	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper, RedisCache redisCache, BotSenderMapper botSenderMapper) {
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.redisCache = redisCache;
+		this.botSenderMapper = botSenderMapper;
 	}
 
 	@Override
@@ -41,6 +47,9 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 		List<BotMessage> respMessageList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
+			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			Asserts.notNull(targetSender, "权限不足");
+
 			String sourceNameStr = StringUtils.isNotBlank(forwardConfig.getSourceName())? "["+forwardConfig.getSourceName()+"]": "";
 			String userName = messageAction.getBotUser().getName();
 
@@ -55,9 +64,9 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 					}
 				}).filter(Objects::nonNull).collect(Collectors.toList()));
 
-				// 文字传话特别提醒
+				// 往Minecraft的文字传话特别提醒
 				String key = "Minecraft-message-reply-"+senderId;
-				if (!redisCache.exists(key)) {
+				if (!redisCache.exists(key) && SendTypeEnum.MINECRAFT_MESSAGE_STR.equals(targetSender.getSendType())) {
 					respMessageList.add(BotMessage.simpleTextMessage("连接已建立。", messageAction.getBotMessage()));
 				}
 				redisCache.setValue(key, "yes", 5 * 60);
