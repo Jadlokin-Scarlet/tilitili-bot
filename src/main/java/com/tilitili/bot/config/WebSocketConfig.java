@@ -13,7 +13,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.TimeUtil;
@@ -87,8 +87,8 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     }
 
     @Bean
-    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper) {
-        return new MinecraftReceive(jmsTemplate, taskMapper, environment, botService, botSenderMapper, botRobotCacheManager);
+    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderCacheManager botSenderCacheManager) {
+        return new MinecraftReceive(jmsTemplate, taskMapper, environment, botService, botSenderCacheManager, botRobotCacheManager);
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class BotForwardService {
     private final BotForwardConfigMapper botForwardConfigMapper;
-    private final BotSenderMapper botSenderMapper;
+    private final BotSenderCacheManager botSenderCacheManager;
     private final BotRobotCacheManager botRobotCacheManager;
 
-    public BotForwardService(BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper, BotRobotCacheManager botRobotCacheManager) {
+    public BotForwardService(BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager) {
         this.botForwardConfigMapper = botForwardConfigMapper;
-        this.botSenderMapper = botSenderMapper;
+        this.botSenderCacheManager = botSenderCacheManager;
         this.botRobotCacheManager = botRobotCacheManager;
     }
 

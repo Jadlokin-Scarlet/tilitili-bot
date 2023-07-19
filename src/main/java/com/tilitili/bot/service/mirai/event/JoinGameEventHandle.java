@@ -12,7 +12,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.TimeUtil;
@@ -25,16 +25,16 @@ import java.util.List;
 @Slf4j
 @Component
 public class JoinGameEventHandle extends BaseEventHandleAdapt {
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final SendMessageManager sendMessageManager;
 	private final RedisCache redisCache;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
 	@Autowired
-	public JoinGameEventHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, SendMessageManager sendMessageManager, RedisCache redisCache) {
+	public JoinGameEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, SendMessageManager sendMessageManager, RedisCache redisCache) {
 		super(BotEvent.EVENT_TYPE_JOIN_GAME);
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 		this.sendMessageManager = sendMessageManager;
@@ -54,7 +54,7 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.ForwardTaskId), "无转发权限");
 			for (BotForwardConfig forwardConfig : forwardConfigList) {
 				Long targetSenderId = forwardConfig.getTargetSenderId();
-				BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+				BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 				Asserts.notNull(targetSender, "找不到渠道");
 				Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 

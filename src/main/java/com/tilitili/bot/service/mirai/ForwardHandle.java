@@ -11,7 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StreamUtil;
@@ -28,12 +28,12 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final List<String> blackList4370 = Arrays.asList("https://gchat.qpic.cn/qmeetpic/49134681639135681/7091721-2888756874-C116108D71E375A0A37E168B6C97889A/0?term");
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final RedisCache redisCache;
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 
-	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper, RedisCache redisCache, BotSenderMapper botSenderMapper) {
+	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper, RedisCache redisCache, BotSenderCacheManager botSenderCacheManager) {
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.redisCache = redisCache;
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 		List<BotMessage> respMessageList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 			Asserts.notNull(targetSender, "权限不足");
 
 			String sourceNameStr = StringUtils.isNotBlank(forwardConfig.getSourceName())? "["+forwardConfig.getSourceName()+"]": "";

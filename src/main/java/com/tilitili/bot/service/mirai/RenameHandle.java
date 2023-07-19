@@ -10,7 +10,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,9 +34,9 @@ public class RenameHandle extends ExceptionRespMessageHandle {
     private final ScheduledExecutorService scheduled =  Executors.newSingleThreadScheduledExecutor();
 
     @Autowired
-    public RenameHandle(BotManager botManager, BotSenderMapper botSenderMapper) {
+    public RenameHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager) {
         this.botManager = botManager;
-        this.listenGroup = botSenderMapper.getValidBotSenderById(3445L);
+        this.listenGroup = botSenderCacheManager.getValidBotSenderById(3445L);
     }
 
 	@Override

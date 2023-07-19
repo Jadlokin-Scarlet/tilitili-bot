@@ -9,7 +9,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.view.message.TaskMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotRobotCacheManager;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.rank.TaskMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +27,13 @@ public class MinecraftReceive {
 	private final JmsTemplate jmsTemplate;
 	private final TaskMapper taskMapper;
 	private final BotService botService;
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotRobotCacheManager botRobotCacheManager;
 
 
-	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderMapper botSenderMapper, BotRobotCacheManager botRobotCacheManager) {
+	public MinecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager) {
 		this.botService = botService;
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
 		gson = new Gson();
 		this.ip = environment.getProperty("ip");
@@ -57,7 +57,7 @@ public class MinecraftReceive {
 			Asserts.isNumber(senderIdStr, "参数异常");
 			log.info("Message Received {}",requestStr);
 			long senderId = Long.parseLong(senderIdStr);
-			BotSender botSender = botSenderMapper.getValidBotSenderById(senderId);
+			BotSender botSender = botSenderCacheManager.getValidBotSenderById(senderId);
 			Asserts.notNull(botSender, "权限不足");
 			BotRobot bot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
 			Asserts.notNull(bot, "权限不足");

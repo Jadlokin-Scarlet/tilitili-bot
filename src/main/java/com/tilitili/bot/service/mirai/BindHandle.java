@@ -15,7 +15,7 @@ import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -29,16 +29,16 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 	private final RedisCache redisCache;
 	private final BotUserManager botUserManager;
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotCattleMapper botCattleMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
-	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderMapper botSenderMapper, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botCattleMapper = botCattleMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
@@ -101,7 +101,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender targetSender = null;
 		for (BotUserSenderMapping mapping : mappingList) {
 			Long senderId = mapping.getSenderId();
-			BotSender theTargetSender = botSenderMapper.getValidBotSenderById(senderId);
+			BotSender theTargetSender = botSenderCacheManager.getValidBotSenderById(senderId);
 			boolean hasBind = botSenderTaskMappingManager.checkSenderHasTask(senderId, BotTaskConstant.bindTaskId);
 			if (hasBind) {
 				targetSender = theTargetSender;

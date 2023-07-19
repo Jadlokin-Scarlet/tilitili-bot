@@ -19,7 +19,11 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotPlaceManager;
-import com.tilitili.common.mapper.mysql.*;
+import com.tilitili.common.manager.BotSenderCacheManager;
+import com.tilitili.common.mapper.mysql.BotFunctionMapper;
+import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
+import com.tilitili.common.mapper.mysql.FishConfigMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -39,7 +43,7 @@ import java.util.stream.Collectors;
 @Component
 public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotManager botManager;
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotFunctionMapper botFunctionMapper;
 	private final BotFunctionTalkMapper botFunctionTalkMapper;
 	private final FunctionTalkService functionTalkService;
@@ -48,9 +52,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotPlaceManager botPlaceManager;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderMapper botSenderMapper, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
 		this.botManager = botManager;
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botFunctionMapper = botFunctionMapper;
 		this.botFunctionTalkMapper = BotFunctionTalkMapper;
 		this.functionTalkService = functionTalkService;
@@ -108,27 +112,27 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		List<BotSender> botSenderList = new ArrayList<>();
 		if (StringUtils.isNotBlank(friendList)) {
 			botSenderList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
-					.map(botSenderMapper::getBotSenderByQq)
+					.map(botSenderCacheManager::getBotSenderByQq)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(groupList)) {
 			botSenderList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
-					.map(botSenderMapper::getBotSenderByGroup)
+					.map(botSenderCacheManager::getBotSenderByGroup)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(guildList)) {
 			botSenderList.addAll(Arrays.stream(guildList.split(",")).map(Long::valueOf)
-					.flatMap(guildId -> botSenderMapper.getBotSenderByCondition(new BotSenderQuery().setGuildId(guildId).setStatus(0)).stream())
+					.flatMap(guildId -> botSenderCacheManager.getBotSenderByCondition(new BotSenderQuery().setGuildId(guildId).setStatus(0)).stream())
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(channelList)) {
 			botSenderList.addAll(Arrays.stream(channelList.split(",")).map(Long::valueOf)
-					.map(botSenderMapper::getBotSenderByChannelId)
+					.map(botSenderCacheManager::getBotSenderByChannelId)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(senderList)) {
 			botSenderList.addAll(Arrays.stream(senderList.split(",")).map(Long::valueOf)
-					.map(botSenderMapper::getValidBotSenderById)
+					.map(botSenderCacheManager::getValidBotSenderById)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();

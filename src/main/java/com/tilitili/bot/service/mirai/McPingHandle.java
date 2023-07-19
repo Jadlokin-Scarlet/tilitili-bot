@@ -17,7 +17,7 @@ import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.McPingManager;
 import com.tilitili.common.manager.MinecraftManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,16 +36,16 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private final McPingManager mcPingManager;
 	private final MinecraftManager minecraftManager;
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotRobotCacheManager botRobotCacheManager;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderMapper botSenderMapper, BotRobotCacheManager botRobotCacheManager) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager) {
 		this.mcPingManager = mcPingManager;
 		this.minecraftManager = minecraftManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
 	}
 
@@ -66,7 +66,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetBotSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 			BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
 			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot);

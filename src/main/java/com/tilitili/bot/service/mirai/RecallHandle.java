@@ -11,7 +11,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,14 +24,14 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 
     private final BotManager botManager;
     private final BotRobotCacheManager botRobotCacheManager;
-    private final BotSenderMapper botSenderMapper;
+    private final BotSenderCacheManager botSenderCacheManager;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
     @Autowired
-    public RecallHandle(BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSenderMapper botSenderMapper, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+    public RecallHandle(BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSenderCacheManager botSenderCacheManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
         this.botManager = botManager;
         this.botRobotCacheManager = botRobotCacheManager;
-        this.botSenderMapper = botSenderMapper;
+        this.botSenderCacheManager = botSenderCacheManager;
         this.botSendMessageRecordMapper = botSendMessageRecordMapper;
     }
 
@@ -52,7 +52,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         } else if (recallAll) {
             List<BotSendMessageRecord> sendMessageList = botSendMessageRecordMapper.getNewBotsendMessageList();
             for (BotSendMessageRecord sendMessage : sendMessageList) {
-                BotSender otherBotSender = botSenderMapper.getBotSenderById(sendMessage.getSenderId());
+                BotSender otherBotSender = botSenderCacheManager.getBotSenderById(sendMessage.getSenderId());
                 BotRobot otherBot = botRobotCacheManager.getValidBotRobotById(otherBotSender.getSendBot());
                 Asserts.notNull(otherBot, "啊嘞，不对劲");
                 botManager.recallMessage(otherBot, otherBotSender, sendMessage.getMessageId());
@@ -75,7 +75,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 //                    String messageId = pixivImage.getMessageId();
 //                    if (messageId != null) {
 //                        BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageId);
-//                        BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+//                        BotSender botSender = botSenderCacheManager.getBotSenderById(botSendMessageRecord.getSenderId());
 //                        botManager.recallMessage(messageId, botSender.getBot());
 //                        return BotMessage.simpleTextMessage("搞定");
 //                    }
@@ -86,7 +86,7 @@ public class RecallHandle extends ExceptionRespMessageHandle {
 //            String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
 //            if (! isBlank(messageIdStr)) {
 //                BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
-//                BotSender botSender = botSenderMapper.getBotSenderById(botSendMessageRecord.getSenderId());
+//                BotSender botSender = botSenderCacheManager.getBotSenderById(botSendMessageRecord.getSenderId());
 //                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getBot());
 //                return BotMessage.simpleTextMessage("搞定");
 //            }

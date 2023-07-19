@@ -9,6 +9,7 @@ import com.tilitili.common.entity.dto.SubscriptionDynamicDTO;
 import com.tilitili.common.entity.query.SubscriptionQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.DynamicManager;
 import com.tilitili.common.mapper.mysql.SubscriptionDynamicMapper;
 import com.tilitili.common.mapper.mysql.SubscriptionMapper;
@@ -34,12 +35,14 @@ public class DynamicController extends BaseController {
     private final SubscriptionUserMapper subscriptionUserMapper;
     private final DynamicManager dynamicManager;
     private final SubscriptionMapper subscriptionMapper;
+    private final BilibiliManager bilibiliManager;
 
-    public DynamicController(SubscriptionDynamicMapper subscriptionDynamicMapper, SubscriptionUserMapper subscriptionUserMapper, DynamicManager dynamicManager, SubscriptionMapper subscriptionMapper) {
+    public DynamicController(SubscriptionDynamicMapper subscriptionDynamicMapper, SubscriptionUserMapper subscriptionUserMapper, DynamicManager dynamicManager, SubscriptionMapper subscriptionMapper, BilibiliManager bilibiliManager) {
         this.subscriptionDynamicMapper = subscriptionDynamicMapper;
         this.subscriptionUserMapper = subscriptionUserMapper;
         this.dynamicManager = dynamicManager;
         this.subscriptionMapper = subscriptionMapper;
+        this.bilibiliManager = bilibiliManager;
     }
 
     @ResponseBody
@@ -84,7 +87,7 @@ public class DynamicController extends BaseController {
         if (SubscriptionConstant.TYPE_BILIBILI_LIVE_ROOM == type) {
             List<Subscription> subscriptionList = subscriptionMapper.getSubscriptionByCondition(new SubscriptionQuery().setType(type).setValue(externalId).setStatus(0));
             Asserts.checkEquals(subscriptionList.size(), 1, "找不到关注");
-            return "https://live.bilibili.com/" + subscriptionList.get(0).getRoomId();
+            return bilibiliManager.getRoomUrlByRoomId(subscriptionList.get(0).getRoomId());
         }
 
         SubscriptionDynamic dynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, externalId);

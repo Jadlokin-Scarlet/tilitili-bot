@@ -54,7 +54,7 @@ class StartApplicationTest {
     @Autowired
     private BotTaskMapper botTaskMapper;
     @Autowired
-    private BotSenderMapper botSenderMapper;
+    private BotSenderCacheManager botSenderCacheManager;
     @Autowired
     private BotSenderTaskMappingMapper botSenderTaskMappingMapper;
     @Autowired
@@ -118,7 +118,7 @@ class StartApplicationTest {
 
     @Test
     void main() throws UnsupportedEncodingException {
-//        BotSender botSender = botSenderMapper.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
+//        BotSender botSender = botSenderCacheManager.getBotSenderById(BotSenderConstant.TEST_SENDER_ID);
 //        BotUser botUser = botUserMapper.getBotUserById(BotUserConstant.MASTER_USER_ID);
 //        BotMessageAction messageAction = new BotMessageAction(BotMessage.emptyMessage().setSender(botSender), null, botSender, botUser, BotEnum.CIRNO_QQ);
 //        BotMessage botMessage = pixivCacheService.handlePixiv(messageAction, "pixiv", "碧蓝档案", null, "safe", null);
@@ -228,14 +228,14 @@ class StartApplicationTest {
 
     @Test
     void test() {
-//        botSenderMapper.deleteAllBotSender();
+//        botSenderCacheManager.deleteAllBotSender();
 //        botSenderTaskMappingMapper.deleteAllMapping();
 //        // friend message
 //        List<MiraiFriend> friendList = miraiManager.getFriendList();
 //        List<Long> qqList = friendList.stream().map(MiraiFriend::getId).collect(Collectors.toList());
 //        for (MiraiFriend friend : friendList) {
 //            BotSender friendSender = new BotSender().setSendType(SendTypeEnum.FRIEND_MESSAGE_STR).setQq(friend.getId()).setName(friend.getNickname());
-//            botSenderMapper.addBotSenderSelective(friendSender);
+//            botSenderCacheManager.addBotSenderSelective(friendSender);
 //            List<Integer> list = new ArrayList<>();
 //            if (Arrays.asList(66600000L, 1701008067L).contains(friendSender.getQq())) continue;
 //
@@ -250,7 +250,7 @@ class StartApplicationTest {
 //        List<MiraiGroup> groupList = miraiManager.getGroupList();
 //        for (MiraiGroup group : groupList) {
 //            BotSender groupSender = new BotSender().setSendType(SendTypeEnum.GROUP_MESSAGE_STR).setGroup(group.getId()).setName(group.getName());
-//            botSenderMapper.addBotSenderSelective(groupSender);
+//            botSenderCacheManager.addBotSenderSelective(groupSender);
 //            List<Integer> list = new ArrayList<>();
 //            if (groupSender.getGroup().equals(RANK_GROUP.value)) {
 //                list.addAll(Arrays.asList(1,2,3,4,6,7,8,9,10,11,14,15,16,17,20,21,22,23,24,25));
@@ -267,7 +267,7 @@ class StartApplicationTest {
 //                if (qqList.contains(temp.getId())) continue;
 //
 //                BotSender tempSender = new BotSender().setSendType(SendTypeEnum.TEMP_MESSAGE_STR).setGroup(group.getId()).setQq(temp.getId()).setName(temp.getMemberName());
-//                botSenderMapper.addBotSenderSelective(tempSender);
+//                botSenderCacheManager.addBotSenderSelective(tempSender);
 //
 //                List<Integer> list2 = new ArrayList<>(Arrays.asList(3,4,6,7,8,9,10,11,14,15,17,20,21,22,23,24,25));
 //                list2.stream().map(Long::valueOf).forEach(taskId -> botSenderTaskMappingMapper.addBotSenderTaskMappingSelective(new BotSenderTaskMapping().setSenderId(tempSender.getId()).setTaskId(taskId)));
@@ -279,7 +279,7 @@ class StartApplicationTest {
 //            List<GoCqhttpChannel> channelList = goCqhttpManager.getGuildChannelList(guild.getGuildId());
 //            for (GoCqhttpChannel channel : channelList) {
 //                BotSender guildSender = new BotSender().setSendType(SendTypeEnum.GUILD_MESSAGE_STR).setGuildId(guild.getGuildId()).setChannelId(channel.getChannelId()).setName(channel.getChannelName());
-//                botSenderMapper.addBotSenderSelective(guildSender);
+//                botSenderCacheManager.addBotSenderSelective(guildSender);
 //                List<Integer> list = new ArrayList<>();
 //                if (channel.getChannelId().equals(CAI_HONG_GUANZHU_CHANNEL.channelId)) {// 转播自助用
 //                    list.addAll(Arrays.asList(3,4,11));

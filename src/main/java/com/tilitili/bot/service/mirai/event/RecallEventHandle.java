@@ -11,7 +11,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
 import com.tilitili.common.mapper.mysql.BotSendMessageRecordMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +23,16 @@ import java.util.List;
 @Slf4j
 @Component
 public class RecallEventHandle extends BaseEventHandleAdapt {
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotMessageRecordMapper botMessageRecordMapper;
 	private final BotManager botManager;
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
 	@Autowired
-	public RecallEventHandle(BotSenderMapper botSenderMapper, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
+	public RecallEventHandle(BotSenderCacheManager botSenderCacheManager, BotMessageRecordMapper botMessageRecordMapper, BotManager botManager, BotRobotCacheManager botRobotCacheManager, BotSendMessageRecordMapper botSendMessageRecordMapper) {
 		super(BotEvent.EVENT_TYPE_RECALL);
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botMessageRecordMapper = botMessageRecordMapper;
 		this.botManager = botManager;
 		this.botRobotCacheManager = botRobotCacheManager;
@@ -53,7 +53,7 @@ public class RecallEventHandle extends BaseEventHandleAdapt {
 		for (String replyMessageId : replyMessageIdList) {
 			BotSendMessageRecord replyMessage = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(replyMessageId);
 			Asserts.notNull(replyMessage, "回复消息太久远啦");
-			BotSender replySender = botSenderMapper.getValidBotSenderById(replyMessage.getSenderId());
+			BotSender replySender = botSenderCacheManager.getValidBotSenderById(replyMessage.getSenderId());
 			Asserts.notNull(replySender, "没有权限");
 
 			BotRobot replyBot = botRobotCacheManager.getValidBotRobotById(replySender.getSendBot());

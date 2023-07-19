@@ -12,7 +12,7 @@ import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.mapper.mysql.BotSenderMapper;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,14 @@ import java.util.List;
 @Slf4j
 @Component
 public class SystemEventHandle extends BaseEventHandleAdapt {
-	private final BotSenderMapper botSenderMapper;
+	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
 	@Autowired
-	public SystemEventHandle(BotSenderMapper botSenderMapper, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public SystemEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
 		super(BotEvent.EVENT_TYPE_SYSTEM);
-		this.botSenderMapper = botSenderMapper;
+		this.botSenderCacheManager = botSenderCacheManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 	}
@@ -51,7 +51,7 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 		List<BotMessage> respList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
 			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetSender = botSenderMapper.getValidBotSenderById(targetSenderId);
+			BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 			Asserts.notNull(targetSender, "找不到渠道");
 
 			BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
