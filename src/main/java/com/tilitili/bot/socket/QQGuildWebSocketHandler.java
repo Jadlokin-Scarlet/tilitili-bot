@@ -43,7 +43,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             switch (response.getOp()) {
                 case 10: {
                     if (sessionId == null) {
-                        this.send("{\"op\":2,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"intents\":1073741827,\"shard\":[0,1]}}");
+                        this.send("{\"op\":2,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"intents\":"+bot.getIntents()+",\"shard\":[0,1]}}");
                     } else {
                         this.send("{\"op\":6,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
                     }
