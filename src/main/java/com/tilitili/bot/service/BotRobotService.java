@@ -149,6 +149,7 @@ public class BotRobotService {
         Asserts.isTrue(Pattern.matches("\\d+\\.\\w+", bot.getVerifyKey()), "ggGuild的秘钥由appId点secret构成");
         bot.setPushType("ws");
         bot.setHost("https://api.sgroup.qq.com/");
+        bot.setIntents(1073741827);
 
         BotRobot botInfo = botManager.getBotInfo(bot);
         Asserts.notNull(botInfo, "参数异常");
