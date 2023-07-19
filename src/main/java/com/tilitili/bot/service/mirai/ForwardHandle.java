@@ -9,6 +9,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
+import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,11 @@ import java.util.stream.Collectors;
 public class ForwardHandle extends BaseMessageHandleAdapt {
 	private final List<String> blackList4370 = Arrays.asList("https://gchat.qpic.cn/qmeetpic/49134681639135681/7091721-2888756874-C116108D71E375A0A37E168B6C97889A/0?term");
 	private final BotForwardConfigMapper botForwardConfigMapper;
+	private final RedisCache redisCache;
 
-	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper) {
+	public ForwardHandle(BotForwardConfigMapper botForwardConfigMapper, RedisCache redisCache) {
 		this.botForwardConfigMapper = botForwardConfigMapper;
+		this.redisCache = redisCache;
 	}
 
 	@Override
@@ -51,6 +54,13 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 						default: return chain;
 					}
 				}).filter(Objects::nonNull).collect(Collectors.toList()));
+
+				// 文字传话特别提醒
+				String key = "Minecraft-message-reply-"+senderId;
+				if (!redisCache.exists(key)) {
+					respMessageList.add(BotMessage.simpleTextMessage("连接已建立。", messageAction.getBotMessage()));
+				}
+				redisCache.setValue(key, "yes", 5 * 60);
 			} else if (forwardConfig.getMessageType() == 1) {
 				newMessageChainList = sourceMessageChainList.stream()
 						.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_IMAGE)).collect(Collectors.toList());
