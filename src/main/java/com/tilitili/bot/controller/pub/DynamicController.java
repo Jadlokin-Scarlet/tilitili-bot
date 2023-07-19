@@ -1,12 +1,17 @@
 package com.tilitili.bot.controller.pub;
 
 import com.tilitili.bot.controller.BaseController;
+import com.tilitili.common.constant.SubscriptionConstant;
+import com.tilitili.common.entity.Subscription;
 import com.tilitili.common.entity.SubscriptionDynamic;
 import com.tilitili.common.entity.SubscriptionUser;
 import com.tilitili.common.entity.dto.SubscriptionDynamicDTO;
+import com.tilitili.common.entity.query.SubscriptionQuery;
 import com.tilitili.common.entity.view.BaseModel;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.DynamicManager;
 import com.tilitili.common.mapper.mysql.SubscriptionDynamicMapper;
+import com.tilitili.common.mapper.mysql.SubscriptionMapper;
 import com.tilitili.common.mapper.mysql.SubscriptionUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.net.URI;
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/pub/dynamic")
@@ -27,11 +33,13 @@ public class DynamicController extends BaseController {
     private final SubscriptionDynamicMapper subscriptionDynamicMapper;
     private final SubscriptionUserMapper subscriptionUserMapper;
     private final DynamicManager dynamicManager;
+    private final SubscriptionMapper subscriptionMapper;
 
-    public DynamicController(SubscriptionDynamicMapper subscriptionDynamicMapper, SubscriptionUserMapper subscriptionUserMapper, DynamicManager dynamicManager) {
+    public DynamicController(SubscriptionDynamicMapper subscriptionDynamicMapper, SubscriptionUserMapper subscriptionUserMapper, DynamicManager dynamicManager, SubscriptionMapper subscriptionMapper) {
         this.subscriptionDynamicMapper = subscriptionDynamicMapper;
         this.subscriptionUserMapper = subscriptionUserMapper;
         this.dynamicManager = dynamicManager;
+        this.subscriptionMapper = subscriptionMapper;
     }
 
     @ResponseBody
@@ -68,18 +76,28 @@ public class DynamicController extends BaseController {
         Asserts.notNull(type, "参数有误");
         Asserts.notBlank(externalId, "参数有误");
         HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(this.getJumpUrl(externalId, type)));
+        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
+    }
+
+    private String getJumpUrl(String externalId, Integer type) {
+        if (SubscriptionConstant.TYPE_BILIBILI_LIVE_ROOM == type) {
+            List<Subscription> subscriptionList = subscriptionMapper.getSubscriptionByCondition(new SubscriptionQuery().setType(type).setValue(externalId).setStatus(0));
+            Asserts.checkEquals(subscriptionList.size(), 1, "找不到关注");
+            return "https://live.bilibili.com/" + subscriptionList.get(0).getRoomId();
+        }
 
         SubscriptionDynamic dynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, externalId);
         if (dynamic.getQuoteId() != null) {
             SubscriptionDynamic quoteDynamic = subscriptionDynamicMapper.getSubscriptionDynamicByTypeAndExternalId(type, dynamic.getQuoteId());
             if (StringUtils.isNotBlank(quoteDynamic.getShareUrl())) {
-                headers.setLocation(URI.create(quoteDynamic.getShareUrl()));
+                return quoteDynamic.getShareUrl();
             }
         }
         if (StringUtils.isNotBlank(dynamic.getShareUrl())) {
-            headers.setLocation(URI.create(dynamic.getShareUrl()));
+            return dynamic.getShareUrl();
         }
-        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
+        throw new AssertException("找不到关注");
     }
 
     private void uploadImage(SubscriptionDynamic dynamic) {
