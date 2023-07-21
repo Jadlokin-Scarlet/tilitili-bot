@@ -1,7 +1,6 @@
 package com.tilitili.bot.socket;
 
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -68,7 +67,6 @@ public class BaseWebSocketHandler extends WebSocketClient {
     }
 
     public void botConnect() {
-        Asserts.checkEquals(status, -1, "状态校验异常");
         if (super.getSocket() != null && super.getSocket().isClosed()) {
             super.reconnect();
         } else {
@@ -77,7 +75,6 @@ public class BaseWebSocketHandler extends WebSocketClient {
     }
 
     public void botClose() {
-        Asserts.checkEquals(status, 0, "状态校验异常");
         super.close();
     }
 }
