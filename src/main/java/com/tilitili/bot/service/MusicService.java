@@ -240,7 +240,8 @@ public class MusicService {
             }
         } else if (searchKey.contains("b23.tv")) {
             // https://b23.tv/NtQiyU8
-            String bvUrl = HttpClientUtil.resolveShortUrl(searchKey);
+            String shortUrl = StringUtils.patten("https://b23.tv/\\w+", searchKey);
+            String bvUrl = HttpClientUtil.resolveShortUrl(shortUrl);
             List<String> bvList = StringUtils.pattenAll("BV\\w{10}", bvUrl);
             Asserts.notEmpty(bvList, "啊嘞，不对劲");
 
