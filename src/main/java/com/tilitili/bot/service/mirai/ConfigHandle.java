@@ -24,6 +24,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
     public static final String autoSellFishKey = "自动卖鱼";
     public static final String autoSellRepeatFishKey = "回收重复";
     public static final String favoriteUserIdKey = "老婆QQ";
+    public static final String aiSystemKey = "ai语境";
     private final BotUserConfigManager botUserConfigManager;
 
     @Autowired
@@ -100,6 +101,16 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
                     botUserConfigManager.deleteUserConfig(userId, favoriteUserIdKey);
                     respList.add("已移除老婆QQ喵。");
                 }
+            }
+        } catch (AssertException e) {
+            respList.add(e.getMessage());
+        }
+
+        try {
+            String aiSystem = paramMap.get(aiSystemKey);
+            if (aiSystem != null) {
+                botUserConfigManager.addOrUpdateUserConfig(userId, aiSystemKey, aiSystem);
+                respList.add("设置ai语境成功喵。");
             }
         } catch (AssertException e) {
             respList.add(e.getMessage());
