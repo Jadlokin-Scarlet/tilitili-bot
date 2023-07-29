@@ -42,7 +42,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private final BotMessageRecordMapper botMessageRecordMapper;
 
 	private final static Random random = new Random(System.currentTimeMillis());
-	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai");
+	private final List<String> nameList = Arrays.asList("tx", "qy", "ml", "ai", "aig");
 	public static final String nameKey = "ChatHandle.nameKey";
 	private static final String networkKey = "ChatHandle.networkKey";
 
@@ -167,6 +167,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				reply = openAiManager.freeChat(botSender, messageAction.getBotMessage(), network, filterMessageRecordList);
 				break;
 			}
+			case "aiGlm": reply = openAiManager.chatGlm(text); break;
 		}
 
 		if (chainList != null) {
