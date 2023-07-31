@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/api/pub/cookie")
 public class LoginCookieReportController extends BaseController {
-	private final BotConfigManager botConfigManager;
 	private final BotAdminMapper botAdminMapper;
+	private final BotConfigManager botConfigManager;
 
 	public LoginCookieReportController(BotConfigManager botConfigManager, BotAdminMapper botAdminMapper) {
-		this.botConfigManager = botConfigManager;
 		this.botAdminMapper = botAdminMapper;
+		this.botConfigManager = botConfigManager;
 	}
 
 	@PostMapping("")
