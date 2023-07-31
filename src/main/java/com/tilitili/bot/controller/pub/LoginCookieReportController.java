@@ -32,8 +32,8 @@ public class LoginCookieReportController extends BaseController {
 		Asserts.notNull(request, "参数异常");
 		Asserts.notBlank(request.getKey(), "参数异常");
 		Asserts.notBlank(request.getCookie(), "参数异常");
-		Asserts.notBlank(request.getAdminCode(), "参数异常");
-		BotAdmin botAdmin = botAdminMapper.getBotAdminByCode(request.getAdminCode());
+		Asserts.notBlank(request.getCode(), "参数异常");
+		BotAdmin botAdmin = botAdminMapper.getBotAdminByCode(request.getCode());
 		botConfigManager.addOrUpdateConfig(botAdmin.getId(), request.getKey(), request.getCookie());
 		return BaseModel.success();
 	}
