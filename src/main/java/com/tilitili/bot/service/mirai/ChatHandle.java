@@ -167,7 +167,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				reply = openAiManager.freeChat(botSender, messageAction.getBotMessage(), network, filterMessageRecordList);
 				break;
 			}
-			case "aig": reply = openAiManager.chatGlm(text); break;
+			case "aig": reply = openAiManager.chatGlm(bot, text); break;
 		}
 
 		if (chainList != null) {
