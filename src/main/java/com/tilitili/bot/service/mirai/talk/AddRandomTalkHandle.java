@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.bot.entity.RandomTalkDTO;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotItemConstant;
@@ -46,18 +45,16 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotFunctionMapper botFunctionMapper;
 	private final BotFunctionTalkMapper botFunctionTalkMapper;
-	private final FunctionTalkService functionTalkService;
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotPlaceManager botPlaceManager;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FunctionTalkService functionTalkService, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
 		this.botManager = botManager;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botFunctionMapper = botFunctionMapper;
 		this.botFunctionTalkMapper = BotFunctionTalkMapper;
-		this.functionTalkService = functionTalkService;
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botPlaceManager = botPlaceManager;

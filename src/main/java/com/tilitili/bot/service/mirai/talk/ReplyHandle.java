@@ -2,18 +2,22 @@ package com.tilitili.bot.service.mirai.talk;
 
 import com.google.gson.Gson;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.FunctionConvertParam;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.FunctionTalkManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,18 +37,18 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
     private final BotFunctionTalkMapper botFunctionTalkMapper;
     private final Random random;
     private final Gson gson;
-    private final FunctionTalkService functionTalkService;
     private final BotFunctionMapper botFunctionMapper;
     private final BotUserManager botUserManager;
     private final RedisCache redisCache;
+    private final FunctionTalkManager functionTalkManager;
 
     @Autowired
-    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, FunctionTalkService functionTalkService, BotFunctionMapper botFunctionMapper, BotUserManager botUserManager, RedisCache redisCache) throws IOException {
+    public ReplyHandle(BotTalkManager botTalkManager, BotFunctionTalkMapper botFunctionTalkMapper, BotFunctionMapper botFunctionMapper, BotUserManager botUserManager, RedisCache redisCache, FunctionTalkManager functionTalkManager) throws IOException {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
-        this.functionTalkService = functionTalkService;
         this.botFunctionMapper = botFunctionMapper;
         this.botUserManager = botUserManager;
         this.redisCache = redisCache;
+        this.functionTalkManager = functionTalkManager;
         this.gson = new Gson();
         this.botTalkManager = botTalkManager;
         this.random = new Random(System.currentTimeMillis());
@@ -68,7 +72,8 @@ public class ReplyHandle extends ExceptionRespMessageHandle {
                     return BotMessage.simpleTextMessage(String.format("啊嘞，积分不够了。(%s)", botFunction.getScore()));
                 }
             }
-            List<BotMessageChain> respList = functionTalkService.convertFunctionRespToChain(bot, botSender, botUser, functionTalk.getResp());
+            FunctionConvertParam convertParam = new FunctionConvertParam().setBot(bot).setBotSender(botSender).setBotUser(botUser);
+            List<BotMessageChain> respList = functionTalkManager.convertFunctionRespToChain(functionTalk.getResp(), convertParam);
             String redisKey = timeNumKey + "-" + botFunction.getFunction() + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
             Long theTimeNum = redisCache.increment(redisKey, 1L);
             redisCache.expire(redisKey, 60 * 60 * 24);

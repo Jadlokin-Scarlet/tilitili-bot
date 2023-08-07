@@ -1,15 +1,16 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.FunctionConvertParam;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.FunctionTalkManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,12 @@ import java.util.List;
 @Component
 public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserManager botUserManager;
-	private final FunctionTalkService functionTalkService;
+	private final FunctionTalkManager functionTalkManager;
 
 	@Autowired
-	public ForwardMarkHandle(BotUserManager botUserManager, FunctionTalkService functionTalkService) {
+	public ForwardMarkHandle(BotUserManager botUserManager, FunctionTalkManager functionTalkManager) {
 		this.botUserManager = botUserManager;
-		this.functionTalkService = functionTalkService;
+		this.functionTalkManager = functionTalkManager;
 	}
 
 	@Override
@@ -49,7 +50,7 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
 			long qq = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
-			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(bot, botSender, text);
+			List<BotMessageChain> botMessageChains = functionTalkManager.convertFunctionRespToChain(text, new FunctionConvertParam().setBot(bot).setBotSender(botSender));
 
 			// 此功能只能QQ用
 			BotUserDTO botUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, 0);

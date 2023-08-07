@@ -1,6 +1,5 @@
 package com.tilitili.bot.socket;
 
-import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
@@ -10,10 +9,11 @@ import java.net.URI;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class BaseWebSocketHandler extends WebSocketClient {
-    protected Integer status = -1;
+    protected final AtomicInteger status = new AtomicInteger(-1);
     protected final ScheduledExecutorService executorService;
 
     public BaseWebSocketHandler(URI serverUri) {
@@ -23,7 +23,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        status = 0;
+        status.set(0);
         log.info("连接websocket成功，url={}", getURI().toString());
     }
 
@@ -31,7 +31,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
     public void onMessage(String message) {
         try {
             handleTextMessage(StringUtils.removeCfCode(message));
-        } catch (AssertException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -45,7 +45,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
                 this.reconnect();
             }, 60, TimeUnit.SECONDS);
         } else {
-            status = -1;
+            status.set(-1);
         }
     }
 
@@ -60,21 +60,5 @@ public class BaseWebSocketHandler extends WebSocketClient {
     }
 
     protected void handleTextMessage(String message) {
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void botConnect() {
-        if (super.getSocket() != null && super.getSocket().isClosed()) {
-            super.reconnect();
-        } else {
-            super.connect();
-        }
-    }
-
-    public void botClose() {
-        super.close();
     }
 }

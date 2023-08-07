@@ -48,4 +48,20 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
 //        }
         super.onClose(code, reason, remote);
     }
+
+    public Integer getStatus() {
+        return status.get();
+    }
+
+    public void botConnect() {
+        if (super.getSocket() != null && super.getSocket().isClosed()) {
+            super.reconnect();
+        } else {
+            super.connect();
+        }
+    }
+
+    public void botClose() {
+        super.close();
+    }
 }

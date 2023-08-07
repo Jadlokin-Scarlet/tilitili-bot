@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.FunctionTalkService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
@@ -10,6 +9,7 @@ import com.tilitili.common.constant.FavoriteConstant;
 import com.tilitili.common.emnus.FavoriteEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.FunctionConvertParam;
 import com.tilitili.common.entity.query.BotFavoriteTalkQuery;
 import com.tilitili.common.entity.query.BotItemQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -18,6 +18,7 @@ import com.tilitili.common.entity.view.bot.BotMessageNode;
 import com.tilitili.common.manager.BotFavoriteManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.FunctionTalkManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
 public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final RedisCache redisCache;
 	private final BotItemMapper botItemMapper;
-	private final ForwardMarkHandle forwardMarkHandle;
 	private final BotFavoriteMapper botFavoriteMapper;
 	private final BotFavoriteManager botFavoriteManager;
 	private final BotFavoriteTalkMapper botFavoriteTalkMapper;
@@ -42,10 +42,10 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private final Random random;
 	private final BotUserManager botUserManager;
 	private final BotUserConfigMapper botUserConfigMapper;
-	private final FunctionTalkService functionTalkService;
+	private final FunctionTalkManager functionTalkManager;
 
 	@Autowired
-	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, ForwardMarkHandle forwardMarkHandle, BotUserManager botUserManager, BotUserConfigMapper botUserConfigMapper, FunctionTalkService functionTalkService) {
+	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, BotUserManager botUserManager, BotUserConfigMapper botUserConfigMapper, FunctionTalkManager functionTalkManager) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
 		this.botUserManager = botUserManager;
@@ -54,9 +54,8 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
-		this.forwardMarkHandle = forwardMarkHandle;
 		this.botUserConfigMapper = botUserConfigMapper;
-		this.functionTalkService = functionTalkService;
+		this.functionTalkManager = functionTalkManager;
 		this.random = new Random(System.currentTimeMillis());
 	}
 
@@ -311,7 +310,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
 			long userId = Long.parseLong(cellList.get(0));
 			String text = cellList.get(1);
-			List<BotMessageChain> botMessageChains = functionTalkService.convertCqToMessageChain(bot, botSender, text);
+			List<BotMessageChain> botMessageChains = functionTalkManager.convertFunctionRespToChain(text, new FunctionConvertParam().setBot(bot).setBotSender(botSender));
 
 			if (userId == 0) {
 				nodeList.add(new BotMessageNode().setSenderName("旁白").setMessageChain(botMessageChains));
