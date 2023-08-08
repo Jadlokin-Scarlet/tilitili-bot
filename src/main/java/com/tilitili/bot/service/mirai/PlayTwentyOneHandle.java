@@ -9,10 +9,9 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.SendMessageManager;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
@@ -30,17 +29,15 @@ import static com.tilitili.common.constant.BotUserConstant.*;
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	private final Map<Long, TwentyOneTable> tableMap = new HashMap<>();
 
-	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
-	private final BotManager botManager;
 	private final SendMessageManager sendMessageManager;
+	private final BotAdminManager botAdminManager;
 
 	@Autowired
-	public PlayTwentyOneHandle(BotUserMapper botUserMapper, BotUserManager botUserManager, BotManager botManager, SendMessageManager sendMessageManager) {
-		this.botUserMapper = botUserMapper;
+	public PlayTwentyOneHandle(BotUserManager botUserManager, SendMessageManager sendMessageManager, BotAdminManager botAdminManager) {
 		this.botUserManager = botUserManager;
-		this.botManager = botManager;
 		this.sendMessageManager = sendMessageManager;
+		this.botAdminManager = botAdminManager;
 	}
 
 	@Override
@@ -69,7 +66,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 			case "分家": case "fj": return this.splitCard(messageAction, twentyOneTable);
 			case "投降": case "tx": return this.surrender(messageAction, twentyOneTable);
 			case "退出": return this.quitGame(messageAction, botUser);
-			case "掀桌": return this.removeGame(botUser, twentyOneTable);
+			case "掀桌": return this.removeGame(messageAction, twentyOneTable);
 			case "桌面": return this.showTable(messageAction, twentyOneTable);
 			default: return null;
 		}
@@ -125,10 +122,9 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleListMessage(resp);
 	}
 
-	private final List<Long> adminUserIdList = Arrays.asList(MASTER_USER_ID, MASTER_GUILD_USER_ID, WEIWEI_USER_ID);
-	private BotMessage removeGame(BotUserDTO botUser, TwentyOneTable twentyOneTable) {
-		boolean hasJurisdiction = adminUserIdList.contains(botUser.getId());
-		if (!hasJurisdiction) return null;
+	private BotMessage removeGame(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
+		boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+		if (!canUseBotAdminTask) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());
 		return BotMessage.simpleTextMessage("(╯‵□′)╯︵┻━┻");

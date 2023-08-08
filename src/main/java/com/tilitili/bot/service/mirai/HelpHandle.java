@@ -3,12 +3,12 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotTaskDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -24,11 +24,13 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     private final BotTaskMapper botTaskMapper;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
+    private final BotAdminManager botAdminManager;
 
-    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper) {
+    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotAdminManager botAdminManager) {
         this.botTaskMapper = botTaskMapper;
         this.messageHandleMap = messageHandleMap;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
+        this.botAdminManager = botAdminManager;
     }
 
     @Override
@@ -41,7 +43,8 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleClose(BotMessageAction messageAction) {
-        if (!BotUserConstant.MASTER_USER_ID.equals(messageAction.getBotUser().getId())) {
+        boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+        if (!canUseBotAdminTask) {
             return null;
         }
         Long senderId = messageAction.getBotSender().getId();
@@ -64,7 +67,8 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleOpen(BotMessageAction messageAction) {
-        if (!BotUserConstant.MASTER_USER_ID.equals(messageAction.getBotUser().getId())) {
+        boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+        if (!canUseBotAdminTask) {
             return null;
         }
         Long senderId = messageAction.getBotSender().getId();
