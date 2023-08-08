@@ -18,12 +18,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/config")
 public class BotConfigController {
-    private final BotConfigManager botConfigManager;
     private final BotConfigMapper botConfigMapper;
+    private final BotConfigManager botConfigManager;
 
     public BotConfigController(BotConfigManager botConfigManager, BotConfigMapper botConfigMapper) {
-        this.botConfigManager = botConfigManager;
         this.botConfigMapper = botConfigMapper;
+        this.botConfigManager = botConfigManager;
     }
 
     @GetMapping("/list")
