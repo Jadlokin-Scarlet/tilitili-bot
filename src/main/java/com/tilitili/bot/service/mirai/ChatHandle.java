@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 public class ChatHandle extends ExceptionRespMessageHandle {
 	private final AnimeWordsService animeWordsService;
 	private final OpenAiManager openAiManager;
-	private final TencentCloudApiManager tencentCloudApiManager;
 	private final MoliManager moliManager;
 	private final BotRobotCacheManager botRobotCacheManager;
+	private final TencentCloudApiManager tencentCloudApiManager;
 	private final BotMessageRecordMapper botMessageRecordMapper;
 
 	private final static Random random = new Random(System.currentTimeMillis());
@@ -50,9 +50,9 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	public ChatHandle(AnimeWordsService animeWordsService, OpenAiManager openAiManager, TencentCloudApiManager tencentCloudApiManager, MoliManager moliManager, BotRobotCacheManager botRobotCacheManager, BotMessageRecordMapper botMessageRecordMapper) {
 		this.animeWordsService = animeWordsService;
 		this.openAiManager = openAiManager;
-		this.tencentCloudApiManager = tencentCloudApiManager;
 		this.moliManager = moliManager;
 		this.botRobotCacheManager = botRobotCacheManager;
+		this.tencentCloudApiManager = tencentCloudApiManager;
 		this.botMessageRecordMapper = botMessageRecordMapper;
 	}
 
