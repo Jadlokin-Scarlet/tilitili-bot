@@ -111,6 +111,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		boolean network = "true".equals(session.getOrDefault(networkKey, "false"));
+		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 		String redisKey = nameKey + botSender.getId();
 		String source = session.getOrDefault(redisKey, "tx");
@@ -167,7 +168,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 				reply = openAiManager.freeChat(botSender, messageAction.getBotMessage(), network, filterMessageRecordList);
 				break;
 			}
-			case "aig": reply = openAiManager.chatGlm(bot, text); break;
+			case "aig": reply = openAiManager.chatGlm(bot, botUser, text); break;
 		}
 
 		if (chainList != null) {
