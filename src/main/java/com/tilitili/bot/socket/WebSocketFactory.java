@@ -94,7 +94,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
                 botWebSocketHandlerMap.remove(key);
             }
             BaseWebSocketHandler newBotWebSocketHandler = this.newWebSocketHandle(key, callback);
-            newBotWebSocketHandler.closeBlocking();
+            newBotWebSocketHandler.connectBlocking();
             botWebSocketHandlerMap.put(key, newBotWebSocketHandler);
         } catch (AssertException e) {
             log.warn("断言异常，message="+e.getMessage());
