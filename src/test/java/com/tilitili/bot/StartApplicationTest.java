@@ -8,12 +8,10 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
-import com.tilitili.bot.socket.QQGuildWebSocketHandler;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
-import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.FishConfig;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.exception.AssertException;
@@ -34,7 +32,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -78,13 +75,13 @@ class StartApplicationTest {
 
     @Test
     public void qqGuildWebsocketTest() throws URISyntaxException {
-        BotRobot bot = botRobotCacheManager.getValidBotRobotById(9L);
-        QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
-                new URI(botManager.getWebSocketUrl(bot)),
-                bot,
-                botService, sendMessageManager, botRobotCacheManager
-        );
-        qqGuildWebSocketHandler.connect();
+//        BotRobot bot = botRobotCacheManager.getValidBotRobotById(9L);
+//        QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
+//                new URI(botManager.getWebSocketUrl(bot)),
+//                bot,
+//                botService, sendMessageManager, botRobotCacheManager
+//        );
+//        qqGuildWebSocketHandler.connect();
 //        BotWebSocketHandler gocq = new BotWebSocketHandler(
 //                new URI(botManager.getWebSocketUrl(botRobotCacheManager.getValidBotRobotById(3L))),
 //                botRobotCacheManager.getValidBotRobotById(3L),

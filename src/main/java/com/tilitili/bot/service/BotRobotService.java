@@ -1,8 +1,8 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.config.WebSocketConfig;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.socket.BotWebSocketHandler;
+import com.tilitili.bot.socket.WebSocketFactory;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.constant.BotUserConstant;
@@ -14,13 +14,13 @@ import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,19 +32,21 @@ import java.util.regex.Pattern;
 @Service
 public class BotRobotService {
     private final BotRobotCacheManager botRobotCacheManager;
-    private final WebSocketConfig webSocketConfig;
     private final BotManager botManager;
     private final BotRobotIndexMapper botRobotIndexMapper;
     private final BotUserManager botUserManager;
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
+    private final WebSocketFactory webSocketFactory;
+    private final BotAdminManager botAdminManager;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, @Nullable WebSocketConfig webSocketConfig, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager) {
         this.botRobotCacheManager = botRobotCacheManager;
-        this.webSocketConfig = webSocketConfig;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
         this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
+        this.webSocketFactory = webSocketFactory;
+        this.botAdminManager = botAdminManager;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
@@ -58,10 +60,8 @@ public class BotRobotService {
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (Objects.equals(robot.getPushType(), "ws")) {
-                if (webSocketConfig != null) {
-                    BotWebSocketHandler handler = webSocketConfig.getBotWebSocketHandlerMap().get(robot.getId());
-                    robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
-                }
+                BotWebSocketHandler handler = webSocketFactory.getWebSocketOrNull(robot);
+                robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
             } else if (Objects.equals(robot.getPushType(), "hook")) {
                 robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
             }
@@ -70,33 +70,23 @@ public class BotRobotService {
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
     }
 
-    public void upBot(BotAdmin botAdmin, Long id) {
-        BotRobot bot = botRobotCacheManager.getBotRobotById(id);
-        Asserts.notNull(bot, "参数异常");
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-        if (adminMapping == null) {
-            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
-        }
+    public void upBot(BotAdmin botAdmin, Long botId) {
+        BotRobot bot = botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
-        int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(id).setStatus(0));
+        int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
-        if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
-            webSocketConfig.upBot(id);
+        if (Objects.equals(bot.getPushType(), "ws")) {
+            webSocketFactory.upBotBlocking(bot.getId());
         }
     }
 
-    public void downBot(BotAdmin botAdmin, Long id) {
-        BotRobot bot = botRobotCacheManager.getBotRobotById(id);
-        Asserts.notNull(bot, "参数异常");
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-        if (adminMapping == null) {
-            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
-        }
-        int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(id).setStatus(-1));
+    public void downBot(BotAdmin botAdmin, Long botId) {
+        BotRobot bot = botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+        int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
-        if (Objects.equals(bot.getPushType(), "ws") && webSocketConfig != null) {
-            webSocketConfig.downBot(id);
+        if (Objects.equals(bot.getPushType(), "ws")) {
+            webSocketFactory.downBotBlocking(bot);
         }
     }
 
@@ -201,15 +191,10 @@ public class BotRobotService {
         }
     }
 
-    public void deleteBot(BotAdmin botAdmin, Long id) {
-        BotRobot bot = botRobotCacheManager.getBotRobotById(id);
-        Asserts.notNull(bot, "参数异常");
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-        if (adminMapping == null) {
-            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
-        }
-        botRobotCacheManager.deleteBotRobotByPrimary(id);
-        List<BotRobotIndex> indexList = botRobotIndexMapper.getBotRobotIndexByCondition(new BotRobotIndexQuery().setBot(id));
+    public void deleteBot(BotAdmin botAdmin, Long botId) {
+        botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+        botRobotCacheManager.deleteBotRobotByPrimary(botId);
+        List<BotRobotIndex> indexList = botRobotIndexMapper.getBotRobotIndexByCondition(new BotRobotIndexQuery().setBot(botId));
         for (BotRobotIndex index : indexList) {
             botRobotIndexMapper.deleteBotRobotIndexByPrimary(index.getId());
         }
@@ -252,12 +237,6 @@ public class BotRobotService {
     }
 
     public BotRobot getBot(BotAdmin botAdmin, Long botId) {
-        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
-        Asserts.notNull(bot, "参数异常");
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-        if (adminMapping == null) {
-            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
-        }
-        return bot;
+        return botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
     }
 }

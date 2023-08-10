@@ -1,23 +1,20 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.socket.ShortUrlWebSocketHandler;
-import com.tilitili.common.utils.RedisCache;
+import com.tilitili.bot.socket.WebSocketFactory;
 import org.springframework.stereotype.Service;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Service
 public class ShortUrlService {
-    private final ShortUrlWebSocketHandler webSocketHandler;
+    private final WebSocketFactory webSocketFactory;
 
-    public ShortUrlService(RedisCache redisCache) throws URISyntaxException {
-        webSocketHandler = new ShortUrlWebSocketHandler(new URI("wss://sl.xiaomark.com/socket.io/?guest=nFFA8rxHbCmdi8TN&EIO=3&transport=websocket"), redisCache);
-        webSocketHandler.connect();
+    public ShortUrlService(WebSocketFactory webSocketFactory) {
+        this.webSocketFactory = webSocketFactory;
     }
 
     public String getShortUrl(String url) {
-        String shortUrl = webSocketHandler.getShortUrl(url);
+        ShortUrlWebSocketHandler shortUrlWebSocketHandler = webSocketFactory.getShortUrlWebSocketHandler();
+        String shortUrl = shortUrlWebSocketHandler.getShortUrl(url);
         if (shortUrl == null) {
             return url;
         } else {

@@ -54,11 +54,10 @@ public class BaseWebSocketHandler extends WebSocketClient {
         log.error("websocket异常", ex);
     }
 
-    @Override
-    public void connect() {
-        super.connect();
+    protected void handleTextMessage(String message) {
     }
 
-    protected void handleTextMessage(String message) {
+    public Integer getStatus() {
+        return status.get();
     }
 }

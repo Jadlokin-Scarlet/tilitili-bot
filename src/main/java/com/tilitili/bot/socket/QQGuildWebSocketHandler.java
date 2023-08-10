@@ -1,11 +1,7 @@
 package com.tilitili.bot.socket;
 
-import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.qqGuild.QQGuildWsResponse;
-import com.tilitili.common.manager.BotRobotCacheManager;
-import com.tilitili.common.manager.SendMessageManager;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +14,13 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     private int s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, SendMessageManager sendMessageManager, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, bot, botService, sendMessageManager, botRobotCacheManager);
+    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory) {
+        super(serverUri, bot, webSocketFactory);
     }
 
     @Override
-    public void handleTextMessage(String message) {
+    protected void handleBotMessage(BotRobot bot, String message) {
         try {
-            BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
-            Asserts.notNull(bot, "bot权限不足");
             if ("{\"op\":9,\"d\":false}".equals(message)) {
                 log.warn("{\"op\":9,\"d\":false}");
                 return;
@@ -38,7 +32,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             }
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
             if (response.getOp() != 11) {
-                log.info(bot.getName() + " Message Received message={}", message);
+                log.info("Message Received bot={} message={}", bot.getName(), message);
             }
             switch (response.getOp()) {
                 case 10: {
@@ -56,7 +50,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                     if (response.getD().getSessionId() != null) {
                         this.sessionId = response.getD().getSessionId();
                     }
-                    botService.syncHandleMessage(bot, message);
+                    webSocketFactory.syncHandleMessage(bot, message);
                     break;
                 }
                 case 7: {
