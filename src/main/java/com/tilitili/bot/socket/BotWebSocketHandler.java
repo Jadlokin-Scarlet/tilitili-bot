@@ -22,13 +22,13 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
     @Override
     protected void handleTextMessage(String message) {
         BotRobot bot = webSocketFactory.getValidBotRobotById(botId);
-        if (!message.contains("heartbeat")) {
-            log.info("Message Received bot={} message={}", bot.getName(), message);
-        }
         this.handleBotMessage(bot, message);
     }
 
     protected void handleBotMessage(BotRobot bot, String message) {
+        if (!message.contains("heartbeat")) {
+            log.info("Message Received bot={} message={}", bot.getName(), message);
+        }
         callback.accept(bot, message);
     }
 

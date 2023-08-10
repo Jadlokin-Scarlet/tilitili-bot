@@ -24,7 +24,9 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
 
     @Override
     protected void handleBotMessage(BotRobot bot, String message) {
-        log.info("Message Received bot={} message={}", bot.getName(), message);
+        if (!"{\"s\":3}".equals(message)) {
+            log.info("Message Received bot={} message={}", bot.getName(), message);
+        }
         KookData<KookSessionId> kookData = Gsons.fromJson(message, new TypeToken<KookData<KookSessionId>>(){}.getType());
         switch (kookData.getS()) {
             case 0: {
