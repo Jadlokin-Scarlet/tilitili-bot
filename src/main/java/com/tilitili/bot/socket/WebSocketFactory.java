@@ -1,6 +1,5 @@
 package com.tilitili.bot.socket;
 
-import com.tilitili.bot.service.BotService;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.exception.AssertException;
@@ -18,6 +17,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 @Slf4j
 @Component
@@ -25,14 +25,12 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     private final Map<Long, BaseWebSocketHandler> botWebSocketHandlerMap;
     private final Long shortUrlWebSocketKey = -1L;
     private final ConcurrentHashMap<Long, Boolean> botIdLockMap = new ConcurrentHashMap<>();
-    private final BotService botService;
     private final BotManager botManager;
     private final BotRobotCacheManager botRobotCacheManager;
     private final RedisCache redisCache;
 
 
-    public WebSocketFactory(BotService botService, BotManager botManager, BotRobotCacheManager botRobotCacheManager, RedisCache redisCache) {
-        this.botService = botService;
+    public WebSocketFactory(BotManager botManager, BotRobotCacheManager botRobotCacheManager, RedisCache redisCache) {
         this.botManager = botManager;
         this.botRobotCacheManager = botRobotCacheManager;
         this.redisCache = redisCache;
@@ -44,20 +42,14 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     }
 
     public ShortUrlWebSocketHandler getShortUrlWebSocketHandler() {
-        return (ShortUrlWebSocketHandler) this.getWebSocketByKey(shortUrlWebSocketKey);
-    }
-
-    private BaseWebSocketHandler getWebSocketByKey(Long key) {
-        Asserts.notNull(key, "参数异常");
-        BaseWebSocketHandler webSocketHandler = botWebSocketHandlerMap.get(key);
+        BaseWebSocketHandler webSocketHandler = botWebSocketHandlerMap.get(shortUrlWebSocketKey);
         if (webSocketHandler == null || webSocketHandler.getStatus() != 0) {
-            this.upBotBlocking(key);
+            this.upBotBlocking(shortUrlWebSocketKey, null);
         }
-        return botWebSocketHandlerMap.get(key);
-
+        return (ShortUrlWebSocketHandler) botWebSocketHandlerMap.get(shortUrlWebSocketKey);
     }
 
-    private BaseWebSocketHandler newWebSocketHandle(Long key) {
+    private BaseWebSocketHandler newWebSocketHandle(Long key, BiConsumer<BotRobot, String> callback) {
         try {
             if (this.shortUrlWebSocketKey.equals(key)) {
                 return new ShortUrlWebSocketHandler(redisCache);
@@ -68,9 +60,9 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
             Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
             switch (bot.getType()) {
                 case BotRobotConstant.TYPE_MIRAI:
-                case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, this);
-                case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, this);
-                case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketHandler(new URI(wsUrl), bot, this);
+                case BotRobotConstant.TYPE_GOCQ: return new BotWebSocketHandler(new URI(wsUrl), bot, this, callback);
+                case BotRobotConstant.TYPE_KOOK: return new KookWebSocketHandler(new URI(wsUrl), bot, this, callback);
+                case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketHandler(new URI(wsUrl), bot, this, callback);
                 default: throw new AssertException("?");
             }
         } catch (URISyntaxException e) {
@@ -79,21 +71,21 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
         }
     }
 
-    public void syncHandleMessage(BotRobot bot, String message) {
-        botService.syncHandleMessage(bot, message);
-    }
-
     public BotRobot getValidBotRobotById(Long botId) {
         BotRobot botRobot = botRobotCacheManager.getValidBotRobotById(botId);
         Asserts.notNull(botRobot, "权限不足");
         return botRobot;
     }
 
-    public void upBotBlocking(Long key) {
+    public void upBotBlocking(Long key, BiConsumer<BotRobot, String> callback) {
         Asserts.notNull(key, "参数异常");
         try {
-            Asserts.checkNull(botIdLockMap.putIfAbsent(key, true), "链接超时，请重试");
             BaseWebSocketHandler webSocketHandler = botWebSocketHandlerMap.get(key);
+            if (webSocketHandler != null && webSocketHandler.getStatus() == 0) {
+                return;
+            }
+            Asserts.checkNull(botIdLockMap.putIfAbsent(key, true), "链接超时，请重试");
+            webSocketHandler = botWebSocketHandlerMap.get(key);
             if (webSocketHandler != null && webSocketHandler.getStatus() == 0) {
                 return;
             }
@@ -101,7 +93,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
                 webSocketHandler.closeBlocking();
                 botWebSocketHandlerMap.remove(key);
             }
-            BaseWebSocketHandler newBotWebSocketHandler = this.newWebSocketHandle(key);
+            BaseWebSocketHandler newBotWebSocketHandler = this.newWebSocketHandle(key, callback);
             newBotWebSocketHandler.closeBlocking();
             botWebSocketHandlerMap.put(key, newBotWebSocketHandler);
         } catch (AssertException e) {

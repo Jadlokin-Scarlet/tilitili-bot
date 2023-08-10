@@ -10,14 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 @Slf4j
 public class KookWebSocketHandler extends BotWebSocketHandler {
     private int sn = 0;
     private String sessionId;
 
-    public KookWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory) {
-        super(serverUri, bot, webSocketFactory);
+    public KookWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback) {
+        super(serverUri, bot, webSocketFactory, callback);
         this.setReuseAddr(true);
     }
 
@@ -28,7 +29,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
         switch (kookData.getS()) {
             case 0: {
                 this.sn = kookData.getSn() == null ? 0 : kookData.getSn();
-                webSocketFactory.syncHandleMessage(bot, message);
+                callback.accept(bot, message);
                 break;
             }
             case 1: if (kookData.getD() != null && kookData.getD().getSessionId() != null) this.sessionId = kookData.getD().getSessionId();

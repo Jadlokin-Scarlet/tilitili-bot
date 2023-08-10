@@ -8,14 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 @Slf4j
 public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     private int s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory) {
-        super(serverUri, bot, webSocketFactory);
+    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback) {
+        super(serverUri, bot, webSocketFactory, callback);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                     if (response.getD().getSessionId() != null) {
                         this.sessionId = response.getD().getSessionId();
                     }
-                    webSocketFactory.syncHandleMessage(bot, message);
+                    callback.accept(bot, message);
                     break;
                 }
                 case 7: {

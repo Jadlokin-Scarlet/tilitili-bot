@@ -4,16 +4,19 @@ import com.tilitili.common.entity.BotRobot;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.util.function.BiConsumer;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
     protected final Long botId;
     protected final WebSocketFactory webSocketFactory;
+    protected final BiConsumer<BotRobot, String> callback;
 
-    public BotWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory) {
+    public BotWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback) {
         super(serverUri);
         this.botId = bot.getId();
         this.webSocketFactory = webSocketFactory;
+        this.callback = callback;
     }
 
     @Override
@@ -26,7 +29,7 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
     }
 
     protected void handleBotMessage(BotRobot bot, String message) {
-        webSocketFactory.syncHandleMessage(bot, message);
+        callback.accept(bot, message);
     }
 
     @Override

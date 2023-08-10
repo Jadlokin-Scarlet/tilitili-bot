@@ -38,8 +38,9 @@ public class BotRobotService {
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final WebSocketFactory webSocketFactory;
     private final BotAdminManager botAdminManager;
+    private final BotService botService;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager, BotService botService) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
@@ -47,6 +48,7 @@ public class BotRobotService {
         this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
         this.webSocketFactory = webSocketFactory;
         this.botAdminManager = botAdminManager;
+        this.botService = botService;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
@@ -77,7 +79,7 @@ public class BotRobotService {
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
         if (Objects.equals(bot.getPushType(), "ws")) {
-            webSocketFactory.upBotBlocking(bot.getId());
+            webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
         }
     }
 
