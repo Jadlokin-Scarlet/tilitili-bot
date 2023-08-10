@@ -155,7 +155,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return null;
         }
         if (success) {
-            return BotMessage.simpleTextMessage("重启喵。");
+            return BotMessage.simpleTextMessage("已停止。");
         } else {
             throw new AssertException();
         }
