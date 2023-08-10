@@ -36,6 +36,7 @@ public class WebSocketConfig {
     public void webSocketConnectionManager() {
         List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
 //        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getValidBotRobotById(5L));
+//        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
         }
