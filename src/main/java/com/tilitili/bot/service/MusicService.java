@@ -6,6 +6,7 @@ import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.BaseModel;
@@ -38,6 +39,9 @@ public class MusicService {
         this.musicCloudManager = musicCloudManager;
     }
 
+    private String post(String api, String data) {
+        return HttpClientUtil.httpPost(new HttpRequestDTO().setHttpClient(HttpClientUtil.longHttpClient).setUrl("https://oss.tilitili.club/api/ktv/" + api).setJson(data)).getContent();
+    }
 
     public BotMessage pushPlayListToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
@@ -50,7 +54,7 @@ public class MusicService {
         Asserts.notNull(token, "啊嘞，不对劲");
 
         String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", req);
+        String result = this.post("add", req);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -72,7 +76,7 @@ public class MusicService {
         Asserts.notNull(token, "啊嘞，不对劲");
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/add", data);
+        String result = this.post("add", data);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -93,7 +97,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/last", data);
+        String result = this.post("last", data);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -108,7 +112,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/stop", data);
+        String result = this.post("stop", data);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -123,7 +127,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/start", data);
+        String result = this.post("start", data);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -138,7 +142,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/list", data);
+        String result = this.post("list", data);
         BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -153,7 +157,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/loop", data);
+        String result = this.post("loop", data);
         BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
@@ -168,7 +172,7 @@ public class MusicService {
         }
 
         String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = HttpClientUtil.httpPost("https://oss.tilitili.club/api/ktv/restart", data);
+        String result = this.post("restart", data);
         BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
         Asserts.notNull(resp, "网络异常");
         Asserts.isTrue(resp.getSuccess(), resp.getMessage());
