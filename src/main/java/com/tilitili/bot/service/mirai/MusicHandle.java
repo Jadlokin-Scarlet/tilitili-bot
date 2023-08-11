@@ -51,7 +51,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
             switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
                 case "选歌": return handleChoose(messageAction);
-                case "点歌": case "dg": return handleSearch(messageAction);
+                case "点歌": case "dg": return handleSearch(messageAction, null);
+                case "点歌1": return handleSearch(messageAction, 0);
                 case "切歌": return handleLast(messageAction);
     //            case "绑定KTV": return handleBindKTV(messageAction);
                 case "暂停": return handleStop(messageAction);
@@ -244,7 +245,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         return handleMusicCouldLink(bot, botSender, botUser, song);
     }
 
-    private BotMessage handleSearch(BotMessageAction messageAction) {
+    private BotMessage handleSearch(BotMessageAction messageAction, Integer index) {
         BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         BotSender botSender = messageAction.getBotSender();
@@ -263,7 +264,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         } else if (playerMusicSongList != null) {
             return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
         } else {
-            return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey);
+            return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey, index);
         }
     }
 
@@ -274,10 +275,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
     }
 
-    private BotMessage handleMusicCouldSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String searchKey) {
+    private BotMessage handleMusicCouldSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String searchKey, Integer theIndex) {
         List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
+        Asserts.notEmpty(songList, "没搜到歌曲");
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
+            return handleMusicCouldLink(bot, botSender, botUser, song);
+        } else if (theIndex != null) {
+            MusicCloudSong song = songList.get(theIndex);
             return handleMusicCouldLink(bot, botSender, botUser, song);
         } else {
             String resp = IntStream.range(0, songList.size()).mapToObj(index -> String.format("%s:%s%s\t%s\t%s",
