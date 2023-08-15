@@ -117,9 +117,6 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String source = session.getOrDefault(redisKey, "tx");
 
 		BotRobot bot = messageAction.getBot();
-		if (bot == null) {
-			return null;
-		}
 //		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEnum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
 //		String source = messageAction.getParamOrDefault("source", defaultSource);
 		String text = messageAction.getText();
