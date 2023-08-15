@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -34,16 +35,25 @@ public class WebSocketConfig {
 
     @PostConstruct
     public void webSocketConnectionManager() {
+        upAllBotRobot();
+    }
+
+    @Bean
+    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderCacheManager botSenderCacheManager) {
+        return new MinecraftReceive(jmsTemplate, taskMapper, environment, botService, botSenderCacheManager, botRobotCacheManager);
+    }
+
+    @Scheduled(cron = "0 0/1 * * * ?")
+    public void wsCheckJob() {
+        upAllBotRobot();
+    }
+
+    private void upAllBotRobot() {
         List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
 //        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getValidBotRobotById(5L));
 //        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
         }
-    }
-
-    @Bean
-    public MinecraftReceive minecraftReceive(JmsTemplate jmsTemplate, TaskMapper taskMapper, Environment environment, BotService botService, BotSenderCacheManager botSenderCacheManager) {
-        return new MinecraftReceive(jmsTemplate, taskMapper, environment, botService, botSenderCacheManager, botRobotCacheManager);
     }
 }

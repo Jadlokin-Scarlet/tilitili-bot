@@ -36,4 +36,8 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
     public void onClose(int code, String reason, boolean remote) {
         super.onClose(code, reason, remote);
     }
+
+    public BiConsumer<BotRobot, String> getCallback() {
+        return callback;
+    }
 }
