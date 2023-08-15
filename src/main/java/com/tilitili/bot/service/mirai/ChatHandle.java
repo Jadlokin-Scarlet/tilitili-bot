@@ -143,21 +143,21 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 		String reply = null;
 		List<BotMessageChain> chainList = null;
 		switch (source) {
-			case "tx": {
-				if ("签到".equals(text.trim())) {
-					break;
-				}
-				for (int index = 0; index < 3; index++) {
-					reply = tencentCloudApiManager.reqReply(text);
-					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女") && !reply.contains("再说一遍")) break;
-					TimeUtil.millisecondsSleep(100);
-				}
-				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
-				if (isRandomReply && (reply.contains("能再说一遍么") || reply.contains("不是姑姑我不明白，这世界变化快") || reply.contains("再说一遍可以么"))) {
-					return BotMessage.emptyMessage();
-				}
-				break;
-			}
+//			case "tx": {
+//				if ("签到".equals(text.trim())) {
+//					break;
+//				}
+//				for (int index = 0; index < 3; index++) {
+//					reply = tencentCloudApiManager.reqReply(text);
+//					if (StringUtils.isNotBlank(reply) && !reply.contains("小龙女") && !reply.contains("再说一遍")) break;
+//					TimeUtil.millisecondsSleep(100);
+//				}
+//				if (StringUtils.isBlank(reply) || reply.contains("小龙女")) return BotMessage.simpleTextMessage("网络似乎不太通常呢。");
+//				if (isRandomReply && (reply.contains("能再说一遍么") || reply.contains("不是姑姑我不明白，这世界变化快") || reply.contains("再说一遍可以么"))) {
+//					return BotMessage.emptyMessage();
+//				}
+//				break;
+//			}
 			case "qy": reply = reqQingYunReply(text); break;
 			case "ml": chainList = reqMoLiReply(text, messageAction); break;
 			case "ai": {
