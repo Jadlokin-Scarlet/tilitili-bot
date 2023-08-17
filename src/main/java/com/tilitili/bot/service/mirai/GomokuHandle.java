@@ -35,6 +35,9 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
     @Override
     public String isThisTask(BotMessageAction messageAction) {
         String text = messageAction.getText();
+        if (!messageAction.getSession().containsKey("GomokuHandle.gomoku")) {
+            return null;
+        }
         if (Pattern.matches("[A-Oa-o][0-9]{1,2}", text)) {
             return "落子";
         } else {
