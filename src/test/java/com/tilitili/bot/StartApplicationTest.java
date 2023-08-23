@@ -9,6 +9,7 @@ import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.api.KtvServiceInterface;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
@@ -23,6 +24,7 @@ import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +74,13 @@ class StartApplicationTest {
     private SendMessageManager sendMessageManager;
     @Autowired
     private BotManager botManager;
+    @DubboReference
+    private KtvServiceInterface ktvServiceInterface;
+
+    @Test
+    public void ktvTest() {
+        System.out.println(ktvServiceInterface.getTheMusic(123L));
+    }
 
     @Test
     public void qqGuildWebsocketTest() throws URISyntaxException {

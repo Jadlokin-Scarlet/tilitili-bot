@@ -1,7 +1,6 @@
 package com.tilitili.bot;
 
-import org.apache.ibatis.io.VFS;
-import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -11,6 +10,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableDubbo
 @EnableAsync
 @EnableRetry
 @EnableCaching

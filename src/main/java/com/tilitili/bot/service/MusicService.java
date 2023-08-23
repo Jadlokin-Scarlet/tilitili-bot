@@ -1,15 +1,12 @@
 package com.tilitili.bot.service;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
+import com.tilitili.common.api.KtvServiceInterface;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
-import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
@@ -17,8 +14,11 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MusicCloudManager;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,15 +32,13 @@ public class MusicService {
     private final BotManager botManager;
     private final BilibiliManager bilibiliManager;
     private final MusicCloudManager musicCloudManager;
+    @DubboReference
+    private KtvServiceInterface ktvServiceInterface;
 
     public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager) {
         this.botManager = botManager;
         this.bilibiliManager = bilibiliManager;
         this.musicCloudManager = musicCloudManager;
-    }
-
-    private String post(String api, String data) {
-        return HttpClientUtil.httpPost(new HttpRequestDTO().setHttpClient(HttpClientUtil.longHttpClient).setUrl("https://oss.tilitili.club/api/ktv/" + api).setJson(data)).getContent();
     }
 
     public BotMessage pushPlayListToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
@@ -53,12 +51,13 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
-        String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
-        String result = this.post("add", req);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        List<String> playerMusicNameList = resp.getData();
+        List<String> playerMusicNameList = ktvServiceInterface.addMusic(botSender.getId(), voiceSender.getId(), null, playerMusicSongList);
+//        String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
+//        String result = this.post("add", req);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        List<String> playerMusicNameList = resp.getData();
         if (playerMusicNameList == null) {
             return null;
         } else {
@@ -75,12 +74,13 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
-        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
-        String result = this.post("add", data);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        List<String> playerMusicNameList = resp.getData();
+        List<String> playerMusicNameList = ktvServiceInterface.addMusic(botSender.getId(), voiceSender.getId(), music, null);
+//        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
+//        String result = this.post("add", data);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        List<String> playerMusicNameList = resp.getData();
         if (playerMusicNameList == null) {
             return null;
         } else {
@@ -96,12 +96,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
-        String result = this.post("last", data);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.lastMusic(botSender.getId(), voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
+//        String result = this.post("last", data);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public List<String> stopMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -111,12 +112,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = this.post("stop", data);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.stopMusic(voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
+//        String result = this.post("stop", data);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public List<String> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -126,12 +128,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
-        String result = this.post("start", data);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.startMusic(botSender.getId(), voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId()));
+//        String result = this.post("start", data);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public List<String> listMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -141,12 +144,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = this.post("list", data);
-        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.listMusic(voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
+//        String result = this.post("list", data);
+//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public Boolean loopPlayer(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -156,12 +160,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = this.post("loop", data);
-        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.loopPlayer(voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
+//        String result = this.post("loop", data);
+//        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public Boolean restartKtv(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -171,12 +176,13 @@ public class MusicService {
             return null;
         }
 
-        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
-        String result = this.post("restart", data);
-        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.restartKtv(voiceSender.getId());
+//        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
+//        String result = this.post("restart", data);
+//        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public PlayerMusicDTO getTheMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
@@ -186,11 +192,12 @@ public class MusicService {
             return null;
         }
 
-        String result = HttpClientUtil.httpGet("https://oss.tilitili.club/api/ktv/get?voiceSenderId="+voiceSender.getId());
-        BaseModel<PlayerMusicDTO> resp = Gsons.fromJson(result, new TypeToken<BaseModel<PlayerMusicDTO>>(){}.getType());
-        Asserts.notNull(resp, "网络异常");
-        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-        return resp.getData();
+        return ktvServiceInterface.getTheMusic(voiceSender.getId());
+//        String result = HttpClientUtil.httpGet("https://oss.tilitili.club/api/ktv/get?voiceSenderId="+voiceSender.getId());
+//        BaseModel<PlayerMusicDTO> resp = Gsons.fromJson(result, new TypeToken<BaseModel<PlayerMusicDTO>>(){}.getType());
+//        Asserts.notNull(resp, "网络异常");
+//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
+//        return resp.getData();
     }
 
     public String getMusicJumpUrl(PlayerMusicDTO theMusic) {
