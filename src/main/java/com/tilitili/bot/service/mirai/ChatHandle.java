@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.AnimeWordsService;
 import com.tilitili.bot.service.BotSessionService;
@@ -108,7 +107,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 	}
 
 	private final List<String> randomSendTypeList = Arrays.asList(SendTypeEnum.GROUP_MESSAGE_STR, SendTypeEnum.KOOK_MESSAGE_STR, SendTypeEnum.MINECRAFT_MESSAGE_STR);
-	private BotMessage handleChat(BotMessageAction messageAction) throws TencentCloudSDKException, UnsupportedEncodingException {
+	private BotMessage handleChat(BotMessageAction messageAction) throws UnsupportedEncodingException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		boolean network = "true".equals(session.getOrDefault(networkKey, "false"));
 		BotUserDTO botUser = messageAction.getBotUser();

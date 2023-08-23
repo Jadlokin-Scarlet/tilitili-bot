@@ -259,7 +259,7 @@ public class MusicService {
                 playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
                 playerMusicList.add(playerMusic);
             }
-        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/program")) {
+        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/song") || searchKey.contains("163.com/#/program")) {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
