@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -232,7 +233,7 @@ public class MusicService {
             Asserts.notBlank(fid, "啊嘞，不对劲");
 
             playerMusicSongList = bilibiliManager.getFavoriteList(fid);
-        } else if (searchKey.contains("bilibili.com")) {
+        } else if (searchKey.contains("bilibili.com") || Pattern.matches("BV\\w{10}", searchKey)) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
             List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
             Asserts.notEmpty(bvList, "啊嘞，不对劲");
