@@ -285,4 +285,21 @@ public class MusicService {
         }
         return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicSongList(playerMusicSongList);
     }
+
+    public PlayerMusicSongList getMusicListByListId(Integer type, String listId) {
+        switch (type) {
+            case PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM:
+                return musicCloudManager.getProgramPlayerList(Long.valueOf(listId));
+            case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
+                PlayerMusicSongList playerMusicSongList = musicCloudManager.getPlayerList(Long.valueOf(listId));
+                List<String> idList = playerMusicSongList.getMusicList().stream().map(PlayerMusicDTO::getExternalId).collect(Collectors.toList());
+                List<PlayerMusicDTO> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+                playerMusicSongList.setMusicList(playerMusicListDetail);
+                return playerMusicSongList;
+            case PlayerMusicDTO.TYPE_BILIBILI:
+                return bilibiliManager.getFavoriteList(listId);
+            default:
+                throw new AssertException();
+        }
+    }
 }

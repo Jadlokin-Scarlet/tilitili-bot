@@ -7,15 +7,18 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PlayerMusic;
+import com.tilitili.common.entity.PlayerMusicList;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.MusicCloudManager;
+import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -37,12 +40,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private final MusicCloudManager musicCloudManager;
     private final AtomicBoolean lockFlag = new AtomicBoolean(false);
     private final PlayerMusicMapper playerMusicMapper;
+    private final PlayerMusicListMapper playerMusicListMapper;
 
-    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, PlayerMusicMapper playerMusicMapper) {
+    public MusicHandle(RedisCache redisCache, MusicCloudManager musicCloudManager, MusicService musicService, PlayerMusicMapper playerMusicMapper, PlayerMusicListMapper playerMusicListMapper) {
         this.redisCache = redisCache;
         this.musicService = musicService;
         this.musicCloudManager = musicCloudManager;
         this.playerMusicMapper = playerMusicMapper;
+        this.playerMusicListMapper = playerMusicListMapper;
     }
 
     @Override
@@ -77,8 +82,41 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             case "删除": return handleDeleteTheMusic(messageAction);
             case "清空": return handleClearSongList(messageAction);
             case "播放": case "启动": return handlePlaySongList(messageAction);
+            case "同步": return handleSyncList(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handleSyncList(BotMessageAction messageAction) {
+        Long userId = messageAction.getBotUser().getId();
+        List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
+        Asserts.notEmpty(listList, "无歌单可用");
+        for (PlayerMusicList list : listList) {
+            PlayerMusicSongList playerMusicSongList = musicService.getMusicListByListId(list.getType(), list.getExternalId());
+            List<PlayerMusicDTO> newMusicList = playerMusicSongList.getMusicList();
+            List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
+
+            List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+            for (PlayerMusicDTO newMusic : newMusicList) {
+                if (oldExternalIdList.contains(newMusic.getExternalId())) {
+                    continue;
+                }
+                PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
+                if (otherMusic != null) {
+                    continue;
+                }
+                playerMusicMapper.addPlayerMusicSelective(newMusic);
+            }
+
+            List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+            for (PlayerMusic oldMusic : oldMusicList) {
+                if (newExternalIdList.contains(oldMusic.getExternalId())) {
+                    continue;
+                }
+                playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
+            }
+        }
+        return BotMessage.simpleTextMessage("同步完毕");
     }
 
     private BotMessage handlePlaySongList(BotMessageAction messageAction) {
@@ -101,10 +139,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (!redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
             return null;
         }
+        List<PlayerMusicList> musicListList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(botUser.getId()));
         List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId()));
-        Asserts.notEmpty(musicList, "歌单空空如也");
+        Asserts.isFalse(musicList.isEmpty() && musicListList.isEmpty(), "歌单空空如也");
         for (PlayerMusic music : musicList) {
             playerMusicMapper.deletePlayerMusicByPrimary(music.getId());
+        }
+        for (PlayerMusicList list : musicListList) {
+            playerMusicListMapper.deletePlayerMusicListByPrimary(list.getId());
         }
         return BotMessage.simpleTextMessage("好了喵("+musicList.size()+")");
     }
@@ -118,14 +160,43 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleDeleteTheMusic(BotMessageAction messageAction) {
         BotUserDTO botUser = messageAction.getBotUser();
-        PlayerMusicDTO theMusic = musicService.getTheMusic(messageAction.getBot(), messageAction.getBotSender(), botUser);
-        if (theMusic == null) {
-            return null;
+        Long userId = botUser.getId();
+        String searchKey = messageAction.getSubValue();
+        if (StringUtils.isNotBlank(searchKey)) {
+            MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
+            List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+            PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+            if (playerMusicList == null) {
+                playerMusicList = new ArrayList<>();
+            }
+            int musicCnt = 0;
+            int listCnt = 0;
+            if (playerMusicSongList != null) {
+                playerMusicList.addAll(playerMusicSongList.getMusicList());
+                PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId());
+                if (dbList != null) {
+                    playerMusicListMapper.deletePlayerMusicListByPrimary(dbList.getId());
+                    listCnt++;
+                }
+            }
+            for (PlayerMusicDTO playerMusic : playerMusicList) {
+                PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId());
+                if (dbMusic != null) {
+                    playerMusicMapper.deletePlayerMusicByPrimary(dbMusic.getId());
+                    musicCnt++;
+                }
+            }
+            return BotMessage.simpleTextMessage(String.format("删除歌单%d歌曲%d成功.", listCnt, musicCnt));
+        } else {
+            PlayerMusicDTO theMusic = musicService.getTheMusic(messageAction.getBot(), messageAction.getBotSender(), botUser);
+            if (theMusic == null) {
+                return null;
+            }
+            PlayerMusic dbPlayerMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(botUser.getId(), theMusic.getType(), theMusic.getExternalId());
+            Asserts.notNull(dbPlayerMusic, "当前歌曲不在你的歌单中");
+            playerMusicMapper.deletePlayerMusicByPrimary(dbPlayerMusic.getId());
+            return BotMessage.simpleTextMessage("删除成功，歌曲地址：" + musicService.getMusicJumpUrl(theMusic));
         }
-        PlayerMusic dbPlayerMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(botUser.getId(), theMusic.getType(), theMusic.getExternalId());
-        Asserts.notNull(dbPlayerMusic, "当前歌曲不在你的歌单中");
-        playerMusicMapper.deletePlayerMusicByPrimary(dbPlayerMusic.getId());
-        return BotMessage.simpleTextMessage("删除成功，歌曲地址：" + musicService.getMusicJumpUrl(theMusic));
     }
 
     private BotMessage handleSongListImport(BotMessageAction messageAction) {
@@ -139,6 +210,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
         if (playerMusicSongList != null) {
             playerMusicList.addAll(playerMusicSongList.getMusicList());
+            if (playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId()) == null) {
+                playerMusicListMapper.addPlayerMusicListSelective(new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId()));
+            }
         }
         for (PlayerMusicDTO playerMusic : playerMusicList) {
             playerMusic.setUserId(userId);
