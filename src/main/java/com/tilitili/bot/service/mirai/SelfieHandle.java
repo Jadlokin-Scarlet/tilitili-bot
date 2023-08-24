@@ -15,10 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class SelfieHandle extends ExceptionRespMessageHandle {
@@ -52,7 +49,7 @@ public class SelfieHandle extends ExceptionRespMessageHandle {
 		}
 		for (String imageData : imageList) {
 			String base64Image = imageData.split(",")[1];
-			byte[] imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64Image);
+			byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 			BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
 			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 				ImageIO.write(buffImage, "png", os);                          // Passing: ​(RenderedImage im, String formatName, OutputStream output)
