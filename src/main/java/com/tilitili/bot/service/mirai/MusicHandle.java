@@ -327,8 +327,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSearch(BotMessageAction messageAction, Integer index) {
-        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
+        BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
