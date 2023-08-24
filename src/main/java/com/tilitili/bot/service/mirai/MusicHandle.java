@@ -103,9 +103,12 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 }
                 PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
                 if (otherMusic != null) {
-                    continue;
+                    playerMusicMapper.updatePlayerMusicSelective(new PlayerMusic().setId(otherMusic.getId()).setListId(list.getId()));
+                } else {
+                    newMusic.setUserId(userId);
+                    newMusic.setListId(list.getId());
+                    playerMusicMapper.addPlayerMusicSelective(newMusic);
                 }
-                playerMusicMapper.addPlayerMusicSelective(newMusic);
             }
 
             List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
