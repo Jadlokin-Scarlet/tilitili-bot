@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -216,6 +215,8 @@ public class MusicService {
         PlayerMusicSongList playerMusicSongList = null;
         List<PlayerMusicDTO> playerMusicList = null;
 
+        List<String> searchBvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
+
         if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             playerMusicSongList = musicCloudManager.getProgramPlayerList(listId);
@@ -233,9 +234,9 @@ public class MusicService {
             Asserts.notBlank(fid, "啊嘞，不对劲");
 
             playerMusicSongList = bilibiliManager.getFavoriteList(fid);
-        } else if (searchKey.contains("bilibili.com") || Pattern.matches("BV\\w{10}", searchKey)) {
+        } else if (searchKey.contains("bilibili.com") || !searchBvList.isEmpty()) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
-            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
+            List<String> bvList = searchBvList;
             Asserts.notEmpty(bvList, "啊嘞，不对劲");
             String pnStr = bvList.size() < 2? StringUtils.patten1("\\?p=(\\d+)", searchKey): null;
 
