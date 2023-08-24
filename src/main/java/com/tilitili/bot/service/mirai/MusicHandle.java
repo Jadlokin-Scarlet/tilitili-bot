@@ -208,14 +208,18 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicList == null) {
             playerMusicList = new ArrayList<>();
         }
+        Long listId = null;
         if (playerMusicSongList != null) {
             playerMusicList.addAll(playerMusicSongList.getMusicList());
             if (playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId()) == null) {
-                playerMusicListMapper.addPlayerMusicListSelective(new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId()));
+                PlayerMusicList newList = new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId());
+                playerMusicListMapper.addPlayerMusicListSelective(newList);
+                listId = newList.getId();
             }
         }
         for (PlayerMusicDTO playerMusic : playerMusicList) {
             playerMusic.setUserId(userId);
+            playerMusic.setListId(listId);
             if (playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId()) == null) {
                 playerMusicMapper.addPlayerMusicSelective(playerMusic);
             }
