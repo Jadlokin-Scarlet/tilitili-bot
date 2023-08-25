@@ -32,7 +32,7 @@ public class MusicService {
     private final BotManager botManager;
     private final BilibiliManager bilibiliManager;
     private final MusicCloudManager musicCloudManager;
-    @DubboReference
+    @DubboReference(timeout = 4000)
     private KtvServiceInterface ktvServiceInterface;
 
     public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager) {
