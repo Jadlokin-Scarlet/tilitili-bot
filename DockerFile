@@ -2,4 +2,4 @@ From docker.tilitili.club/tilitili/tilitili-java:8-zh-jre
 
 ADD target/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "-Xmx250M", "-Xms250M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "app.jar"]
+ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "app.jar"]
