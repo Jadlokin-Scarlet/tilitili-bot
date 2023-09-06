@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.universalis.UniversalisItemPrice;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.HttpClientUtil;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -31,9 +31,9 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         if (id == null) {
             return null;
         }
-        ItemPrice itemPrice = this.getPriceList(id);
+        UniversalisItemPrice itemPrice = this.getPriceList(id);
         Asserts.notNull(itemPrice, "查询失败");
-        return BotMessage.simpleTextMessage(String.format("%s的最低价位%d（更新于%s）", value, itemPrice.minPrice, DateUtils.formatDateYMDHMS(itemPrice.lastUploadTime)));
+        return BotMessage.simpleTextMessage(String.format("%s的最低价位%d，更新于%s（包括 5%% 消费税）", value, itemPrice.getMinPrice(), DateUtils.formatDateYMDHMS(itemPrice.getLastUploadTime())));
     }
 
     private Integer search(String name) throws UnsupportedEncodingException {
@@ -48,41 +48,18 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         }
     }
 
-    private ItemPrice getPriceList(Integer id) {
+    private UniversalisItemPrice getPriceList(Integer id) {
         String html = HttpClientUtil.httpGet("https://universalis.app/market/" + id, headers);
         Asserts.notBlank(html, "网络异常");
         Document document = Jsoup.parse(html);
 
-        String json = document.select("script#__NEXT_DATA__").text();
+        String json = document.select("script#__NEXT_DATA__").first().data();
         Asserts.notBlank(json, "网络异常");
         try {
-            return JSONPath.read(json, "$.props.pageProps.markets.1043", ItemPrice.class);
+            return JSONPath.read(json, "$.props.pageProps.markets.1043", UniversalisItemPrice.class);
         } catch (JSONException e) {
             log.warn("error handle json="+json, e);
             return null;
-        }
-    }
-
-    class ItemPrice {
-        Date lastUploadTime;
-        Integer minPrice;
-
-        public Date getLastUploadTime() {
-            return lastUploadTime;
-        }
-
-        public ItemPrice setLastUploadTime(Date lastUploadTime) {
-            this.lastUploadTime = lastUploadTime;
-            return this;
-        }
-
-        public Integer getMinPrice() {
-            return minPrice;
-        }
-
-        public ItemPrice setMinPrice(Integer minPrice) {
-            this.minPrice = minPrice;
-            return this;
         }
     }
 }
