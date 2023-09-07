@@ -2,11 +2,12 @@ From docker.tilitili.club/tilitili/tilitili-java:8-zh-jdk
 
 ADD target/*.jar app.jar
 
-#ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "app.jar"]
+#ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", "app.jar"]
 
 ADD ejstatd-1.0.0.jar /usr/java/jdk/bin/
 
 ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", \
+"-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", \
 "-Dcom.sun.management.jmxremote=true", \
 "-Dcom.sun.management.jmxremote.port=33306", \
 "-Dcom.sun.management.jmxremote.authenticate=false", \
