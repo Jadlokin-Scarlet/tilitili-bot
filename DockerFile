@@ -4,9 +4,6 @@ ADD target/*.jar app.jar
 
 #ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "app.jar"]
 
-ADD ejstatd-1.0.0.jar /usr/java/jdk/bin/
-
-
 ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", \
 "-Dcom.sun.management.jmxremote=true", \
 "-Dcom.sun.management.jmxremote.port=33306", \
