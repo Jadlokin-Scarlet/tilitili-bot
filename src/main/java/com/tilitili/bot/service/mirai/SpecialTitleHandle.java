@@ -11,7 +11,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.utils.Asserts;
-import org.apache.commons.collections.CollectionUtils;
+import com.tilitili.common.utils.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

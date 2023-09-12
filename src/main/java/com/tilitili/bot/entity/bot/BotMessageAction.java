@@ -7,9 +7,9 @@ import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.utils.CollectionUtils;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;

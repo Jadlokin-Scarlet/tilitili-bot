@@ -1,15 +1,11 @@
 package com.tilitili.bot.service.mirai;
 
-import static org.junit.Assert.*;
-
 import com.alibaba.fastjson.JSONPath;
 import com.tilitili.bot.StartApplication;
 import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 

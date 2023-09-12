@@ -20,10 +20,10 @@ import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.CollectionUtils;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

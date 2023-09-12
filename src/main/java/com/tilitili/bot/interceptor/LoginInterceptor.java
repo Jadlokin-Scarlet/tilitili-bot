@@ -1,11 +1,9 @@
 package com.tilitili.bot.interceptor;
 
-import com.google.gson.Gson;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.view.BaseModel;
-import com.tilitili.common.mapper.mysql.BotAdminMapper;
+import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -18,16 +16,6 @@ import java.io.PrintWriter;
 @Slf4j
 @Component
 public class LoginInterceptor extends HandlerInterceptorAdapter {
-
-    private final BotAdminMapper botAdminMapper;
-    private final Gson gson;
-
-    @Autowired
-    public LoginInterceptor(BotAdminMapper botAdminMapper) {
-        this.botAdminMapper = botAdminMapper;
-        gson = new Gson();
-    }
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession();
@@ -56,7 +44,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
         try {
             response.setContentType("application/json;charset=UTF-8");
             writer = response.getWriter();
-            writer.print(gson.toJson(baseModel));
+            writer.print(Gsons.toJson(baseModel));
         } catch (IOException e) {
             log.error("returnResp error, ", e);
         } finally {

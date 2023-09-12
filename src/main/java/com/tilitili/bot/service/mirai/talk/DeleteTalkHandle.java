@@ -8,11 +8,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.QQUtil;
-import com.tilitili.common.utils.StringUtils;
-import org.apache.commons.collections.CollectionUtils;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

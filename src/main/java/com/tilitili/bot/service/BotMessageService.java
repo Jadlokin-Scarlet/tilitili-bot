@@ -3,9 +3,9 @@ package com.tilitili.bot.service;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.CollectionUtils;
 import com.tilitili.common.utils.QQUtil;
 import com.tilitili.common.utils.StringUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
