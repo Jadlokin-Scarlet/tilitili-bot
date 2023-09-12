@@ -12,7 +12,7 @@ import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
-import org.jsoup.helper.StringUtil;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             return null;
         }
 
-        if (StringUtil.isBlank(paramListStr)) {
+        if (StringUtils.isBlank(paramListStr)) {
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！查看详情发送（帮助 [指令]）\n");
             for (int i = 0; i < botTaskDTOList.size(); i++) {
                 BotTaskDTO botTask = botTaskDTOList.get(i);

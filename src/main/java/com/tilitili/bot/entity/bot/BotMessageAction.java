@@ -10,7 +10,6 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.jsoup.helper.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -151,7 +150,7 @@ public class BotMessageAction extends BaseDTO {
     }
 
     public String getBodyOrDefault(String defaultValue) {
-        return StringUtil.isBlank(body)? defaultValue: body;
+        return StringUtils.isBlank(body)? defaultValue: body;
     }
 
     public BotMessage getBotMessage() {
@@ -167,7 +166,7 @@ public class BotMessageAction extends BaseDTO {
     }
 
     public String getValueOrDefault(String defaultValue) {
-        return StringUtil.isBlank(value)? defaultValue: value;
+        return StringUtils.isBlank(value)? defaultValue: value;
     }
 
     public BotSessionService.MiraiSession getSession() {

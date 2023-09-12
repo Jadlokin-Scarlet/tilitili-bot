@@ -5,7 +5,7 @@ import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 
 @Slf4j
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = StartApplication.class)
 public class ExcelUtilTest {
 

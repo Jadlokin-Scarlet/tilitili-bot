@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @SpringBootTest
-@RunWith(SpringRunner.class)
 class StartApplicationTest {
     @Autowired
     private HelpHandle helpHandle;
