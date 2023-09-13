@@ -1,6 +1,6 @@
 package com.tilitili.bot.interceptor;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.tilitili.bot.annotation.BotAuthorityCheck;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotAdmin;

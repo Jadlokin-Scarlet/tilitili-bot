@@ -1,8 +1,7 @@
 
 package com.tilitili.bot.socket;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.TimeUtil;
@@ -16,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ShortUrlWebSocketHandler extends BaseWebSocketHandler {
     private final RedisCache redisCache;
+    private final JSONPath shortUrlPath = JSONPath.of("$[1].data.url", String.class);
+    private final JSONPath originUrlPath = JSONPath.of("$[1].data.origin_url", String.class);
 
     public ShortUrlWebSocketHandler(RedisCache redisCache) throws URISyntaxException {
         super(new URI("wss://sl.xiaomark.com/socket.io/?guest=nFFA8rxHbCmdi8TN&EIO=3&transport=websocket"));
@@ -34,10 +35,8 @@ public class ShortUrlWebSocketHandler extends BaseWebSocketHandler {
                 executorService.schedule(() -> this.send("2"),  30, TimeUnit.SECONDS);
             } else if (message.contains("create_link")) {
                 String json = message.replace("42/socket.io.xmsl,", "");
-                JSONArray resp = JSONObject.parseArray(json);
-                JSONObject data = resp.getJSONObject(1).getJSONObject("data");
-                String shortUrl = data.getString("url");
-                String originUrl = data.getString("origin_url");
+                String shortUrl = (String) shortUrlPath.extract(json);
+                String originUrl = (String) originUrlPath.extract(json);
                 redisCache.setValue(originUrl, shortUrl, 60 * 29);
             }
         } catch (AssertException e) {

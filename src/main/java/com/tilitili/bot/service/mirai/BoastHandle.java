@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
-import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson2.JSONPath;
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -50,7 +50,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		if (Arrays.asList("夸夸他", "kkt", "夸夸我", "kkw").contains(key)) {
 			String result = HttpClientUtil.httpGet("https://api.shadiao.app/chp");
 			Asserts.notBlank(result, "网络异常");
-			text = JSONPath.read(result, "$.data.text", String.class);
+			text = (String) JSONPath.eval(result, "$.data.text");
 			type = "夸夸他";
 		} else if (Arrays.asList("骂骂我", "mmw", "骂骂他", "mmt").contains(key)){
 			text = "";//HttpClientUtil.httpGet("https://nmsl.yfchat.xyz/api.php?level=min");

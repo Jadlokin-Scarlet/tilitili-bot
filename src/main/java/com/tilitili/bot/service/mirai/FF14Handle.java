@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONPath;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -36,18 +36,20 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         return BotMessage.simpleTextMessage(String.format("%s的最低价位%d，更新于%s（包括 5%% 消费税）", value, itemPrice.getMinPrice(), DateUtils.formatDateYMDHMS(itemPrice.getLastUploadTime())));
     }
 
+    JSONPath searchPath = JSONPath.of("$.Results[0].ID",  Integer.class);
     private Integer search(String name) throws UnsupportedEncodingException {
         String url = "https://cafemaker.wakingsands.com/search?string="+ URLEncoder.encode(name, "utf-8") +"&indexes=item&language=chs&filters=ItemSearchCategory.ID%3E=1&columns=ID,Icon,Name,LevelItem,Rarity,ItemSearchCategory.Name,ItemSearchCategory.ID,ItemKind.Name&limit=100&sort_field=LevelItem&sort_order=desc";
         String resp = HttpClientUtil.httpGet(url, headers);
         Asserts.notBlank(resp, "网络异常");
         try {
-            return JSONPath.read(resp, "$.Results[0].ID", Integer.class);
+            return (Integer) searchPath.extract(resp);
         } catch (JSONException e) {
             log.warn("error handle json="+resp, e);
             return null;
         }
     }
 
+    JSONPath priceListPath = JSONPath.of("$.props.pageProps.markets.1043",  UniversalisItemPrice.class);
     private UniversalisItemPrice getPriceList(Integer id) {
         String html = HttpClientUtil.httpGet("https://universalis.app/market/" + id, headers);
         Asserts.notBlank(html, "网络异常");
@@ -56,7 +58,7 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         String json = document.select("script#__NEXT_DATA__").first().data();
         Asserts.notBlank(json, "网络异常");
         try {
-            return JSONPath.read(json, "$.props.pageProps.markets.1043", UniversalisItemPrice.class);
+            return (UniversalisItemPrice) priceListPath.extract(json);
         } catch (JSONException e) {
             log.warn("error handle json="+json, e);
             return null;
