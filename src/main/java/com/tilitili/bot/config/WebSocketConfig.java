@@ -11,6 +11,7 @@ import com.tilitili.common.mapper.rank.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,7 +20,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Slf4j
-//@Configuration
+@Configuration
 public class WebSocketConfig {
     private final BotRobotCacheManager botRobotCacheManager;
     private final WebSocketFactory webSocketFactory;
