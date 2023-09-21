@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.tilitili.parent</groupId>
         <artifactId>tilitili-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <repositories>
@@ -29,7 +29,6 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-<!--        <org.springframework.version>4.3.12.RELEASE</org.springframework.version>-->
         <skipTests>true</skipTests>
     </properties>
 
@@ -37,7 +36,6 @@
         <dependency>
             <groupId>com.tilitili.common</groupId>
             <artifactId>tilitili-common</artifactId>
-            <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency><!--添加websocket依赖 -->
             <groupId>org.springframework</groupId>
