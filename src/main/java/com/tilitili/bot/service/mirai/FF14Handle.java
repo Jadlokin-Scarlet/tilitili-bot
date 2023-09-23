@@ -8,7 +8,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.universalis.UniversalisItemPrice;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -33,7 +33,7 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         }
         UniversalisItemPrice itemPrice = this.getPriceList(id);
         Asserts.notNull(itemPrice, "查询失败");
-        return BotMessage.simpleTextMessage(String.format("%s的最低价位%d，更新于%s（包括 5%% 消费税）", value, itemPrice.getMinPrice(), DateUtils.formatDateYMDHMS(itemPrice.getLastUploadTime())));
+        return BotMessage.simpleTextMessage(String.format("%s的最低价位%d，更新于%s（包括 5%% 消费税）", value, itemPrice.getMinPrice(), formatDate(itemPrice.getLastUploadTime())));
     }
 
     JSONPath searchPath = JSONPath.of("$.Results[0].ID",  Integer.class);
@@ -42,7 +42,9 @@ public class FF14Handle extends ExceptionRespMessageHandle {
         String resp = HttpClientUtil.httpGet(url, headers);
         Asserts.notBlank(resp, "网络异常");
         try {
-            return (Integer) searchPath.extract(resp);
+            Object id = searchPath.extract(resp);
+            Asserts.notNull(id, "查无此物");
+            return (Integer) id;
         } catch (JSONException e) {
             log.warn("error handle json="+resp, e);
             return null;
@@ -63,5 +65,35 @@ public class FF14Handle extends ExceptionRespMessageHandle {
             log.warn("error handle json="+json, e);
             return null;
         }
+    }
+
+    private String formatDate(Date inputDate) {
+        // 获取当前时间
+        Date currentTime = new Date();
+
+
+        // 计算时间差（单位：毫秒）
+        long timeDifference = currentTime.getTime() - inputDate.getTime();
+
+        // 转换为秒、分钟、小时和天
+        long seconds = timeDifference / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+
+        // 构建返回字符串
+        String result = "";
+        if (days > 0) {
+            result = days + "天前";
+        } else if (hours > 0) {
+            result = hours + "小时前";
+        } else if (minutes > 0) {
+            result = minutes + "分钟前";
+        } else {
+            result = seconds + "秒前";
+        }
+
+        // 输出结果
+        return result;
     }
 }
