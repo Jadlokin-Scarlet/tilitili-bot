@@ -1,6 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.ShortUrlService;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.utils.Asserts;
@@ -11,6 +12,11 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class BaiduHandle extends BaseMessageHandleAdapt {
+	private final ShortUrlService shortUrlService;
+
+	public BaiduHandle(ShortUrlService shortUrlService) {
+		this.shortUrlService = shortUrlService;
+	}
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
@@ -18,10 +24,10 @@ public class BaiduHandle extends BaseMessageHandleAdapt {
 		Asserts.notBlank(value, "格式错啦(内容)");
 
 		String url = "https://www.baidu.com/s?ie=UTF-8&wd=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-		if (url.length() > 100) {
-			url = "https://www.baidu.com/s?ie=UTF-8&wd=" + value;
-		}
+//		if (url.length() > 100) {
+//			url = "https://www.baidu.com/s?ie=UTF-8&wd=" + value;
+//		}
 
-		return BotMessage.simpleLinkMessage(url);
+		return BotMessage.simpleLinkMessage(shortUrlService.getShortUrl(url));
 	}
 }
