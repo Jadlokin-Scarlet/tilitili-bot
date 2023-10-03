@@ -215,6 +215,17 @@ public class MusicService {
         PlayerMusicSongList playerMusicSongList = null;
         List<PlayerMusicDTO> playerMusicList = null;
 
+        // 短网址
+        if (searchKey.contains("b23.tv")) {
+            // https://b23.tv/NtQiyU8
+            String shortUrl = StringUtils.patten("https://b23.tv/\\w+", searchKey);
+            searchKey = HttpClientUtil.resolveShortUrl(shortUrl);
+        } else if (searchKey.contains("163cn.tv")) {
+            // http://163cn.tv/1DpBt0
+            String shortUrl = StringUtils.patten("http://163cn.tv/\\w+", searchKey);
+            searchKey = HttpClientUtil.resolveShortUrl(shortUrl);
+        }
+
         List<String> searchBvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
 
         if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
@@ -236,12 +247,11 @@ public class MusicService {
             playerMusicSongList = bilibiliManager.getFavoriteList(fid);
         } else if (searchKey.contains("bilibili.com") || !searchBvList.isEmpty()) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
-            List<String> bvList = searchBvList;
-            Asserts.notEmpty(bvList, "啊嘞，不对劲");
-            String pnStr = bvList.size() < 2? StringUtils.patten1("\\?p=(\\d+)", searchKey): null;
+            Asserts.notEmpty(searchBvList, "啊嘞，不对劲");
+            String pnStr = searchBvList.size() < 2? StringUtils.patten1("\\?p=(\\d+)", searchKey): null;
 
             playerMusicList = new ArrayList<>();
-            for (String bv : bvList) {
+            for (String bv : searchBvList) {
                 VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
                 Asserts.notNull(videoInfo, "获取视频信息失败");
                 Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
@@ -251,24 +261,8 @@ public class MusicService {
                 playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(pn).getCid()));
                 playerMusicList.add(playerMusic);
             }
-        } else if (searchKey.contains("b23.tv")) {
-            // https://b23.tv/NtQiyU8
-            String shortUrl = StringUtils.patten("https://b23.tv/\\w+", searchKey);
-            String bvUrl = HttpClientUtil.resolveShortUrl(shortUrl);
-            List<String> bvList = StringUtils.pattenAll("BV\\w{10}", bvUrl);
-            Asserts.notEmpty(bvList, "啊嘞，不对劲");
-
-            playerMusicList = new ArrayList<>();
-            for (String bv : bvList) {
-                VideoView videoInfo = bilibiliManager.getVideoInfo(bv);
-                Asserts.notNull(videoInfo, "获取视频信息失败");
-                Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
-
-                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(0).getCid()));
-                playerMusicList.add(playerMusic);
-            }
-        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/song") || searchKey.contains("163.com/#/program")) {
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?(song|program)", searchKey), "")) {
+//        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/song") || searchKey.contains("163.com/#/program")) {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
