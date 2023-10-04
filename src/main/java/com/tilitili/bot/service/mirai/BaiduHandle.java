@@ -24,10 +24,10 @@ public class BaiduHandle extends BaseMessageHandleAdapt {
 		Asserts.notBlank(value, "格式错啦(内容)");
 
 		String url = "https://www.baidu.com/s?ie=UTF-8&wd=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-//		if (url.length() > 100) {
-//			url = "https://www.baidu.com/s?ie=UTF-8&wd=" + value;
-//		}
+		if (url.length() > 100) {
+			url = "https://www.baidu.com/s?ie=UTF-8&wd=" + value;
+		}
 
-		return BotMessage.simpleLinkMessage(shortUrlService.getShortUrl(url));
+		return BotMessage.simpleLinkMessage((url));
 	}
 }
