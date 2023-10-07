@@ -155,7 +155,17 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage startGame(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String numListStr = session.get(numListKey);
-		Asserts.checkNull(numListStr, "先玩完这一局吧："+numListStr);
+		if (numListStr != null) {
+			String lastSendTime2StrIfExited = session.get(lastSendTimeKey);
+			boolean needEnd = lastSendTime2StrIfExited != null && DateUtils.parseDateYMDHMS(lastSendTime2StrIfExited).before(getLimitDate());
+			if (needEnd) {
+				session.remove(numListKey);
+				session.remove(lastSendTimeKey);
+				session.remove(lockKey);
+			} else {
+				throw new AssertException("先玩完这一局吧："+numListStr);
+			}
+		}
 
 		List<Integer> numList;
 		String answer;
