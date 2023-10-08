@@ -13,7 +13,7 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L[%t] - %m%n"/>
         </console>
         <RollingFile name="logfile" fileName="/home/www/logs/${sys:app.id}/all.log"
-                     filePattern="/home/www/logs/${sys:app.id}/all-%d{yyyy-MM-dd}.log">
+                     filePattern="/home/www/logs/${sys:app.id}/all.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L[%t] - %m%n" />
             <Policies>
@@ -21,7 +21,7 @@
             </Policies>
         </RollingFile>
         <RollingFile name="debugfile" fileName="/home/www/logs/${sys:app.id}/debug.log"
-                     filePattern="/home/www/logs/${sys:app.id}/debug-%d{yyyy-MM-dd}.log">
+                     filePattern="/home/www/logs/${sys:app.id}/debug.log.%d{yyyy-MM-dd}">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %5p %c{1}:%L[%t] - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
