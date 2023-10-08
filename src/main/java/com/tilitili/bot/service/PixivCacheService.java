@@ -20,7 +20,10 @@ import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.NewProxyUtil;
+import com.tilitili.common.utils.OSSUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -270,9 +273,7 @@ public class PixivCacheService {
 //			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
 //		}
 //
-		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
-		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
-		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".")): null;
+		String fileType = StringUtils.getFileTypeFromUrl(url);
 		Path path = null;
 		try {
 			path = Files.createTempFile("pixiv", fileType);
@@ -310,10 +311,7 @@ public class PixivCacheService {
 //		} else {
 //			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 //		}
-
-		String urlWithoutFooter = url.split("@")[0].split("#")[0].split("\\?")[0];
-		String fileName = urlWithoutFooter.substring(urlWithoutFooter.lastIndexOf("/") + 1);
-		String fileType = fileName.contains(".")? fileName.substring(fileName.lastIndexOf(".") + 1): null;
+		String fileType = StringUtils.getFileTypeFromUrl(url);
 		Path path = null;
 		try {
 			path = Files.createTempFile("pixiv", "." + fileType);
