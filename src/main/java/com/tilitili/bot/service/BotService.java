@@ -6,7 +6,6 @@ import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotQuery;
@@ -306,10 +305,10 @@ public class BotService {
         String sendType = botSender.getSendType();
 
         String prefix = "";
-        if (Objects.equals(sendType, SendTypeEnum.GUILD_MESSAGE.sendType)) {
-            prefix = ".";
-            actionKey = actionKey.replaceAll("^[.。/]", prefix);
-        }
+//        if (Objects.equals(sendType, SendTypeEnum.GUILD_MESSAGE.sendType)) {
+//            prefix = ".";
+//            actionKey = actionKey.replaceAll("^[.。/]", prefix);
+//        }
 
         return botTaskMapper.getBotTaskListBySenderIdAndKeyOrNotKey(botSender.getId(), actionKey, prefix);
     }
