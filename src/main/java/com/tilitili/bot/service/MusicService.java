@@ -267,7 +267,7 @@ public class MusicService {
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
             playerMusicList = musicCloudManager.getPlayerListDetail(idList);
-        } else if (searchKey.contains("163.com/dj")) {
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?dj", searchKey), "")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
