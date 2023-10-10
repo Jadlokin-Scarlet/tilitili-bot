@@ -10,7 +10,6 @@ import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -86,12 +85,13 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
                 return;
             }
             Asserts.checkNull(botIdLockMap.putIfAbsent(key, true), "链接超时，请重试");
+            log.info("尝试连接ws key="+key);
             webSocketHandler = botWebSocketHandlerMap.get(key);
             if (webSocketHandler != null && webSocketHandler.getStatus() == 0) {
                 return;
             }
             if (webSocketHandler != null) {
-                webSocketHandler.closeBlocking();
+                webSocketHandler.connectBlocking();
                 botWebSocketHandlerMap.remove(key);
             }
             BaseWebSocketHandler newBotWebSocketHandler = this.newWebSocketHandle(key, callback);
