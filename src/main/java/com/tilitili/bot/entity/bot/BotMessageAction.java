@@ -57,7 +57,7 @@ public class BotMessageAction extends BaseDTO {
         this.atList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "At")).map(BotMessageChain::getTarget).filter(Objects::nonNull).collect(Collectors.toList());
         List<String> textList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, "Plain")).map(BotMessageChain::getText).filter(StringUtils::isNotBlank).collect(Collectors.toList());
 
-        this.text = String.join("", textList).trim();
+        this.text = StringUtils.removeGuildPrefix(String.join("", textList).trim());
         this.body = text.contains("\n")? text.substring(text.indexOf("\n") + 1).trim(): null;
         List<String> lineList = body == null? Collections.emptyList(): Arrays.stream(body.split("\n")).filter(StringUtils::isNotBlank).map(String::trim).collect(Collectors.toList());
         head = text.isEmpty()? null: text.contains("\n")? text.substring(0, text.indexOf("\n")): text;
