@@ -357,7 +357,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleMusicCouldSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String searchKey, Integer theIndex) {
-        List<MusicCloudSong> songList = musicCloudManager.searchMusicList(searchKey);
+        List<MusicCloudSong> songList = musicCloudManager.searchMusicList(bot, searchKey);
         Asserts.notEmpty(songList, "没搜到歌曲");
         if (songList.size() == 1) {
             MusicCloudSong song = songList.get(0);
