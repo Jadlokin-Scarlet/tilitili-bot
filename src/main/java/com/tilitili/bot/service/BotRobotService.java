@@ -61,10 +61,10 @@ public class BotRobotService {
         List<BotRobotDTO> result = new ArrayList<>();
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
-            if (Objects.equals(robot.getPushType(), "ws")) {
+            if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
                 BotWebSocketHandler handler = webSocketFactory.getWebSocketOrNull(robot);
                 robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
-            } else if (Objects.equals(robot.getPushType(), "hook")) {
+            } else if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_HOOK)) {
                 robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
             }
             result.add(robotDTO);
@@ -78,7 +78,7 @@ public class BotRobotService {
         Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
-        if (Objects.equals(bot.getPushType(), "ws")) {
+        if (Objects.equals(bot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
             webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
         }
     }
@@ -87,7 +87,7 @@ public class BotRobotService {
         BotRobot bot = botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
-        if (Objects.equals(bot.getPushType(), "ws")) {
+        if (Objects.equals(bot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
             webSocketFactory.downBotBlocking(bot);
         }
     }
@@ -139,7 +139,7 @@ public class BotRobotService {
     private void handleQQGuildBot(BotRobot bot) {
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         Asserts.isTrue(Pattern.matches("\\d+\\.\\w+", bot.getVerifyKey()), "ggGuild的秘钥由appId点secret构成");
-        bot.setPushType("ws");
+        bot.setPushType(BotRobotConstant.PUSH_TYPE_WS);
         bot.setHost("https://api.sgroup.qq.com/");
         bot.setIntents(1073741827);
 
@@ -156,7 +156,7 @@ public class BotRobotService {
 
     private void handleKookBot(BotRobot bot) {
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
-        bot.setPushType("ws");
+        bot.setPushType(BotRobotConstant.PUSH_TYPE_WS);
         bot.setHost("https://www.kookapp.cn/");
 
         BotRobot botInfo = botManager.getBotInfo(bot);
@@ -174,7 +174,7 @@ public class BotRobotService {
         Asserts.notBlank(bot.getName(), "请输入昵称");
         Asserts.notNull(bot.getHost(), "请输入服务器地址");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
-        bot.setPushType("hook");
+        bot.setPushType(BotRobotConstant.PUSH_TYPE_HOOK);
         String host = bot.getHost();
         if (!host.startsWith("http")) {
             host = "http://"+host;

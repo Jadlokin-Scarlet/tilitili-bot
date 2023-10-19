@@ -3,6 +3,7 @@ package com.tilitili.bot.config;
 import com.tilitili.bot.receive.MinecraftReceive;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.WebSocketFactory;
+import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.manager.BotRobotCacheManager;
@@ -53,7 +54,9 @@ public class WebSocketConfig {
 //        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getValidBotRobotById(5L));
 //        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
-            webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
+            if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {
+                webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
+            }
         }
     }
 }

@@ -91,7 +91,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
                 return;
             }
             if (webSocketHandler != null) {
-                webSocketHandler.connectBlocking();
+                webSocketHandler.closeBlocking();
                 botWebSocketHandlerMap.remove(key);
             }
             BaseWebSocketHandler newBotWebSocketHandler = this.newWebSocketHandle(key, callback);
