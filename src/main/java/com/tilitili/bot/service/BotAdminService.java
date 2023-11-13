@@ -61,7 +61,7 @@ public class BotAdminService {
         }
         Asserts.notNull(botAdmin, "账号不存在");
 
-        String md5Password = md5Password(password);
+        String md5Password = password.length() == 32? password: md5Password(password);
         Asserts.checkEquals(botAdmin.getPassword(), md5Password, "密码错误");
 
         return botAdmin;
@@ -118,6 +118,7 @@ public class BotAdminService {
 
     private void checkRegisterPassword(String password) {
         Asserts.notBlank(password, "请填写密码");
+        Asserts.isTrue(password.length() < 30, "密码过长");
     }
 
     private void checkRegisterEmail(String email) {
