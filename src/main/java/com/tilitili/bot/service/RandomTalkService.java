@@ -30,8 +30,8 @@ public class RandomTalkService {
 
     public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(BotFunctionTalkQuery query) {
         query.setStatus(0);
-        List<BotFunctionTalk> list = botFunctionTalkMapper.getBotFunctionTalkByAdmin(query);
         int total = botFunctionTalkMapper.countBotFunctionTalkByAdmin(query);
+        List<BotFunctionTalk> list = botFunctionTalkMapper.getBotFunctionTalkByAdmin(query);
         Map<Long, BotSender> cacheMap = new HashMap<>();
         List<BotFunctionTalkDTO> result = list.stream().map(functionTalk -> {
             BotFunctionTalkDTO functionTalkDTO = new BotFunctionTalkDTO();
