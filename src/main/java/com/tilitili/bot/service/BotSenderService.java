@@ -42,8 +42,8 @@ public class BotSenderService {
     }
 
     public BaseModel<PageModel<Map<String, Object>>> listBotSender(BotSenderQuery query) {
-        List<BotSender> list = botSenderCacheManager.listBotSender(query);
         int count = botSenderCacheManager.countBotSender(query);
+        List<BotSender> list = botSenderCacheManager.listBotSender(query);
         List<Map<String, Object>> result = list.stream().map(botSender -> {
             BotRobot listenBot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
             BotRobot sendBot = botRobotCacheManager.getValidBotRobotById(botSender.getSendBot());
