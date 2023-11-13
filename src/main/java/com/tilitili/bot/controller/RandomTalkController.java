@@ -2,6 +2,7 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotFunctionTalkDTO;
 import com.tilitili.bot.service.RandomTalkService;
+import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Slf4j
 @Controller
@@ -23,7 +25,7 @@ public class RandomTalkController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(BotFunctionTalkQuery query) {
-        return randomTalkService.listRandomTalk(query);
+    public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(@SessionAttribute("botAdmin") BotAdmin botAdmin, BotFunctionTalkQuery query) {
+        return randomTalkService.listRandomTalk(query.setAdminId(botAdmin.getId()));
     }
 }
