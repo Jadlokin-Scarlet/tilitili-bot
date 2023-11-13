@@ -69,7 +69,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		long sourceUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
 		BotUserDTO sourceBotUser = botUserManager.getValidBotUserByIdWithParent(sourceUserId);
-		botUserManager.bindUser(bot, botSender, sourceBotUser, botUser);
+		botUserManager.bindUser(sourceBotUser, botUser);
 
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);
