@@ -42,8 +42,8 @@ public class BotSenderService {
     }
 
     public BaseModel<PageModel<Map<String, Object>>> listBotSender(BotSenderQuery query) {
-        List<BotSender> list = botSenderCacheManager.listBotSender(query);
-        int count = botSenderCacheManager.countBotSender(query);
+        List<BotSender> list = botSenderCacheManager.listBotSenderByAdmin(query);
+        int count = botSenderCacheManager.countBotSenderByAdmin(query);
         List<Map<String, Object>> result = list.stream().map(botSender -> {
             BotRobot listenBot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
             BotRobot sendBot = botRobotCacheManager.getValidBotRobotById(botSender.getSendBot());
@@ -133,7 +133,7 @@ public class BotSenderService {
         if (adminMapping == null) {
             botSenderQuery.setAdminId(botAdmin.getId());
         }
-        List<BotSender> list = botSenderCacheManager.listBotSender(botSenderQuery);
+        List<BotSender> list = botSenderCacheManager.listBotSenderByAdmin(botSenderQuery);
         return list.stream().map(botSender -> new Resource(botSender.getId(), botSender.getName())).collect(Collectors.toList());
     }
 }
