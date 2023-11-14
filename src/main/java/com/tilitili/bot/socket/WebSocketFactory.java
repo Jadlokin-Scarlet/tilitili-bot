@@ -102,6 +102,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
         } catch (Exception e) {
             log.error("异常", e);
         } finally {
+            log.info("连接ws结束 key="+key);
             botIdLockMap.remove(key);
         }
     }

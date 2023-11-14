@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 
@@ -41,7 +40,7 @@ public class MinecraftReceive {
 		this.taskMapper = taskMapper;
 	}
 
-	@Scheduled(fixedDelay = 1)
+//	@Scheduled(fixedDelay = 1)
 	public void  receiveMinecraftMessage() {
 		TaskMessage taskMessage = null;
 		try {
