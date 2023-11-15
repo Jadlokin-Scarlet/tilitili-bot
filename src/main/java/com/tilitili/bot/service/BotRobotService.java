@@ -210,16 +210,17 @@ public class BotRobotService {
         if (adminMapping == null) {
             Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
         }
-        this.suppleHost(bot);
 
         BotRobot updBot = new BotRobot().setId(bot.getId());
         BotRobot dbBot = botRobotCacheManager.getBotRobotById(bot.getId());
         if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
             updBot.setName(bot.getName());
         }
-        if (bot.getHost() != null && !bot.getHost().equals(dbBot.getHost())) {
-            updBot.setHost(bot.getHost());
-        }
+        if (bot.getHost() != null)
+            this.suppleHost(bot);
+            if (!bot.getHost().equals(dbBot.getHost())) {
+                updBot.setHost(bot.getHost());
+            }
         if (bot.getVerifyKey() != null && !bot.getVerifyKey().equals(dbBot.getVerifyKey())) {
             updBot.setVerifyKey(bot.getVerifyKey());
         }
