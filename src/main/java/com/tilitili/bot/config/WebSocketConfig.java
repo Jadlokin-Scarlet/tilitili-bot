@@ -51,7 +51,7 @@ public class WebSocketConfig {
 
     private void upAllBotRobot() {
         List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
-//        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getValidBotRobotById(5L));
+//        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(9L));
 //        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {

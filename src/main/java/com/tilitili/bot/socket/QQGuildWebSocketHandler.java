@@ -12,11 +12,13 @@ import java.util.function.BiConsumer;
 
 @Slf4j
 public class QQGuildWebSocketHandler extends BotWebSocketHandler {
+    private final String token;
     private int s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback) {
+    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback, String token) {
         super(serverUri, bot, webSocketFactory, callback);
+        this.token = token;
     }
 
     @Override
@@ -38,9 +40,9 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             switch (response.getOp()) {
                 case 10: {
                     if (sessionId == null) {
-                        this.send("{\"op\":2,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"intents\":"+bot.getIntents()+",\"shard\":[0,1]}}");
+                        this.send("{\"op\":2,\"d\":{\"token\":\""+token+"\",\"intents\":"+bot.getIntents()+",\"shard\":[0,1]}}");
                     } else {
-                        this.send("{\"op\":6,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
+                        this.send("{\"op\":6,\"d\":{\"token\":\""+token+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
                     }
                     executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 50, TimeUnit.SECONDS);
                     break;
@@ -64,6 +66,11 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
         } catch (Exception e) {
             log.error("处理websocket异常, message="+message, e);
         }
+    }
+    @Override
+    public void send(String text) {
+        log.info("send ws message "+text);
+        super.send(text);
     }
 
     @Override
