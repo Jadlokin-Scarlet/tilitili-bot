@@ -37,7 +37,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     }
 
     public List<BotWebSocketHandler> getWebSocketOrNull(BotRobot bot) {
-        return botWebSocketHandlerMap.get(bot.getId()).stream().map(w -> (BotWebSocketHandler)w).collect(Collectors.toList());
+        return botWebSocketHandlerMap.getOrDefault(bot.getId(), Collections.emptyList()).stream().map(w -> (BotWebSocketHandler)w).collect(Collectors.toList());
     }
 
 //    // 短连接Websocket只会有一个
