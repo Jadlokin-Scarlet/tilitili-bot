@@ -216,11 +216,12 @@ public class BotRobotService {
         if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
             updBot.setName(bot.getName());
         }
-        if (bot.getHost() != null)
+        if (bot.getHost() != null) {
             this.suppleHost(bot);
             if (!bot.getHost().equals(dbBot.getHost())) {
                 updBot.setHost(bot.getHost());
             }
+        }
         if (bot.getVerifyKey() != null && !bot.getVerifyKey().equals(dbBot.getVerifyKey())) {
             updBot.setVerifyKey(bot.getVerifyKey());
         }
