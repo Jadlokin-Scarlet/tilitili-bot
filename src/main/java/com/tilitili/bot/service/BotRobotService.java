@@ -21,6 +21,8 @@ import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.CollectionUtils;
+import com.tilitili.common.utils.StreamUtil;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -62,8 +64,9 @@ public class BotRobotService {
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
-                BotWebSocketHandler handler = webSocketFactory.getWebSocketOrNull(robot);
-                robotDTO.setWsStatus(handler == null? -1: handler.getStatus());
+                List<BotWebSocketHandler> handlerList = webSocketFactory.getWebSocketOrNull(robot);
+                boolean hasCon = CollectionUtils.isNotEmpty(handlerList) && handlerList.stream().allMatch(StreamUtil.isEqual(BotWebSocketHandler::getStatus, 0));
+                robotDTO.setWsStatus(hasCon? 0: -1);
             } else if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_HOOK)) {
                 robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
             }

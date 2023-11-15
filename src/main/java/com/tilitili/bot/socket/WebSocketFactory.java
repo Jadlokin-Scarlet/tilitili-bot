@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -35,8 +36,8 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
         this.botWebSocketHandlerMap = new HashMap<>();
     }
 
-    public BotWebSocketHandler getWebSocketOrNull(BotRobot bot) {
-        return (BotWebSocketHandler) botWebSocketHandlerMap.get(bot.getId());
+    public List<BotWebSocketHandler> getWebSocketOrNull(BotRobot bot) {
+        return botWebSocketHandlerMap.get(bot.getId()).stream().map(w -> (BotWebSocketHandler)w).collect(Collectors.toList());
     }
 
 //    // 短连接Websocket只会有一个
