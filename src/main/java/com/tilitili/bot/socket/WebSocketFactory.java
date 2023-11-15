@@ -63,10 +63,18 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
                 case BotRobotConstant.TYPE_MIRAI:
                 case BotRobotConstant.TYPE_GOCQ: return Collections.singletonList(new BotWebSocketHandler(new URI(wsUrl), bot, this, callback));
                 case BotRobotConstant.TYPE_KOOK: return Collections.singletonList(new KookWebSocketHandler(new URI(wsUrl), bot, this, callback));
-                case BotRobotConstant.TYPE_QQ_GUILD: return Arrays.asList(
-//                        new QQGuildWebSocketHandler(new URI(wsUrl), bot, this, callback, botManager.getAccessToken(bot, "group"))
-                        new QQGuildWebSocketHandler(new URI(wsUrl), bot, this, callback, botManager.getAccessToken(bot, "guild"))
-                );
+                case BotRobotConstant.TYPE_QQ_GUILD: {
+                    List<BaseWebSocketHandler> wsList = new ArrayList<>();
+                    String groupToken = botManager.getAccessToken(bot, "group");
+                    String guildToken = botManager.getAccessToken(bot, "guild");
+                    if (groupToken != null) {
+                        wsList.add(new QQGuildWebSocketHandler(new URI(wsUrl), bot, this, callback, groupToken));
+                    }
+                    if (guildToken != null) {
+                        wsList.add(new QQGuildWebSocketHandler(new URI(wsUrl), bot, this, callback, guildToken));
+                    }
+                    return wsList;
+                }
                 default: throw new AssertException("?");
             }
         } catch (URISyntaxException e) {
