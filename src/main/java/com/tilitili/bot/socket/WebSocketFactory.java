@@ -37,7 +37,11 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     }
 
     public int getWsStatus(BotRobot bot) {
-        return wrapperMap.get(bot.getId()).getStatus();
+        BotWebSocketWrapperImp wrapper = wrapperMap.get(bot.getId());
+        if (wrapper == null) {
+            return -1;
+        }
+        return wrapper.getStatus();
     }
 
     private BotWebSocketWrapperImp newWebSocketWrapper(Long botId) {
