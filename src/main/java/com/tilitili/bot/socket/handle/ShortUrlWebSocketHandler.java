@@ -1,5 +1,5 @@
 
-package com.tilitili.bot.socket;
+package com.tilitili.bot.socket.handle;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.tilitili.common.exception.AssertException;

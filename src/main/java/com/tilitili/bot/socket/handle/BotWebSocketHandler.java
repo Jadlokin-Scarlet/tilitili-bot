@@ -1,27 +1,28 @@
-package com.tilitili.bot.socket;
+package com.tilitili.bot.socket.handle;
 
+import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.util.function.BiConsumer;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
     protected final Long botId;
-    protected final WebSocketFactory webSocketFactory;
-    protected final BiConsumer<BotRobot, String> callback;
+    private final BotService botService;
+    private final BotRobotCacheManager botRobotCacheManager;
 
-    public BotWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback) {
+    public BotWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
         super(serverUri);
         this.botId = bot.getId();
-        this.webSocketFactory = webSocketFactory;
-        this.callback = callback;
+        this.botService = botService;
+        this.botRobotCacheManager = botRobotCacheManager;
     }
 
     @Override
     protected void handleTextMessage(String message) {
-        BotRobot bot = webSocketFactory.getValidBotRobotById(botId);
+        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
         this.handleBotMessage(bot, message);
     }
 
@@ -29,15 +30,11 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         if (!message.contains("heartbeat")) {
             log.info("Message Received bot={} message={}", bot.getName(), message);
         }
-        callback.accept(bot, message);
+        botService.syncHandleMessage(bot, message);
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
         super.onClose(code, reason, remote);
-    }
-
-    public BiConsumer<BotRobot, String> getCallback() {
-        return callback;
     }
 }

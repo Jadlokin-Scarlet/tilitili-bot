@@ -1,4 +1,4 @@
-package com.tilitili.bot.socket;
+package com.tilitili.bot.socket.handle;
 
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class BaseWebSocketHandler extends WebSocketClient {
     protected void handleTextMessage(String message) {
     }
 
-    public Integer getStatus() {
+    public int getStatus() {
         return status.get();
     }
 }

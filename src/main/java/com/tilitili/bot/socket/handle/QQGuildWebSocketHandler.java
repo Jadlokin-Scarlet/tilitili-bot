@@ -1,24 +1,31 @@
-package com.tilitili.bot.socket;
+package com.tilitili.bot.socket.handle;
 
+import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.qqGuild.QQGuildWsResponse;
+import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 
 @Slf4j
 public class QQGuildWebSocketHandler extends BotWebSocketHandler {
-    private final String token;
+    private final String type;
+    private final BotManager botManager;
+    private final BotService botService;
+
     private int s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, WebSocketFactory webSocketFactory, BiConsumer<BotRobot, String> callback, String token) {
-        super(serverUri, bot, webSocketFactory, callback);
-        this.token = token;
+    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, String type, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
+        super(serverUri, bot, botService, botRobotCacheManager);
+        this.type = type;
+        this.botManager = botManager;
+        this.botService = botService;
     }
 
     @Override
@@ -39,6 +46,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             }
             switch (response.getOp()) {
                 case 10: {
+                    String token = botManager.getAccessToken(bot, type);
                     if (sessionId == null) {
                         this.send("{\"op\":2,\"d\":{\"token\":\""+token+"\",\"intents\":"+bot.getIntents()+",\"shard\":[0,1]}}");
                     } else {
@@ -53,7 +61,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                     if (response.getD().getSessionId() != null) {
                         this.sessionId = response.getD().getSessionId();
                     }
-                    callback.accept(bot, message);
+                    botService.syncHandleMessage(bot, message);
                     break;
                 }
                 case 7: {

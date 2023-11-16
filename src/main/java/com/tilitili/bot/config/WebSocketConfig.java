@@ -25,13 +25,11 @@ import java.util.List;
 public class WebSocketConfig {
     private final BotRobotCacheManager botRobotCacheManager;
     private final WebSocketFactory webSocketFactory;
-    private final BotService botService;
 
     @Autowired
-    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, WebSocketFactory webSocketFactory, BotService botService) {
+    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, WebSocketFactory webSocketFactory) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.webSocketFactory = webSocketFactory;
-        this.botService = botService;
     }
 
     @PostConstruct
@@ -55,7 +53,7 @@ public class WebSocketConfig {
 //        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {
-                webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
+                webSocketFactory.upBotBlocking(bot.getId());
             }
         }
     }

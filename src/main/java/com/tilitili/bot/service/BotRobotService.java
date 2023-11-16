@@ -1,7 +1,6 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.BotRobotDTO;
-import com.tilitili.bot.socket.BotWebSocketHandler;
 import com.tilitili.bot.socket.WebSocketFactory;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.constant.BotRoleConstant;
@@ -21,8 +20,6 @@ import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.CollectionUtils;
-import com.tilitili.common.utils.StreamUtil;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
@@ -64,9 +61,7 @@ public class BotRobotService {
         for (BotRobot robot : list) {
             BotRobotDTO robotDTO = new BotRobotDTO(robot);
             if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
-                List<BotWebSocketHandler> handlerList = webSocketFactory.getWebSocketOrNull(robot);
-                boolean hasCon = CollectionUtils.isNotEmpty(handlerList) && handlerList.stream().allMatch(StreamUtil.isEqual(BotWebSocketHandler::getStatus, 0));
-                robotDTO.setWsStatus(hasCon? 0: -1);
+                robotDTO.setWsStatus(webSocketFactory.getWsStatus(robot));
             } else if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_HOOK)) {
                 robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
             }
@@ -82,7 +77,7 @@ public class BotRobotService {
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(0));
         Asserts.checkEquals(cnt, 1, "上线失败");
         if (Objects.equals(bot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
-            webSocketFactory.upBotBlocking(bot.getId(), botService::syncHandleMessage);
+            webSocketFactory.upBotBlocking(bot.getId());
         }
     }
 
@@ -91,7 +86,7 @@ public class BotRobotService {
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
         if (Objects.equals(bot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
-            webSocketFactory.downBotBlocking(bot);
+            webSocketFactory.downBotBlocking(botId);
         }
     }
 
