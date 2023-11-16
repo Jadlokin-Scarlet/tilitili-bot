@@ -77,7 +77,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     }
     @Override
     public void send(String text) {
-        log.info("send ws message "+text);
+        log.info("send ws message type="+type+" botId="+botId+" text="+text);
         super.send(text);
     }
 
