@@ -38,7 +38,7 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 	@Override
 	public void downBotBlocking() {
 		this.downBotBlocking(TYPE_GROUP);
-		this.downBotBlocking(TYPE_GUILD);
+//		this.downBotBlocking(TYPE_GUILD);
 	}
 
 	public void downBotBlocking(String type) {
@@ -62,7 +62,7 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 	public int getStatus() {
 		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
 		int groupStatus = this.getStatus(bot, TYPE_GROUP);
-		int guildStatus = this.getStatus(bot, TYPE_GUILD);
+		int guildStatus = 0;;//this.getStatus(bot, TYPE_GUILD);
 		return groupStatus == guildStatus && guildStatus == 0? 0: -1;
 	}
 
@@ -86,7 +86,7 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 		Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
 
 		this.upBotBlocking(wsUrl, bot, TYPE_GROUP);
-		this.upBotBlocking(wsUrl, bot, TYPE_GUILD);
+//		this.upBotBlocking(wsUrl, bot, TYPE_GUILD);
 	}
 
 	private void upBotBlocking(String wsUrl, BotRobot bot, String type) {
