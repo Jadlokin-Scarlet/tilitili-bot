@@ -52,10 +52,10 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                     } else {
                         this.send("{\"op\":6,\"d\":{\"token\":\""+token+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
                     }
-                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 50, TimeUnit.SECONDS);
+                    executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 40, TimeUnit.SECONDS);
                     break;
                 }
-                case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 50, TimeUnit.SECONDS);break;
+                case 11: executorService.schedule(() -> this.send("{\"op\": 1,\"d\": "+s+"}"), 40, TimeUnit.SECONDS);break;
                 case 0: {
                     this.s = response.getS();
                     if (response.getD().getSessionId() != null) {
