@@ -42,7 +42,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             }
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
             if (response.getOp() != 11) {
-                log.info("Message Received bot={} message={}", bot.getName(), message);
+                log.info("Message Received bot={} type={} message={}", bot.getName(), type, message);
             }
             switch (response.getOp()) {
                 case 10: {
