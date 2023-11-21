@@ -37,9 +37,8 @@ public class BotRobotService {
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final WebSocketFactory webSocketFactory;
     private final BotAdminManager botAdminManager;
-    private final BotService botService;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager, BotService botService) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
@@ -47,7 +46,6 @@ public class BotRobotService {
         this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
         this.webSocketFactory = webSocketFactory;
         this.botAdminManager = botAdminManager;
-        this.botService = botService;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
