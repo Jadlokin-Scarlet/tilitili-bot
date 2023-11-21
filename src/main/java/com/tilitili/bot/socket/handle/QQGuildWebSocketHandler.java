@@ -44,9 +44,9 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             if (response.getOp() != 11) {
                 log.info("Message Received bot={} type={} message={}", bot.getName(), type, message);
             }
+            String token = botManager.getAccessToken(bot, type);
             switch (response.getOp()) {
                 case 10: {
-                    String token = botManager.getAccessToken(bot, type);
                     if (sessionId == null) {
                         this.send("{\"op\":2,\"d\":{\"token\":\""+token+"\",\"intents\":"+bot.getIntents()+",\"shard\":[0,1]}}");
                     } else {
@@ -66,7 +66,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
                 }
                 case 7: {
                     log.info("尝试重连");
-                    this.send("{\"op\":6,\"d\":{\"token\":\"Bot "+bot.getVerifyKey()+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
+                    this.send("{\"op\":6,\"d\":{\"token\":\""+token+"\",\"session_id\":\""+sessionId+"\",\"seq\":"+s+"}}");
                     executorService.schedule(() -> this.send("{\"op\": 1,\"d\": " + s + "}"), 50, TimeUnit.SECONDS);
                 }
                 default: log.warn("记录未知类型"+ message);
