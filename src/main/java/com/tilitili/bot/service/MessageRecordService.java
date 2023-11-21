@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class
-MessageRecordService {
+public class MessageRecordService {
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final BotManager botManager;
 
