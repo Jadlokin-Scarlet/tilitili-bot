@@ -35,11 +35,11 @@ public class BotService {
     public static final String lastMessageIdKey = "lastMessageId";
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final Map<String, BaseEventHandle> eventHandleMap;
-    private final BotSessionService botSessionService;
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
     private final Gson gson;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
+    private final BotSessionService botSessionService;
     private final SendMessageManager sendMessageManager;
     private final BotRobotCacheManager botRobotCacheManager;
     private final BotMessageRecordMapper botMessageRecordMapper;
