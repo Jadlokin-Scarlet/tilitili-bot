@@ -40,10 +40,10 @@ public class BotService {
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
     private final Gson gson;
-    private final BotMessageRecordManager botMessageRecordManager;
     private final BotMessageRecordMapper botMessageRecordMapper;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
     private final BotRobotCacheManager botRobotCacheManager;
+    private final BotMessageRecordManager botMessageRecordManager;
     private final BotSendMessageRecordMapper botSendMessageRecordMapper;
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
