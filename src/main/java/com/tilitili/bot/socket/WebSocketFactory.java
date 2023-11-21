@@ -32,8 +32,8 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     public WebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
         this.botManager = botManager;
         this.botService = botService;
-        this.botRobotCacheManager = botRobotCacheManager;
         this.wrapperMap = new ConcurrentHashMap<>();
+        this.botRobotCacheManager = botRobotCacheManager;
     }
 
     public int getWsStatus(BotRobot bot) {
