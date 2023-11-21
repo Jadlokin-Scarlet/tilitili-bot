@@ -55,8 +55,8 @@ public class BotService {
         this.botTaskMapper = botTaskMapper;
         this.botMessageRecordManager = botMessageRecordManager;
         this.botMessageRecordMapper = botMessageRecordMapper;
-        this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botRobotCacheManager = botRobotCacheManager;
+        this.botSendMessageRecordMapper = botSendMessageRecordMapper;
         this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 
         gson = new Gson();
