@@ -16,6 +16,6 @@ deploy:
   script:
     - echo "start deploy ..."
     - cd /home/www/
-    - ./docker_deploy_test tilitili-bot springboot 121.5.247.29 8087 172.27.0.8
+    - ./docker_deploy tilitili-bot springboot 121.5.247.29 8087 172.27.0.8
   only:
     - master
