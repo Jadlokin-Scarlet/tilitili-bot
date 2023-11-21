@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
-import com.tilitili.bot.service.mirai.talk.ReplyHandle;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -98,11 +97,11 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
 
-        String redisKey = ReplyHandle.timeNumKey + "-" + DateUtils.formatDateYMD(new Date()) + "-" + botUser.getId();
-        Long theTimeNum = redisCache.increment(redisKey, 1L);
-        redisCache.expire(redisKey, 60 * 60 * 24);
-        if (theTimeNum > 1) {
-            return BotMessage.simpleTextMessage("不要太贪心哦。");
+        String redisKey = this.getWifeMappingCacheKey(botSender, botUser);
+        Long wifeUserId = redisCache.getValueLong(this.getWifeMappingCacheKey(botSender, botUser));
+        if (wifeUserId != null) {
+            BotUserDTO wife = botUserManager.getValidBotUserByIdWithParent(wifeUserId);
+            return BotMessage.simpleTextMessage("你的老婆是@"+wife.getName()+"，不要太贪心哦。");
         }
 
         List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
@@ -113,7 +112,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         BotUserDTO wifeUser = userList.get(ThreadLocalRandom.current().nextInt(userList.size()));
         String resp = String.format("你今天的群老婆是：%s(%s)", wifeUser.getName(), wifeUser.getQq());
         String image = wifeUser.getFace();
-        redisCache.setValue(this.getWifeMappingCacheKey(botSender, botUser), wifeUser.getId(), TimeUnit.DAYS.toSeconds(1));
+        redisCache.setValue(redisKey, wifeUser.getId(), TimeUnit.DAYS.toSeconds(1));
         return BotMessage.simpleImageTextMessage(resp, image);
     }
 }
