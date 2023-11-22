@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotTaskConstant;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
@@ -11,6 +12,7 @@ import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
@@ -34,8 +36,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
+	private final BotAdminManager botAdminManager;
 
-	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotAdminManager botAdminManager) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botSenderCacheManager = botSenderCacheManager;
@@ -43,6 +46,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
+		this.botAdminManager = botAdminManager;
 	}
 
 	@Override
@@ -50,8 +54,28 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "申请合体": return handleApply(messageAction);
 			case "合体！": return handleAccept(messageAction);
+			case "合体": return handleAdminBind(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleAdminBind(BotMessageAction messageAction) {
+		BotRobot bot = messageAction.getBot();
+		BotUserDTO botUser = messageAction.getBotUser();
+		boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(bot, botUser);
+		if (!canUseBotAdminTask) {
+			return null;
+		}
+		String qqStr = messageAction.getValue();
+		Asserts.isNumber(qqStr, "格式错啦(qq号)");
+		List<BotUserDTO> atList = messageAction.getAtList();
+		Asserts.notEmpty(atList, "格式错啦(at)");
+		BotUserDTO subUser = atList.get(0);
+
+		Long qq = Long.parseLong(qqStr);
+		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+		botUserManager.bindUser(subUser, parentUser);
+		return BotMessage.simpleTextMessage("√");
 	}
 
 	private BotMessage handleAccept(BotMessageAction messageAction) {
