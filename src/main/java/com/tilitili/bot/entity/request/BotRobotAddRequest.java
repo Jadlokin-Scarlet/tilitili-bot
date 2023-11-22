@@ -11,6 +11,7 @@ public class BotRobotAddRequest extends BotRobot {
 
     public BotRobotAddRequest setBotId(Long botId) {
         this.botId = botId;
+        this.setId(botId);
         return this;
     }
 }

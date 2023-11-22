@@ -68,8 +68,9 @@ public class BotRobotService {
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
     }
 
-    public void upBot(BotAdmin botAdmin, Long botId) {
-        BotRobot bot = botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+    public void upBot(Long botId) {
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
+        Asserts.notNull(bot, "参数异常");
         List<BotSender> senderList = botManager.getBotSenderDTOList(bot);
         Asserts.notEmpty(senderList, "bot验证失败");
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(0));
@@ -79,8 +80,9 @@ public class BotRobotService {
         }
     }
 
-    public void downBot(BotAdmin botAdmin, Long botId) {
-        BotRobot bot = botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+    public void downBot(Long botId) {
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
+        Asserts.notNull(bot, "参数异常");
         int cnt = botRobotCacheManager.updateBotRobotSelective(new BotRobot().setId(botId).setStatus(-1));
         Asserts.checkEquals(cnt, 1, "下线失败");
         if (Objects.equals(bot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
@@ -189,8 +191,9 @@ public class BotRobotService {
         }
     }
 
-    public void deleteBot(BotAdmin botAdmin, Long botId) {
-        botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+    public void deleteBot(Long botId) {
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
+        Asserts.notNull(bot, "参数异常");
         botRobotCacheManager.deleteBotRobotByPrimary(botId);
         List<BotRobotIndex> indexList = botRobotIndexMapper.getBotRobotIndexByCondition(new BotRobotIndexQuery().setBot(botId));
         for (BotRobotIndex index : indexList) {
@@ -198,12 +201,7 @@ public class BotRobotService {
         }
     }
 
-    public void editBot(BotAdmin botAdmin, BotRobot bot) {
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-        if (adminMapping == null) {
-            Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
-        }
-
+    public void editBot(BotRobot bot) {
         BotRobot updBot = new BotRobot().setId(bot.getId());
         BotRobot dbBot = botRobotCacheManager.getBotRobotById(bot.getId());
         if (bot.getName() != null && !bot.getName().equals(dbBot.getName())) {
@@ -221,8 +219,8 @@ public class BotRobotService {
         if (bot.getQq() != null && !bot.getQq().equals(dbBot.getQq())) {
             updBot.setQq(bot.getQq());
         }
-        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
-        Asserts.checkEquals(cnt, 1, "更新失败");
+//        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
+//        Asserts.checkEquals(cnt, 1, "更新失败");
     }
 
     private void suppleHost(BotRobot bot) {
@@ -236,7 +234,19 @@ public class BotRobotService {
         bot.setHost(host);
     }
 
-    public BotRobot getBot(BotAdmin botAdmin, Long botId) {
-        return botAdminManager.getBotRobotWithAdminCheck(botAdmin, botId);
+    public BotRobot getBot(Long botId) {
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
+        Asserts.notNull(bot, "参数异常");
+        return bot;
+    }
+
+    public void updateTaskList(BotRobot bot) {
+        BotRobot updBot = new BotRobot().setId(bot.getId());
+        BotRobot dbBot = botRobotCacheManager.getBotRobotById(bot.getId());
+        if (bot.getDefaultTaskIdList() != null && !bot.getDefaultTaskIdList().equals(dbBot.getDefaultTaskIdList())) {
+            updBot.setDefaultTaskIdList(bot.getDefaultTaskIdList());
+        }
+        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
+        Asserts.checkEquals(cnt, 1, "更新失败");
     }
 }

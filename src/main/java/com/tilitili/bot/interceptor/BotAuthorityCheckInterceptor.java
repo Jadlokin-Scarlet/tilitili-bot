@@ -43,6 +43,7 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
                 HttpSession session = request.getSession();
                 // 从会话中获取数据
                 BotAdmin botAdmin = (BotAdmin) session.getAttribute("botAdmin");
+                Asserts.notNull(botAdmin, "参数异常");
 
                 BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
                 if (adminMapping == null) {

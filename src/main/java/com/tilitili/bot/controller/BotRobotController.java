@@ -32,16 +32,16 @@ public class BotRobotController extends BaseController{
     @PostMapping("/up/{botId}")
     @ResponseBody
     @BotAuthorityCheck
-    public BaseModel<String> upBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
-        botRobotService.upBot(botAdmin, botId);
+    public BaseModel<String> upBot(@PathVariable Long botId) {
+        botRobotService.upBot(botId);
         return BaseModel.success();
     }
 
     @PostMapping("/down/{botId}")
     @ResponseBody
     @BotAuthorityCheck
-    public BaseModel<String> downBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
-        botRobotService.downBot(botAdmin, botId);
+    public BaseModel<String> downBot(@PathVariable Long botId) {
+        botRobotService.downBot(botId);
         return BaseModel.success();
     }
 
@@ -55,24 +55,31 @@ public class BotRobotController extends BaseController{
     @DeleteMapping("/delete/{botId}")
     @ResponseBody
     @BotAuthorityCheck
-    public BaseModel<String> deleteBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
-        botRobotService.deleteBot(botAdmin, botId);
+    public BaseModel<String> deleteBot(@PathVariable Long botId) {
+        botRobotService.deleteBot(botId);
         return BaseModel.success();
     }
 
     @PostMapping("/edit")
     @ResponseBody
     @BotAuthorityCheck
-    public BaseModel<String> editBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobotAddRequest bot) {
-        bot.setId(bot.getBotId());
-        botRobotService.editBot(botAdmin, bot);
+    public BaseModel<String> editBot(@RequestBody BotRobotAddRequest bot) {
+        botRobotService.editBot(bot);
         return BaseModel.success();
     }
 
     @GetMapping("/{botId}")
     @ResponseBody
     @BotAuthorityCheck
-    public BaseModel<BotRobot> getBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @PathVariable Long botId) {
-        return BaseModel.success(botRobotService.getBot(botAdmin, botId));
+    public BaseModel<BotRobot> getBot(@PathVariable Long botId) {
+        return BaseModel.success(botRobotService.getBot(botId));
+    }
+
+    @PostMapping("/taskList")
+    @ResponseBody
+    @BotAuthorityCheck
+    public BaseModel<BotRobot> updateTaskList(@RequestBody BotRobotAddRequest bot) {
+        botRobotService.updateTaskList(bot);
+        return BaseModel.success();
     }
 }
