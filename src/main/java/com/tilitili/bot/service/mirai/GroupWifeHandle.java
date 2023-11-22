@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class GroupWifeHandle extends ExceptionRespMessageHandle {
-
     private final RedisCache redisCache;
+
     private final BotUserManager botUserManager;
     private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
