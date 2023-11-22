@@ -27,7 +27,7 @@ public class ResourceService {
         resourceMap.put("sendTypeList", SendTypeEnum::getResource);
         resourceMap.put("roleList", botRoleManager::getResource);
         resourceMap.put("sendTypeResource", SendTypeEnum::getResource);
-        resourceMap.put("BotTaskResource", botTaskManager::listTaskResource);
+        resourceMap.put("botTaskResource", botTaskManager::listTaskResource);
         adminResourceMap.put("botSenderList", botSenderService::listBotSenderResource);
     }
 
