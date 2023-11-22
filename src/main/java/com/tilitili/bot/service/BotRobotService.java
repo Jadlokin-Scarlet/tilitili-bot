@@ -219,8 +219,11 @@ public class BotRobotService {
         if (bot.getQq() != null && !bot.getQq().equals(dbBot.getQq())) {
             updBot.setQq(bot.getQq());
         }
-//        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
-//        Asserts.checkEquals(cnt, 1, "更新失败");
+        if (bot.getDefaultTaskIdList() != null && !bot.getDefaultTaskIdList().equals(dbBot.getDefaultTaskIdList())) {
+            updBot.setDefaultTaskIdList(bot.getDefaultTaskIdList());
+        }
+        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
+        Asserts.checkEquals(cnt, 1, "更新失败");
     }
 
     private void suppleHost(BotRobot bot) {
@@ -240,13 +243,13 @@ public class BotRobotService {
         return bot;
     }
 
-    public void updateTaskList(BotRobot bot) {
-        BotRobot updBot = new BotRobot().setId(bot.getId());
-        BotRobot dbBot = botRobotCacheManager.getBotRobotById(bot.getId());
-        if (bot.getDefaultTaskIdList() != null && !bot.getDefaultTaskIdList().equals(dbBot.getDefaultTaskIdList())) {
-            updBot.setDefaultTaskIdList(bot.getDefaultTaskIdList());
-        }
-        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
-        Asserts.checkEquals(cnt, 1, "更新失败");
-    }
+//    public void updateTaskList(BotRobot bot) {
+//        BotRobot updBot = new BotRobot().setId(bot.getId());
+//        BotRobot dbBot = botRobotCacheManager.getBotRobotById(bot.getId());
+//        if (bot.getDefaultTaskIdList() != null && !bot.getDefaultTaskIdList().equals(dbBot.getDefaultTaskIdList())) {
+//            updBot.setDefaultTaskIdList(bot.getDefaultTaskIdList());
+//        }
+//        int cnt = botRobotCacheManager.updateBotRobotSelective(updBot);
+//        Asserts.checkEquals(cnt, 1, "更新失败");
+//    }
 }

@@ -75,11 +75,11 @@ public class BotRobotController extends BaseController{
         return BaseModel.success(botRobotService.getBot(botId));
     }
 
-    @PostMapping("/taskList")
-    @ResponseBody
-    @BotAuthorityCheck
-    public BaseModel<BotRobot> updateTaskList(@RequestBody BotRobotAddRequest bot) {
-        botRobotService.updateTaskList(bot);
-        return BaseModel.success();
-    }
+//    @PostMapping("/taskList")
+//    @ResponseBody
+//    @BotAuthorityCheck
+//    public BaseModel<BotRobot> updateTaskList(@RequestBody BotRobotAddRequest bot) {
+//        botRobotService.updateTaskList(bot);
+//        return BaseModel.success();
+//    }
 }
