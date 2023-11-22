@@ -98,11 +98,6 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);
 
-		BotCattle sourceCattle = botCattleMapper.getBotCattleByUserId(sourceUserId);
-		if (sourceCattle != null) {
-			botCattleMapper.updateBotCattleSelective(new BotCattle().setId(sourceCattle.getId()).setStatus(-1));
-		}
-
 		return BotMessage.simpleTextMessage("合体成功！");
 	}
 
