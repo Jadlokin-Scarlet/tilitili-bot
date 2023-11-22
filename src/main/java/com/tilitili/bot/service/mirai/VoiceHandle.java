@@ -1,8 +1,12 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
+import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.CheckManager;
@@ -22,17 +26,21 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
     private final BotManager botManager;
     private final VitsOPManager vitsOPManager;
     private final CheckManager checkManager;
+    private final MusicService musicService;
 
     @Autowired
-    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager, CheckManager checkManager) {
+    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager, CheckManager checkManager, MusicService musicService) {
         this.botManager = botManager;
         this.vitsOPManager = vitsOPManager;
         this.checkManager = checkManager;
+        this.musicService = musicService;
     }
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
         BotRobot bot = messageAction.getBot();
+        BotSender botSender = messageAction.getBotSender();
+        BotUserDTO botUser = messageAction.getBotUser();
         String speaker = messageAction.getParamOrDefault("who", "派蒙");
         String speed = messageAction.getParamOrDefault("speed", "1.2");
 
@@ -65,7 +73,13 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         String voiceId = botManager.uploadVoice(bot, wavFile);
         Asserts.notBlank(voiceId, "上传失败");
 
-        return BotMessage.simpleVoiceIdMessage(voiceId, url);
+        PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
+        playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_File);
+        if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
+            return BotMessage.simpleVoiceIdMessage(voiceId, url);
+        } else {
+            return BotMessage.emptyMessage();
+        }
     }
 //	@Override
 //    public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
