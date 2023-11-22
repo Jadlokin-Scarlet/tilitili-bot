@@ -68,14 +68,22 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		String qqStr = messageAction.getValue();
 		Asserts.isNumber(qqStr, "格式错啦(qq号)");
-		List<BotUserDTO> atList = messageAction.getAtList();
-		Asserts.notEmpty(atList, "格式错啦(at)");
-		BotUserDTO subUser = atList.get(0);
-
 		Long qq = Long.parseLong(qqStr);
 		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+
+		String targetKey = applyKey + parentUser.getId();
+		String sourceKey = (String) redisCache.getValue(targetKey);
+		long subUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
+		BotUserDTO subUser = botUserManager.getValidBotUserByIdWithParent(subUserId);
+
+		Asserts.checkEquals(parentUser.getType(), 0, "啊嘞，不对劲");
+
 		botUserManager.bindUser(subUser, parentUser);
-		return BotMessage.simpleTextMessage("√");
+
+		redisCache.delete(sourceKey);
+		redisCache.delete(targetKey);
+
+		return BotMessage.simpleTextMessage("合体成功！");
 	}
 
 	private BotMessage handleAccept(BotMessageAction messageAction) {
