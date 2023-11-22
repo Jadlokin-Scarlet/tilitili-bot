@@ -71,8 +71,8 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 //        String voiceId = botManager.uploadVoice(bot, wavFile);
 //        Asserts.notBlank(voiceId, "上传失败");
-
         PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
+
         playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_File).setName(String.format("%s的台词", botUser.getName()));
         if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
