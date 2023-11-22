@@ -59,6 +59,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
         Asserts.isTrue(VitsOPManager.nameList.contains(speaker), "%s是谁啊。", speaker);
         String url = vitsOPManager.getVoiceUrl(text, speaker, speed);
+        log.info("voice url="+url);
 //        url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
 //        HttpClientUtil.downloadFile(url, wavFile);
 
