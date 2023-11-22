@@ -12,7 +12,6 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.manager.VitsOPManager;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,7 +60,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         Asserts.isTrue(VitsOPManager.nameList.contains(speaker), "%s是谁啊。", speaker);
         String url = vitsOPManager.getVoiceUrl(text, speaker, speed);
 //        url = String.format("https://dds.dui.ai/runtime/v1/synthesize?voiceId=%s&speed=%s&volume=100&audioType=wav&text=%s", speaker, speed, URLEncoder.encode(text, "UTF-8"));
-        HttpClientUtil.downloadFile(url, wavFile);
+//        HttpClientUtil.downloadFile(url, wavFile);
 
 //        String speakShell = String.format("sh /home/admin/silk/run2.sh %s", text);
 //        Runtime.getRuntime().exec(speakShell);
@@ -70,16 +69,16 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 //        Asserts.isTrue(slkFile.exists(), "转码slk失败");
 
-        String voiceId = botManager.uploadVoice(bot, wavFile);
-        Asserts.notBlank(voiceId, "上传失败");
+//        String voiceId = botManager.uploadVoice(bot, wavFile);
+//        Asserts.notBlank(voiceId, "上传失败");
 
         PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
-        playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_File);
+        playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_File).setName(String.format("%s的台词", botUser.getName()));
         if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
-            return BotMessage.simpleVoiceIdMessage(voiceId, url);
-        } else {
-            return BotMessage.emptyMessage();
+//            return BotMessage.simpleVoiceIdMessage(voiceId, url);
+//        } else {
         }
+            return BotMessage.emptyMessage();
     }
 //	@Override
 //    public BotMessage handleMessage(BotMessageAction messageAction) throws IOException, InterruptedException {
