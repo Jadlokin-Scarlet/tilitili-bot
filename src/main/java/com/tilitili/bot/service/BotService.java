@@ -5,13 +5,16 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseEventHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandleAdapt;
+import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.constant.BotTaskConstant;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.query.BotTaskQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotMessageRecordMapper;
@@ -97,6 +100,7 @@ public class BotService {
         try {
             // 获取sender，校验权限
             BotSender botSender = botMessage.getBotSender();
+            BotUserDTO botUser = botMessage.getBotUser();
             // 校验权限
             boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
             if (!hasHelp) {
@@ -109,13 +113,13 @@ public class BotService {
             botMessageRecordManager.logRecord(botMessage);
 
             // 获取用户锁
-            lockUserId.add(botMessage.getBotUser().getId());
-            Asserts.checkNull(userIdLockMap.putIfAbsent(botMessage.getBotUser().getId(), true), "听我说你先别急。");
+            lockUserId.add(botUser.getId());
+            Asserts.checkNull(userIdLockMap.putIfAbsent(botUser.getId(), true), "听我说你先别急。");
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
             for (BotUserDTO atUser : botMessageAction.getAtList()) {
                 Long atUserId = atUser.getId();
-                if (Objects.equals(atUserId, botMessage.getBotUser().getId())) continue;
+                if (Objects.equals(atUserId, botUser.getId())) continue;
                 lockUserId.add(atUserId);
                 Asserts.checkNull(userIdLockMap.putIfAbsent(atUserId, true), "听我说你先别急。");
             }
@@ -171,6 +175,10 @@ public class BotService {
                 // 没设置发送者，就默认原路发回
                 if (message.getBotSender() == null) {
                     message.setBotSender(botSender);
+                }
+                // 群默认@原主，补上缺失的at
+                if (BotRobotConstant.TYPE_QQ_GUILD.equals(bot.getType()) && SendTypeEnum.GROUP_MESSAGE_STR.equals(botSender.getSendType())) {
+                    message.getBotMessageChainList().add(0, BotMessageChain.ofAt(botUser));
                 }
                 // 记录消息和回复消息的关系
                 message.setMessageId(botMessage.getMessageId());
