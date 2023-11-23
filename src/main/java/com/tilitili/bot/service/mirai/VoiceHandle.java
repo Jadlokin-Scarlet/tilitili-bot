@@ -74,7 +74,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 //        Asserts.notBlank(voiceId, "上传失败");
         PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
 
-        playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的台词", botUser.getName()));
+        playerMusicDTO.setFileUrl(url).setVolume(3).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的台词", botUser.getName()));
         if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
 //        } else {
