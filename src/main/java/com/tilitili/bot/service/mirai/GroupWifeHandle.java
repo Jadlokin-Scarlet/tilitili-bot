@@ -101,7 +101,7 @@ public class GroupWifeHandle extends ExceptionRespMessageHandle {
         Long wifeUserId = redisCache.getValueLong(this.getWifeMappingCacheKey(botSender, botUser));
         if (wifeUserId != null) {
             BotUserDTO wife = botUserManager.getValidBotUserByIdWithParent(wifeUserId);
-            return BotMessage.simpleTextMessage("你的老婆是@"+wife.getName()+"，不要太贪心哦。");
+            return BotMessage.simpleTextMessage("不要太贪心哦，你的老婆是@"+wife.getName()+"。");
         }
 
         List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
