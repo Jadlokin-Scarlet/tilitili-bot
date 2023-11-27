@@ -106,36 +106,22 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		Integer initScore = botUser.getScore();
 		Asserts.notNull(initScore, "未绑定");
 		Date now = new Date();
-		if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock")) {
-			log.info("别签到刷屏");
-			return null;
-		}
 
-		int addScore;
+		int addScore = 150;
 		try {
-			List<BotItemDTO> itemDTOList = botUserItemMappingMapper.getItemListByUserId(botUser.getId());
-			int itemScore = itemDTOList.stream().map(BotItemDTO::getSellPrice).filter(Objects::nonNull).mapToInt(Integer::intValue).sum();
-			BotIcePrice botIcePrice = botIcePriceManager.getIcePrice();
-			Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
-			Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemConstant.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
-			int sumScore = initScore + itemScore + icePrice * iceNum;
-			if (sumScore >= 150) {
-				log.info("积分满了");
+			if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock")) {
+				log.info("别签到刷屏");
 				return null;
 			}
 			if (botUser.getLastSignTime() != null && botUser.getLastSignTime().after(DateUtils.getCurrentDay())) {
 				log.info("已经签到过了");
 				return null;
 			}
-			addScore = Math.max(150 - sumScore, 0);
 			botUserManager.updateBotUserSelective(bot, botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
-			if (addScore != 0) {
-				botUserManager.safeUpdateScore(botUser, addScore);
-			}
+			botUserManager.safeUpdateScore(botUser, addScore);
 		} finally {
 			session.remove(externalIdLockKey + botUser.getId());
 		}
-
 
 		String time = TimeUtil.getTimeTalk();
 
@@ -143,7 +129,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		String message1 = String.format("%s好，%s", time, talk);
 		String message2 = String.format("(分数+%d)", addScore);
 		String tips = initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
-		String message = message1 + (addScore == 0? "": message2) + tips;
+		String message = message1 + message2 + tips;
 		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId());
 	}
 }
