@@ -95,10 +95,10 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(index1Str, "坐标不对啦");
         char c = index1Str.charAt(0);
         int index1;
-        if (c >= 'A') {
-            index1 = c - 'A';
-        } else {
+        if (c >= 'a') {
             index1 = c - 'a';
+        } else {
+            index1 = c - 'A';
         }
         Asserts.isRange(0, index1, boardLength, "坐标不对啦");
         // 第二个坐标
