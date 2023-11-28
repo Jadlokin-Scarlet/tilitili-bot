@@ -168,8 +168,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleEnd(BotMessageAction messageAction) {
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
-
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+
 		Asserts.notNull(fishPlayer, "你还没抛竿");
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus()) || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus())) {
 			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
