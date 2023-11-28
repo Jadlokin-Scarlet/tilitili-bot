@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 @Component
@@ -74,7 +73,11 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         BotUserDTO nowPlayer = gomoku.getNowPlayer();
-        Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
+        if (nowPlayer == null) {
+            gomoku.setNowPlayer(botUser);
+        } else {
+            Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
+        }
         BotUserDTO lastPlayer = gomoku.getLastPlayer();
 
         List<String> indexStrList = StringUtils.extractList("([A-Oa-o])([0-9]{1,2})", value);
@@ -137,20 +140,18 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotSessionService.MiraiSession session = messageAction.getSession();
         BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
-        List<BotUserDTO> atList = messageAction.getAtList();
-        Asserts.checkEquals(atList.size(), 1, "和谁？");
-        BotUserDTO otherUser = atList.get(0);
-        Asserts.isFalse(session.containsKey("GomokuHandle.gomoku"), "已经有人在下啦");
 
-        int[][] board = new int[boardLength][boardLength];
-        int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
-        Gomoku gomoku = new Gomoku().setBoard(board).setFlag(flag).setPlayerA(botUser).setPlayerB(otherUser);
-        session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
+        int[][] board;
+        if (!session.containsKey("GomokuHandle.gomoku")) {
+            board = new int[boardLength][boardLength];
+//            int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
+            Gomoku gomoku = new Gomoku().setBoard(board).setFlag(1);
+            session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
+        } else {
+            Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
+            board = gomoku.getBoard();
+        }
 
-        BotUserDTO nowPlayer = gomoku.getNowPlayer();
-        return BotMessage.simpleListMessage(Lists.newArrayList(
-                BotMessageChain.ofPlain(String.format("%s执黑，请落子", nowPlayer.getName())),
-                BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
-        ));
+        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, board));
     }
 }

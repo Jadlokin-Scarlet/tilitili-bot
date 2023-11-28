@@ -13,6 +13,14 @@ public class Gomoku extends BaseDTO {
         return flag == 1? playerA: playerB;
     }
 
+    public void setNowPlayer(BotUserDTO botUser) {
+        if (flag == 1) {
+            playerA = botUser;
+        } else {
+            playerB = botUser;
+        }
+    }
+
     public BotUserDTO getLastPlayer() {
         return flag == -1? playerA: playerB;
     }
