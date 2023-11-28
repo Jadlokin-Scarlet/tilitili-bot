@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.Gomoku;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
@@ -8,7 +7,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
@@ -108,10 +106,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
-        return BotMessage.simpleListMessage(Lists.newArrayList(
-                BotMessageChain.ofPlain(String.format("%s请落子", lastPlayer.getName())),
-                BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, board))
-        ));
+        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, board));
     }
 
     private final int boardLength = 15;
