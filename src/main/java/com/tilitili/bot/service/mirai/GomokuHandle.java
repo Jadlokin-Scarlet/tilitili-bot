@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.entity.Gomoku;
+import com.tilitili.common.entity.dto.Gomoku;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -106,7 +106,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
-        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, board));
+        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, gomoku));
     }
 
     private final int boardLength = 15;
@@ -136,17 +136,16 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
 
-        int[][] board;
+        Gomoku gomoku;
         if (!session.containsKey("GomokuHandle.gomoku")) {
-            board = new int[boardLength][boardLength];
+            int[][] board = new int[boardLength][boardLength];
 //            int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
-            Gomoku gomoku = new Gomoku().setBoard(board).setFlag(1);
+            gomoku = new Gomoku().setBoard(board).setFlag(1);
             session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
         } else {
-            Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
-            board = gomoku.getBoard();
+            gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         }
 
-        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, board));
+        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, gomoku));
     }
 }
