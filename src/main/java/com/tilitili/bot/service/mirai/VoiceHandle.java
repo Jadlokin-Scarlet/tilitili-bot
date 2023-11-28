@@ -50,7 +50,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 //        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
         String text = messageAction.getValueOrDefault(messageAction.getBody());
-        Asserts.isTrue(checkManager.checkText(text), "达咩");
+//        Asserts.isTrue(checkManager.checkText(text), "达咩");
 
 
         if (text == null) {
