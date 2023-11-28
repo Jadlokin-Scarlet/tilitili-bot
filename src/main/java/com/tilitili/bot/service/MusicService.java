@@ -121,6 +121,16 @@ public class MusicService {
 //        return resp.getData();
     }
 
+    public List<String> clearMusicList(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+
+        return ktvServiceInterface.clearMusicList(voiceSender.getId());
+    }
+
     public List<String> startMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, botSender, botUser);
         if (voiceSender == null) {

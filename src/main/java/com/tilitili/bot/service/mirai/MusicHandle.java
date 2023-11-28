@@ -62,6 +62,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     //            case "绑定KTV": return handleBindKTV(messageAction);
                 case "暂停": return handleStop(messageAction);
                 case "继续": return handleStart(messageAction);
+                case "清空": return handleClear(messageAction);
                 case "播放列表": return handleList(messageAction);
                 case "循环播放": return handleLoopPlayer(messageAction);
                 case "停止": return handleRestartKtv(messageAction);
@@ -294,6 +295,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleTextMessage("已暂停，无下一首，点歌以继续。");
         }
         return BotMessage.simpleTextMessage(String.format("已暂停，输入继续播放下一首：[%s]。", playerMusicList.get(1)));
+    }
+
+    private BotMessage handleClear(BotMessageAction messageAction) {
+        List<String> playerMusicList = musicService.clearMusicList(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        if (playerMusicList == null) {
+            return null;
+        }
+        return BotMessage.simpleTextMessage("已清理播放列表，无下一首，点歌以继续。");
     }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
