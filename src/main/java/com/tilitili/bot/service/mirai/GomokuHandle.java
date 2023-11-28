@@ -102,8 +102,8 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Asserts.checkEquals(gomoku.getBoardCell(index1, index2), 0, "这里已经落子啦");
         gomoku.setBoardCell(index1, index2, flag);
 
-        Boolean end = this.checkEnd(gomoku);
 
+        Boolean end = this.checkEnd(gomoku);
         gomoku.setFlag(-flag);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
         return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, gomoku));
