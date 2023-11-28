@@ -14,13 +14,11 @@ import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -91,12 +89,12 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         } else {
             index1 = c - 'a';
         }
-        Asserts.isRange(0, index1,15 , "坐标不对啦");
+        Asserts.isRange(0, index1,boardLength , "坐标不对啦");
         // 第二个坐标
         String index2Str = indexStrList.get(1);
         Asserts.isNumber(index2Str, "坐标不对啦");
         int index2 = Integer.parseInt(index2Str) - 1;
-        Asserts.isRange(0, index2,15 , "坐标不对啦");
+        Asserts.isRange(0, index2,boardLength , "坐标不对啦");
 
         int flag = gomoku.getFlag();
         int[][] board = gomoku.getBoard();
@@ -113,19 +111,22 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         ));
     }
 
-    private final int length = 15;
+    private final int boardLength = 15;
     private Boolean checkEnd(Gomoku gomoku) {
         int flag = gomoku.getFlag();
         int[][] board = gomoku.getBoard();
-        boolean[][] over = new boolean[length][length];
-        for (int i = 0; i < length; i++) {
-            for (int j = 0; j < length; j++) {
-                Queue<Point> queue = new LinkedList<>();
-                queue.add(new Point(i, j));
-                while (!queue.isEmpty()) {
-                    Point now = queue.poll();
-                    over[i][j] = true;
-
+        int[][][] cnt = new int[boardLength + 1][boardLength + 1][4];
+        for (int i = 1; i <= boardLength; i++) {
+            for (int j = 1; j <= boardLength; j++) {
+                int theBoard = board[i - 1][j - 1];
+                if (theBoard == flag) {
+                    cnt[i][j][0] = cnt[i - 1][j][0] + 1;
+                    cnt[i][j][1] = cnt[i][j - 1][1] + 1;
+                    cnt[i][j][2] = cnt[i - 1][j - 1][2] + 1;
+                    cnt[i][j][3] = cnt[i + 1][j - 1][3] + 1;
+                }
+                if (ArrayUtils.contains(cnt[i][j], 5)) {
+                    return true;
                 }
             }
         }
@@ -141,7 +142,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         BotUserDTO otherUser = atList.get(0);
         Asserts.isFalse(session.containsKey("GomokuHandle.gomoku"), "已经有人在下啦");
 
-        int[][] board = new int[15][15];
+        int[][] board = new int[boardLength][boardLength];
         int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
         Gomoku gomoku = new Gomoku().setBoard(board).setFlag(flag).setPlayerA(botUser).setPlayerB(otherUser);
         session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));

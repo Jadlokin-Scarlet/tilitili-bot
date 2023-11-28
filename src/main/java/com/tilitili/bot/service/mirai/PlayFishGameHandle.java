@@ -19,6 +19,7 @@ import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
+import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +40,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotPlaceMapper botPlaceMapper;
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
 	private final BotUserConfigMapper botUserConfigMapper;
+	private final RedisCache redisCache;
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -52,6 +54,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.botPlaceMapper = botPlaceMapper;
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
 		this.botUserConfigMapper = botUserConfigMapper;
+		this.redisCache = redisCache;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -287,6 +290,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
 			List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
 			Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
+
+			Long testFlag = redisCache.getValueLong("PlayFishGameHandle.testFlag-" + botSender.getId());
+			int version = testFlag == 1? 1: 0;
 
 			fishPlayer = new FishPlayer();
 			fishPlayer.setUserId(userId);
