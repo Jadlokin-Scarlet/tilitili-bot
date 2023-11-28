@@ -7,16 +7,17 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.GomokuImageManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Component
@@ -57,8 +58,16 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         if (!session.containsKey("GomokuHandle.gomoku")) {
             return null;
         }
+        Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
+        // 用户不是管理员，参与者，并且五子棋在1小时内有更新，则不可掀桌
         if (!Objects.equals(botUser.getId(), bot.getMasterId())) {
-            return null;
+            if (!botUser.equals(gomoku.getPlayerA())) {
+                if (!botUser.equals(gomoku.getPlayerB())) {
+                    if (gomoku.getUpdateTime() != null && gomoku.getUpdateTime().after(DateUtils.addTime(new Date(), Calendar.HOUR, -1))) {
+                        return null;
+                    }
+                }
+            }
         }
         session.remove("GomokuHandle.gomoku");
         return BotMessage.simpleTextMessage("(╯‵□′)╯︵┻━┻");
@@ -72,6 +81,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         BotUserDTO nowPlayer = gomoku.getNowPlayer();
         if (nowPlayer == null) {
+            Asserts.notEquals(botUser, gomoku.getLastPlayer(), "不准左右互搏");
             gomoku.setNowPlayer(botUser);
         } else {
             Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
@@ -102,11 +112,18 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Asserts.checkEquals(gomoku.getBoardCell(index1, index2), 0, "这里已经落子啦");
         gomoku.setBoardCell(index1, index2, flag);
 
-        Boolean end = this.checkEnd(gomoku);
-
-        gomoku.setFlag(-flag);
-        session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
-        return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, gomoku));
+        if (this.checkEnd(gomoku)) {
+            BotMessage resp = BotMessage.simpleListMessage(Arrays.asList(
+                    BotMessageChain.ofPlain(String.format("恭喜%s获得胜利", nowPlayer)),
+                    BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, gomoku))
+            ));
+            session.remove("GomokuHandle.gomoku");
+            return resp;
+        } else {
+            gomoku.setFlag(-flag);
+            session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku.setUpdateTime(new Date())));
+            return BotMessage.simpleImageMessage(gomokuImageManager.getGomokuImage(bot, gomoku));
+        }
     }
 
     private final int boardLength = 15;
@@ -141,7 +158,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
             int[][] board = new int[boardLength][boardLength];
 //            int flag = ThreadLocalRandom.current().nextInt(2) * 2 - 1;
             gomoku = new Gomoku().setBoard(board).setFlag(1);
-            session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku));
+            session.put("GomokuHandle.gomoku", Gsons.toJson(gomoku.setUpdateTime(new Date())));
         } else {
             gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         }
