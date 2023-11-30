@@ -267,7 +267,6 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofPlain("\n"));
 			resultList.add(BotMessageChain.ofImage(icon));
 		}
-
 		return BotMessage.simpleListMessage(resultList);
 	}
 
