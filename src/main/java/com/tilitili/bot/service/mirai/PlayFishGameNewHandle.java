@@ -157,14 +157,15 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		Asserts.notNull(fishPlayer, "你还没抛竿");
+		Asserts.checkEquals(fishPlayer.getVersion(), FishPlayerConstant.VERSION_NEW, "版本不兼容");
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
-			if (fishPlayer.getNotifyTime() == null) {
-				return BotMessage.simpleTextMessage("鱼还没来呢。");
-			} else {
-				return BotMessage.simpleTextMessage("鱼已经跑啦");
-			}
+			return BotMessage.simpleTextMessage("鱼还没来呢。");
 		} else if (FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
 			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！");
+		} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
+			return BotMessage.simpleTextMessage("鱼已经跑啦");
+		} else if (FishPlayerConstant.STATUS_STOP.equals(fishPlayer.getStatus())) {
+			return BotMessage.simpleTextMessage(this.getStopTips(fishPlayer));
 		} else {
 			throw new AssertException();
 		}
@@ -175,19 +176,33 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		Long userId = botUser.getId();
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
 		Asserts.notNull(fishPlayer, "你还没抛竿");
+		Asserts.checkEquals(fishPlayer.getVersion(), FishPlayerConstant.VERSION_NEW, "版本不兼容");
 
-		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus()) || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus())) {
+		if (!FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
 			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
-			if (fishPlayer.getNotifyTime() == null) {
+			if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
 				return BotMessage.simpleTextMessage("啥也没有。。");
-			} else {
+			} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
 				return BotMessage.simpleTextMessage(String.format("似乎来晚了。。(%s-1)", botItem.getName()));
+			} else if (FishPlayerConstant.STATUS_STOP.equals(fishPlayer.getStatus())) {
+				return BotMessage.simpleTextMessage(this.getStopTips(fishPlayer));
+			} else {
+				throw new AssertException();
 			}
 		}
-		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
+
+		int stopDelay = random.nextInt(3600) + 3600;
+		Date stopEndTime = DateUtils.addTime(new Date(), Calendar.SECOND, stopDelay);
+		try {
+			taskSender.sendDelayMessage(FishPlayerConstant.FISH_STOP_MESSAGE, fishPlayer.getId(), (long) stopDelay);
+		} catch (AssertException e) {
+			log.error("抛竿cd失败", e);
+			throw new AssertException();
+		}
+		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_STOP);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(fishPlayer.getPlaceId()).setStatus(0));
 		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
@@ -201,7 +216,7 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}
 		Asserts.notNull(fishConfig, "啊嘞，不对劲");
-		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()));
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()).setStopEndTime(stopEndTime));
 		String description = fishConfig.getDescription();
 		Long itemId = fishConfig.getItemId();
 		Integer price = fishConfig.getPrice();
@@ -253,14 +268,13 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofImage(icon));
 		}
 
-		try {
-			BotMessage startMessage = this.handleStart(messageAction);
-			resultList.add(BotMessageChain.ofPlain("\n"));
-			resultList.addAll(startMessage.getBotMessageChainList());
-		} catch (AssertException e) {
-			resultList.add(BotMessageChain.ofPlain("自动抛竿失败，" + e.getMessage()));
-		}
 		return BotMessage.simpleListMessage(resultList);
+	}
+
+	private String getStopTips(FishPlayer fishPlayer) {
+		Asserts.notNull(fishPlayer.getStopEndTime(), "啊嘞，不对劲");
+		long expire = fishPlayer.getStopEndTime().getTime() - new Date().getTime();
+		return String.format("让鱼儿再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 	}
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
@@ -285,30 +299,29 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)。\n"));
 		}
 
-		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
-		Asserts.isTrue(fishPlayer == null || FishPlayerConstant.STATUS_WAIT.equals(fishPlayer.getStatus()), "你已经在钓啦！");
-		if (fishPlayer == null) {
-			BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
-			Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
-			List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
-			Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
-
-			fishPlayer = new FishPlayer();
-			fishPlayer.setUserId(userId);
-			fishPlayer.setPlaceId(placeId);
-			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
-			fishPlayer.setVersion(FishPlayerConstant.VERSION_NEW);
-			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
+		FishPlayer oldFishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		if (oldFishPlayer != null) {
+			Asserts.notEquals(oldFishPlayer.getStatus(), FishPlayerConstant.STATUS_STOP, this.getStopTips(oldFishPlayer));
+			throw new AssertException("你已经在钓啦！");
 		}
+		BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
+		Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
+		List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
+		Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
 
-		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FISHING);
-		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
-		Date startTime = new Date();
-		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setStartTime(startTime).setSenderId(senderId));
+		FishPlayer newFishPlayer = new FishPlayer();
+		newFishPlayer.setUserId(userId);
+		newFishPlayer.setPlaceId(placeId);
+		newFishPlayer.setStatus(FishPlayerConstant.STATUS_FISHING);
+		newFishPlayer.setStartTime(new Date());
+		newFishPlayer.setSenderId(senderId);
+		newFishPlayer.setVersion(FishPlayerConstant.VERSION_NEW);
+		fishPlayerMapper.addFishPlayerSelective(newFishPlayer);
+
 		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setNum(-1));
 
 		long delay = random.nextInt(180000) + 60000;
-		taskSender.sendDelayMessage(FishPlayerConstant.FISH_MESSAGE, fishPlayer.getId(), delay);
+		taskSender.sendDelayMessage(FishPlayerConstant.FISH_MESSAGE, newFishPlayer.getId(), delay);
 
 		resultList.add(BotMessageChain.ofPlain("抛竿成功，有动静我会再叫你哦。"));
 		return BotMessage.simpleListMessage(resultList);
