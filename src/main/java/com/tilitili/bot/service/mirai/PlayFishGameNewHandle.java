@@ -276,7 +276,7 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		if (fishPlayer.getStopEndTime() == null) {
 			return null;
 		}
-		long expire = fishPlayer.getStopEndTime().getTime() - new Date().getTime();
+		long expire = (fishPlayer.getStopEndTime().getTime() - new Date().getTime()) / 1000;
 		return String.format("让鱼儿再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 	}
 
