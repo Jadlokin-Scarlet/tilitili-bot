@@ -194,8 +194,8 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		}
 
-		int stopDelay = random.nextInt(3600) + 3600;
-		Date stopEndTime = DateUtils.addTime(new Date(), Calendar.SECOND, stopDelay);
+		int stopDelay = random.nextInt(3600000) + 3600000;
+		Date stopEndTime = DateUtils.addTime(new Date(), Calendar.MILLISECOND, stopDelay);
 		try {
 			taskSender.sendDelayMessage(FishPlayerConstant.FISH_STOP_MESSAGE, fishPlayer.getId(), (long) stopDelay);
 		} catch (AssertException e) {
