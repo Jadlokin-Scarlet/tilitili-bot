@@ -179,13 +179,15 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkEquals(fishPlayer.getVersion(), FishPlayerConstant.VERSION_NEW, "版本不兼容");
 
 		if (!FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
-			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
-			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
 			if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
+				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINALL);
+				Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
 				return BotMessage.simpleTextMessage("啥也没有。。");
 			} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
+				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FAIL, FishPlayerConstant.STATUS_FINALL);
+				Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 				return BotMessage.simpleTextMessage(String.format("似乎来晚了。。(%s-1)", botItem.getName()));
 			} else if (FishPlayerConstant.STATUS_STOP.equals(fishPlayer.getStatus())) {
 				return BotMessage.simpleTextMessage(this.getStopTips(fishPlayer));
