@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotItemConstant;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -25,7 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -128,7 +129,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		String talk = "今天也是充满希望的一天";
 		String message1 = String.format("%s好，%s", time, talk);
 		String message2 = String.format("(分数+%d)", addScore);
-		String tips = initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
+		String tips = "";//initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
 		String message = message1 + message2 + tips;
 		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId());
 	}
