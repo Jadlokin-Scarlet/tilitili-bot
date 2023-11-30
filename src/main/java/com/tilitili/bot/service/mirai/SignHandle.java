@@ -115,8 +115,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 				return null;
 			}
 			if (botUser.getLastSignTime() != null && botUser.getLastSignTime().after(DateUtils.getCurrentDay())) {
-				log.info("已经签到过了");
-				return null;
+				return BotMessage.simpleTextMessage("已经签到过啦");
 			}
 			botUserManager.updateBotUserSelective(bot, botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
 			botUserManager.safeUpdateScore(botUser, addScore);
