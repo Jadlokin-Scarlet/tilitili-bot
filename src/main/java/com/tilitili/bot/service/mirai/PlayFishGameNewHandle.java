@@ -272,7 +272,9 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private String getStopTips(FishPlayer fishPlayer) {
-		Asserts.notNull(fishPlayer.getStopEndTime(), "啊嘞，不对劲");
+		if (fishPlayer.getStopEndTime() == null) {
+			return null;
+		}
 		long expire = fishPlayer.getStopEndTime().getTime() - new Date().getTime();
 		return String.format("让鱼儿再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
 	}
