@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotPlaceConstant;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.constant.FishPlayerConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotItemDTO;
@@ -22,7 +21,6 @@ import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -31,7 +29,7 @@ import java.util.stream.IntStream;
 
 @Slf4j
 @Component
-public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
+public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 	private final Random random;
 
 	private final FishPlayerMapper fishPlayerMapper;
@@ -44,22 +42,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
 	private final BotUserConfigMapper botUserConfigMapper;
 	private final RedisCache redisCache;
-	private final PlayFishGameNewHandle playFishGameNewHandle;
-
-	private List<Long> testBotList = new ArrayList<>();
-
-	public void setTestBotList(@Value("${PlayFishGameHandle.testBotList:}") String testBotList) {
-		try {
-			this.testBotList = Arrays.stream(testBotList.split(",")).map(Long::parseLong).collect(Collectors.toList());
-			log.info("刷新testBotList成功，{}", this.testBotList);
-		} catch (Exception e) {
-			log.error("刷新testBotList异常", e);
-		}
-	}
 
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache, PlayFishGameNewHandle playFishGameNewHandle) {
+	public PlayFishGameNewHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -71,7 +57,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
 		this.botUserConfigMapper = botUserConfigMapper;
 		this.redisCache = redisCache;
-		this.playFishGameNewHandle = playFishGameNewHandle;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -91,10 +76,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		// 灰度
-		if (testBotList.contains(messageAction.getBot().getId())) {
-			return playFishGameNewHandle.handleMessage(messageAction);
-		}
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "抛竿": case "抛杆": return handleStart(messageAction);
 			case "收竿": case "收杆": return handleEnd(messageAction);
@@ -293,15 +274,12 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		// 兑换道具
 		if (!botItemIdList.contains(BotItemConstant.FISH_TOOL)) {
 			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemConstant.FISH_TOOL));
-			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼竿一把(-90)，谢谢惠顾。\n"));
-			if (botUser.getType() != BotUserConstant.USER_TYPE_QQ) {
-				resultList.add(BotMessageChain.ofPlain("tips: 有共同群聊最好先申请合体再玩。\n"));
-			}
+			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼竿(-90)。\n"));
 		}
 
 		if (!botItemIdList.contains(BotItemConstant.FISH_FOOD)) {
 			botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setItemNum(10));
-			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)，谢谢惠顾。\n"));
+			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)。\n"));
 		}
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
@@ -316,6 +294,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			fishPlayer.setUserId(userId);
 			fishPlayer.setPlaceId(placeId);
 			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
+			fishPlayer.setVersion(1L);
 			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 		}
 
