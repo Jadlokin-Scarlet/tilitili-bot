@@ -20,6 +20,7 @@ import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +52,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	@Value("${PlayFishGameHandle.testBotList:}")
 	public void setTestBotList(String testBotList) {
 		try {
-			this.testBotList = Arrays.stream(testBotList.split(",")).map(Long::parseLong).collect(Collectors.toList());
+			this.testBotList = Arrays.stream(testBotList.split(",")).filter(StringUtils::isNotBlank).map(Long::parseLong).collect(Collectors.toList());
 			log.info("刷新testBotList成功，{}", this.testBotList);
 		} catch (Exception e) {
 			log.error("刷新testBotList异常", e);
