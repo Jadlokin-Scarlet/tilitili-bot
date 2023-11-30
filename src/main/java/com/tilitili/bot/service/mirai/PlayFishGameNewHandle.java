@@ -16,6 +16,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.*;
+import com.tilitili.common.sender.TaskSender;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.RedisCache;
@@ -42,10 +43,11 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
 	private final BotUserConfigMapper botUserConfigMapper;
 	private final RedisCache redisCache;
+	private final TaskSender taskSender;
 
 
 	@Autowired
-	public PlayFishGameNewHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache) {
+	public PlayFishGameNewHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache, TaskSender taskSender) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -57,6 +59,7 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
 		this.botUserConfigMapper = botUserConfigMapper;
 		this.redisCache = redisCache;
+		this.taskSender = taskSender;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -294,16 +297,20 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 			fishPlayer.setUserId(userId);
 			fishPlayer.setPlaceId(placeId);
 			fishPlayer.setStatus(FishPlayerConstant.STATUS_WAIT);
-			fishPlayer.setVersion(1L);
+			fishPlayer.setVersion(FishPlayerConstant.VERSION_NEW);
 			fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 		}
 
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FISHING);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
-		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setStartTime(new Date()).setSenderId(senderId));
+		Date startTime = new Date();
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setStartTime(startTime).setSenderId(senderId));
 		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setNum(-1));
+
+		long delay = random.nextInt(180000) + 60000;
+		taskSender.sendDelayMessage(FishPlayerConstant.FISH_MESSAGE, fishPlayer.getId(), delay);
+
 		resultList.add(BotMessageChain.ofPlain("抛竿成功，有动静我会再叫你哦。"));
 		return BotMessage.simpleListMessage(resultList);
 	}
-
 }
