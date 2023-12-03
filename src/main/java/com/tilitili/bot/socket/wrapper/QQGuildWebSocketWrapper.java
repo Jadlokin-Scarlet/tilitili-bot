@@ -37,8 +37,9 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 
 	@Override
 	public void downBotBlocking() {
-		this.downBotBlocking(TYPE_GROUP);
-//		this.downBotBlocking(TYPE_GUILD);
+		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
+		String type = this.getType(bot);
+		this.downBotBlocking(type);
 	}
 
 	public void downBotBlocking(String type) {
@@ -61,9 +62,9 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 	@Override
 	public int getStatus() {
 		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
-		int groupStatus = this.getStatus(bot, TYPE_GROUP);
-		int guildStatus = 0;;//this.getStatus(bot, TYPE_GUILD);
-		return groupStatus == guildStatus && guildStatus == 0? 0: -1;
+		String type = this.getType(bot);
+		int status = this.getStatus(bot, type);
+		return status == 0? 0: -1;
 	}
 
 	private int getStatus(BotRobot bot, String type) {
@@ -84,9 +85,9 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 		Asserts.notNull(bot, "权限不足");
 		String wsUrl = botManager.getWebSocketUrl(bot);
 		Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
+		String type = this.getType(bot);
 
-		this.upBotBlocking(wsUrl, bot, TYPE_GROUP);
-//		this.upBotBlocking(wsUrl, bot, TYPE_GUILD);
+		this.upBotBlocking(wsUrl, bot, type);
 	}
 
 	private void upBotBlocking(String wsUrl, BotRobot bot, String type) {
@@ -118,6 +119,15 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 			log.error("异常", e);
 		} finally {
 			blocking.set(false);
+		}
+	}
+
+	private String getType(BotRobot bot) {
+		String accessToken = botManager.getAccessToken(bot, TYPE_GROUP);
+		if (accessToken != null) {
+			return TYPE_GROUP;
+		} else {
+			return TYPE_GUILD;
 		}
 	}
 }
