@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 @Controller
 @RequestMapping("/api/robot")
 public class BotRobotController extends BaseController{
+
     private final BotRobotService botRobotService;
 
     public BotRobotController(BotRobotService botRobotService) {
