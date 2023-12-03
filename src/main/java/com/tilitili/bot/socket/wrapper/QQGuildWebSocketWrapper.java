@@ -93,9 +93,10 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 	private void upBotBlocking(String wsUrl, BotRobot bot, String type) {
 		try {
 			String token = botManager.getAccessToken(bot, type);
-			if (token == null) {
-				return;
-			}
+			Asserts.notNull(token, "获取token失败 botId="+bot.getId());
+//			if (token == null) {
+//				return;
+//			}
 			BotWebSocketHandler handler = handlerMap.get(type);
 			if (handler != null && handler.getStatus() == 0) {
 				return;
