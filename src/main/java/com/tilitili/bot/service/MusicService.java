@@ -74,6 +74,7 @@ public class MusicService {
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
 
+
         List<String> playerMusicNameList = ktvServiceInterface.addMusic(botSender.getId(), voiceSender.getId(), music, null);
 //        String data = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "music", music));
 //        String result = this.post("add", data);
