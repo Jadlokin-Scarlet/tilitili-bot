@@ -49,8 +49,8 @@ public class BotService {
 
     public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper, BotRobotCacheManager botRobotCacheManager) {
         this.botManager = botManager;
-        this.messageHandleMap = messageHandleMap;
         this.botTaskMapper = botTaskMapper;
+        this.messageHandleMap = messageHandleMap;
         this.botSessionService = botSessionService;
         this.sendMessageManager = sendMessageManager;
         this.botRobotCacheManager = botRobotCacheManager;
