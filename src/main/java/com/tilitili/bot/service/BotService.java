@@ -35,8 +35,8 @@ public class BotService {
     public static final String lastMessageIdKey = "lastMessageId";
     private final Gson gson;
     private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
-    private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
+    private final BotManager botManager;
     private final BotSessionService botSessionService;
     private final SendMessageManager sendMessageManager;
     private final BotRobotCacheManager botRobotCacheManager;
