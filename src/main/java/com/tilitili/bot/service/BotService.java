@@ -48,11 +48,11 @@ public class BotService {
     private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
     public BotService(SendMessageManager sendMessageManager, BotManager botManager, Map<String, BaseMessageHandle> messageHandleMap, List<BaseEventHandle> eventHandleList, BotSessionService botSessionService, BotTaskMapper botTaskMapper, BotSendMessageRecordMapper botSendMessageRecordMapper, BotMessageRecordManager botMessageRecordManager, BotSenderTaskMappingManager botSenderTaskMappingManager, BotMessageRecordMapper botMessageRecordMapper, BotRobotCacheManager botRobotCacheManager) {
-        this.sendMessageManager = sendMessageManager;
         this.botManager = botManager;
         this.messageHandleMap = messageHandleMap;
         this.botTaskMapper = botTaskMapper;
         this.botSessionService = botSessionService;
+        this.sendMessageManager = sendMessageManager;
         this.botRobotCacheManager = botRobotCacheManager;
         this.botMessageRecordMapper = botMessageRecordMapper;
         this.botMessageRecordManager = botMessageRecordManager;
