@@ -58,7 +58,7 @@ public class McPanelWebSocketWrapper implements BotWebSocketWrapperImp {
 
 	@Override
 	public void upBotBlocking() {
-		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
+		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
 		String wsUrl = botManager.getWebSocketUrl(bot);
 		Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
@@ -75,7 +75,7 @@ public class McPanelWebSocketWrapper implements BotWebSocketWrapperImp {
 				handler.closeBlocking();
 				handler = null;
 			}
-			handler = new McPanelWebSocketHandler(new URI(wsUrl), bot, botService, botRobotCacheManager);
+			handler = new McPanelWebSocketHandler(new URI(wsUrl), bot, botManager, botService, botRobotCacheManager);
 			handler.connectBlocking();
 			log.info("连接ws结束 botId=" + bot.getId());
 		} catch (AssertException e) {

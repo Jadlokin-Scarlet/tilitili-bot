@@ -6,6 +6,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,11 @@ public class BaseWebSocketHandler extends WebSocketClient {
     protected final ScheduledExecutorService executorService;
 
     public BaseWebSocketHandler(URI serverUri) {
-        super(serverUri);
+        this(serverUri, null);
+    }
+
+    public BaseWebSocketHandler(URI serverUri, Map<String, String> httpHeaders) {
+        super(serverUri, httpHeaders);
         this.executorService = Executors.newScheduledThreadPool(10);
     }
 

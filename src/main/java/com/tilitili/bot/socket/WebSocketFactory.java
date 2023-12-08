@@ -42,7 +42,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
     }
 
     private BotWebSocketWrapperImp newWebSocketWrapper(Long botId) {
-        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
         Asserts.notNull(bot, "权限不足");
         switch (bot.getType()) {
             case BotRobotConstant.TYPE_MIRAI:

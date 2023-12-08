@@ -1,9 +1,11 @@
 package com.tilitili.bot.socket.handle;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.tilitili.bot.entity.McPanelWsData;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +17,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class McPanelWebSocketHandler extends BotWebSocketHandler {
     private final BotService botService;
+    private final BotManager botManager;
 
-    public McPanelWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, bot, botService, botRobotCacheManager);
+    public McPanelWebSocketHandler(URI serverUri, BotRobot bot, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
+        super(serverUri, ImmutableMap.of("Cookie", bot.getKey2()), bot, botService, botRobotCacheManager);
         this.botService = botService;
+        this.botManager = botManager;
     }
 
     @Override
@@ -27,13 +31,17 @@ public class McPanelWebSocketHandler extends BotWebSocketHandler {
             log.info("Message Received bot={} message={}", bot.getName(), message);
             McPanelWsData mcPanelWsData = Gsons.fromJson(message, McPanelWsData.class);
             switch (mcPanelWsData.getType()) {
-                case "return": return;
+                case "return": {
+                    botManager.handleAfterWebSocket(bot, mcPanelWsData.getData().getAsString());
+                    return;
+                }
                 case "broadcast": {
                     List<JsonElement> list = mcPanelWsData.getData().getAsJsonArray().asList();
                     List<String> broadList = list.stream().map(JsonElement::getAsString).collect(Collectors.toList());
                     for (String broad : broadList) {
                         botService.syncHandleMessage(bot, broad);
                     }
+                    return;
                 }
                 default: {
                     log.info("记录未知类型{}", mcPanelWsData.getType());

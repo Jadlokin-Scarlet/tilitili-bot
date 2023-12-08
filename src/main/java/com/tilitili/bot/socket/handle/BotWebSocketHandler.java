@@ -6,6 +6,7 @@ import com.tilitili.common.manager.BotRobotCacheManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.util.Map;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
@@ -20,9 +21,16 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         this.botRobotCacheManager = botRobotCacheManager;
     }
 
+    public BotWebSocketHandler(URI serverUri, Map<String, String> httpHeaders, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
+        super(serverUri, httpHeaders);
+        this.botId = bot.getId();
+        this.botService = botService;
+        this.botRobotCacheManager = botRobotCacheManager;
+    }
+
     @Override
     protected void handleTextMessage(String message) {
-        BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
+        BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
         this.handleBotMessage(bot, message);
     }
 
