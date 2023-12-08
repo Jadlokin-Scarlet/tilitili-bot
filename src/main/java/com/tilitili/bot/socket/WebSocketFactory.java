@@ -1,10 +1,7 @@
 package com.tilitili.bot.socket;
 
 import com.tilitili.bot.service.BotService;
-import com.tilitili.bot.socket.wrapper.BotWebSocketWrapper;
-import com.tilitili.bot.socket.wrapper.BotWebSocketWrapperImp;
-import com.tilitili.bot.socket.wrapper.KookWebSocketWrapper;
-import com.tilitili.bot.socket.wrapper.QQGuildWebSocketWrapper;
+import com.tilitili.bot.socket.wrapper.*;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.exception.AssertException;
@@ -52,6 +49,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
             case BotRobotConstant.TYPE_GOCQ: return (new BotWebSocketWrapper(botId, botManager, botService, botRobotCacheManager));
             case BotRobotConstant.TYPE_KOOK: return (new KookWebSocketWrapper(botId, botManager, botService, botRobotCacheManager));
             case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketWrapper(botId, botManager, botService, botRobotCacheManager);
+            case BotRobotConstant.TYPE_MC_PANEL: return new McPanelWebSocketWrapper(botId, botManager, botService, botRobotCacheManager);
             default: throw new AssertException("?");
         }
     }
