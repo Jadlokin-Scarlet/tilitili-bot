@@ -13,7 +13,6 @@ import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotUserManager;
@@ -36,16 +35,14 @@ public class BotRobotService {
     private final BotUserManager botUserManager;
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final WebSocketFactory webSocketFactory;
-    private final BotAdminManager botAdminManager;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory, BotAdminManager botAdminManager) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
         this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
         this.webSocketFactory = webSocketFactory;
-        this.botAdminManager = botAdminManager;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
