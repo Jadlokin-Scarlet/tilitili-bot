@@ -39,6 +39,7 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
             }
             case 1: if (kookData.getD() != null && kookData.getD().getSessionId() != null) this.sessionId = kookData.getD().getSessionId();
             case 3: executorService.schedule(() -> this.send("{\"s\": 2,\"sn\": "+sn+"}"), 20, TimeUnit.SECONDS); break;
+            case 5: if (kookData.getD().getCode() != null && kookData.getD().getCode() == 40107) this.sessionId = null;
             default: log.warn("记录s="+ kookData.getS());
         }
     }
