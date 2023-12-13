@@ -9,7 +9,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -44,14 +43,14 @@ public class BaseWebSocketHandler extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.warn("连接关闭，url={} code ={}, reason={}, remote={}", this.uri.toString(), code, reason, remote);
-        if (remote) {
-            executorService.schedule(() -> {
-                log.info("尝试重连");
-                this.reconnect();
-            }, 60, TimeUnit.SECONDS);
-        } else {
+//        if (remote) {
+//            executorService.schedule(() -> {
+//                log.info("尝试重连");
+//                this.reconnect();
+//            }, 60, TimeUnit.SECONDS);
+//        } else {
             status.set(-1);
-        }
+//        }
     }
 
     @Override
