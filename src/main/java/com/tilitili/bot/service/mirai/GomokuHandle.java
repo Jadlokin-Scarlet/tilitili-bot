@@ -47,8 +47,33 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
             case "五子棋": return this.handleStart(messageAction);
             case "落子": return this.handleFall(messageAction);
             case "掀桌": return this.handleStop(messageAction);
+            case "认输": case "投降": return this.handleEnd(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handleEnd(BotMessageAction messageAction) {
+        BotSessionService.MiraiSession session = messageAction.getSession();
+        BotUserDTO botUser = messageAction.getBotUser();
+        BotRobot bot = messageAction.getBot();
+        if (!session.containsKey("GomokuHandle.gomoku")) {
+            return null;
+        }
+        Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
+        // 用户不是参与者，并且五子棋在1小时内有更新，则不可掀桌
+        if (!botUser.equals(gomoku.getPlayerA())) {
+            if (!botUser.equals(gomoku.getPlayerB())) {
+                return null;
+            }
+        }
+        BotUserDTO winner;
+        if (botUser.equals(gomoku.getPlayerA())) {
+            winner = gomoku.getPlayerB();
+        } else {
+            winner = gomoku.getPlayerA();
+        }
+        session.remove("GomokuHandle.gomoku");
+        return BotMessage.simpleTextMessage(String.format("获胜者是，%s！", winner.getName()));
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
