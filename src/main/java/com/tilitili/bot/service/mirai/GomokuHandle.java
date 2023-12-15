@@ -108,6 +108,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         if (nowPlayer == null) {
             Asserts.notEquals(botUser, gomoku.getLastPlayer(), "不准左右互搏");
             gomoku.setNowPlayer(botUser);
+            nowPlayer = gomoku.getNowPlayer();
         } else {
             Asserts.checkEquals(nowPlayer.getId(), botUser.getId(), "还没轮到你");
         }
