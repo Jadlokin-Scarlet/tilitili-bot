@@ -139,7 +139,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
         if (this.checkEnd(gomoku)) {
             BotMessage resp = BotMessage.simpleListMessage(Arrays.asList(
-                    BotMessageChain.ofPlain(String.format("恭喜%s获得胜利", nowPlayer)),
+                    BotMessageChain.ofPlain(String.format("恭喜%s获得胜利", nowPlayer.getName())),
                     BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, gomoku))
             ));
             session.remove("GomokuHandle.gomoku");
