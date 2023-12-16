@@ -2,6 +2,7 @@ package com.tilitili.bot.socket.handle;
 
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.entity.view.bot.qqGuild.QQGuildWsResponse;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
@@ -9,7 +10,7 @@ import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -21,8 +22,8 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     private int s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(URI serverUri, BotRobot bot, String type, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, bot, botService, botRobotCacheManager);
+    public QQGuildWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, String type, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
+        super(wsRequest, bot, botService, botRobotCacheManager);
         this.type = type;
         this.botManager = botManager;
         this.botService = botService;

@@ -2,11 +2,11 @@ package com.tilitili.bot.socket.handle;
 
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
-import java.util.Map;
+import java.net.URISyntaxException;
 
 @Slf4j
 public class BotWebSocketHandler extends BaseWebSocketHandler {
@@ -14,15 +14,8 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
     private final BotService botService;
     private final BotRobotCacheManager botRobotCacheManager;
 
-    public BotWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri);
-        this.botId = bot.getId();
-        this.botService = botService;
-        this.botRobotCacheManager = botRobotCacheManager;
-    }
-
-    public BotWebSocketHandler(URI serverUri, Map<String, String> httpHeaders, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, httpHeaders);
+    public BotWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
+        super(wsRequest);
         this.botId = bot.getId();
         this.botService = botService;
         this.botRobotCacheManager = botRobotCacheManager;

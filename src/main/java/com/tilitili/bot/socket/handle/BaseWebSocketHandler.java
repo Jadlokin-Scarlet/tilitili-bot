@@ -1,12 +1,13 @@
 package com.tilitili.bot.socket.handle;
 
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.Map;
+import java.net.URISyntaxException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,12 +17,8 @@ public class BaseWebSocketHandler extends WebSocketClient {
     protected final AtomicInteger status = new AtomicInteger(-1);
     protected final ScheduledExecutorService executorService;
 
-    public BaseWebSocketHandler(URI serverUri) {
-        this(serverUri, null);
-    }
-
-    public BaseWebSocketHandler(URI serverUri, Map<String, String> httpHeaders) {
-        super(serverUri, httpHeaders);
+    public BaseWebSocketHandler(HttpRequestDTO wsRequest) throws URISyntaxException {
+        super(new URI(wsRequest.getUrl()), wsRequest.getHeader());
         this.executorService = Executors.newScheduledThreadPool(10);
     }
 

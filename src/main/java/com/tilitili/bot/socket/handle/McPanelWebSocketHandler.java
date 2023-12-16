@@ -1,16 +1,16 @@
 package com.tilitili.bot.socket.handle;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.tilitili.bot.entity.McPanelWsData;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +19,8 @@ public class McPanelWebSocketHandler extends BotWebSocketHandler {
     private final BotService botService;
     private final BotManager botManager;
 
-    public McPanelWebSocketHandler(URI serverUri, BotRobot bot, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, ImmutableMap.of("Cookie", bot.getKey2()), bot, botService, botRobotCacheManager);
+    public McPanelWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
+        super(wsRequest, bot, botService, botRobotCacheManager);
         this.botService = botService;
         this.botManager = botManager;
     }

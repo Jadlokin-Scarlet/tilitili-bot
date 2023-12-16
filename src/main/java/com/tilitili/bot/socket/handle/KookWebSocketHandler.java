@@ -3,6 +3,7 @@ package com.tilitili.bot.socket.handle;
 import com.google.common.reflect.TypeToken;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.entity.view.bot.kook.ws.KookData;
 import com.tilitili.common.entity.view.bot.kook.ws.KookSessionId;
 import com.tilitili.common.manager.BotRobotCacheManager;
@@ -10,7 +11,7 @@ import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -19,8 +20,8 @@ public class KookWebSocketHandler extends BotWebSocketHandler {
     private String sessionId;
     private final BotService botService;
 
-    public KookWebSocketHandler(URI serverUri, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) {
-        super(serverUri, bot, botService, botRobotCacheManager);
+    public KookWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
+        super(wsRequest, bot, botService, botRobotCacheManager);
         this.botService = botService;
         this.setReuseAddr(true);
     }

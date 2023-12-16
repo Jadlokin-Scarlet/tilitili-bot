@@ -4,13 +4,13 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.handle.BotWebSocketHandler;
 import com.tilitili.bot.socket.handle.KookWebSocketHandler;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -61,8 +61,8 @@ public class KookWebSocketWrapper implements BotWebSocketWrapperImp {
 	public void upBotBlocking() {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
-		String wsUrl = botManager.getWebSocketUrl(bot);
-		Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
+		HttpRequestDTO wsRequest = botManager.getWebSocketUrl(bot);
+		Asserts.notNull(wsRequest.getUrl(), "%s获取ws地址异常", bot.getName());
 		try {
 			if (handler != null && handler.getStatus() == 0) {
 				return;
@@ -76,7 +76,7 @@ public class KookWebSocketWrapper implements BotWebSocketWrapperImp {
 				handler.closeBlocking();
 				handler = null;
 			}
-			handler = new KookWebSocketHandler(new URI(wsUrl), bot, botService, botRobotCacheManager);
+			handler = new KookWebSocketHandler(wsRequest, bot, botService, botRobotCacheManager);
 			handler.connectBlocking();
 			log.info("连接ws结束 botId=" + bot.getId());
 		} catch (AssertException e) {

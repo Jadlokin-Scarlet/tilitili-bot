@@ -4,13 +4,13 @@ import com.tilitili.bot.service.BotService;
 import com.tilitili.bot.socket.handle.BotWebSocketHandler;
 import com.tilitili.bot.socket.handle.QQGuildWebSocketHandler;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,14 +83,14 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 	public void upBotBlocking() {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
-		String wsUrl = botManager.getWebSocketUrl(bot);
-		Asserts.notNull(wsUrl, "%s获取ws地址异常", bot.getName());
+		HttpRequestDTO wsRequest = botManager.getWebSocketUrl(bot);
+		Asserts.notNull(wsRequest.getUrl(), "%s获取ws地址异常", bot.getName());
 		String type = this.getType(bot);
 
-		this.upBotBlocking(wsUrl, bot, type);
+		this.upBotBlocking(wsRequest, bot, type);
 	}
 
-	private void upBotBlocking(String wsUrl, BotRobot bot, String type) {
+	private void upBotBlocking(HttpRequestDTO wsRequest, BotRobot bot, String type) {
 		try {
 			String token = botManager.getAccessToken(bot, type);
 			Asserts.notNull(token, "获取token失败 botId="+bot.getId());
@@ -110,7 +110,7 @@ public class QQGuildWebSocketWrapper implements BotWebSocketWrapperImp {
 				handler.closeBlocking();
 				handlerMap.remove(type);
 			}
-			QQGuildWebSocketHandler newHandler = new QQGuildWebSocketHandler(new URI(wsUrl), bot, type, botManager, botService, botRobotCacheManager);
+			QQGuildWebSocketHandler newHandler = new QQGuildWebSocketHandler(wsRequest, bot, type, botManager, botService, botRobotCacheManager);
 			newHandler.connectBlocking();
 			handlerMap.put(type, newHandler);
 			log.info("连接ws结束 botId=" + bot.getId());
