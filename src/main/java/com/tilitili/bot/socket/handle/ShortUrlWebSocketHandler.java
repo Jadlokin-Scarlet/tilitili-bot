@@ -2,12 +2,12 @@
 package com.tilitili.bot.socket.handle;
 
 import com.alibaba.fastjson2.JSONPath;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +19,7 @@ public class ShortUrlWebSocketHandler extends BaseWebSocketHandler {
     private final JSONPath originUrlPath = JSONPath.of("$[1].data.origin_url", String.class);
 
     public ShortUrlWebSocketHandler(RedisCache redisCache) throws URISyntaxException {
-        super(new URI("wss://sl.xiaomark.com/socket.io/?guest=nFFA8rxHbCmdi8TN&EIO=3&transport=websocket"));
+        super(HttpRequestDTO.ofUrl("wss://sl.xiaomark.com/socket.io/?guest=nFFA8rxHbCmdi8TN&EIO=3&transport=websocket"));
         this.redisCache = redisCache;
     }
 
