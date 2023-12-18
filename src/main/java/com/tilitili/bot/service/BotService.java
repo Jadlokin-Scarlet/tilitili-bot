@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 @Service
 public class BotService {
     public static final String lastMessageIdKey = "lastMessageId";
-    private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
     private final Gson gson;
+    private final ConcurrentHashMap<Long, Boolean> userIdLockMap = new ConcurrentHashMap<>();
     private final BotManager botManager;
     private final BotTaskMapper botTaskMapper;
     private final BotSessionService botSessionService;
