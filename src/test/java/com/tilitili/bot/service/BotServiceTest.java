@@ -22,8 +22,8 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		BotRobot bot = botRobotCacheManager.getBotRobotById(21L);
-		tester.testHandleMessage(bot, "[18:11:36] [Server thread/INFO]: Jadlokin_Scarlet joined the game");
-//		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(12L), "{\"post_type\":\"message\",\"message_type\":\"guild\",\"time\":1685139325,\"self_id\":536657454,\"sub_type\":\"channel\",\"message\":\"[CQ:at,qq=144115218753207094] ping\",\"self_tiny_id\":\"144115218680351893\",\"sender\":{\"nickname\":\"Jadlokin_Scarlet\",\"tiny_id\":\"144115218678093982\",\"user_id\":144115218678093982},\"guild_id\":\"14133921638967841\",\"channel_id\":\"1733719\",\"message_id\":\"BAAyNroSkuohAAAAAAAadFcAAAAAAAACDQ==\",\"user_id\":\"144115218678093982\"}");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(3L), "{\"post_type\":\"message\",\"message_type\":\"group\",\"time\":1702975738,\"self_id\":536657454,\"sub_type\":\"normal\",\"anonymous\":null,\"message\":\"[CQ:at,qq=2010851224] [CQ:at,qq=2854212978] 比划比划\",\"message_seq\":38989,\"raw_message\":\"[CQ:at,qq=2010851224] [CQ:at,qq=2854212978] 比划比划\",\"font\":0,\"group_id\":413438226,\"sender\":{\"age\":0,\"area\":\"\",\"card\":\"\",\"level\":\"\",\"nickname\":\"\uD83C\uDF65雪\",\"role\":\"admin\",\"sex\":\"unknown\",\"title\":\"\",\"user_id\":571790751},\"user_id\":571790751,\"message_id\":-948845572}");
+		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
+		tester.testHandleMessage(bot, "{\"op\":0,\"s\":3,\"t\":\"GROUP_AT_MESSAGE_CREATE\",\"id\":\"GROUP_AT_MESSAGE_CREATE:ebb1uclrakugrelcmdvdcg4g3llpt4qise4znd0coixcb3ifop7ft9skolij8yha\",\"d\":{\"author\":{\"id\":\"F2236D4C1EDA60136A2727B753CA2407\",\"member_openid\":\"F2236D4C1EDA60136A2727B753CA2407\"},\"content\":\"  比划比划\",\"group_id\":\"C6A1F9AB51F8F50B754C200C084B99EC\",\"group_openid\":\"C6A1F9AB51F8F50B754C200C084B99EC\",\"id\":\"ROBOT1.0_ebb1UCLraKUGrelcmDVdCKbrQ2WQMRmyrtrXVSoZYxOpRERAWEkYqFEaiXF6itGYrDHuaD37J5zVfzxxHrXn0w!!\",\"timestamp\":\"2023-12-19T16:48:58+08:00\"}}");
 	}
 }

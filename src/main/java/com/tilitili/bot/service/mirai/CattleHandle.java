@@ -322,6 +322,9 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotCattle otherCattle;
 		boolean isRandom;
 		List<BotUserDTO> atList = messageAction.getAtList();
+		if (atList.isEmpty() && StringUtils.isNumber(messageAction.getValue())) {
+			atList.add(botUserManager.getValidBotUserByExternalIdWithParent(Long.valueOf(messageAction.getValue()), botUser.getType()));
+		}
 		if (atList.isEmpty()) {
 			if (StringUtils.isNotBlank(messageAction.getValue())) {
 				return BotMessage.emptyMessage();
