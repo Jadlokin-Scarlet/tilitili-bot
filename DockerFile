@@ -4,7 +4,7 @@ ADD target/*.jar app.jar
 
 #ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", "-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", "app.jar"]
 
-ENTRYPOINT ["java", "-jar", "-Xmx300M", "-Xms300M", "-XX:MetaspaceSize=128m", "-XX:MaxMetaspaceSize=128m", \
+ENTRYPOINT ["java", "-jar", "-Xmx400M", "-Xms400M", "-XX:MetaspaceSize=128m", "-XX:MaxMetaspaceSize=128m", \
 "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", \
 "-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", \
 "-Dcom.sun.management.jmxremote=true", \
