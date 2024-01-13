@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PetpetHandle extends ExceptionRespMessageHandle {
@@ -31,6 +32,8 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 		String value = messageAction.getValue();
 		BotUserDTO botUser = messageAction.getBotUser();
 		List<BotUserDTO> atList = messageAction.getAtList();
+		Asserts.notBlank(value, "格式错啦(表情包)");
+
 		String key;
 		String text;
 		if (value.contains(" ")) {
@@ -43,12 +46,26 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 
 		List<PetpetData> petpetDataList = this.listPetpet();
 		PetpetData data = petpetDataList.stream().filter(item -> item.getAlias().contains(key)).findFirst()
-				.orElseThrow(() -> new AssertException("未找到标签，发送[帮助 生成]查看详情"));
+				.orElseThrow(() -> new AssertException("未找到表情包，发送[帮助 生成]查看详情"));
 
 		PetpetRequest petpetRequest = new PetpetRequest().setKey(data.getKey());
-		BotUserDTO firstUser = atList.isEmpty()? botUser: atList.get(0);
-		Asserts.notNull(firstUser.getFace(), "找不到头像");
-		petpetRequest.setTo(new PetpetRequestUser().setName(firstUser.getName()).setAvatar(firstUser.getFace()));
+		for (String type : data.getTypes().stream().distinct().collect(Collectors.toList())) {
+			BotUserDTO theUser;
+			if (petpetRequest.getTo() == null && petpetRequest.getFrom() == null) {
+				theUser = atList.isEmpty() ? botUser : atList.get(0);
+			} else {
+				Asserts.isTrue(atList.size() > 1, "该表情包需要@2人");
+				theUser = atList.get(1);
+			}
+			Asserts.notNull(theUser.getFace(), "找不到头像");
+			PetpetRequestUser requestUser = new PetpetRequestUser().setName(theUser.getName()).setAvatar(theUser.getFace());
+			if ("TO".equals(type)) {
+				petpetRequest.setTo(requestUser);
+			} else {
+				petpetRequest.setFrom(requestUser);
+			}
+		}
+
 		if (text != null) {
 			petpetRequest.setTextList(Collections.singletonList(text));
 		}
