@@ -49,7 +49,9 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 		BotUserDTO firstUser = atList.isEmpty()? botUser: atList.get(0);
 		Asserts.notNull(firstUser.getFace(), "找不到头像");
 		petpetRequest.setTo(new PetpetRequestUser().setName(firstUser.getName()).setAvatar(firstUser.getFace()));
-		petpetRequest.setTextList(Collections.singletonList(text));
+		if (text != null) {
+			petpetRequest.setTextList(Collections.singletonList(text));
+		}
 		String img = generate(petpetRequest);
 		return BotMessage.simpleImageMessage(img);
 	}
