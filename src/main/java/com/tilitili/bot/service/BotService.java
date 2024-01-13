@@ -114,7 +114,7 @@ public class BotService {
             Asserts.checkNull(userIdLockMap.putIfAbsent(botUser.getId(), true), "听我说你先别急。");
             // 解析指令
             BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
-            for (BotUserDTO atUser : botMessageAction.getAtList()) {
+            for (BotUserDTO atUser : botMessageAction.getAtList().stream().distinct().collect(Collectors.toList())) {
                 Long atUserId = atUser.getId();
                 if (Objects.equals(atUserId, botUser.getId())) continue;
                 lockUserId.add(atUserId);
