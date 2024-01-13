@@ -1,6 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.google.gson.reflect.TypeToken;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.component.CloseableTempFile;
@@ -9,6 +8,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.petpet.PetpetData;
 import com.tilitili.common.entity.view.bot.petpet.PetpetRequest;
 import com.tilitili.common.entity.view.bot.petpet.PetpetRequestUser;
+import com.tilitili.common.entity.view.bot.petpet.PetpetResponse;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -57,9 +57,10 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 	private List<PetpetData> listPetpet() {
 		String result = HttpClientUtil.httpGet(petpetHost);
 		Asserts.notBlank(result, "网络异常");
-		List<PetpetData> petpetDataList = Gsons.fromJson(result, new TypeToken<List<PetpetData>>(){}.getType());
-		Asserts.notEmpty(petpetDataList, "网络异常");
-		return petpetDataList;
+		PetpetResponse response = Gsons.fromJson(result, PetpetResponse.class);
+		Asserts.notNull(response, "网络异常");
+		Asserts.notEmpty(response.getPetData(), "网络异常");
+		return response.getPetData();
 	}
 
 	private String generate(PetpetRequest request) {
