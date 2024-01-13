@@ -45,7 +45,7 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 		}
 
 		List<PetpetData> petpetDataList = this.listPetpet();
-		PetpetData data = petpetDataList.stream().filter(item -> item.getAlias().contains(key)).findFirst()
+		PetpetData data = petpetDataList.stream().filter(item -> item.getAlias().contains(key) || item.getKey().equals(key)).findFirst()
 				.orElseThrow(() -> new AssertException("未找到表情包，发送[帮助 生成]查看详情"));
 
 		PetpetRequest petpetRequest = new PetpetRequest().setKey(data.getKey());
