@@ -28,8 +28,8 @@ public class PetpetHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		BotUserDTO botUser = messageAction.getBotUser();
 		String value = messageAction.getValue();
+		BotUserDTO botUser = messageAction.getBotUser();
 		List<BotUserDTO> atList = messageAction.getAtList();
 		String key;
 		String text;
