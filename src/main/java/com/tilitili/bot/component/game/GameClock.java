@@ -1,4 +1,4 @@
-package com.tilitili.bot.component;
+package com.tilitili.bot.component.game;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
