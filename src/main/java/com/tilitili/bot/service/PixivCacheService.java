@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.api.ShortUrlServiceInterface;
+import com.tilitili.common.component.CloseableTempFile;
 import com.tilitili.common.entity.BotPixivSendRecord;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -20,10 +21,8 @@ import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.NewProxyUtil;
-import com.tilitili.common.utils.OSSUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.jsoup.Jsoup;
@@ -35,13 +34,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -57,13 +54,15 @@ public class PixivCacheService {
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
 	@DubboReference
 	private ShortUrlServiceInterface shortUrlServiceInterface;
+	private final PixivLoginUserMapper pixivLoginUserMapper;
 
 	@Autowired
-	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager) {
+	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager, PixivLoginUserMapper pixivLoginUserMapper) {
 		this.botPixivSendRecordMapper = botPixivSendRecordMapper;
 		this.loliconManager = loliconManager;
 		this.pixivManager = pixivManager;
 		this.sendMessageManager = sendMessageManager;
+		this.pixivLoginUserMapper = pixivLoginUserMapper;
 	}
 
 	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException {
@@ -272,16 +271,12 @@ public class PixivCacheService {
 //			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
 //		}
 //
-		String fileType = StringUtils.getFileTypeFromUrl(url);
-		Path path = null;
-		try {
-			path = Files.createTempFile("pixiv", fileType);
-			log.debug("缓存文件："+path.toString());
-			File file = path.toFile();
-			pixivManager.downloadPixivImage(url, file);
+		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
+		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
+		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			String ossUrl = OSSUtil.uploadOSSByFile(file, fileType);
+			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
 			return new UploadImageResult().setUrl(ossUrl);
 //			UploadImageResult uploadImageResult = botManager.uploadImage(file);
@@ -290,14 +285,6 @@ public class PixivCacheService {
 //			return uploadImageResult;
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
-		} finally {
-			if (path != null) {
-				try {
-					Files.deleteIfExists(path);
-				} catch (IOException e) {
-					log.error("清理缓存失败", e);
-				}
-			}
 		}
 	}
 
@@ -310,29 +297,18 @@ public class PixivCacheService {
 //		} else {
 //			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 //		}
-		String fileType = StringUtils.getFileTypeFromUrl(url);
-		Path path = null;
-		try {
-			path = Files.createTempFile("pixiv", "." + fileType);
-			File file = path.toFile();
-			pixivManager.downloadPixivImage(url, file);
+		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
+		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
+		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			String ossUrl = OSSUtil.uploadOSSByImageWithType(file, fileType);
+			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
 			String shortUrl = shortUrlServiceInterface.generateShortUrl(ossUrl).getUrl();
 			Asserts.notNull(shortUrl, "啊嘞，上传失败了。");
 			return shortUrl;
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
-		} finally {
-			if (path != null) {
-				try {
-					Files.deleteIfExists(path);
-				} catch (IOException e) {
-					log.error("清理缓存失败", e);
-				}
-			}
 		}
 	}
 }
