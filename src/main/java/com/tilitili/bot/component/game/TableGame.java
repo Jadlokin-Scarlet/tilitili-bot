@@ -7,7 +7,7 @@ import java.util.List;
 
 @Component
 public class TableGame implements Game {
-	private List<TablePlayer> playerList;
+//	private List<TablePlayer> playerList;
 	@Override
 	public void run() {
 
