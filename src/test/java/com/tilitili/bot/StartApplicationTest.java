@@ -8,12 +8,14 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.bot.socket.handle.BaseWebSocketHandler;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.api.KtvServiceInterface;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.entity.BotIcePrice;
 import com.tilitili.common.entity.BotItem;
 import com.tilitili.common.entity.FishConfig;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
@@ -25,6 +27,7 @@ import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.java_websocket.client.WebSocketClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,19 +84,16 @@ class StartApplicationTest {
 
     @Test
     public void qqGuildWebsocketTest() throws URISyntaxException {
-//        BotRobot bot = botRobotCacheManager.getValidBotRobotById(9L);
-//        QQGuildWebSocketHandler qqGuildWebSocketHandler = new QQGuildWebSocketHandler(
-//                new URI(botManager.getWebSocketUrl(bot)),
-//                bot,
-//                botService, sendMessageManager, botRobotCacheManager
-//        );
-//        qqGuildWebSocketHandler.connect();
-//        BotWebSocketHandler gocq = new BotWebSocketHandler(
-//                new URI(botManager.getWebSocketUrl(botRobotCacheManager.getValidBotRobotById(3L))),
-//                botRobotCacheManager.getValidBotRobotById(3L),
-//                botService, sendMessageManager
-//        );
-//        gocq.connect();
+        WebSocketClient ws = new BaseWebSocketHandler(HttpRequestDTO.ofUrl("ws://1.15.153.3:40001")){
+            @Override
+            protected void handleTextMessage(String message) {
+                log.info("Message Received message={}", message);
+                executorService.schedule(() -> this.send("ping"), 20, TimeUnit.SECONDS);
+            }
+        };
+        ws.connect();
+        TimeUtil.millisecondsSleep(1000* 10);
+        ws.send("ping");
         TimeUtil.millisecondsSleep(1000* 60 * 60);
     }
 
