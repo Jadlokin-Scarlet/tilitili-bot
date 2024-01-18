@@ -31,8 +31,8 @@ public class HongHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		switch (messageAction.getKeyWithoutPrefix()) {
-			case "哄哄": return this.handleStart(messageAction);
 			case "不哄了": return this.handleEnd(messageAction);
+			case "哄哄": return this.handleStart(messageAction);
 			default: return this.handleChat(messageAction);
 		}
 	}
