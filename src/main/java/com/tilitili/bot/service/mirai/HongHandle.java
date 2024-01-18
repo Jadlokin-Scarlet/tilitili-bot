@@ -64,7 +64,7 @@ public class HongHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleStart(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
-		if (!redisCache.exists(HongManager.chatKey + botSender.getId())) {
+		if (redisCache.exists(HongManager.chatKey + botSender.getId())) {
 			return BotMessage.simpleTextMessage("已经在哄啦，别急，或者发送[不哄了]。");
 		}
 		redisCache.delete(HongManager.scoreKey + botSender.getId());
