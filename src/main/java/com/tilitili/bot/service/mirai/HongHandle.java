@@ -73,8 +73,8 @@ public class HongHandle extends ExceptionRespMessageHandle {
 		List<ChoiceMessage> chatList = new ArrayList<>();
 		chatList.add(new ChoiceMessage().setRole(ChoiceMessage.aiRole).setContent("哼"));
 		redisCache.setValue(HongManager.chatKey + botSender.getId(), Gsons.toJson(chatList), 60 * 60);
-		redisCache.increment(HongManager.scoreKey + botSender.getId(), 20L);
-		redisCache.increment(HongManager.numKey + botSender.getId(), 0L);
+		redisCache.increment(HongManager.scoreKey + botSender.getId(), Long.valueOf(20));
+		redisCache.increment(HongManager.numKey + botSender.getId(), Long.valueOf(0));
 		return BotMessage.simpleTextMessage("你回家太晚，女朋友很生气，试着安慰她吧。");
 	}
 }
