@@ -10,6 +10,7 @@ import com.tilitili.common.entity.view.bot.openai.ChoiceMessage;
 import com.tilitili.common.manager.HongManager;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -65,6 +66,11 @@ public class HongHandle extends ExceptionRespMessageHandle {
 			tips = "(噢，TA离你而去了)";
 		} else {
 			tips = "";
+		}
+		if (StringUtils.isNotBlank(tips)) {
+			redisCache.delete(HongManager.chatKey + botSender.getId());
+			redisCache.delete(HongManager.scoreKey + botSender.getId());
+			redisCache.delete(HongManager.numKey + botSender.getId());
 		}
 		return BotMessage.simpleListMessage(Arrays.asList(
 				BotMessageChain.ofPlain(result.getMessage()),
