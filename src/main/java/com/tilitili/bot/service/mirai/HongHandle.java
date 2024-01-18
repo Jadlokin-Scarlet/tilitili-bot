@@ -55,7 +55,7 @@ public class HongHandle extends ExceptionRespMessageHandle {
 		}
 		HongResult result = hongManager.chat(botSender, messageAction.getText());
 		Long score = redisCache.increment(HongManager.scoreKey + botSender.getId(), result.getScore());
-		Long num = redisCache.increment(HongManager.numKey + botSender.getId(), 1);
+		Long num = redisCache.increment(HongManager.numKey + botSender.getId(), Long.valueOf(1));
 		String tips;
 		if (score <= 0) {
 			tips = "(噢，TA离你而去了)";
