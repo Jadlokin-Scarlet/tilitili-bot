@@ -10,6 +10,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +85,10 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 			respList.add(BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName())));
 
 			if (noticeMap.containsKey(botSender.getId())) {
-				respList.add(BotMessage.simpleTextMessage(String.format("[公告]%s", noticeMap.get(botSender.getId()))));
+				respList.add(BotMessage.simpleListMessage(Arrays.asList(
+						BotMessageChain.ofSpeaker("公告"),
+						BotMessageChain.ofPlain(noticeMap.get(botSender.getId()))
+				)));
 			}
 		}
 
