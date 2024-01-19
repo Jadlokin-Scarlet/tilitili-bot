@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai.event;
 
+import com.google.common.reflect.TypeToken;
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.entity.BotForwardConfig;
@@ -9,43 +10,56 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotSenderTaskMappingManager;
-import com.tilitili.common.manager.SendMessageManager;
-import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.manager.BotSenderCacheManager;
+import com.tilitili.common.manager.BotSenderTaskMappingManager;
+import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
 public class JoinGameEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
-	private final SendMessageManager sendMessageManager;
 	private final RedisCache redisCache;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
+	private Map<Long, String> noticeMap;
+
+	@Value("${JoinGameEventHandle.noticeMap:{}}")
+	public JoinGameEventHandle setNoticeMap(String noticeMapStr) {
+		this.noticeMap = Gsons.fromJson(noticeMapStr, new TypeToken<Map<Long, String>>(){}.getType());
+		return this;
+	}
+
+
+
 	@Autowired
-	public JoinGameEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, SendMessageManager sendMessageManager, RedisCache redisCache) {
+	public JoinGameEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, RedisCache redisCache) {
 		super(BotEvent.EVENT_TYPE_JOIN_GAME);
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
-		this.sendMessageManager = sendMessageManager;
 		this.redisCache = redisCache;
 	}
 
 	@Override
-	public BotMessage handleEvent(BotRobot bot, BotMessage botMessage) {
+	public List<BotMessage> handleEventNew(BotRobot bot, BotMessage botMessage) {
 		BotUserDTO botUser = botMessage.getBotUser();
 		BotSender botSender = botMessage.getBotSender();
 		BotEvent botEvent = botMessage.getBotEvent();
+
+		List<BotMessage> respList = new ArrayList<>();
 
 		BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0).setIsSend(true);
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(forwardConfigQuery);
@@ -58,17 +72,25 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 				Asserts.notNull(targetSender, "找不到渠道");
 				Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
-				sendMessageManager.sendMessage(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
+				respList.add(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
 			}
 		}
 
 		String key = String.format("JoinGameEventHandle-%s", botUser.getId());
-		if (redisCache.exists(key)) {
-			return BotMessage.emptyMessage();
-		}
-		redisCache.setValue(key, "yes", 10);
+		if (!redisCache.exists(key)) {
+			redisCache.setValue(key, "yes", 10);
 
-		String time = TimeUtil.getTimeTalk();
-		return BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName()));
+			String time = TimeUtil.getTimeTalk();
+			respList.add(BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName())));
+
+			if (noticeMap.containsKey(botSender.getId())) {
+				respList.add(BotMessage.simpleTextMessage(String.format("[公告]%s", noticeMap.get(botSender.getId()))));
+			}
+		}
+
+		if (respList.isEmpty()) {
+			return null;
+		}
+		return respList;
 	}
 }
