@@ -36,11 +36,11 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 	private final RedisCache redisCache;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
 
-	private Map<Long, String> noticeMap;
+	private Map<Long, List<String>> noticeMap;
 
 	@Value("${JoinGameEventHandle.noticeMap:{}}")
 	public void setNoticeMap(String noticeMapStr) {
-		this.noticeMap = Gsons.fromJson(noticeMapStr, new TypeToken<Map<Long, String>>(){}.getType());
+		this.noticeMap = Gsons.fromJson(noticeMapStr, new TypeToken<Map<Long, List<String>>>(){}.getType());
 	}
 
 
@@ -85,9 +85,11 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 			respList.add(BotMessage.simpleTextMessage(String.format("%s好，%s，今天也是充满希望的一天。", time, botUser.getName())));
 
 			if (noticeMap.containsKey(botSender.getId())) {
+				List<String> noticeList = noticeMap.get(botSender.getId());
+				Long num = redisCache.increment("JoinGame.niticeNum-" + botSender.getId());
 				respList.add(BotMessage.simpleListMessage(Arrays.asList(
 						BotMessageChain.ofSpeaker("公告"),
-						BotMessageChain.ofPlain(noticeMap.get(botSender.getId()))
+						BotMessageChain.ofPlain(noticeList.get((int) (num % noticeList.size())))
 				)));
 			}
 		}
