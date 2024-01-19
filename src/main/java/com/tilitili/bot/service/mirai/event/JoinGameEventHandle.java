@@ -37,9 +37,8 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 	private Map<Long, String> noticeMap;
 
 	@Value("${JoinGameEventHandle.noticeMap:{}}")
-	public JoinGameEventHandle setNoticeMap(String noticeMapStr) {
+	public void setNoticeMap(String noticeMapStr) {
 		this.noticeMap = Gsons.fromJson(noticeMapStr, new TypeToken<Map<Long, String>>(){}.getType());
-		return this;
 	}
 
 
