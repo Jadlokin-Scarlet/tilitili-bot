@@ -94,6 +94,9 @@ public class BotSenderService {
         List<BotRobotSenderMapping> mappingList = botRobotSenderMappingMapper.getBotRobotSenderMappingByCondition(query);
         List<BotRobotSenderMappingDTO> list = mappingList.stream().map(mapping -> {
             BotRobot botRobot = botRobotCacheManager.getValidBotRobotById(mapping.getBotId());
+            if (botRobot == null) {
+                return null;
+            }
 
             BotRobotSenderMappingDTO result = new BotRobotSenderMappingDTO();
             result.setBotId(botRobot.getId());
@@ -103,7 +106,7 @@ public class BotSenderService {
             result.setListenIndex(mapping.getListenIndex());
             result.setSendIndex(mapping.getSendIndex());
             return result;
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), list);
     }
 
