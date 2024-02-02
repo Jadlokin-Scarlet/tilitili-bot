@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai.event;
 
 import com.tilitili.bot.service.mirai.base.BaseEventHandleAdapt;
 import com.tilitili.common.constant.BotTaskConstant;
-import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -10,9 +9,10 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.manager.BotRobotCacheManager;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +27,22 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
+	private final BotRobotCacheManager botRobotCacheManager;
 
 	@Autowired
-	public SystemEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager) {
+	public SystemEventHandle(BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotRobotCacheManager botRobotCacheManager) {
 		super(BotEvent.EVENT_TYPE_SYSTEM);
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
+		this.botRobotCacheManager = botRobotCacheManager;
 	}
 
 	@Override
 	public List<BotMessage> handleEventNew(BotRobot bot, BotMessage botMessage) {
 		BotUserDTO botUser = botMessage.getBotUser();
-		Asserts.isFalse(BotUserConstant.BOT_USER_ID_LIST.contains(botUser.getId()), "系统消息屏蔽bot");
+		List<Long> botRobotUserIdList = botRobotCacheManager.getBotRobotUserIdList();
+		Asserts.isFalse(botRobotUserIdList.contains(botUser.getId()), "系统消息屏蔽bot");
 
 		BotSender botSender = botMessage.getBotSender();
 		BotEvent botEvent = botMessage.getBotEvent();
