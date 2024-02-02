@@ -9,7 +9,6 @@ import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudProgram;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
@@ -286,12 +285,7 @@ public class MusicService {
 
             playerMusicList = new ArrayList<>();
             for (String songId : idList) {
-                MusicCloudProgram program = musicCloudManager.getProgramById(songId);
-                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-                playerMusic.setType(PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName())
-                        .setExternalId(songId).setExternalSubId(String.valueOf(program.getMainSong().getId()))
-                        .setIcon(program.getCoverUrl());
-                playerMusicList.add(playerMusic);
+                playerMusicList.add(musicCloudManager.getProgramById(songId));
             }
         }
         return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicSongList(playerMusicSongList);
