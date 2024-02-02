@@ -361,7 +361,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song) {
         Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
         PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-        playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId()));
+        playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId())).setIcon(song.getAlbum().getPicUrl());
         return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
     }
 

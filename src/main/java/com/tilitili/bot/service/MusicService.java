@@ -269,16 +269,18 @@ public class MusicService {
                 int pn = StringUtils.isBlank(pnStr)? 0: Integer.parseInt(pnStr) - 1;
 
                 PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle()).setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(pn).getCid()));
+                playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle())
+                        .setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(pn).getCid()))
+                        .setIcon(videoInfo.getPic());
                 playerMusicList.add(playerMusic);
             }
-        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?(song|program)", searchKey), "")) {
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?song", searchKey), "")) {
 //        } else if (searchKey.contains("163.com/song") || searchKey.contains("163.com/#/song") || searchKey.contains("163.com/#/program")) {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
             playerMusicList = musicCloudManager.getPlayerListDetail(idList);
-        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?dj", searchKey), "")) {
+        } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?(dj|program)", searchKey), "")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
@@ -286,7 +288,9 @@ public class MusicService {
             for (String songId : idList) {
                 MusicCloudProgram program = musicCloudManager.getProgramById(songId);
                 PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-                playerMusic.setType(PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName()).setExternalId(songId).setExternalSubId(String.valueOf(program.getMainSong().getId()));
+                playerMusic.setType(PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM).setName(program.getName())
+                        .setExternalId(songId).setExternalSubId(String.valueOf(program.getMainSong().getId()))
+                        .setIcon(program.getCoverUrl());
                 playerMusicList.add(playerMusic);
             }
         }
