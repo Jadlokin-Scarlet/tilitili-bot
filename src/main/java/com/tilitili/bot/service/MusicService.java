@@ -112,7 +112,7 @@ public class MusicService {
             return null;
         }
 
-        return ktvServiceInterface.stopMusic(voiceSender.getId());
+        return ktvServiceInterface.stopMusic(botSender.getId(), voiceSender.getId());
 //        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
 //        String result = this.post("stop", data);
 //        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
