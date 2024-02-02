@@ -80,8 +80,8 @@ public class BotService {
             log.warn("解析失败");
             return;
         }
-        Long userId = botMessage.getBotUser().getId();
-        if (botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setUserId(userId)) == 1) {
+        if (botMessage.getBotUser() != null
+                && botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setUserId(botMessage.getBotUser().getId())) == 1) {
             log.info("跳过自己消息");
             return;
         }
