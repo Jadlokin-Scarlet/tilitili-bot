@@ -306,11 +306,4 @@ class StartApplicationTest {
 //        }
     }
 
-    @Test
-    public void test4() {
-        redisCache.addMapValue("test", "test", "lock");
-        System.out.println(redisCache.removeMapValue("test", "test"));
-        System.out.println(redisCache.removeMapValue("test", "test"));
-    }
-
 }

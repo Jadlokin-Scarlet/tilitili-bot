@@ -340,6 +340,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
+        if (StringUtils.isBlank(searchKey)) {
+            messageAction.getSession().put("waitSearchKey", "yes", 60 * 60 * 3);
+            return BotMessage.simpleTextMessage("请输入以下之一：①网易云歌曲/歌单链接②b站视频/收藏夹链接③网易云歌曲名");
+        }
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
@@ -397,6 +401,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
             return "歌单";
         }
+        if (messageAction.getSession().containsKey("waitSearchKey")) {
+            return "点歌";
+        }
+
         return null;
     }
 }

@@ -1,12 +1,12 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class BotSessionService {
@@ -39,61 +39,37 @@ public class BotSessionService {
         public MiraiSession(String sessionKey) {
             this.sessionKey = sessionKey;
         }
-        public String getSessionKey() {
-            return sessionKey;
+        private String generateKey(String key) {
+            return sessionKey + "-" + key;
         }
         public String get(String key) {
-            Object value = redisCache.getMapValue(sessionKey, key);
-            if (value == null) {
-                return null;
-            }
-            if (!(value instanceof String)) {
-                throw new AssertException();
-            }
-            return (String) value;
+            return redisCache.getValueString(this.generateKey(key));
         }
         public String getOrDefault(String key, String or) {
-            if (redisCache.existsHashKey(sessionKey, key)) {
+            if (redisCache.exists(this.generateKey(key))) {
                 return this.get(key);
             } else {
                 return or;
             }
         }
         public Long getLong(String key) {
-            Object value = redisCache.getMapValue(sessionKey, key);
-            if (value == null) {
-                return null;
-            }
-            if (value instanceof Integer) {
-                return Long.valueOf(((Integer) value));
-            } else if (value instanceof Long) {
-                return (Long) value;
-            } else {
-                throw new AssertException();
-            }
-        }
-        public Integer getInteger(String key) {
-            Object value = redisCache.getMapValue(sessionKey, key);
-            if (value == null) {
-                return null;
-            }
-            if (value instanceof Integer) {
-                return ((Integer) value);
-            } else {
-                throw new AssertException();
-            }
+            return redisCache.getValueLong(this.generateKey(key));
         }
         public void put(String key, Object value) {
-            redisCache.addMapValue(sessionKey, key, value);
+            redisCache.setValue(this.generateKey(key), value);
         }
-        public Boolean putIfAbsent(String key, String value) {
-            return redisCache.addIfAbsentMapValue(sessionKey, key, value);
+        public void put(String key, String value, int delay) {
+            redisCache.setValue(this.generateKey(key), value, delay);
+        }
+        public Boolean putIfAbsent(String key, String value, int delay, TimeUnit unit) {
+            return redisCache.setNotExist(this.generateKey(key), value, delay, unit);
         }
         public boolean containsKey(String key) {
-            return redisCache.existsHashKey(sessionKey, key);
+            return redisCache.exists(this.generateKey(key));
         }
-        public Object remove(String key) {
-            return redisCache.removeMapValue(sessionKey, key);
+        public Boolean remove(String key) {
+            return redisCache.delete(this.generateKey(key));
         }
-    }
+
+	}
 }

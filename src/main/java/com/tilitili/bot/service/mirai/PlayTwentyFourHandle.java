@@ -120,7 +120,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValueOrVirtualValue();
-		if (Objects.equals(session.remove(lockKey), 0)) return null;
+		if (session.remove(lockKey)) return null;
 		try {
 			if (!session.containsKey(numListKey)) return null;
 			Asserts.notBlank(result, "你想答什么。");
