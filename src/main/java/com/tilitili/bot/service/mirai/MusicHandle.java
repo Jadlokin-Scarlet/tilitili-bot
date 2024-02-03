@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.emnus.MusicType;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PlayerMusic;
@@ -14,6 +15,7 @@ import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudOwner;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.exception.AssertException;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -90,7 +93,16 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleShowList(BotMessageAction messageAction) {
-        return null;
+        Long userId = messageAction.getBotUser().getId();
+        List<PlayerMusicList> musicListList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
+
+        List<String> textList = musicListList.stream()
+                .map(musicList -> String.format("%s(%s)", musicList.getName(), MusicType.getByValue(musicList.getType()).getValue()))
+                .collect(Collectors.toList());
+
+        return BotMessage.simpleListMessage(Collections.singletonList(
+                new BotMessageChain().setType(BotMessage.MESSAGE_TYPE_CARD_MUSIC_LIST).setTextList(textList)
+        ));
     }
 
     private BotMessage handleSyncList(BotMessageAction messageAction) {
