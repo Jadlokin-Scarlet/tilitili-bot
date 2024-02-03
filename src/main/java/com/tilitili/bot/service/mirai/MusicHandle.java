@@ -1,5 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
+import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
@@ -176,7 +177,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
         redisCache.setValue(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()), "yes", 60);
-        return BotMessage.simpleTextMessage("确定清空个人歌单吗(是/否)");
+        return BotMessage.simpleAtTextMessage("确定清空个人歌单吗(是/否)", botUser);
     }
 
     private BotMessage handleDeleteTheMusic(BotMessageAction messageAction) {
@@ -409,7 +410,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                     songList.get(index).getAlbum().getName()
             )).collect(Collectors.joining("\n"));
             redisCache.setValue("songList-" + botUser.getId(), songList, 60);
-            return BotMessage.simpleTextMessage("搜索结果如下，输入序号选择歌曲\n" + resp);
+            return BotMessage.simpleListMessage(Lists.newArrayList(
+                    BotMessageChain.ofAt(botUser),
+                    BotMessageChain.ofPlain("搜索结果如下，输入序号选择歌曲\n" + resp)
+            ));
         }
     }
 
