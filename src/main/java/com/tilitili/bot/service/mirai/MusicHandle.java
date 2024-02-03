@@ -84,8 +84,13 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             case "清空": return handleClearSongList(messageAction);
             case "播放": case "启动": return handlePlaySongList(messageAction);
             case "同步": return handleSyncList(messageAction);
+            case "": return handleShowList(messageAction);
             default: throw new AssertException();
         }
+    }
+
+    private BotMessage handleShowList(BotMessageAction messageAction) {
+        return null;
     }
 
     private BotMessage handleSyncList(BotMessageAction messageAction) {
@@ -339,7 +344,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
-        String searchKey = messageAction.getValueOrDefault(messageAction.getBody());
+        String searchKey = messageAction.getValueOrVirtualValue();
         if (StringUtils.isBlank(searchKey)) {
             messageAction.getSession().put("waitSearchKey", "yes", 60 * 60 * 3);
             return BotMessage.simpleTextMessage("请输入以下之一：①网易云歌曲/歌单链接②b站视频/收藏夹链接③网易云歌曲名");
