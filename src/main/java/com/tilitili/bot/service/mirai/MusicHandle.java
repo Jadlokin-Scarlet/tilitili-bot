@@ -94,12 +94,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleShowList(BotMessageAction messageAction) {
-        Long userId = messageAction.getBotUser().getId();
+        BotUserDTO botUser = messageAction.getBotUser();
+        Long userId = botUser.getId();
         List<PlayerMusicList> musicListList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
 
         List<String> textList = IntStream.range(0, musicListList.size())
                 .mapToObj(index -> String.format("%s：%s(%s)", index, musicListList.get(index).getName(), MusicType.getByValue(musicListList.get(index).getType()).getText()))
                 .collect(Collectors.toList());
+        textList.add(0, String.format("%s的个人歌单：", botUser.getName()));
 
         return BotMessage.simpleListMessage(Collections.singletonList(
                 new BotMessageChain().setType(BotMessage.MESSAGE_TYPE_CARD_MUSIC_LIST).setTextList(textList)
