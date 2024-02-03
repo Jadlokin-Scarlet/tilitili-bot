@@ -57,7 +57,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         try {
             Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
-            switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
+            switch (messageAction.getKeyWithoutPrefix()) {
                 case "选歌": return handleChoose(messageAction);
                 case "点歌": case "dg": return handleSearch(messageAction, null);
                 case "点歌1": return handleSearch(messageAction, 0);
@@ -78,7 +78,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSongList(BotMessageAction messageAction) {
-        if ("是".equals(messageAction.getValueOrVirtualValue())) {
+        if ("是".equals(messageAction.getValue())) {
             return handleConfirmClear(messageAction);
         }
         switch (messageAction.getSubKey()) {
@@ -97,7 +97,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         List<PlayerMusicList> musicListList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
 
         List<String> textList = musicListList.stream()
-                .map(musicList -> String.format("%s(%s)", musicList.getName(), MusicType.getByValue(musicList.getType()).getValue()))
+                .map(musicList -> String.format("%s(%s)", musicList.getName(), MusicType.getByValue(musicList.getType()).getText()))
                 .collect(Collectors.toList());
 
         return BotMessage.simpleListMessage(Collections.singletonList(
@@ -223,6 +223,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleSongListImport(BotMessageAction messageAction) {
         Long userId = messageAction.getBotUser().getId();
         String searchKey = messageAction.getSubValue();
+        if (StringUtils.isBlank(searchKey)) {
+            messageAction.getSession().put("waitSearchKeyList", "yes", 60 * 60 * 3);
+            return BotMessage.simpleTextMessage("请输入以下之一：①网易云歌单链接②b站收藏夹链接");
+        }
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
         PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
@@ -341,7 +345,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (!redisCache.exists(redisKey)) {
             return null;
         }
-        String value = messageAction.getValueOrVirtualValue();
+        String value = messageAction.getValue();
         Asserts.isNumber(value, "格式错啦(序号)");
         int index = Integer.parseInt(value) - 1;
 
@@ -356,7 +360,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
-        String searchKey = messageAction.getValueOrVirtualValue();
+        String searchKey = messageAction.getValue();
         if (StringUtils.isBlank(searchKey)) {
             messageAction.getSession().put("waitSearchKey", "yes", 60 * 60 * 3);
             return BotMessage.simpleTextMessage("请输入以下之一：①网易云歌曲/歌单链接②b站视频/收藏夹链接③网易云歌曲名");
@@ -420,6 +424,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
         if (messageAction.getSession().containsKey("waitSearchKey")) {
             return "点歌";
+        }
+        if (messageAction.getSession().containsKey("waitSearchKeyList")) {
+            return "歌单 导入";
         }
 
         return null;

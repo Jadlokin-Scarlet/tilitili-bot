@@ -64,11 +64,11 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
 		String key = messageAction.getKeyWithoutPrefix();
-		String virtualKey = messageAction.getVirtualKey();
+		String virtualKey = messageAction.getKey();
 		switch (virtualKey != null? virtualKey: key) {
 			case "玩24点": case "w24": return Collections.singletonList(BotMessage.simpleTextMessage("试试看这道题吧(1，4，3，8)，时限3分钟哦~"));
 			case "回答24点": case "hd24": {
-				String result = messageAction.getValueOrVirtualValue();
+				String result = messageAction.getValue();
 				if ("(8-3+1)*4".equals(result)) {
 					return Collections.singletonList(BotMessage.simpleTextMessage("恭喜你回答正确！"));
 				} else {
@@ -82,7 +82,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String key = messageAction.getKeyWithoutPrefix();
-		String virtualKey = messageAction.getVirtualKey();
+		String virtualKey = messageAction.getKey();
 		switch (virtualKey != null? virtualKey: key) {
 			case "玩24点": case "w24": return startGame(messageAction);
 			case "回答24点": case "hd24": return handleGame(messageAction);
@@ -119,7 +119,7 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleGame(BotMessageAction messageAction) {
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSessionService.MiraiSession session = messageAction.getSession();
-		String result = messageAction.getValueOrVirtualValue();
+		String result = messageAction.getValue();
 		if (session.remove(lockKey)) return null;
 		try {
 			if (!session.containsKey(numListKey)) return null;

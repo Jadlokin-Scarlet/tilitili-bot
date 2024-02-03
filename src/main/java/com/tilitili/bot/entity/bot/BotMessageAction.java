@@ -26,12 +26,12 @@ public class BotMessageAction extends BaseDTO {
     private final BotRobot bot;
     private final List<String> imageList;
     private final List<BotUserDTO> atList;
-    private final String text;
-    private final String head;
     private final String body;
     private final String messageId;
     private final Map<String, String> paramMap;
     private final Map<String, String> bodyMap;
+    private String text;
+    private String head;
     private String keyWithoutPrefix;
     private String key;
     private String value;
@@ -40,7 +40,6 @@ public class BotMessageAction extends BaseDTO {
     private String quoteMessageId;
     private BotUserDTO quoteUser;
     private BotMessage quoteMessage;
-    private String virtualKey;
 
     public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotRobot bot) {
         this.botSender = botMessage.getBotSender();
@@ -121,9 +120,28 @@ public class BotMessageAction extends BaseDTO {
         }
     }
 
-    public String getValueOrVirtualValue() {
-        return virtualKey != null? head: value;
+    public BotMessageAction setVirtualKey(String virtualKey) {
+        String key;
+        String subKey;
+        int index = virtualKey.indexOf(" ");
+        if (index != -1) {
+            key = virtualKey.substring(0, index).trim();
+            subKey = value.substring(index).trim();
+        } else {
+            key = virtualKey.trim();
+            subKey = "";
+        }
+        this.key = key;
+        this.subKey = subKey;
+        this.keyWithoutPrefix = key;
+        this.value = subKey + " " + head;
+        this.subValue = head;
+
+        this.text = virtualKey + " " + text;
+        this.head = virtualKey + " " + head;
+        return this;
     }
+
 
     public Map<String, String> getParamMap() {
         return paramMap;
@@ -216,19 +234,6 @@ public class BotMessageAction extends BaseDTO {
 
     public String getHead() {
         return head;
-    }
-
-    public String getVirtualKey() {
-        return virtualKey;
-    }
-
-    public String getVirtualKeyOrDefault(String other) {
-        return virtualKey != null? virtualKey: other;
-    }
-
-    public BotMessageAction setVirtualKey(String virtualKey) {
-        this.virtualKey = virtualKey;
-        return this;
     }
 
     public BotUserDTO getBotUser() {

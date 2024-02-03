@@ -43,7 +43,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
 
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-        switch (messageAction.getVirtualKeyOrDefault(messageAction.getKeyWithoutPrefix())) {
+        switch (messageAction.getKeyWithoutPrefix()) {
             case "五子棋": return this.handleStart(messageAction);
             case "落子": return this.handleFall(messageAction);
             case "掀桌": return this.handleStop(messageAction);
@@ -101,7 +101,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
     private BotMessage handleFall(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
         BotRobot bot = messageAction.getBot();
-        String value = messageAction.getValueOrVirtualValue();
+        String value = messageAction.getValue();
         BotUserDTO botUser = messageAction.getBotUser();
         Gomoku gomoku = Gsons.fromJson(session.get("GomokuHandle.gomoku"), Gomoku.class);
         BotUserDTO nowPlayer = gomoku.getNowPlayer();

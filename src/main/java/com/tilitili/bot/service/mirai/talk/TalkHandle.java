@@ -75,7 +75,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		String senderReqKey = reqKey + userId;
 		String senderStatusKey = statusKey + userId;
 
-		String value = messageAction.getValueOrVirtualValue() == null? "": messageAction.getValueOrVirtualValue();
+		String value = messageAction.getValue() == null? "": messageAction.getValue();
 		String reqStr = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
 		String respStr = messageAction.getBodyOrDefault("回答", value.contains(" ")? value.substring(value.indexOf(" ")).trim(): null);
 

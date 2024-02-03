@@ -31,7 +31,7 @@ public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotUserDTO botUser = messageAction.getBotUser();
-		String value = messageAction.getValueOrVirtualValue();
+		String value = messageAction.getValue();
 		String req = messageAction.getBodyOrDefault("提问", value);
 		Long userId = botUser.getId();
 
