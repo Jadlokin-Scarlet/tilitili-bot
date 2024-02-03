@@ -111,7 +111,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleSyncList(BotMessageAction messageAction) {
         Long userId = messageAction.getBotUser().getId();
         List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
-        Asserts.notEmpty(listList, "无歌单可用");
+        Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
             PlayerMusicSongList playerMusicSongList = musicService.getMusicListByListId(list.getType(), list.getExternalId());
             List<PlayerMusicDTO> newMusicList = playerMusicSongList.getMusicList();
@@ -152,7 +152,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName()).setIcon(music.getIcon());
             return playerMusic;
         }).collect(Collectors.toList());
-        Asserts.notEmpty(musicList, "歌单空空如也");
+        Asserts.notEmpty(musicList, "歌单空空如也，先导入歌单吧");
         PlayerMusicSongList playerMusicSongList = new PlayerMusicSongList().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
         return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
     }
