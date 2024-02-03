@@ -97,8 +97,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Long userId = messageAction.getBotUser().getId();
         List<PlayerMusicList> musicListList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
 
-        List<String> textList = musicListList.stream()
-                .map(musicList -> String.format("%s(%s)", musicList.getName(), MusicType.getByValue(musicList.getType()).getText()))
+        List<String> textList = IntStream.range(0, musicListList.size())
+                .mapToObj(index -> String.format("%s：%s(%s)", index, musicListList.get(index).getName(), MusicType.getByValue(musicListList.get(index).getType()).getText()))
                 .collect(Collectors.toList());
 
         return BotMessage.simpleListMessage(Collections.singletonList(
