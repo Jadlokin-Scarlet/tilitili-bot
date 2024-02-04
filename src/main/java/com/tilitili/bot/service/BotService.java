@@ -77,7 +77,7 @@ public class BotService {
             log.warn("解析失败", e);
         }
         if (botMessage == null) {
-            log.warn("解析失败 botId="+bot.getId());
+            log.warn(String.format("解析失败 botId=%d message=%s", bot.getId(), message));
             return;
         }
         if (botMessage.getBotUser() != null
