@@ -74,10 +74,10 @@ public class BotService {
         try {
             botMessage = botManager.handleMessageToBotMessage(bot, message);
         } catch (Exception e) {
-            log.warn("解析失败", e);
+            log.warn("解析异常", e);
         }
         if (botMessage == null) {
-            log.warn(String.format("解析失败 botId=%d message=%s", bot.getId(), message));
+            log.debug("解析失败 botId="+bot.getId());
             return;
         }
         if (botMessage.getBotUser() != null
