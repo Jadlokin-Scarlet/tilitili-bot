@@ -1,16 +1,21 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.BotFunctionTalkDTO;
+import com.tilitili.bot.service.mirai.talk.AddRandomTalkHandle;
+import com.tilitili.common.component.CloseableTempFile;
+import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +27,12 @@ import java.util.stream.Collectors;
 public class RandomTalkService {
     private final BotFunctionTalkMapper botFunctionTalkMapper;
     private final BotSenderCacheManager botSenderCacheManager;
+    private final AddRandomTalkHandle addRandomTalkHandle;
 
-    public RandomTalkService(BotFunctionTalkMapper botFunctionTalkMapper, BotSenderCacheManager botSenderCacheManager) {
+    public RandomTalkService(BotFunctionTalkMapper botFunctionTalkMapper, BotSenderCacheManager botSenderCacheManager, AddRandomTalkHandle addRandomTalkHandle) {
         this.botFunctionTalkMapper = botFunctionTalkMapper;
         this.botSenderCacheManager = botSenderCacheManager;
+        this.addRandomTalkHandle = addRandomTalkHandle;
     }
 
     public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(BotFunctionTalkQuery query) {
@@ -49,5 +56,15 @@ public class RandomTalkService {
             return functionTalkDTO;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
+    }
+
+    public BaseModel<String> importRandomTalk(BotAdmin botAdmin, String ossUrl) {
+        try (CloseableTempFile file = CloseableTempFile.ofUrl(ossUrl, null)) {
+            String resp = addRandomTalkHandle.doHandleRandomTalkFile(file.getFile(), botAdmin.getId());
+            return BaseModel.success(resp);
+        } catch (IOException e) {
+            log.info("下载文件失败", e);
+            throw new AssertException("网络异常");
+        }
     }
 }

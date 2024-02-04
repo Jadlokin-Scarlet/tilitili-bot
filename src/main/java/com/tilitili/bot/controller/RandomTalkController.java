@@ -8,10 +8,7 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
@@ -27,5 +24,11 @@ public class RandomTalkController {
     @ResponseBody
     public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(@SessionAttribute("botAdmin") BotAdmin botAdmin, BotFunctionTalkQuery query) {
         return randomTalkService.listRandomTalk(query.setAdminId(botAdmin.getId()));
+    }
+
+    @PostMapping("/import")
+    @ResponseBody
+    public BaseModel<String> importRandomTalk(@SessionAttribute("botAdmin") BotAdmin botAdmin, String file) {
+        return randomTalkService.importRandomTalk(botAdmin, file);
     }
 }

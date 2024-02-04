@@ -16,6 +16,7 @@ import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotPlaceManager;
 import com.tilitili.common.manager.BotSenderCacheManager;
@@ -48,9 +49,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotPlaceManager botPlaceManager;
+	private final BotAdminManager botAdminManager;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager, BotAdminManager botAdminManager) {
 		this.botManager = botManager;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botFunctionMapper = botFunctionMapper;
@@ -58,6 +60,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botPlaceManager = botPlaceManager;
+		this.botAdminManager = botAdminManager;
 	}
 
 	@Override
@@ -84,6 +87,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private BotMessage handleRandomTalkFile(BotMessageAction messageAction, BotMessageChain fileChain) {
 		BotRobot bot = messageAction.getBot();
 		File file = botManager.downloadGroupFile(bot, messageAction.getBotSender(), fileChain);
+		return BotMessage.simpleTextMessage(this.doHandleRandomTalkFile(file, null));
+	}
+
+	public String doHandleRandomTalkFile(File file, Long adminId) {
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
@@ -103,9 +110,6 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		int timeNum = Integer.parseInt(timeNumStr);
 		int isReply = "是".equals(isReplyStr)? 1: 0;
 
-		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
-		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score).setTimeNum(timeNum).setIsReply(isReply);
-		botFunctionMapper.addBotFunctionSelective(newFunction);
 		List<BotSender> botSenderList = new ArrayList<>();
 		if (StringUtils.isNotBlank(friendList)) {
 			botSenderList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
@@ -132,6 +136,18 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					.map(botSenderCacheManager::getValidBotSenderById)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
+
+		// 如果有adminId则校验权限
+		if (adminId != null) {
+			for (BotSender botSender : botSenderList) {
+				Asserts.isTrue(botAdminManager.checkAdminAndSender(adminId, botSender.getId()), "%s渠道无权限", botSender.getName());
+			}
+		}
+
+		BotFunction oldFunction = botFunctionMapper.getLastFunction(function);
+		BotFunction newFunction = new BotFunction().setFunction(function).setScore(score).setTimeNum(timeNum).setIsReply(isReply);
+		botFunctionMapper.addBotFunctionSelective(newFunction);
+
 		List<BotFunctionTalk> newFunctionTalkList = new ArrayList<>();
 		for (RandomTalkDTO randomTalkDTO : resultList) {
 			Asserts.notBlank(randomTalkDTO.getReq(), "关键词不能为空");
@@ -158,7 +174,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String senderMessage = CollectionUtils.isEmpty(botSenderList)? "": "渠道"+botSenderList.stream().map(BotSender::getName).collect(Collectors.joining(","));
 		String scoreMessage = score == 0? "": String.format("，积分%s", score);
 		String timeNumMessage = timeNum == 99999999? "": "，每" + timeUnit + timeNumStr + "次";
-		return BotMessage.simpleTextMessage(String.format("搞定√(分组%s导入%s条对话，%s%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage, timeNumMessage));
+		return String.format("搞定√(分组%s导入%s条对话，%s%s%s)", function, newFunctionTalkList.size(), senderMessage, scoreMessage, timeNumMessage);
 	}
 
 	private BotMessage handleFishFile(BotMessageAction messageAction, BotMessageChain fileChain) {
