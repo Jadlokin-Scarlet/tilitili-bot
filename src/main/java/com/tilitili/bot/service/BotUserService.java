@@ -37,8 +37,8 @@ public class BotUserService {
 	}
 
 	public void bindUser(Long adminId, Long userId, Long qq) {
-		Asserts.notNull(userId, "参数异常");
 		Asserts.notNull(qq, "参数异常");
+		Asserts.notNull(userId, "参数异常");
 		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(userId, adminId) > 0, "参数异常");
 
 		BotUserDTO subUser = botUserManager.getValidBotUserByIdWithParent(null, userId);
