@@ -228,7 +228,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Long userId = botUser.getId();
         String searchKey = messageAction.getSubValue();
         if (StringUtils.isBlank(searchKey)) {
-            messageAction.getSession().put("waitSearchKeyList"+ userId, "yes", 60 * 60 * 3);
+            messageAction.getSession().put("waitSearchKeyList-"+ userId, "yes", 60 * 60 * 3);
             return BotMessage.simpleAtTextMessage("请输入以下之一：①网易云歌单链接②b站收藏夹链接", botUser);
         }
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
@@ -429,10 +429,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
             return "歌单";
         }
-        if (messageAction.getSession().containsKey("waitSearchKey"+messageAction.getBotUser().getId())) {
+        if (messageAction.getSession().containsKey("waitSearchKey-"+messageAction.getBotUser().getId())) {
             return "点歌";
         }
-        if (messageAction.getSession().containsKey("waitSearchKeyList"+messageAction.getBotUser().getId())) {
+        if (messageAction.getSession().containsKey("waitSearchKeyList-"+messageAction.getBotUser().getId())) {
             return "歌单 导入";
         }
 
