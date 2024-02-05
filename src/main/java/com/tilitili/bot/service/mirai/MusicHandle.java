@@ -231,6 +231,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             messageAction.getSession().put("waitSearchKeyList-"+ userId, "yes", 60 * 60 * 3);
             return BotMessage.simpleAtTextMessage("请输入以下之一：①网易云歌单链接②b站收藏夹链接", botUser);
         }
+        messageAction.getSession().remove("waitSearchKeyList-"+userId);
+
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
         PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
@@ -366,10 +368,11 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         String searchKey = messageAction.getValue();
         if (StringUtils.isBlank(searchKey)) {
-            messageAction.getSession().put("waitSearchKey-"+messageAction.getBotUser().getId(), "yes", 60 * 60 * 3);
+            messageAction.getSession().put("waitSearchKey-"+botUser.getId(), "yes", 60 * 60 * 3);
             return BotMessage.simpleAtTextMessage("请输入以下之一：①网易云歌曲/歌单链接②b站视频/收藏夹链接③网易云歌曲名", botUser);
         }
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
+        messageAction.getSession().remove("waitSearchKey-"+botUser.getId());
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
@@ -429,10 +432,10 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (redisCache.exists(String.format("MusicHandle.clearSongListConfirm-%s-%s", botSender.getId(), botUser.getId()))) {
             return "歌单";
         }
-        if (messageAction.getSession().containsKey("waitSearchKey-"+messageAction.getBotUser().getId())) {
+        if (messageAction.getSession().containsKey("waitSearchKey-"+botUser.getId())) {
             return "点歌";
         }
-        if (messageAction.getSession().containsKey("waitSearchKeyList-"+messageAction.getBotUser().getId())) {
+        if (messageAction.getSession().containsKey("waitSearchKeyList-"+botUser.getId())) {
             return "歌单 导入";
         }
 
