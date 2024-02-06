@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Controller
 @RequestMapping("/api/randomTalk")
-public class RandomTalkController {
+public class RandomTalkController extends BaseController {
     public final RandomTalkService randomTalkService;
 
     public RandomTalkController(RandomTalkService randomTalkService) {
