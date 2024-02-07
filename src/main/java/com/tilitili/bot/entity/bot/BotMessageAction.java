@@ -134,7 +134,7 @@ public class BotMessageAction extends BaseDTO {
         this.key = key;
         this.subKey = subKey;
         this.keyWithoutPrefix = key;
-        this.value = subKey + " " + head;
+        this.value = " ".equals(subKey) ? head: subKey + " " + head;
         this.subValue = head;
 
         this.text = virtualKey + " " + text;
