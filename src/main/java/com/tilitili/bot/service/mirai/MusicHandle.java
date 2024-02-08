@@ -356,6 +356,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         int index = Integer.parseInt(value) - 1;
 
         List<MusicCloudSong> songList = (List<MusicCloudSong>) redisCache.getValue(redisKey);
+        Asserts.isRange(0, index, songList.size(), "格式错啦(序号)");
         MusicCloudSong song = songList.get(index);
         redisCache.delete(redisKey);
 

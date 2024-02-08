@@ -1,12 +1,15 @@
-package com.tilitili.bot.component.game;
+package com.tilitili.bot.component;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class TableGame implements Game {
+public class MountainTable {
 //	private List<TablePlayer> playerList;
-	@Override
+	private
 	public void run() {
+		while(true) {
 
+			break;
+		}
 	}
 }
