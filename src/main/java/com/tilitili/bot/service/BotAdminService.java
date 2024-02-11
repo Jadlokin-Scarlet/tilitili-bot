@@ -6,8 +6,10 @@ import com.tilitili.common.constant.BotSenderConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotAdminCode;
 import com.tilitili.common.entity.BotRoleAdminMapping;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotAdminCodeManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.QywechatManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.mapper.mysql.BotAdminCodeMapper;
@@ -38,8 +40,9 @@ public class BotAdminService {
     private final SendMessageManager sendMessageManager;
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final QywechatManager qywechatManager;
+    private final BotUserManager botUserManager;
 
-    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper, QywechatManager qywechatManager) {
+    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper, QywechatManager qywechatManager, BotUserManager botUserManager) {
         this.botAdminMapper = botAdminMapper;
         this.botAdminCodeManager = botAdminCodeManager;
         this.botAdminCodeMapper = botAdminCodeMapper;
@@ -47,9 +50,10 @@ public class BotAdminService {
         this.sendMessageManager = sendMessageManager;
         this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
         this.qywechatManager = qywechatManager;
+        this.botUserManager = botUserManager;
     }
 
-    public BotAdmin login(BotAdminRequest request) {
+    public BotUserDTO login(BotAdminRequest request) {
         String username = request.getUsername();
         String password = request.getPassword();
         Asserts.notBlank(username, "用户名不能为空");
@@ -64,7 +68,7 @@ public class BotAdminService {
         String md5Password = password.length() == 32? password: md5Password(password);
         Asserts.checkEquals(botAdmin.getPassword(), md5Password, "密码错误");
 
-        return botAdmin;
+        return botUserManager.getValidBotUserByIdWithParent(botAdmin.getUserId());
     }
 
     public void register(BotAdminRequest request) {
@@ -140,7 +144,7 @@ public class BotAdminService {
 
         redisCache.setValue(emailCodeKey + email, emailCode);
         if (testEmail.equals(email)) {
-            sendMessageManager.sendMessage(BotMessage.simpleTextMessage("验证码："+emailCode).setSenderId(BotSenderConstant.MASTER_SENDER_ID));
+            sendMessageManager.sendMessage(BotMessage.simpleTextMessage("验证码："+emailCode).setSenderId(BotSenderConstant.TEST_SENDER_ID));
         } else {
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom(sendMessageFromEmail);

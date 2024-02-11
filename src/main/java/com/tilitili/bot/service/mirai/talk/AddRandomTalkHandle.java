@@ -16,9 +16,9 @@ import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotAdminManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotPlaceManager;
+import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.mysql.BotFunctionMapper;
 import com.tilitili.common.mapper.mysql.BotFunctionTalkMapper;
@@ -49,10 +49,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotPlaceManager botPlaceManager;
-	private final BotAdminManager botAdminManager;
+	private final BotRoleManager botRoleManager;
 
 	@Autowired
-	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager, BotAdminManager botAdminManager) {
+	public AddRandomTalkHandle(BotManager botManager, BotSenderCacheManager botSenderCacheManager, BotFunctionMapper botFunctionMapper, BotFunctionTalkMapper BotFunctionTalkMapper, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotPlaceManager botPlaceManager, BotRoleManager botRoleManager) {
 		this.botManager = botManager;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botFunctionMapper = botFunctionMapper;
@@ -60,7 +60,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botPlaceManager = botPlaceManager;
-		this.botAdminManager = botAdminManager;
+		this.botRoleManager = botRoleManager;
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		return BotMessage.simpleTextMessage(this.doHandleRandomTalkFile(file, null));
 	}
 
-	public String doHandleRandomTalkFile(File file, Long adminId) {
+	public String doHandleRandomTalkFile(File file, Long adminUserId) {
 		ExcelResult<RandomTalkDTO> excelResult = ExcelUtil.getListFromExcel(file, RandomTalkDTO.class);
 		List<RandomTalkDTO> resultList = excelResult.getResultList();
 		String function = excelResult.getParam("分组");
@@ -138,9 +138,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		}
 
 		// 如果有adminId则校验权限
-		if (adminId != null) {
+		if (adminUserId != null) {
 			for (BotSender botSender : botSenderList) {
-				Asserts.isTrue(botAdminManager.checkAdminAndSender(adminId, botSender.getId()), "%s渠道无权限", botSender.getName());
+				Asserts.isTrue(botRoleManager.checkAdminAndSender(adminUserId, botSender.getId()), "%s渠道无权限", botSender.getName());
 			}
 		}
 

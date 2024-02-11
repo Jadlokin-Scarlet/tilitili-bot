@@ -4,8 +4,8 @@ import com.tilitili.bot.annotation.BotAuthorityCheck;
 import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.bot.entity.request.BotRobotAddRequest;
 import com.tilitili.bot.service.BotRobotService;
-import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -26,8 +26,8 @@ public class BotRobotController extends BaseController{
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotRobotDTO>> list(@SessionAttribute("botAdmin") BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
-        return botRobotService.list(botAdmin, query);
+    public BaseModel<PageModel<BotRobotDTO>> list(@SessionAttribute(value = "botUser") BotUserDTO botUser, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
+        return botRobotService.list(botUser, query);
     }
 
     @PostMapping("/up/{botId}")
@@ -48,8 +48,8 @@ public class BotRobotController extends BaseController{
 
     @PostMapping("/add")
     @ResponseBody
-    public BaseModel<String> addBot(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody BotRobot bot) {
-        botRobotService.addBot(botAdmin, bot);
+    public BaseModel<String> addBot(@SessionAttribute(value = "botUser") BotUserDTO botUser, @RequestBody BotRobot bot) {
+        botRobotService.addBot(botUser, bot);
         return BaseModel.success();
     }
 

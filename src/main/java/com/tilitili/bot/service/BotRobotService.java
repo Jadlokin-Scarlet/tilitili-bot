@@ -17,7 +17,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
-import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Service;
 
@@ -33,22 +33,22 @@ public class BotRobotService {
     private final BotManager botManager;
     private final BotRobotIndexMapper botRobotIndexMapper;
     private final BotUserManager botUserManager;
-    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
+    private final BotRoleUserMappingMapper botRoleUserMappingMapper;
     private final WebSocketFactory webSocketFactory;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleAdminMappingMapper BotRoleAdminMappingMapper, WebSocketFactory webSocketFactory) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleUserMappingMapper BotRoleUserMappingMapper, WebSocketFactory webSocketFactory) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
-        this.botRoleAdminMappingMapper = BotRoleAdminMappingMapper;
+        this.botRoleUserMappingMapper = BotRoleUserMappingMapper;
         this.webSocketFactory = webSocketFactory;
     }
 
-    public BaseModel<PageModel<BotRobotDTO>> list(BotAdmin botAdmin, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+    public BaseModel<PageModel<BotRobotDTO>> list(BotUserDTO botUser, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setAdminId(botAdmin.getId());
+            query.setUserId(botUser.getId());
         }
         int total = botRobotCacheManager.countBotRobotByCondition(query);
         List<BotRobot> list = botRobotCacheManager.getBotRobotByCondition(query);
@@ -87,12 +87,12 @@ public class BotRobotService {
         }
     }
 
-    public void addBot(BotAdmin botAdmin, BotRobot bot) {
+    public void addBot(BotUserDTO botUser, BotRobot bot) {
         Asserts.notNull(bot, "参数异常");
         Asserts.notNull(bot.getType(), "参数异常");
         bot.setStatus(-1);
-        bot.setAdminId(botAdmin.getId());
-        bot.setMasterId(botAdmin.getUserId());
+        bot.setUserId(botUser.getId());
+        bot.setMasterId(botUser.getId());
         switch (bot.getType()) {
             case BotRobotConstant.TYPE_MIRAI: {
                 BotRobot botInfo = botManager.getBotInfo(bot);

@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.request.UpdateBotRobotSenderMappingIndexRequest;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotSenderMappingQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
@@ -15,7 +16,7 @@ import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotRobotSenderMappingMapper;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
-import com.tilitili.common.mapper.mysql.automapper.BotRoleAdminMappingAutoMapper;
+import com.tilitili.common.mapper.mysql.automapper.BotRoleUserMappingAutoMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Service;
 
@@ -30,14 +31,14 @@ public class BotSenderService {
     private final BotSenderCacheManager botSenderCacheManager;
     private final BotRobotCacheManager botRobotCacheManager;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
-    private final BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper;
+    private final BotRoleUserMappingAutoMapper botRoleUserMappingMapper;
     private final BotRobotSenderMappingMapper botRobotSenderMappingMapper;
 
-    public BotSenderService(BotSenderCacheManager botSenderCacheManager, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotCacheManager botRobotCacheManager, BotRoleAdminMappingAutoMapper botRoleAdminMappingMapper, BotRobotSenderMappingMapper botRobotSenderMappingMapper) {
+    public BotSenderService(BotSenderCacheManager botSenderCacheManager, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRobotCacheManager botRobotCacheManager, BotRoleUserMappingAutoMapper botRoleUserMappingMapper, BotRobotSenderMappingMapper botRobotSenderMappingMapper) {
         this.botSenderCacheManager = botSenderCacheManager;
         this.botRobotCacheManager = botRobotCacheManager;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
-        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
+        this.botRoleUserMappingMapper = botRoleUserMappingMapper;
         this.botRobotSenderMappingMapper = botRobotSenderMappingMapper;
     }
 
@@ -60,7 +61,7 @@ public class BotSenderService {
         return PageModel.of(count, query.getPageSize(), query.getCurrent(), result);
     }
 
-    public void updateBotSenderTask(BotAdmin botAdmin, UpdateBotSenderTaskRequest request) {
+    public void updateBotSenderTask(BotUserDTO botUser, UpdateBotSenderTaskRequest request) {
         Asserts.notNull(request, "参数异常");
         Long id = request.getId();
         Long taskId = request.getTaskId();
@@ -70,12 +71,12 @@ public class BotSenderService {
         Asserts.notNull(taskId, "参数异常");
         Asserts.notNull(checked, "参数异常");
 
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             BotSender botSender = botSenderCacheManager.getValidBotSenderById(id);
             BotRobot bot1 = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
             BotRobot bot2 = botRobotCacheManager.getValidBotRobotById(botSender.getSendBot());
-            Asserts.isTrue(Objects.equals(botAdmin.getId(), bot1.getAdminId()) || Objects.equals(botAdmin.getId(), bot2.getAdminId()), "权限不足");
+            Asserts.isTrue(Objects.equals(botUser.getId(), bot1.getUserId()) || Objects.equals(botUser.getId(), bot2.getUserId()), "权限不足");
         }
 
         BotSenderTaskMapping botSenderTaskMapping = botSenderTaskMappingMapper.getBotSenderTaskMappingBySenderIdAndTaskId(id, taskId);
@@ -130,11 +131,11 @@ public class BotSenderService {
         }
     }
 
-    public List<Resource> listBotSenderResource(BotAdmin botAdmin) {
+    public List<Resource> listBotSenderResource(BotUserDTO botUser) {
         BotSenderQuery botSenderQuery = new BotSenderQuery().setStatus(0);
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            botSenderQuery.setAdminId(botAdmin.getId());
+            botSenderQuery.setAdminUserId(botUser.getId());
         }
         List<BotSender> list = botSenderCacheManager.listBotSenderByAdmin(botSenderQuery);
         return list.stream().map(botSender -> new Resource(botSender.getId(), botSender.getName())).collect(Collectors.toList());

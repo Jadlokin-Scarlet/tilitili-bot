@@ -5,13 +5,13 @@ import com.tilitili.bot.entity.request.UpdateBotRobotSenderMappingIndexRequest;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.bot.service.BotSenderService;
 import com.tilitili.common.constant.BotRoleConstant;
-import com.tilitili.common.entity.BotAdmin;
-import com.tilitili.common.entity.BotRoleAdminMapping;
+import com.tilitili.common.entity.BotRoleUserMapping;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotRobotSenderMappingQuery;
 import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
-import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,27 +21,27 @@ import java.util.Map;
 @RequestMapping("/api/sender")
 public class BotSenderController extends BaseController {
     private final BotSenderService botSenderService;
-    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
+    private final BotRoleUserMappingMapper botRoleUserMappingMapper;
 
-    public BotSenderController(BotSenderService botSenderService, BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
+    public BotSenderController(BotSenderService botSenderService, BotRoleUserMappingMapper botRoleUserMappingMapper) {
         this.botSenderService = botSenderService;
-        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
+        this.botRoleUserMappingMapper = botRoleUserMappingMapper;
     }
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<Map<String, Object>>> listBotSender(@SessionAttribute("botAdmin") BotAdmin botAdmin, BotSenderQuery query) {
-        BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+    public BaseModel<PageModel<Map<String, Object>>> listBotSender(@SessionAttribute(value = "botUser") BotUserDTO botUser, BotSenderQuery query) {
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setAdminId(botAdmin.getId());
+            query.setAdminUserId(botUser.getId());
         }
         return botSenderService.listBotSender(query);
     }
 
     @PostMapping("/update")
     @ResponseBody
-    public BaseModel<?> updateBotSenderTask(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestBody UpdateBotSenderTaskRequest request) {
-        botSenderService.updateBotSenderTask(botAdmin, request);
+    public BaseModel<?> updateBotSenderTask(@SessionAttribute(value = "botUser") BotUserDTO botUser, @RequestBody UpdateBotSenderTaskRequest request) {
+        botSenderService.updateBotSenderTask(botUser, request);
         return BaseModel.success();
     }
 

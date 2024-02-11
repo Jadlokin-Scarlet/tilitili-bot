@@ -2,7 +2,7 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.request.BotAdminRequest;
 import com.tilitili.bot.service.BotAdminService;
-import com.tilitili.common.entity.BotAdmin;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Controller;
@@ -21,23 +21,23 @@ public class BotAdminController extends BaseController {
 
     @GetMapping("/isLogin")
     @ResponseBody
-    public BaseModel<BotAdmin> isLogin(@SessionAttribute(value = "botAdmin", required = false) BotAdmin botAdmin) {
-        return new BaseModel<>("", true, botAdmin);
+    public BaseModel<BotUserDTO> isLogin(@SessionAttribute(value = "botUser", required = false) BotUserDTO botUser) {
+        return new BaseModel<>("", true, botUser);
     }
 
     @PostMapping("/login")
     @ResponseBody
-    public BaseModel<?> login(@RequestBody BotAdminRequest request, HttpSession session) {
+    public BaseModel<BotUserDTO> login(@RequestBody BotAdminRequest request, HttpSession session) {
         Asserts.notNull(request, "参数异常");
-        BotAdmin botAdmin = botAdminService.login(request);
-        session.setAttribute("botAdmin", botAdmin);
-        return new BaseModel<>("登录成功", true, botAdmin);
+        BotUserDTO botUser = botAdminService.login(request);
+        session.setAttribute("botUser", botUser);
+        return new BaseModel<>("登录成功", true, botUser);
     }
 
     @PostMapping("/loginOut")
     @ResponseBody
     public BaseModel<?> loginOut(HttpSession session) {
-        session.removeAttribute("botAdmin");
+        session.removeAttribute("botUser");
         return new BaseModel<>("", true);
     }
 

@@ -3,11 +3,11 @@ package com.tilitili.bot.interceptor;
 import com.alibaba.fastjson2.JSONObject;
 import com.tilitili.bot.annotation.BotAuthorityCheck;
 import com.tilitili.common.constant.BotRoleConstant;
-import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotRobot;
-import com.tilitili.common.entity.BotRoleAdminMapping;
+import com.tilitili.common.entity.BotRoleUserMapping;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.manager.BotRobotCacheManager;
-import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
+import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +26,11 @@ import javax.servlet.http.HttpSession;
 public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
 
     private final BotRobotCacheManager botRobotCacheManager;
-    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
+    private final BotRoleUserMappingMapper botRoleUserMappingMapper;
 
-    public BotAuthorityCheckInterceptor(BotRobotCacheManager botRobotCacheManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
+    public BotAuthorityCheckInterceptor(BotRobotCacheManager botRobotCacheManager, BotRoleUserMappingMapper botRoleUserMappingMapper) {
         this.botRobotCacheManager = botRobotCacheManager;
-        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
+        this.botRoleUserMappingMapper = botRoleUserMappingMapper;
     }
 
     @Override
@@ -42,10 +42,10 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
             if (botAuthorityCheckAnnotation != null) {
                 HttpSession session = request.getSession();
                 // 从会话中获取数据
-                BotAdmin botAdmin = (BotAdmin) session.getAttribute("botAdmin");
-                Asserts.notNull(botAdmin, "参数异常");
+                BotUserDTO botUser = (BotUserDTO) session.getAttribute("botUser");
+                Asserts.notNull(botUser, "参数异常");
 
-                BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
+                BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
                 if (adminMapping == null) {
                     String idStr = this.getBotId(request);
                     Asserts.notNull(idStr, "参数异常");
@@ -53,7 +53,7 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
 
                     BotRobot bot = botRobotCacheManager.getBotRobotById(id);
                     Asserts.notNull(bot, "参数异常");
-                    Asserts.checkEquals(bot.getAdminId(), botAdmin.getId(), "权限异常");
+                    Asserts.checkEquals(bot.getMasterId(), botUser.getId(), "权限异常");
                 }
             }
         }

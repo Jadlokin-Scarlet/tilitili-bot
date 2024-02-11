@@ -9,7 +9,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotAdminManager;
+import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.manager.SendMessageManager;
 import com.tilitili.common.utils.Asserts;
@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static com.tilitili.common.constant.BotUserConstant.*;
-
 @Slf4j
 @Component
 public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
@@ -31,13 +29,13 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 
 	private final BotUserManager botUserManager;
 	private final SendMessageManager sendMessageManager;
-	private final BotAdminManager botAdminManager;
+	private final BotRoleManager botRoleManager;
 
 	@Autowired
-	public PlayTwentyOneHandle(BotUserManager botUserManager, SendMessageManager sendMessageManager, BotAdminManager botAdminManager) {
+	public PlayTwentyOneHandle(BotUserManager botUserManager, SendMessageManager sendMessageManager, BotRoleManager botRoleManager) {
 		this.botUserManager = botUserManager;
 		this.sendMessageManager = sendMessageManager;
-		this.botAdminManager = botAdminManager;
+		this.botRoleManager = botRoleManager;
 	}
 
 	@Override
@@ -123,7 +121,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage removeGame(BotMessageAction messageAction, TwentyOneTable twentyOneTable) {
-		boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
 		if (!canUseBotAdminTask) return null;
 		if (twentyOneTable == null) return null;
 		tableMap.remove(twentyOneTable.getTableId());

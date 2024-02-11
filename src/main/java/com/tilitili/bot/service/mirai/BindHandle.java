@@ -5,19 +5,22 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
 import com.tilitili.common.constant.BotTaskConstant;
 import com.tilitili.common.constant.BotUserConstant;
-import com.tilitili.common.entity.*;
+import com.tilitili.common.entity.BotForwardConfig;
+import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotAdminManager;
+import com.tilitili.common.manager.BotRoleManager;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotCattleMapper;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
@@ -36,9 +39,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
-	private final BotAdminManager botAdminManager;
+	private final BotRoleManager botRoleManager ;
 
-	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotAdminManager botAdminManager) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotRoleManager botRoleManager) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botSenderCacheManager = botSenderCacheManager;
@@ -46,7 +49,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
-		this.botAdminManager = botAdminManager;
+		this.botRoleManager = botRoleManager;
 	}
 
 	@Override
@@ -62,7 +65,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private BotMessage handleAdminBind(BotMessageAction messageAction) {
 		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
-		boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(bot, botUser);
+		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(bot, botUser);
 		if (!canUseBotAdminTask) {
 			return null;
 		}

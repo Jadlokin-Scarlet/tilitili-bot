@@ -3,9 +3,12 @@ package com.tilitili.bot.service;
 import com.google.common.collect.Lists;
 import com.tilitili.bot.entity.MenuDTO;
 import com.tilitili.bot.entity.request.UpdateRoleMappingRequest;
-import com.tilitili.common.entity.*;
-import com.tilitili.common.entity.query.BotMenuRoleMappingQuery;
+import com.tilitili.common.entity.BotMenu;
+import com.tilitili.common.entity.BotMenuRoleMapping;
+import com.tilitili.common.entity.BotRole;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotMenuQuery;
+import com.tilitili.common.entity.query.BotMenuRoleMappingQuery;
 import com.tilitili.common.mapper.mysql.BotMenuMapper;
 import com.tilitili.common.mapper.mysql.BotMenuRoleMappingMapper;
 import com.tilitili.common.mapper.mysql.BotRoleMapper;
@@ -27,8 +30,8 @@ public class BotMenuService {
         this.botRoleMapper = botRoleMapper;
     }
 
-    public List<MenuDTO> getMenuList(BotAdmin botAdmin) {
-        List<BotMenu> menuList = botMenuMapper.getAdminMenuList(botAdmin.getId());
+    public List<MenuDTO> getMenuList(BotUserDTO botUser) {
+        List<BotMenu> menuList = botMenuMapper.getUserMenuList(botUser.getId());
         menuList.sort(Comparator.comparingInt(BotMenu::getLevel));
         List<MenuDTO> result = new ArrayList<>();
         Map<Long, MenuDTO> idIndexMap = new HashMap<>();

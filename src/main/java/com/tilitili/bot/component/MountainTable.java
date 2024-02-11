@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MountainTable {
 //	private List<TablePlayer> playerList;
-	private
+//	private
 	public void run() {
 		while(true) {
 

@@ -1,7 +1,7 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.service.ResourceService;
-import com.tilitili.common.entity.BotAdmin;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.resource.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +28,10 @@ public class ResourceController extends BaseController {
 
     @GetMapping("")
     @ResponseBody
-    public BaseModel<?> getResources(@SessionAttribute("botAdmin") BotAdmin botAdmin, @RequestParam List<String> needResourcesList) {
+    public BaseModel<?> getResources(@SessionAttribute(value = "botUser") BotUserDTO botUser, @RequestParam List<String> needResourcesList) {
         Map<String, List<Resource>> resourceMap = new HashMap<>();
         for (String resourceName : needResourcesList) {
-            resourceMap.put(resourceName, resourceService.getResource(botAdmin, resourceName));
+            resourceMap.put(resourceName, resourceService.getResource(botUser, resourceName));
         }
         return BaseModel.success(resourceMap);
     }

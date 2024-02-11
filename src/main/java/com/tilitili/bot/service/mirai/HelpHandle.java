@@ -8,7 +8,7 @@ import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotTaskDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotAdminManager;
+import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -24,13 +24,13 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     private final BotTaskMapper botTaskMapper;
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
-    private final BotAdminManager botAdminManager;
+    private final BotRoleManager botRoleManager;
 
-    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotAdminManager botAdminManager) {
+    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRoleManager botRoleManager) {
         this.botTaskMapper = botTaskMapper;
         this.messageHandleMap = messageHandleMap;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
-        this.botAdminManager = botAdminManager;
+        this.botRoleManager = botRoleManager;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleClose(BotMessageAction messageAction) {
-        boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+        boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
         if (!canUseBotAdminTask) {
             return null;
         }
@@ -67,7 +67,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleOpen(BotMessageAction messageAction) {
-        boolean canUseBotAdminTask = botAdminManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+        boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
         if (!canUseBotAdminTask) {
             return null;
         }

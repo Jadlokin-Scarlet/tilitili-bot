@@ -2,9 +2,9 @@ package com.tilitili.bot.interceptor;
 
 import com.tilitili.bot.annotation.BotAdminCheck;
 import com.tilitili.common.constant.BotRoleConstant;
-import com.tilitili.common.entity.BotAdmin;
-import com.tilitili.common.entity.BotRoleAdminMapping;
-import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
+import com.tilitili.common.entity.BotRoleUserMapping;
+import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,10 @@ import javax.servlet.http.HttpSession;
 @Slf4j
 @Component
 public class BotAdminCheckInterceptor implements HandlerInterceptor {
-    private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
+    private final BotRoleUserMappingMapper botRoleUserMappingMapper;
 
-    public BotAdminCheckInterceptor(BotRoleAdminMappingMapper botRoleAdminMappingMapper) {
-        this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
+    public BotAdminCheckInterceptor(BotRoleUserMappingMapper botRoleUserMappingMapper) {
+        this.botRoleUserMappingMapper = botRoleUserMappingMapper;
     }
 
     @Override
@@ -33,10 +33,10 @@ public class BotAdminCheckInterceptor implements HandlerInterceptor {
             if (botAdminCheckAnnotation != null) {
                 HttpSession session = request.getSession();
                 // 从会话中获取数据
-                BotAdmin botAdmin = (BotAdmin) session.getAttribute("botAdmin");
+                BotUserDTO botUser = (BotUserDTO) session.getAttribute("botUser");
 
-                BotRoleAdminMapping adminMapping = botRoleAdminMappingMapper.getBotRoleAdminMappingByAdminIdAndRoleId(botAdmin.getId(), BotRoleConstant.adminRole);
-                Asserts.notNull(adminMapping, "权限不足");
+                BotRoleUserMapping mapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+                Asserts.notNull(mapping, "权限不足");
             }
         }
 

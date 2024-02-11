@@ -1,6 +1,6 @@
 package com.tilitili.bot.interceptor;
 
-import com.tilitili.common.entity.BotAdmin;
+import com.tilitili.bot.entity.BotRobotDTO;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession();
-        BotAdmin botAdmin = (BotAdmin)session.getAttribute("botAdmin");
+        BotRobotDTO botUser = (BotRobotDTO)session.getAttribute("botUser");
 
         //登陆和资源下放不用登陆
         String url = request.getRequestURL().toString();
@@ -31,7 +31,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
         }
 
         //未登录
-        if (botAdmin == null){
+        if (botUser == null){
             this.returnResp(response,new BaseModel<>("请重新登录"));
             return false;
         }
