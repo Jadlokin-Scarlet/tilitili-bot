@@ -3,15 +3,13 @@ package com.tilitili.bot.service;
 import com.tilitili.bot.entity.request.BotAdminRequest;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.constant.BotSenderConstant;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.BotAdminCode;
 import com.tilitili.common.entity.BotRoleAdminMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotAdminCodeManager;
-import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.manager.QywechatManager;
-import com.tilitili.common.manager.SendMessageManager;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotAdminCodeMapper;
 import com.tilitili.common.mapper.mysql.BotAdminMapper;
 import com.tilitili.common.mapper.mysql.BotRoleAdminMappingMapper;
@@ -41,8 +39,9 @@ public class BotAdminService {
     private final BotRoleAdminMappingMapper botRoleAdminMappingMapper;
     private final QywechatManager qywechatManager;
     private final BotUserManager botUserManager;
+    private final BotManager botManager;
 
-    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper, QywechatManager qywechatManager, BotUserManager botUserManager) {
+    public BotAdminService(BotAdminMapper botAdminMapper, BotAdminCodeManager botAdminCodeManager, BotAdminCodeMapper botAdminCodeMapper, RedisCache redisCache, SendMessageManager sendMessageManager, BotRoleAdminMappingMapper botRoleAdminMappingMapper, QywechatManager qywechatManager, BotUserManager botUserManager, BotManager botManager) {
         this.botAdminMapper = botAdminMapper;
         this.botAdminCodeManager = botAdminCodeManager;
         this.botAdminCodeMapper = botAdminCodeMapper;
@@ -51,6 +50,7 @@ public class BotAdminService {
         this.botRoleAdminMappingMapper = botRoleAdminMappingMapper;
         this.qywechatManager = qywechatManager;
         this.botUserManager = botUserManager;
+        this.botManager = botManager;
     }
 
     public BotUserDTO login(BotAdminRequest request) {
@@ -77,11 +77,13 @@ public class BotAdminService {
         String emailCode = request.getEmailCode();
         String username = request.getUsername();
         String password = request.getPassword();
+        Long masterQQ = request.getMasterQQ();
         this.checkRegisterCode(code);
         this.checkRegisterEmail(email);
         this.checkRegisterEmailCode(email, emailCode);
         this.checkRegisterUsername(username);
         this.checkRegisterPassword(password);
+//        BotUserDTO botUser = this.checkMasterQQ(masterQQ);
 
         botAdminCodeMapper.updateBotAdminCodeStatusSafe(code, 0, -1);
 
@@ -135,6 +137,12 @@ public class BotAdminService {
     private void checkRegisterEmailCode(String email, String emailCode) {
         String cacheEmailCode = (String) redisCache.getValue(emailCodeKey + email);
         Asserts.checkEquals(emailCode, cacheEmailCode, "验证码错误");
+    }
+
+    private BotUserDTO checkMasterQQ(Long masterQQ) {
+        BotUserDTO botUser = botManager.getBotUser(BotUserConstant.USER_TYPE_QQ, masterQQ);
+        Asserts.notNull(botUser, "找不到用户");
+        return botUser;
     }
 
     private void generateAndSendEmail(String email) {

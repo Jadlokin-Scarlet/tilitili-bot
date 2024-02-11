@@ -8,6 +8,7 @@ public class BotAdminRequest extends BaseDTO {
     private String email;
     private String code;
     private String emailCode;
+    private Long masterQQ;
 
     public String getCode() {
         return code;
@@ -51,6 +52,15 @@ public class BotAdminRequest extends BaseDTO {
 
     public BotAdminRequest setEmail(String email) {
         this.email = email;
+        return this;
+    }
+
+    public Long getMasterQQ() {
+        return masterQQ;
+    }
+
+    public BotAdminRequest setMasterQQ(Long masterQQ) {
+        this.masterQQ = masterQQ;
         return this;
     }
 }
