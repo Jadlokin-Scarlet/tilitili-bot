@@ -29,17 +29,17 @@ public class BotUserService {
 		return PageModel.of(total, query.getPageSize(), query.getCurrent(), userList);
 	}
 
-	public void changeStatus(Long adminId, BotUserDTO updBotUser) {
+	public void changeStatus(Long adminUserId, BotUserDTO updBotUser) {
 		Asserts.notNull(updBotUser.getId(), "参数异常");
 		Asserts.notNull(updBotUser.getStatus(), "参数异常");
-		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(updBotUser.getId(), adminId) > 0, "参数异常");
+		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(updBotUser.getId(), adminUserId) > 0, "参数异常");
 		botUserManager.safeUpdateStatus(updBotUser.getId(), updBotUser.getStatus());
 	}
 
-	public void bindUser(Long adminId, Long userId, Long qq) {
+	public void bindUser(Long adminUserId, Long userId, Long qq) {
 		Asserts.notNull(qq, "参数异常");
 		Asserts.notNull(userId, "参数异常");
-		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(userId, adminId) > 0, "参数异常");
+		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(userId, adminUserId) > 0, "参数异常");
 
 		BotUserDTO subUser = botUserManager.getValidBotUserByIdWithParent(null, userId);
 		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);

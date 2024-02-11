@@ -137,7 +137,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 
-		// 如果有adminId则校验权限
+		// 如果有adminUserId则校验权限
 		if (adminUserId != null) {
 			for (BotSender botSender : botSenderList) {
 				Asserts.isTrue(botRoleManager.checkAdminAndSender(adminUserId, botSender.getId()), "%s渠道无权限", botSender.getName());
