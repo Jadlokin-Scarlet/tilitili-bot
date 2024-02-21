@@ -126,7 +126,7 @@ public class BotMessageAction extends BaseDTO {
         int index = virtualKey.indexOf(" ");
         if (index != -1) {
             key = virtualKey.substring(0, index).trim();
-            subKey = value.substring(index).trim();
+            subKey = virtualKey.substring(index).trim();
         } else {
             key = virtualKey.trim();
             subKey = "";
