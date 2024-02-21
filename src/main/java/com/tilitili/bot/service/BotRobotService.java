@@ -16,6 +16,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.mapper.mysql.BotAdminMapper;
 import com.tilitili.common.mapper.mysql.BotRobotIndexMapper;
 import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
@@ -35,20 +36,22 @@ public class BotRobotService {
     private final BotUserManager botUserManager;
     private final BotRoleUserMappingMapper botRoleUserMappingMapper;
     private final WebSocketFactory webSocketFactory;
+    private final BotAdminMapper botAdminMapper;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleUserMappingMapper BotRoleUserMappingMapper, WebSocketFactory webSocketFactory) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleUserMappingMapper BotRoleUserMappingMapper, WebSocketFactory webSocketFactory, BotAdminMapper botAdminMapper) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;
         this.botUserManager = botUserManager;
         this.botRoleUserMappingMapper = BotRoleUserMappingMapper;
         this.webSocketFactory = webSocketFactory;
+        this.botAdminMapper = botAdminMapper;
     }
 
     public BaseModel<PageModel<BotRobotDTO>> list(BotUserDTO botUser, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
         BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setUserId(botUser.getId());
+            query.setMasterId(botUser.getId());
         }
         int total = botRobotCacheManager.countBotRobotByCondition(query);
         List<BotRobot> list = botRobotCacheManager.getBotRobotByCondition(query);
@@ -91,8 +94,9 @@ public class BotRobotService {
         Asserts.notNull(bot, "参数异常");
         Asserts.notNull(bot.getType(), "参数异常");
         bot.setStatus(-1);
-        bot.setUserId(botUser.getId());
         bot.setMasterId(botUser.getId());
+        BotAdmin botAdmin = botAdminMapper.getBotAdminByUserId(botUser.getId());
+        bot.setUserId(botAdmin.getId());
         switch (bot.getType()) {
             case BotRobotConstant.TYPE_MIRAI: {
                 BotRobot botInfo = botManager.getBotInfo(bot);
