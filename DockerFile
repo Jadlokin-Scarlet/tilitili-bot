@@ -1,4 +1,4 @@
-From docker.tilitili.club/tilitili/tilitili-java11-zh-jdk
+FROM docker.tilitili.club/tilitili/tilitili-java11-zh-jdk
 
 ADD target/*.jar app.jar
 
