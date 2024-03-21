@@ -6,14 +6,14 @@ ADD target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "-Xmx400M", "-Xms400M", "-XX:MetaspaceSize=128m", "-XX:MaxMetaspaceSize=128m", \
 "-Duser.timezone=GMT+8", "-Dspring.profiles.active=pro", \
-"-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", \
-"-Dcom.sun.management.jmxremote=true", \
-"-Dcom.sun.management.jmxremote.port=33306", \
-"-Dcom.sun.management.jmxremote.authenticate=false", \
-"-Dcom.sun.management.jmxremote.ssl=false", \
-"-Djava.rmi.server.hostname=172.27.0.8", \
-"-Dcom.sun.management.jmxremote.rmi.port=33307", \
-"-Dcom.sun.management.jmxremote.local.only=false", \
-"-XX:+UnlockCommercialFeatures", \
-"-XX:+FlightRecorder", \
+#"-XX:+PrintGCDetails", "-Xloggc:/home/www/logs/tilitili-bot/gc.log", \
+#"-Dcom.sun.management.jmxremote=true", \
+#"-Dcom.sun.management.jmxremote.port=33306", \
+#"-Dcom.sun.management.jmxremote.authenticate=false", \
+#"-Dcom.sun.management.jmxremote.ssl=false", \
+#"-Djava.rmi.server.hostname=172.27.0.8", \
+#"-Dcom.sun.management.jmxremote.rmi.port=33307", \
+#"-Dcom.sun.management.jmxremote.local.only=false", \
+#"-XX:+UnlockCommercialFeatures", \
+#"-XX:+FlightRecorder", \
 "app.jar"]
