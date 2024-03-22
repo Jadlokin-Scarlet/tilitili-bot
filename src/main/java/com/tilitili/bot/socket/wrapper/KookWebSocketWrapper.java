@@ -61,9 +61,9 @@ public class KookWebSocketWrapper implements BotWebSocketWrapperImp {
 	public void upBotBlocking() {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
-		HttpRequestDTO wsRequest = botManager.getWebSocketUrl(bot);
-		Asserts.notNull(wsRequest.getUrl(), "%s获取ws地址异常", bot.getName());
 		try {
+			HttpRequestDTO wsRequest = botManager.getWebSocketUrl(bot);
+			Asserts.notNull(wsRequest.getUrl(), "%s获取ws地址异常", bot.getName());
 			if (handler != null && handler.getStatus() == 0) {
 				return;
 			}
