@@ -48,6 +48,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
             case BotRobotConstant.TYPE_MIRAI:
             case BotRobotConstant.TYPE_GOCQ: return (new BotWebSocketWrapper(botId, botManager, botService, botRobotCacheManager));
             case BotRobotConstant.TYPE_KOOK: return (new KookWebSocketWrapper(botId, botManager, botService, botRobotCacheManager));
+//            case BotRobotConstant.TYPE_MINECRAFT: return new ServerTapWebSocketWrapper(botId, botManager, botService, botRobotCacheManager);
             case BotRobotConstant.TYPE_QQ_GUILD: return new QQGuildWebSocketWrapper(botId, botManager, botService, botRobotCacheManager);
             case BotRobotConstant.TYPE_MC_PANEL: return new McPanelWebSocketWrapper(botId, botManager, botService, botRobotCacheManager);
             default: throw new AssertException("?");

@@ -15,7 +15,7 @@ class WebSocketFactoryTest {
 
 	@Test
 	void upBotBlocking() {
-		tester.upBotBlocking(22L);
-		TimeUtil.millisecondsSleep(10000);
+		tester.upBotBlocking(16L);
+		TimeUtil.millisecondsSleep(100000000);
 	}
 }

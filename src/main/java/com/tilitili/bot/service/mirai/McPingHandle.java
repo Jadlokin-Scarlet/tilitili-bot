@@ -3,6 +3,8 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -13,12 +15,10 @@ import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
 import com.tilitili.common.entity.view.request.MinecraftPlayer;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotRobotCacheManager;
-import com.tilitili.common.manager.McPingManager;
-import com.tilitili.common.manager.MinecraftManager;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
-import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +26,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,14 +38,18 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotRobotCacheManager botRobotCacheManager;
+	private final BotConfigManager botConfigManager;
+	private final BotManager botManager;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager) {
 		this.mcPingManager = mcPingManager;
 		this.minecraftManager = minecraftManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
+		this.botConfigManager = botConfigManager;
+		this.botManager = botManager;
 	}
 
 	@Override
@@ -56,12 +59,56 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		switch (virtualKey != null? virtualKey: key) {
 			case "mcp": case "mcpd": case "mcm": case "在线人数": return handleMcp(messageAction);
 			case "mcl": case "在线玩家": return handelMcList(messageAction);
+			case "mc白名单": return handleWhiteList(messageAction);
+			case "mcBind": return handleBind(messageAction);
 			default: return null;
 		}
 	}
 
+	private BotMessage handleBind(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
+		String bindSenderIdSrt = messageAction.getValue();
+		Asserts.isNumber(bindSenderIdSrt, "格式错啦(服务器id)");
+		Long bindSenderId = Long.valueOf(bindSenderIdSrt);
+		BotSender bindSender = botSenderCacheManager.getValidBotSenderById(bindSenderId);
+		Asserts.notNull(bindSender, "服务器不存在");
+		Asserts.checkEquals(bindSender.getSendType(), SendTypeEnum.MINECRAFT_MESSAGE_STR, "服务器不存在");
+		botConfigManager.addOrUpdateSenderConfig(senderId, "mcBind", bindSenderId);
+		return BotMessage.simpleTextMessage("成功绑定服务器"+bindSender.getName());
+	}
+
+	private BotMessage handleWhiteList(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
+		Long mcSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
+		Asserts.notNull(mcSenderId, "未绑定服务器");
+		BotSender mcBotSender = botSenderCacheManager.getValidBotSenderById(mcSenderId);
+		BotRobot mcBot = botRobotCacheManager.getValidBotRobotById(mcBotSender.getSendBot());
+		Asserts.isTrue(BotRobotConstant.mcBotTypeList.contains(mcBot.getType()), "啊嘞，不对劲");
+
+		Set<String> playerNameList = new HashSet<>();
+		String value = messageAction.getValue();
+		if (StringUtils.isNotBlank(value)) {
+			playerNameList.addAll(Arrays.asList(value.split("，,")));
+		}
+		String body = messageAction.getBody();
+		if (StringUtils.isNotBlank(body)) {
+			playerNameList.addAll(Arrays.asList(body.split("\n")));
+		}
+		List<String> successList = new ArrayList<>();
+		List<String> failList = new ArrayList<>();
+		for (String playerName : playerNameList) {
+			String result = botManager.execCommand(mcBot, "lp user " + playerName + " set player");
+			if ("".equals(result)) {
+				successList.add(playerName);
+			} else {
+				failList.add(playerName);
+			}
+		}
+
+		return BotMessage.simpleTextMessage(String.format("执行完毕\n疑似成功：%s\n疑似失败：%s", successList, failList));
+	}
+
 	private BotMessage handelMcList(BotMessageAction messageAction) {
-		BotRobot bot = messageAction.getBot();
 		Long senderId = messageAction.getBotSender().getId();
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
