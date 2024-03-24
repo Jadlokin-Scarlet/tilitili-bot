@@ -36,10 +36,12 @@ public class McPanelWebSocketHandler extends BotWebSocketHandler {
                     return;
                 }
                 case "broadcast": {
-                    List<JsonElement> list = mcPanelWsData.getData().getAsJsonArray().asList();
-                    List<String> broadList = list.stream().map(JsonElement::getAsString).collect(Collectors.toList());
-                    for (String broad : broadList) {
-                        botService.syncHandleMessage(bot, broad);
+                    if (mcPanelWsData.getData().isJsonArray()) {
+                        List<JsonElement> list = mcPanelWsData.getData().getAsJsonArray().asList();
+                        List<String> broadList = list.stream().map(JsonElement::getAsString).collect(Collectors.toList());
+                        for (String broad : broadList) {
+                            botService.syncHandleMessage(bot, broad);
+                        }
                     }
                     return;
                 }
