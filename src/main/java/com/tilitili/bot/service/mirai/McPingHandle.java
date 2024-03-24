@@ -40,9 +40,10 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotConfigManager botConfigManager;
 	private final BotManager botManager;
+	private final BotRoleManager botRoleManager;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager) {
+	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager, BotRoleManager botRoleManager) {
 		this.mcPingManager = mcPingManager;
 		this.minecraftManager = minecraftManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
@@ -50,6 +51,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.botConfigManager = botConfigManager;
 		this.botManager = botManager;
+		this.botRoleManager = botRoleManager;
 	}
 
 	@Override
@@ -68,6 +70,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private BotMessage handleBind(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
 		String bindSenderIdSrt = messageAction.getValue();
+		Asserts.isTrue(botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser()), "权限不足");
 		Asserts.isNumber(bindSenderIdSrt, "格式错啦(服务器id)");
 		Long bindSenderId = Long.valueOf(bindSenderIdSrt);
 		BotSender bindSender = botSenderCacheManager.getValidBotSenderById(bindSenderId);
