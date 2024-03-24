@@ -91,7 +91,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Set<String> playerNameList = new HashSet<>();
 		String value = messageAction.getValue();
 		if (StringUtils.isNotBlank(value)) {
-			playerNameList.addAll(Arrays.asList(value.split("，,")));
+			playerNameList.addAll(Arrays.asList(value.split("[，,]")));
 		}
 		String body = messageAction.getBody();
 		if (StringUtils.isNotBlank(body)) {
