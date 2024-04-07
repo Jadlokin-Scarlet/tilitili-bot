@@ -1,7 +1,7 @@
 package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.BotRobotDTO;
-import com.tilitili.bot.socket.NewWebSocketFactory;
+import com.tilitili.bot.socket.WebSocketFactory;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.constant.BotUserConstant;
@@ -35,10 +35,10 @@ public class BotRobotService {
     private final BotRobotIndexMapper botRobotIndexMapper;
     private final BotUserManager botUserManager;
     private final BotRoleUserMappingMapper botRoleUserMappingMapper;
-    private final NewWebSocketFactory webSocketFactory;
+    private final WebSocketFactory webSocketFactory;
     private final BotAdminMapper botAdminMapper;
 
-    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleUserMappingMapper BotRoleUserMappingMapper, NewWebSocketFactory webSocketFactory, BotAdminMapper botAdminMapper) {
+    public BotRobotService(BotRobotCacheManager botRobotCacheManager, BotManager botManager, BotRobotIndexMapper botRobotIndexMapper, BotUserManager botUserManager, BotRoleUserMappingMapper BotRoleUserMappingMapper, WebSocketFactory webSocketFactory, BotAdminMapper botAdminMapper) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.botManager = botManager;
         this.botRobotIndexMapper = botRobotIndexMapper;

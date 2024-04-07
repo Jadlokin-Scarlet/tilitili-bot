@@ -9,15 +9,13 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class WebSocketFactory implements ApplicationListener<ContextClosedEvent> {
+public class WebSocketFactory {
     private final ConcurrentHashMap<Long, BotWebSocketWrapperImp> wrapperMap;
 //    private final Long shortUrlWebSocketKey = -1L;
     private final ConcurrentHashMap<Long, Boolean> botIdLockMap = new ConcurrentHashMap<>();
@@ -71,8 +69,7 @@ public class WebSocketFactory implements ApplicationListener<ContextClosedEvent>
         wrapperMap.get(botId).downBotBlocking();
     }
 
-    @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
+    public void close() {
         for (BotWebSocketWrapperImp wrapper : wrapperMap.values()) {
             wrapper.downBotBlocking();
         }

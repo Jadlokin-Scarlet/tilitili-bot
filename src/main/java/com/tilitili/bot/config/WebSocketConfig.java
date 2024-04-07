@@ -1,6 +1,6 @@
 package com.tilitili.bot.config;
 
-import com.tilitili.bot.socket.NewWebSocketFactory;
+import com.tilitili.bot.socket.WebSocketFactory;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
@@ -19,10 +19,10 @@ import java.util.List;
 @Configuration
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final BotRobotCacheManager botRobotCacheManager;
-    private final NewWebSocketFactory webSocketFactory;
+    private final WebSocketFactory webSocketFactory;
 
     @Autowired
-    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, NewWebSocketFactory webSocketFactory) {
+    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, WebSocketFactory webSocketFactory) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.webSocketFactory = webSocketFactory;
     }
