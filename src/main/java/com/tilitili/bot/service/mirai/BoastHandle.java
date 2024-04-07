@@ -48,11 +48,14 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		String text;
 		String type;
 		if (Arrays.asList("夸夸他", "kkt", "夸夸我", "kkw").contains(key)) {
-			String result = HttpClientUtil.httpGet("https://api.shadiao.app/chp");
-			Asserts.notBlank(result, "网络异常");
-			text = (String) JSONPath.eval(result, "$.data.text");
 			type = "夸夸他";
-		} else if (Arrays.asList("骂骂我", "mmw", "骂骂他", "mmt").contains(key)){
+			String result = HttpClientUtil.httpGet("https://api.shadiao.app/chp");
+			if (StringUtils.isNotBlank(result)) {
+				text = (String) JSONPath.eval(result, "$.data.text");
+			} else {
+				text = null;
+			}
+		} else if (Arrays.asList("骂骂我", "骂骂他").contains(key)){
 			text = "";//HttpClientUtil.httpGet("https://nmsl.yfchat.xyz/api.php?level=min");
 			type = "骂骂他";
 		} else {
@@ -68,7 +71,7 @@ public class BoastHandle extends ExceptionRespMessageHandle {
 		}
 		Asserts.notBlank(text, "网络异常");
 
-		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他", "mmt").contains(key);
+		boolean isOther = Arrays.asList("夸夸他", "kkt", "骂骂他").contains(key);
 		if (isOther) {
 			BotUserDTO firstAt = atList.stream().findFirst().orElse(null);
 			Asserts.notNull(firstAt, "谁？");

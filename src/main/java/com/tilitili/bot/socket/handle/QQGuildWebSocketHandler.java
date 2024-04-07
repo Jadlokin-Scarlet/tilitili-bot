@@ -81,10 +81,4 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
         log.info("send ws message type="+type+" botId="+botId+" text="+text);
         super.send(text);
     }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        super.onClose(code, reason, remote);
-    }
-
 }

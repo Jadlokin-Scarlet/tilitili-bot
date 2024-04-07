@@ -1,7 +1,7 @@
 package com.tilitili.bot.socket.handle;
 
 import com.google.gson.JsonElement;
-import com.tilitili.bot.entity.McPanelWsData;
+import com.tilitili.common.entity.dto.McPanelWsData;
 import com.tilitili.bot.service.BotService;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.HttpRequestDTO;

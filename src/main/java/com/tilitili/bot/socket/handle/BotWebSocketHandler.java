@@ -33,9 +33,4 @@ public class BotWebSocketHandler extends BaseWebSocketHandler {
         }
         botService.syncHandleMessage(bot, message);
     }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        super.onClose(code, reason, remote);
-    }
 }
