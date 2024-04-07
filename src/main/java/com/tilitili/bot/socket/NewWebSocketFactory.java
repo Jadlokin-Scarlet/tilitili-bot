@@ -68,7 +68,6 @@ public class NewWebSocketFactory implements ApplicationListener<ContextClosedEve
     
     private void onError(Long botId) {
         webSocketMap.remove(botId);
-        this.upBotBlocking(botId);
     }
 
     @Override
