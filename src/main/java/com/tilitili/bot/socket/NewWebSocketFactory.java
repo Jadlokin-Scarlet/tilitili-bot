@@ -7,8 +7,6 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class NewWebSocketFactory implements ApplicationListener<ContextClosedEvent> {
+public class NewWebSocketFactory {
     private final ConcurrentHashMap<Long, WebSocket> webSocketMap;
     private final BotManager botManager;
     private final BotService botService;
@@ -70,8 +68,7 @@ public class NewWebSocketFactory implements ApplicationListener<ContextClosedEve
         webSocketMap.remove(botId);
     }
 
-    @Override
-    public void onApplicationEvent(ContextClosedEvent event) {
+    public void close() {
         for (WebSocket webSocket : webSocketMap.values()) {
             webSocket.abort();
         }
