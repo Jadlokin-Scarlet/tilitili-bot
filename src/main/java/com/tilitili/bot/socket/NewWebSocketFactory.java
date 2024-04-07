@@ -40,6 +40,7 @@ public class NewWebSocketFactory implements ApplicationListener<ContextClosedEve
                     log.info("初始化websocket, bot={}", bot.getName());
                     try {
                         webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onError));
+                        log.info("初始化websocket完成, bot={}", bot.getName());
                     } catch (AssertException e) {
                         log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
                     } catch (Exception e) {
