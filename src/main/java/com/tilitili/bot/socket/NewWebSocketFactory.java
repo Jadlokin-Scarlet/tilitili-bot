@@ -9,6 +9,7 @@ import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.net.http.WebSocket;
@@ -30,6 +31,7 @@ public class NewWebSocketFactory implements ApplicationListener<ContextClosedEve
         this.botRobotCacheManager = botRobotCacheManager;
     }
 
+    @Async
     public void upBotBlocking(Long botId) {
         Asserts.notNull(botId, "参数异常");
         BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
