@@ -120,9 +120,9 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		BotMessage botMessage = messageAction.getBotMessage();
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValue();
-		if (session.remove(lockKey)) return null;
+		if (!session.containsKey(numListKey)) return null;
+		Asserts.isTrue(session.putIfAbsent(lockKey, "lock", 1, TimeUnit.SECONDS), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
 		try {
-			if (!session.containsKey(numListKey)) return null;
 			Asserts.notBlank(result, "你想答什么。");
 			String resultAfterReplace = result;
 			for (Map.Entry<String, String> entry : replaceMap.entrySet()) {
@@ -144,9 +144,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			Arrays.sort(calNumList);
 			Asserts.isTrue(Arrays.equals(numList, calNumList), "题目是[%s]哦，不是[%s]", numListStr, String.join("，", calNumList));
 		} finally {
-			session.put(lockKey, "lock");
+			session.remove(lockKey);
 		}
-		session.remove(lockKey);
 		session.remove(numListKey);
 		session.remove(lastSendTimeKey);
 		return BotMessage.simpleTextMessage("恭喜你回答正确！", botMessage).setQuote(messageAction.getMessageId());
@@ -161,7 +160,6 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			if (needEnd) {
 				session.remove(numListKey);
 				session.remove(lastSendTimeKey);
-				session.remove(lockKey);
 			} else {
 				throw new AssertException("先玩完这一局吧："+numListStr);
 			}
@@ -177,7 +175,6 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		String newNumListStr = numList.stream().map(String::valueOf).collect(Collectors.joining("，"));
 		session.put(numListKey, newNumListStr);
 		session.put(lastSendTimeKey, DateUtils.formatDateYMDHMS(new Date()));
-		session.put(lockKey, "lock");
 
 		scheduled.schedule(() -> {
 			String lastSendTime2Str = session.get(lastSendTimeKey);
@@ -186,7 +183,6 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 				sendMessageManager.sendMessage(BotMessage.simpleTextMessage("戳啦，答案是"+answerTmp, messageAction.getBotMessage()));
 				session.remove(numListKey);
 				session.remove(lastSendTimeKey);
-				session.remove(lockKey);
 			}
 		}, waitTime, TimeUnit.MINUTES);
 		return BotMessage.simpleTextMessage("试试看这道题吧("+newNumListStr+")，时限"+waitTime+"分钟哦~");
