@@ -1,11 +1,11 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.common.entity.dto.Gomoku;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.Gomoku;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -14,7 +14,6 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.Gsons;
 import com.tilitili.common.utils.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -44,11 +43,17 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
     @Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         switch (messageAction.getKeyWithoutPrefix()) {
-            case "五子棋": return this.handleStart(messageAction);
-            case "落子": return this.handleFall(messageAction);
-            case "掀桌": return this.handleStop(messageAction);
-            case "认输": case "投降": return this.handleEnd(messageAction);
-            default: throw new AssertException();
+            case "五子棋":
+                return this.handleStart(messageAction);
+            case "落子":
+                return this.handleFall(messageAction);
+            case "掀桌":
+                return this.handleStop(messageAction);
+            case "认输":
+            case "投降":
+                return this.handleEnd(messageAction);
+            default:
+                throw new AssertException();
         }
     }
 
@@ -138,7 +143,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
         Asserts.checkEquals(gomoku.getBoardCell(index1, index2), 0, "这里已经落子啦");
         gomoku.setBoardCell(index1, index2, flag);
 
-        if (this.checkEnd(gomoku)) {
+        if (this.checkEnd(gomoku, index1, index2)) {
             BotMessage resp = BotMessage.simpleListMessage(Arrays.asList(
                     BotMessageChain.ofPlain(String.format("恭喜%s获得胜利", nowPlayer.getName())),
                     BotMessageChain.ofImage(gomokuImageManager.getGomokuImage(bot, gomoku))
@@ -153,26 +158,54 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
     }
 
     private final int boardLength = 15;
-    private Boolean checkEnd(Gomoku gomoku) {
+
+    private Boolean checkEnd(Gomoku gomoku, int x0, int y0) {
+        return checkEnd0(gomoku, x0, y0, 1, 0) ||
+                checkEnd0(gomoku, x0, y0, 0, 1) ||
+                checkEnd0(gomoku, x0, y0, 1, 1) ||
+                checkEnd0(gomoku, x0, y0, 1, -1);
+    }
+    private Boolean checkEnd0(Gomoku gomoku, int x0, int y0, int dx, int dy) {
+        Asserts.isRange(0, x0, boardLength, "参数异常");
+        Asserts.isRange(0, y0, boardLength, "参数异常");
+        Asserts.isRange(0, dx, 2, "参数异常");
+        Asserts.isRange(-1, dx, 2, "参数异常");
         int flag = gomoku.getFlag();
-        int[][] board = gomoku.getBoard();
-        int[][][] cnt = new int[boardLength + 1][boardLength + 1][4];
-        for (int i = 1; i <= boardLength; i++) {
-            for (int j = 1; j <= boardLength; j++) {
-                int theBoard = board[i - 1][j - 1];
-                if (theBoard == flag) {
-                    cnt[i][j][0] = cnt[i - 1][j][0] + 1;
-                    cnt[i][j][1] = cnt[i][j - 1][1] + 1;
-                    cnt[i][j][2] = cnt[i - 1][j - 1][2] + 1;
-                    cnt[i][j][3] = cnt[i + 1][j - 1][3] + 1;
-                }
-                if (ArrayUtils.contains(cnt[i][j], 5)) {
-                    return true;
-                }
+        int cnt = -1;
+        for (int x = x0, y = y0; x < boardLength && y > 0 && y < boardLength; x += dx, y += dy) {
+            if (gomoku.getBoardCell(x, y) == flag) {
+                cnt++;
+            } else {
+                break;
             }
         }
-        return false;
+        for (int x = x0, y = y0; x > 0 && y > 0 && y < boardLength; x -= dx, y -= dy) {
+            if (gomoku.getBoardCell(x, y) == flag) {
+                cnt++;
+            } else {
+                break;
+            }
+        }
+        return cnt >= 5;
     }
+//    {
+//        int[][][] cnt = new int[boardLength + 1][boardLength + 1][4];
+//        for (int i = 1; i <= boardLength; i++) {
+//            for (int j = 1; j <= boardLength; j++) {
+//                int theBoard = board[i - 1][j - 1];
+//                if (theBoard == flag) {
+//                    cnt[i][j][0] = cnt[i - 1][j][0] + 1;
+//                    cnt[i][j][1] = cnt[i][j - 1][1] + 1;
+//                    cnt[i][j][2] = cnt[i - 1][j - 1][2] + 1;
+//                    cnt[i][j][3] = cnt[i + 1][j - 1][3] + 1;
+//                }
+//                if (ArrayUtils.contains(cnt[i][j], 5)) {
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
         BotSessionService.MiraiSession session = messageAction.getSession();
