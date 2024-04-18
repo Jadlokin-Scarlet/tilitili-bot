@@ -6,7 +6,7 @@ import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotUserConfigManager;
+import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,11 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
     public static final String autoSellRepeatFishKey = "回收重复";
     public static final String favoriteUserIdKey = "老婆QQ";
     public static final String aiSystemKey = "ai语境";
-    private final BotUserConfigManager botUserConfigManager;
+    private final BotConfigManager botConfigManager;
 
     @Autowired
-    public ConfigHandle(BotUserConfigManager botUserConfigManager) {
-        this.botUserConfigManager = botUserConfigManager;
+    public ConfigHandle(BotConfigManager botConfigManager) {
+        this.botConfigManager = botConfigManager;
     }
 
     @Override
@@ -62,12 +62,12 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
             if (autoSellFish != null) {
                 Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
                 if ("yes".equals(autoSellFish)) {
-                    Asserts.isTrue(botUserConfigManager.getBooleanConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellRepeatFishKey);
+                    Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellRepeatFishKey);
                     respList.add("之后钓到的鱼将会自动回收喵。");
                 } else {
                     respList.add(autoSellFishKey + "关闭喵。");
                 }
-                botUserConfigManager.addOrUpdateConfig(userId, autoSellFishKey, autoSellFish);
+                botConfigManager.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
             }
         } catch (AssertException e) {
             respList.add(e.getMessage());
@@ -78,12 +78,12 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
             if (autoSellRepeatFish != null) {
                 Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
                 if ("yes".equals(autoSellRepeatFish)) {
-                    Asserts.isTrue(botUserConfigManager.getBooleanConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellFishKey);
+                    Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellFishKey);
                     respList.add("之后钓到的重复的鱼将会自动回收喵。");
                 } else {
                     respList.add(autoSellRepeatFishKey + "关闭喵。");
                 }
-                botUserConfigManager.addOrUpdateConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
+                botConfigManager.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
             }
         } catch (AssertException e) {
             respList.add(e.getMessage());
@@ -94,7 +94,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
                 List<BotUserDTO> atList = messageAction.getAtList();
                 Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
                 String newValue = atList.isEmpty()? null: String.valueOf(atList.get(0).getId());
-                int result = botUserConfigManager.addOrUpdateConfig(userId, favoriteUserIdKey, newValue);
+                int result = botConfigManager.addOrUpdateUserConfig(userId, favoriteUserIdKey, newValue);
                 if (result == 1) {
                     respList.add("设置老婆QQ成功喵。");
                 } else if (result == -1) {
@@ -108,7 +108,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
         try {
             String aiSystem = paramMap.get(aiSystemKey);
             if (aiSystem != null) {
-                botUserConfigManager.addOrUpdateConfig(userId, aiSystemKey, aiSystem);
+                botConfigManager.addOrUpdateUserConfig(userId, aiSystemKey, aiSystem);
                 respList.add("设置ai语境成功喵。");
             }
         } catch (AssertException e) {

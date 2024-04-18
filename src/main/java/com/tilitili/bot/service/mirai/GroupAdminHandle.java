@@ -10,7 +10,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotAdminStatisticsQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.BotUserConfigManager;
+import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotAdminStatisticsMapper;
 import com.tilitili.common.utils.Asserts;
@@ -30,14 +30,14 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	private final BotManager botManager;
 	private final BotUserManager botUserManager;
 	private final BotAdminStatisticsMapper botAdminStatisticsMapper;
-	private final BotUserConfigManager botUserConfigManager;
+	private final BotConfigManager botConfigManager;
 
 	@Autowired
-	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper, BotUserConfigManager botUserConfigManager) {
+	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper, BotConfigManager botConfigManager) {
 		this.botManager = botManager;
 		this.botUserManager = botUserManager;
 		this.botAdminStatisticsMapper = botAdminStatisticsMapper;
-		this.botUserConfigManager = botUserConfigManager;
+		this.botConfigManager = botConfigManager;
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		respBuilder.append("。\n");
 
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.filter(e -> !botUserConfigManager.getBooleanConfigCache(e.getKey(), "禁用管理员"))
+				.filter(e -> !botConfigManager.getBooleanUserConfigCache(e.getKey(), "禁用管理员"))
 				.filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 		if (sortedStatisticsList.isEmpty()) {
 			respBuilder.append("还没有人票数达标。");
@@ -111,11 +111,11 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (!botUserConfigManager.getBooleanConfigCache(botUser.getId(), "禁用管理员")) {
+		if (!botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员")) {
 			return null;
 		}
 
-		botUserConfigManager.addOrUpdateConfig(botUser.getId(), "禁用管理员", false);
+		botConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", false);
 		return BotMessage.simpleTextMessage("好的喵");
 //		List<BotUserDTO> atList = messageAction.getAtList();
 //
@@ -135,12 +135,12 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (botUserConfigManager.getBooleanConfigCache(botUser.getId(), "禁用管理员")) {
+		if (botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员")) {
 			return null;
 		}
 
 		botManager.setMemberAdmin(bot, botSender, botUser, false);
-		botUserConfigManager.addOrUpdateConfig(botUser.getId(), "禁用管理员", true);
+		botConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", true);
 		return BotMessage.simpleTextMessage("好的喵");
 
 
