@@ -8,6 +8,7 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.HelpHandle;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
+import com.tilitili.bot.socket.NewWebSocketFactory;
 import com.tilitili.bot.socket.handle.BaseWebSocketHandler;
 import com.tilitili.bot.util.ExcelUtil;
 import com.tilitili.common.api.KtvServiceInterface;
@@ -76,6 +77,22 @@ class StartApplicationTest {
     private BotManager botManager;
     @DubboReference
     private KtvServiceInterface ktvServiceInterface;
+    @Autowired
+    private NewWebSocketFactory webSocketFactory;
+
+    @Test
+    public void wsTest() {
+        while (true) {
+            Scanner scanner = new Scanner(System.in);
+            String userInput = scanner.nextLine();
+            if (userInput.startsWith("up")) {
+                long botId = Long.parseLong(userInput.substring(3));
+                webSocketFactory.testUp(botId);
+
+            }
+
+        }
+    }
 
     @Test
     public void ktvTest() {

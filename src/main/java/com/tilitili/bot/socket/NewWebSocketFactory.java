@@ -83,7 +83,7 @@ public class NewWebSocketFactory {
 	private void onClose(Long botId) {
 		log.warn("重连websocket, botId={}", botId);
 		webSocketMap.remove(botId);
-		this.upBotBlocking0(botId);
+		this.upBotBlocking(botId);
 	}
 
 	public void close() {
@@ -94,5 +94,11 @@ public class NewWebSocketFactory {
 
 	private String logBot(BotRobot bot) {
 		return bot.getId() + "." + bot.getName();
+	}
+
+	public void testUp(long botId) {
+		botIdLockMap.remove(botId);
+		webSocketMap.remove(botId);
+		upBotBlocking(botId);
 	}
 }
