@@ -19,7 +19,7 @@ class BotRobotServiceTest {
 
 	@Test
 	void upBot() {
-//		tester.upBot(2L);
+		tester.upBot(18L);
 	}
 
 	@Test
