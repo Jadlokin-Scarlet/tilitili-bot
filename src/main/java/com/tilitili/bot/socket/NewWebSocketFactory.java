@@ -42,11 +42,13 @@ public class NewWebSocketFactory {
         BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
         Asserts.notNull(bot, "权限不足");
         try {
-            Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
             if (!webSocketMap.containsKey(botId)) {
                 log.info("初始化websocket, bot={}", bot.getName());
-                webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
-                log.info("初始化websocket完成, bot={}", bot.getName());
+                Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
+                if (!webSocketMap.containsKey(botId)) {
+                    webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
+                    log.info("初始化websocket完成, bot={}", bot.getName());
+                }
             }
         } catch (AssertException e) {
             log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
