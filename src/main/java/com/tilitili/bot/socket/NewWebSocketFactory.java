@@ -36,10 +36,10 @@ public class NewWebSocketFactory {
 	}
 
 	public void upBotBlocking(Long botId) {
-		executor.submit(() -> upBotBlocking0(botId));
-	}
-
-	private void upBotBlocking0(Long botId) {
+//		executor.submit(() -> upBotBlocking0(botId));
+//	}
+//
+//	private void upBotBlocking0(Long botId) {
 		Asserts.notNull(botId, "参数异常");
 		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
@@ -83,7 +83,7 @@ public class NewWebSocketFactory {
 	private void onClose(Long botId) {
 		log.warn("重连websocket, botId={}", botId);
 		webSocketMap.remove(botId);
-		this.upBotBlocking(botId);
+//		this.upBotBlocking(botId);
 	}
 
 	public void close() {
