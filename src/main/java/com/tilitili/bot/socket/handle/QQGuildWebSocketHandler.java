@@ -15,16 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class QQGuildWebSocketHandler extends BotWebSocketHandler {
-    private final String type;
     private final BotManager botManager;
     private final BotService botService;
 
-    private int s = 0;
+    private long s = 0;
     private String sessionId;
 
-    public QQGuildWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, String type, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
+    public QQGuildWebSocketHandler(HttpRequestDTO wsRequest, BotRobot bot, BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) throws URISyntaxException {
         super(wsRequest, bot, botService, botRobotCacheManager);
-        this.type = type;
         this.botManager = botManager;
         this.botService = botService;
     }
@@ -43,9 +41,9 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
             }
             QQGuildWsResponse response = Gsons.fromJson(message, QQGuildWsResponse.class);
             if (response.getOp() != 11) {
-                log.info("Message Received bot={} type={} message={}", bot.getName(), type, message);
+                log.info("Message Received bot={} message={}", bot.getName(), message);
             }
-            String token = botManager.getAccessToken(bot, type);
+            String token = botManager.getAccessToken(bot);
             switch (response.getOp()) {
                 case 10: {
                     if (sessionId == null) {
@@ -78,7 +76,7 @@ public class QQGuildWebSocketHandler extends BotWebSocketHandler {
     }
     @Override
     public void send(String text) {
-        log.info("send ws message type="+type+" botId="+botId+" text="+text);
+        log.info("send ws message botId="+botId+" text="+text);
         super.send(text);
     }
 }

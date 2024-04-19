@@ -31,6 +31,10 @@ public class NewWebSocketFactory {
 
     @Async
     public void upBotBlocking(Long botId) {
+        upBotBlocking0(botId);
+    }
+
+    private void upBotBlocking0(Long botId) {
         Asserts.notNull(botId, "参数异常");
         BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
         Asserts.notNull(bot, "权限不足");
@@ -39,7 +43,7 @@ public class NewWebSocketFactory {
                 if (!webSocketMap.containsKey(botId)) {
                     log.info("初始化websocket, bot={}", bot.getName());
                     try {
-                        webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onError));
+                        webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
                         log.info("初始化websocket完成, bot={}", bot.getName());
                     } catch (AssertException e) {
                         log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
@@ -64,13 +68,14 @@ public class NewWebSocketFactory {
         return webSocket.isInputClosed() || webSocket.isOutputClosed()? -1: 0;
     }
     
-    private void onError(Long botId) {
+    private void onClose(Long botId) {
         webSocketMap.remove(botId);
+        this.upBotBlocking0(botId);
     }
 
     public void close() {
         for (WebSocket webSocket : webSocketMap.values()) {
-            webSocket.abort();
+            webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "");
         }
     }
 }

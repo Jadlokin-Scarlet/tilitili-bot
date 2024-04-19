@@ -1,6 +1,6 @@
 package com.tilitili.bot.config;
 
-import com.tilitili.bot.socket.WebSocketFactory;
+import com.tilitili.bot.socket.NewWebSocketFactory;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.query.BotRobotQuery;
@@ -19,10 +19,10 @@ import java.util.List;
 @Configuration
 public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> {
     private final BotRobotCacheManager botRobotCacheManager;
-    private final WebSocketFactory webSocketFactory;
+    private final NewWebSocketFactory webSocketFactory;
 
     @Autowired
-    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, WebSocketFactory webSocketFactory) {
+    public WebSocketConfig(BotRobotCacheManager botRobotCacheManager, NewWebSocketFactory webSocketFactory) {
         this.botRobotCacheManager = botRobotCacheManager;
         this.webSocketFactory = webSocketFactory;
     }
@@ -40,7 +40,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
     private void upAllBotRobot() {
         List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
 //        List<BotRobot> robotList = Arrays.asList(botRobotCacheManager.getBotRobotById(3L), botRobotCacheManager.getBotRobotById(5L));
-//        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(24L));
+//        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(25L));
 //        List<BotRobot> robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {
