@@ -7,12 +7,13 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.net.http.WebSocket;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
@@ -22,7 +23,7 @@ public class NewWebSocketFactory {
     private final BotManager botManager;
     private final BotService botService;
     private final BotRobotCacheManager botRobotCacheManager;
-
+    private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
         this.botManager = botManager;
@@ -32,9 +33,8 @@ public class NewWebSocketFactory {
         this.botIdLockMap = new ConcurrentHashMap<>();
     }
 
-    @Async
     public void upBotBlocking(Long botId) {
-        upBotBlocking0(botId);
+        executor.submit(() -> upBotBlocking0(botId));
     }
 
     private void upBotBlocking0(Long botId) {
