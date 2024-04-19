@@ -56,8 +56,10 @@ public class NewWebSocketFactory {
     }
 
     public void downBotBlocking(Long botId) {
-        webSocketMap.get(botId).sendClose(WebSocket.NORMAL_CLOSURE, "");
-        webSocketMap.remove(botId);
+        if (webSocketMap.containsKey(botId)) {
+            webSocketMap.get(botId).sendClose(WebSocket.NORMAL_CLOSURE, "");
+            webSocketMap.remove(botId);
+        }
     }
 
     public Integer getWsStatus(BotRobot bot) {
