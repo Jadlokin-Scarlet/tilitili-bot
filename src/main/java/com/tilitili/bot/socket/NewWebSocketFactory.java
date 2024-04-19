@@ -32,7 +32,7 @@ public class NewWebSocketFactory {
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.webSocketMap = new HashMap<>();
 		this.botIdLockMap = new ConcurrentHashMap<>();
-		this.executor = Executors.newFixedThreadPool(botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setStatus(0)));
+		this.executor = Executors.newFixedThreadPool(botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setStatus(0)) + 1);
 	}
 
 	public void upBotBlocking(Long botId) {
