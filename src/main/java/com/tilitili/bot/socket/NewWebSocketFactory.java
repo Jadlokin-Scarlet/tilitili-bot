@@ -48,7 +48,11 @@ public class NewWebSocketFactory {
                 if (!webSocketMap.containsKey(botId)) {
                     webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
                     log.info("初始化websocket完成, bot={}", bot.getName());
+                } else {
+                    log.info("无需初始化2websocket, bot={}", bot.getName());
                 }
+            } else {
+                log.info("无需初始化1websocket, bot={}", bot.getName());
             }
         } catch (AssertException e) {
             log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
