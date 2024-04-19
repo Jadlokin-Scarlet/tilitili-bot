@@ -43,21 +43,21 @@ public class NewWebSocketFactory {
         Asserts.notNull(bot, "权限不足");
         try {
             if (!webSocketMap.containsKey(botId)) {
-                log.info("初始化websocket, bot={}", bot.getName());
+                log.info("初始化websocket, bot={}", this.logBot(bot));
                 Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
                 if (!webSocketMap.containsKey(botId)) {
                     webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
-                    log.info("初始化websocket完成, bot={}", bot.getName());
+                    log.info("初始化websocket完成, bot={}", this.logBot(bot));
                 } else {
-                    log.info("无需初始化2websocket, bot={}", bot.getName());
+                    log.info("无需初始化2websocket, bot={}", this.logBot(bot));
                 }
             } else {
-                log.info("无需初始化1websocket, bot={}", bot.getName());
+                log.info("无需初始化1websocket, bot={}", this.logBot(bot));
             }
         } catch (AssertException e) {
-            log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
+            log.warn("初始化websocket失败, bot={} info={}", this.logBot(bot), e.getMessage());
         } catch (Exception e) {
-            log.error("初始化websocket异常, bot=" + bot.getName(), e);
+            log.error("初始化websocket异常, bot=" + this.logBot(bot), e);
         } finally {
             botIdLockMap.remove(botId);
         }
@@ -79,6 +79,7 @@ public class NewWebSocketFactory {
     }
     
     private void onClose(Long botId) {
+        log.warn("重连websocket, botId={}", botId);
         webSocketMap.remove(botId);
         this.upBotBlocking0(botId);
     }
@@ -87,5 +88,9 @@ public class NewWebSocketFactory {
         for (WebSocket webSocket : webSocketMap.values()) {
             webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "");
         }
+    }
+
+    private String logBot(BotRobot bot) {
+        return bot.getId() + "." + bot.getName();
     }
 }
