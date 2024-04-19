@@ -11,12 +11,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.net.http.WebSocket;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
 public class NewWebSocketFactory {
-    private final ConcurrentHashMap<Long, WebSocket> webSocketMap;
+    private final HashMap<Long, WebSocket> webSocketMap;
+    private final ConcurrentHashMap<Long, Boolean> botIdLockMap;
     private final BotManager botManager;
     private final BotService botService;
     private final BotRobotCacheManager botRobotCacheManager;
@@ -25,8 +27,9 @@ public class NewWebSocketFactory {
     public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
         this.botManager = botManager;
         this.botService = botService;
-        this.webSocketMap = new ConcurrentHashMap<>();
         this.botRobotCacheManager = botRobotCacheManager;
+        this.webSocketMap = new HashMap<>();
+        this.botIdLockMap = new ConcurrentHashMap<>();
     }
 
     @Async
@@ -38,19 +41,16 @@ public class NewWebSocketFactory {
         Asserts.notNull(botId, "参数异常");
         BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
         Asserts.notNull(bot, "权限不足");
+        Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
         if (!webSocketMap.containsKey(botId)) {
-            synchronized (webSocketMap) {
-                if (!webSocketMap.containsKey(botId)) {
-                    log.info("初始化websocket, bot={}", bot.getName());
-                    try {
-                        webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
-                        log.info("初始化websocket完成, bot={}", bot.getName());
-                    } catch (AssertException e) {
-                        log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
-                    } catch (Exception e) {
-                        log.error("初始化websocket异常, bot=" + bot.getName(), e);
-                    }
-                }
+            log.info("初始化websocket, bot={}", bot.getName());
+            try {
+                webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
+                log.info("初始化websocket完成, bot={}", bot.getName());
+            } catch (AssertException e) {
+                log.warn("初始化websocket失败, bot={} info={}", bot.getName(), e.getMessage());
+            } catch (Exception e) {
+                log.error("初始化websocket异常, bot=" + bot.getName(), e);
             }
         }
     }
