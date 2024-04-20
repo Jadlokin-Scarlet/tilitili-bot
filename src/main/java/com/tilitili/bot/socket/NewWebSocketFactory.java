@@ -36,10 +36,10 @@ public class NewWebSocketFactory {
 	}
 
 	public void upBotBlocking(Long botId) {
-//		executor.submit(() -> upBotBlocking0(botId));
-//	}
-//
-//	private void upBotBlocking0(Long botId) {
+		executor.submit(() -> upBotBlocking0(botId));
+	}
+
+	private void upBotBlocking0(Long botId) {
 		Asserts.notNull(botId, "参数异常");
 		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
@@ -50,11 +50,7 @@ public class NewWebSocketFactory {
 				if (!webSocketMap.containsKey(botId)) {
 					webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
 					log.info("初始化websocket完成, bot={}", this.logBot(bot));
-				} else {
-					log.info("无需初始化2websocket, bot={}", this.logBot(bot));
 				}
-			} else {
-				log.info("无需初始化1websocket, bot={}", this.logBot(bot));
 			}
 		} catch (AssertException e) {
 			log.warn("初始化websocket失败, bot={} info={}", this.logBot(bot), e.getMessage());
@@ -83,7 +79,7 @@ public class NewWebSocketFactory {
 	private void onClose(Long botId) {
 		log.warn("重连websocket, botId={}", botId);
 		webSocketMap.remove(botId);
-//		this.upBotBlocking(botId);
+		this.upBotBlocking(botId);
 	}
 
 	public void close() {
