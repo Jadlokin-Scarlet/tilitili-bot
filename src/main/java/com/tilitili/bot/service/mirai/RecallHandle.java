@@ -63,8 +63,6 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             for (BotSendMessageRecord messageRecord : recordList) {
                 botManager.recallMessage(bot, botSender, messageRecord.getMessageId());
             }
-//            Long bot = botSender.getBot();
-//            botManager.recallMessage(BotEnum.getBotById(bot), botSender, session.get(BotService.lastMessageIdKey));
             return BotMessage.emptyMessage();
         }
 
