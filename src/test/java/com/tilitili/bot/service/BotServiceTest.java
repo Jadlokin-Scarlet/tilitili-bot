@@ -21,7 +21,7 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"syncId\":\"-1\",\"data\":{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Source\",\"id\":941441,\"time\":1712763623},{\"type\":\"Plain\",\"text\":\"3*(7+5/5)\"}],\"sender\":{\"id\":972683489,\"memberName\":\"希卡利大助手\",\"specialTitle\":\"超级金发控\",\"permission\":\"MEMBER\",\"joinTimestamp\":1648650588,\"lastSpeakTimestamp\":1712763623,\"muteTimeRemaining\":0,\"group\":{\"id\":907741387,\"name\":\"公主连结AKB48#素质游戏\",\"permission\":\"ADMINISTRATOR\"},\"active\":null}}}");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"self_id\":1701008067,\"user_id\":545459363,\"time\":1713722201,\"message_id\":-2147478739,\"real_id\":-2147478739,\"message_type\":\"private\",\"sender\":{\"user_id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"card\":\"\"},\"raw_message\":\"帮助\",\"font\":14,\"sub_type\":\"friend\",\"message\":[{\"data\":{\"text\":\"帮助\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\"}");
 //		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
 //		tester.testHandleMessage(bot, "");
 	}
