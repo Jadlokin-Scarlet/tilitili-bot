@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableDubbo
-@EnableAsync
 @EnableRetry
+@EnableAsync
 @EnableCaching
 @EnableScheduling
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
