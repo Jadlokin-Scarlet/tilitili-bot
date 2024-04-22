@@ -68,8 +68,8 @@ public class BotService {
 
     @Async
     public void syncHandleMessage(BotRobot bot, String message) {
-        // 解析message
         BotMessage botMessage = null;
+        // 解析message
         try {
             botMessage = botManager.handleMessageToBotMessage(bot, message);
         } catch (Exception e) {
