@@ -93,8 +93,8 @@ public class BotService {
 
     private void syncHandleChatMessage(BotRobot bot, BotMessage botMessage) {
         List<Long> lockUserId = new ArrayList<>();
+        // 获取sender，校验权限
         try {
-            // 获取sender，校验权限
             BotSender botSender = botMessage.getBotSender();
             BotUserDTO botUser = botMessage.getBotUser();
             // 校验权限
