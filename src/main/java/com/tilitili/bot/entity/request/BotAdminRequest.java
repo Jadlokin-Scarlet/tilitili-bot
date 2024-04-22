@@ -9,6 +9,7 @@ public class BotAdminRequest extends BaseDTO {
     private String code;
     private String emailCode;
     private Long masterQQ;
+    private Boolean remember;
 
     public String getCode() {
         return code;
@@ -61,6 +62,15 @@ public class BotAdminRequest extends BaseDTO {
 
     public BotAdminRequest setMasterQQ(Long masterQQ) {
         this.masterQQ = masterQQ;
+        return this;
+    }
+
+    public Boolean getRemember() {
+        return remember;
+    }
+
+    public BotAdminRequest setRemember(Boolean remember) {
+        this.remember = remember;
         return this;
     }
 }
