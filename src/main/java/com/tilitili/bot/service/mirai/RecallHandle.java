@@ -65,30 +65,5 @@ public class RecallHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.emptyMessage();
         }
-
-//        if (Objects.equals(qq, MASTER_QQ)) {
-//            if (pid != null) {
-//                List<PixivImage> pixivImageList = pixivImageMapper.getPixivImageByCondition(new PixivImageQuery().setPid(pid));
-//                for (PixivImage pixivImage : pixivImageList) {
-//                    String messageId = pixivImage.getMessageId();
-//                    if (messageId != null) {
-//                        BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageId);
-//                        BotSender botSender = botSenderCacheManager.getBotSenderById(botSendMessageRecord.getSenderId());
-//                        botManager.recallMessage(messageId, botSender.getBot());
-//                        return BotMessage.simpleTextMessage("搞定");
-//                    }
-//                }
-//                return null;
-//            }
-
-//            String messageIdStr = (String) redisCache.getValue(PixivHandle.messageIdKey);
-//            if (! isBlank(messageIdStr)) {
-//                BotSendMessageRecord botSendMessageRecord = botSendMessageRecordMapper.getNewBotSendMessageRecordByMessageId(messageIdStr);
-//                BotSender botSender = botSenderCacheManager.getBotSenderById(botSendMessageRecord.getSenderId());
-//                botManager.recallMessage(botSendMessageRecord.getMessageId(), botSender.getBot());
-//                return BotMessage.simpleTextMessage("搞定");
-//            }
-//        }
-//        return null;
     }
 }
