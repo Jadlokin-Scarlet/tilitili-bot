@@ -25,7 +25,7 @@ public class BotConfigController {
     @GetMapping("/list")
     @ResponseBody
     public BaseModel<List<BotConfig>> listConfig(@SessionAttribute(value = "botUser") BotUserDTO botUser) {
-        List<BotConfig> configList = botConfigManager.listBotConfigByUserId(botUser.getId());
+        List<BotConfig> configList = botConfigManager.listBotConfigByUserIdWithoutPrefix(botUser.getId());
         return BaseModel.success(configList);
     }
 
