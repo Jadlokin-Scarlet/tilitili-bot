@@ -1,5 +1,6 @@
 package com.tilitili.bot.controller;
 
+import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.service.BotUserService;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotRoleUserMapping;
@@ -24,7 +25,7 @@ public class BotUserController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotUserDTO>> listBotUser(@SessionAttribute(value = "botUser") BotUserDTO botUser, BotUserQuery query) {
+    public BaseModel<PageModel<BotUserDTO>> listBotUser(@SessionAttribute(value = "botUser") BotUserVO botUser, BotUserQuery query) {
         BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
         if (adminMapping == null) {
             query.setAdminUserId(botUser.getId());
@@ -34,14 +35,14 @@ public class BotUserController extends BaseController {
 
     @PostMapping("/status")
     @ResponseBody
-    public BaseModel<?> changeStatus(@SessionAttribute(value = "botUser") BotUserDTO botUser, @RequestBody BotUserDTO updBotUser) {
+    public BaseModel<?> changeStatus(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody BotUserDTO updBotUser) {
         botUserService.changeStatus(botUser.getId(), updBotUser);
         return BaseModel.success();
     }
 
     @PostMapping("/bind")
     @ResponseBody
-    public BaseModel<?> bindUser(@SessionAttribute(value = "botUser") BotUserDTO botUser, @RequestBody BotUserDTO updBotUser) {
+    public BaseModel<?> bindUser(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody BotUserDTO updBotUser) {
         botUserService.bindUser(botUser.getId(), updBotUser.getId(), updBotUser.getQq());
         return BaseModel.success();
     }

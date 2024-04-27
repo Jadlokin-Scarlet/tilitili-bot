@@ -1,12 +1,12 @@
 package com.tilitili.bot.controller;
 
+import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.entity.request.BotAdminRequest;
 import com.tilitili.bot.service.BotAdminService;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.BaseModel;
-import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,25 +20,23 @@ import java.util.UUID;
 public class BotAdminController extends BaseController {
     private final BotAdminService botAdminService;
     private final RedisCache redisCache;
-    private final BotUserManager botUserManager;
 
     private static final String REMEMBER_TOKEN_KEY = "BotAdminController.rememberTokenKey-";
     private static final int TIMEOUT = 60 * 60 * 24 * 30;
 
-    public BotAdminController(BotAdminService botAdminService, RedisCache redisCache, BotUserManager botUserManager) {
+    public BotAdminController(BotAdminService botAdminService, RedisCache redisCache) {
         this.botAdminService = botAdminService;
         this.redisCache = redisCache;
-        this.botUserManager = botUserManager;
     }
 
     @GetMapping("/isLogin")
     @ResponseBody
-    public BaseModel<BotUserDTO> isLogin(@SessionAttribute(value = "botUser", required = false) BotUserDTO botUser,
+    public BaseModel<BotUserVO> isLogin(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser,
                                          @CookieValue(value = "token", required = false) String token,
                                          HttpSession session) {
-        if (botUser == null && token != null) {
+        if (botUser == null && StringUtils.isNotBlank(token)) {
             Long userId = redisCache.getValueLong(REMEMBER_TOKEN_KEY + token);
-            botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+            botUser = botAdminService.getBotUserWithIsAdmin(userId);
             session.setAttribute("botUser", botUser);
         }
         return new BaseModel<>("", true, botUser);
@@ -46,9 +44,9 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/login")
     @ResponseBody
-    public BaseModel<BotUserDTO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
+    public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
-        BotUserDTO botUser = botAdminService.login(request);
+        BotUserVO botUser = botAdminService.login(request);
         if (request.getRemember() != null && request.getRemember()) {
             String newToken = UUID.randomUUID().toString();
             Cookie cookie = new Cookie("token", newToken);
@@ -69,7 +67,7 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/loginOut")
     @ResponseBody
-    public BaseModel<?> loginOut(@SessionAttribute(value = "botUser", required = false) BotUserDTO botUser, HttpSession session, HttpServletResponse response) {
+    public BaseModel<?> loginOut(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser, HttpSession session, HttpServletResponse response) {
         session.removeAttribute("botUser");
         String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
         redisCache.delete(REMEMBER_TOKEN_KEY+token);
@@ -83,6 +81,7 @@ public class BotAdminController extends BaseController {
     public BaseModel<?> checkCode(@RequestBody BotAdminRequest request) {
         Asserts.notNull(request, "参数异常");
         botAdminService.checkRegisterCode(request.getCode());
+        botAdminService.checkMasterQQ(request.getMaster());
         return BaseModel.success("");
     }
 
@@ -104,10 +103,34 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/register")
     @ResponseBody
-    public BaseModel<?> register(@RequestBody BotAdminRequest request) {
+    public BaseModel<?> register(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
         botAdminService.register(request);
-        return BaseModel.success("注册成功");
+        return this.login(request, session, response);
+    }
+
+    @PostMapping("/checkEmailQuick")
+    @ResponseBody
+    public BaseModel<?> checkEmailQuick(@RequestBody BotAdminRequest request) {
+        Asserts.notNull(request, "参数异常");
+        botAdminService.sendEmailCodeQuick(request);
+        return BaseModel.success("请在邮箱中查看验证码");
+    }
+
+    @PostMapping("/checkEmailCodeQuick")
+    @ResponseBody
+    public BaseModel<?> checkEmailCodeQuick(@RequestBody BotAdminRequest request) {
+        Asserts.notNull(request, "参数异常");
+        botAdminService.checkEmailCodeQuick(request);
+        return BaseModel.success();
+    }
+
+    @PostMapping("/registerQuick")
+    @ResponseBody
+    public BaseModel<?> registerQuick(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
+        Asserts.notNull(request, "参数异常");
+        botAdminService.registerQuick(request);
+        return this.login(request, session, response);
     }
 
 }

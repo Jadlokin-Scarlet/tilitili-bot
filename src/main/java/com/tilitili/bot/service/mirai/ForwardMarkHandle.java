@@ -2,6 +2,7 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -48,12 +49,12 @@ public class ForwardMarkHandle extends ExceptionRespMessageToSenderHandle {
 			String row = rowList[i];
 			List<String> cellList = StringUtils.extractList("(\\d+)[：:](.+)", row);
 			Asserts.checkEquals(cellList.size(), 2, "第%s句格式错啦", i);
-			long qq = Long.parseLong(cellList.get(0));
+			String qq = cellList.get(0);
 			String text = cellList.get(1);
 			List<BotMessageChain> botMessageChains = functionTalkManager.convertFunctionRespToChain(text, new FunctionConvertParam().setBot(bot).setBotSender(botSender));
 
 			// 此功能只能QQ用
-			BotUserDTO botUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, 0);
+			BotUserDTO botUser = botUserManager.getValidBotUserByExternalIdWithParent(BotUserConstant.USER_TYPE_QQ, qq);
 			Asserts.notNull(botUser, "第%s句找不到人", i);
 			nodeList.add(new BotMessageNode().setUser(botUser).setSenderName(botUser.getName()).setMessageChain(botMessageChains));
 		}

@@ -3,12 +3,11 @@ package com.tilitili.bot.entity.request;
 import com.tilitili.common.entity.dto.BaseDTO;
 
 public class BotAdminRequest extends BaseDTO {
-    private String username;
     private String password;
     private String email;
     private String code;
     private String emailCode;
-    private Long masterQQ;
+    private String master;
     private Boolean remember;
 
     public String getCode() {
@@ -26,15 +25,6 @@ public class BotAdminRequest extends BaseDTO {
 
     public BotAdminRequest setEmailCode(String emailCode) {
         this.emailCode = emailCode;
-        return this;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public BotAdminRequest setUsername(String username) {
-        this.username = username;
         return this;
     }
 
@@ -56,12 +46,12 @@ public class BotAdminRequest extends BaseDTO {
         return this;
     }
 
-    public Long getMasterQQ() {
-        return masterQQ;
+    public String getMaster() {
+        return master;
     }
 
-    public BotAdminRequest setMasterQQ(Long masterQQ) {
-        this.masterQQ = masterQQ;
+    public BotAdminRequest setMaster(String master) {
+        this.master = master;
         return this;
     }
 

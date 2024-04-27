@@ -118,7 +118,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 			if (botUser.getLastSignTime() != null && botUser.getLastSignTime().after(DateUtils.getCurrentDay())) {
 				return BotMessage.simpleTextMessage("已经签到过啦");
 			}
-			botUserManager.updateBotUserSelective(bot, botSender, new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
+			botUserManager.updateBotUserSelective(new BotUserDTO().setId(botUser.getId()).setLastSignTime(now));
 			botUserManager.safeUpdateScore(botUser, addScore);
 		} finally {
 			session.remove(externalIdLockKey + botUser.getId());

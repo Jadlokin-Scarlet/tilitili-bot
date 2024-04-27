@@ -1,6 +1,6 @@
 package com.tilitili.bot.interceptor;
 
-import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Gsons;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         HttpSession session = request.getSession();
-        BotUserDTO botUser = (BotUserDTO)session.getAttribute("botUser");
+        BotUserVO botUser = (BotUserVO)session.getAttribute("botUser");
 
         //登陆和资源下放不用登陆
         String url = request.getRequestURL().toString();

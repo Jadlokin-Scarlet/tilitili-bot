@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.google.common.base.Function;
 import com.tilitili.common.constant.BotRobotConstant;
+import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.resource.Resource;
@@ -28,6 +29,7 @@ public class ResourceService {
         resourceMap.put("roleList", botRoleManager::getResource);
         resourceMap.put("sendTypeResource", SendTypeEnum::getResource);
         resourceMap.put("botTaskResource", botTaskManager::listTaskResource);
+        resourceMap.put("userTypeList", BotUserConstant::getResource);
         adminResourceMap.put("botSenderList", botSenderService::listBotSenderResource);
     }
 

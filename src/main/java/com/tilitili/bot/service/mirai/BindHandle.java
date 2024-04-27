@@ -69,10 +69,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		if (!canUseBotAdminTask) {
 			return null;
 		}
-		String qqStr = messageAction.getValue();
-		Asserts.isNumber(qqStr, "格式错啦(qq号)");
-		Long qq = Long.parseLong(qqStr);
-		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+		String qq = messageAction.getValue();
+		Asserts.isNumber(qq, "格式错啦(qq号)");
+		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(BotUserConstant.USER_TYPE_QQ, qq);
 
 		String targetKey = applyKey + parentUser.getId();
 		String sourceKey = (String) redisCache.getValue(targetKey);
@@ -116,10 +115,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
 		Asserts.notEquals(botUser.getType(), 0, "无需合体");
-		String qqStr = messageAction.getValue();
-		Asserts.isNumber(qqStr, "格式错啦(QQ号)");
-		long qq = Long.parseLong(qqStr);
-		BotUserDTO targetBotUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, 0);
+		String qq = messageAction.getValue();
+		Asserts.isNumber(qq, "格式错啦(QQ号)");
+		BotUserDTO targetBotUser = botUserManager.getValidBotUserByExternalIdWithParent(BotUserConstant.USER_TYPE_QQ, qq);
 		Asserts.notNull(targetBotUser, "查无此人");
 
 		String sourceKey = applyKey + botUser.getId();

@@ -5,6 +5,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotUserQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
+import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
@@ -17,15 +18,25 @@ import java.util.stream.Collectors;
 public class BotUserService {
 	private final BotUserManager botUserManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
+	private final BotRoleManager botRoleManager;
 
-	public BotUserService(BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
+	public BotUserService(BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotRoleManager botRoleManager) {
 		this.botUserManager = botUserManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
+		this.botRoleManager = botRoleManager;
 	}
 
 	public BaseModel<PageModel<BotUserDTO>> listBotUser(BotUserQuery query) {
-		int total = botUserManager.countBotUserByAdmin(query);
-		List<BotUserDTO> userList = botUserManager.getBotUserByAdmin(query).stream().distinct().collect(Collectors.toList());
+		int total;
+		List<BotUserDTO> userDTOList;
+		if (query.getAdminUserId() != null || query.getBotId() != null) {
+			total = botUserManager.countBotUserByAdmin(query);
+			userDTOList = botUserManager.getBotUserByAdmin(query);
+		} else {
+			total = botUserManager.countBotUserByCondition(query);
+			userDTOList = botUserManager.getBotUserByCondition(query);
+		}
+		List<BotUserDTO> userList = userDTOList.stream().distinct().collect(Collectors.toList());
 		return PageModel.of(total, query.getPageSize(), query.getCurrent(), userList);
 	}
 
@@ -36,13 +47,15 @@ public class BotUserService {
 		botUserManager.safeUpdateStatus(updBotUser.getId(), updBotUser.getStatus());
 	}
 
-	public void bindUser(Long adminUserId, Long userId, Long qq) {
+	public void bindUser(Long adminUserId, Long userId, String qq) {
 		Asserts.notNull(qq, "参数异常");
 		Asserts.notNull(userId, "参数异常");
-		Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(userId, adminUserId) > 0, "参数异常");
+		if (!botRoleManager.isAdmin(adminUserId)) {
+			Asserts.isTrue(botUserSenderMappingMapper.checkUserAndAdminBind(userId, adminUserId) > 0, "参数异常");
+		}
 
 		BotUserDTO subUser = botUserManager.getValidBotUserByIdWithParent(null, userId);
-		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(qq, BotUserConstant.USER_TYPE_QQ);
+		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(BotUserConstant.USER_TYPE_QQ, qq);
 		botUserManager.bindUser(subUser, parentUser);
 	}
 }
