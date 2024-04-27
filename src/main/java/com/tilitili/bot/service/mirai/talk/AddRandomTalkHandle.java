@@ -112,22 +112,22 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 
 		List<BotSender> botSenderList = new ArrayList<>();
 		if (StringUtils.isNotBlank(friendList)) {
-			botSenderList.addAll(Arrays.stream(friendList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(friendList.split(","))
 					.map(botSenderCacheManager::getBotSenderByQq)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(groupList)) {
-			botSenderList.addAll(Arrays.stream(groupList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(groupList.split(","))
 					.map(botSenderCacheManager::getBotSenderByGroup)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(guildList)) {
-			botSenderList.addAll(Arrays.stream(guildList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(guildList.split(","))
 					.flatMap(guildId -> botSenderCacheManager.getBotSenderByCondition(new BotSenderQuery().setGuildId(guildId).setStatus(0)).stream())
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
 		if (StringUtils.isNotBlank(channelList)) {
-			botSenderList.addAll(Arrays.stream(channelList.split(",")).map(Long::valueOf)
+			botSenderList.addAll(Arrays.stream(channelList.split(","))
 					.map(botSenderCacheManager::getBotSenderByChannelId)
 					.filter(Objects::nonNull).collect(Collectors.toList()));
 		}
