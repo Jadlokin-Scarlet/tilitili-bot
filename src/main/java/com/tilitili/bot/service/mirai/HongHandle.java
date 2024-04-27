@@ -56,7 +56,7 @@ public class HongHandle extends ExceptionRespMessageHandle {
 		}
 		HongResult result = hongManager.chat(botSender, messageAction.getText());
 		Long score = redisCache.increment(HongManager.scoreKey + botSender.getId(), result.getScore());
-		Long num = redisCache.increment(HongManager.numKey + botSender.getId(), Long.valueOf(1));
+		Long num = redisCache.increment(HongManager.numKey + botSender.getId(), 1L);
 		String tips;
 		if (score <= 0) {
 			tips = "(噢，TA离你而去了)";
@@ -91,8 +91,8 @@ public class HongHandle extends ExceptionRespMessageHandle {
 		List<ChoiceMessage> chatList = new ArrayList<>();
 		chatList.add(new ChoiceMessage().setRole(ChoiceMessage.aiRole).setContent(initChat));
 		redisCache.setValue(HongManager.chatKey + botSender.getId(), Gsons.toJson(chatList), 60 * 60);
-		redisCache.increment(HongManager.scoreKey + botSender.getId(), Long.valueOf(20));
-		redisCache.increment(HongManager.numKey + botSender.getId(), Long.valueOf(0));
+		redisCache.increment(HongManager.scoreKey + botSender.getId(), 20L);
+		redisCache.increment(HongManager.numKey + botSender.getId(), 0L);
 		return BotMessage.simpleTextMessage(initChat + "\n(你回家太晚，女朋友很生气，试着安慰她吧。)");
 	}
 }
