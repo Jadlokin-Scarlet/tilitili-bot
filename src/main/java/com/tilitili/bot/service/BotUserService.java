@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class BotUserService {
 	private final BotUserManager botUserManager;
-	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotRoleManager botRoleManager;
+	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
 	public BotUserService(BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotRoleManager botRoleManager) {
 		this.botUserManager = botUserManager;
