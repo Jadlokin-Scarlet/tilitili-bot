@@ -117,7 +117,7 @@ public class ChatHandle extends ExceptionRespMessageHandle {
 
 		BotRobot bot = messageAction.getBot();
 //		String defaultSource = Objects.equals(messageAction.getBotMessage().getGroup(), GroupEnum.HOMO_LIVE_GROUP.value) ? "qy" : "tx";
-//		String source = messageAction.getParamOrDefault("source", defaultSource);
+//		String source = messageAction.getBodyOrDefault("source", defaultSource);
 		String text = messageAction.getText();
 		int random = ChatHandle.random.nextInt(300);
 		List<Long> botList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0)).stream().map(BotRobot::getUserId).filter(Objects::nonNull).collect(Collectors.toList());

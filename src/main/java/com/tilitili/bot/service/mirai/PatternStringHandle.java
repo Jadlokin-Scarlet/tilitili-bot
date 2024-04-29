@@ -17,8 +17,8 @@ public class PatternStringHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-        String regex = messageAction.getParam("r");
-        String string = messageAction.getParam("s");
+        String regex = messageAction.getBody("r");
+        String string = messageAction.getBody("s");
         Asserts.notBlank(regex, "格式错啦(r)");
         Asserts.notBlank(string, "格式错啦(s)");
         List<String> pattenList = new ArrayList<>();

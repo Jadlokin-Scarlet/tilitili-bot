@@ -40,8 +40,8 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
-        String speaker = messageAction.getParamOrDefault("who", "派蒙");
-        String speed = messageAction.getParamOrDefault("speed", "1.2");
+        String speaker = messageAction.getBodyOrDefault("who", "派蒙");
+        String speed = messageAction.getBodyOrDefault("speed", "1.2");
 
         File wavFile = new File("/home/admin/silk/voice.wav");
 //        File slkFile = new File("/home/admin/silk/voice.slk");

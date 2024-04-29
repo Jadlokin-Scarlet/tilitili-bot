@@ -43,7 +43,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     protected List<BotMessage> mockMessageInWaiteSender(BotMessageAction messageAction) {
         switch (messageAction.getKeyWithoutPrefix()) {
             case "关注": {
-                String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+                String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
                 if ("23210308".equals(key)) {
                     return Collections.singletonList(BotMessage.simpleTextMessage(String.format("关注%s成功！", "Jadlokin_Scarlet")));
                 } else if ("1".equals(key)) {
@@ -53,7 +53,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
                 }
             }
             case "取关": {
-                String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+                String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
                 if ("23210308".equals(key)) {
                     return Collections.singletonList(BotMessage.simpleTextMessage(String.format("切割%s喵", "Jadlokin_Scarlet")));
                 } else if ("1".equals(key)) {
@@ -81,7 +81,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleTToken(BotMessageAction messageAction) {
-        String name = messageAction.getParamOrDefault("name", messageAction.getValue());
+        String name = messageAction.getBodyOrDefault("name", messageAction.getValue());
 
         List<Subscription> subscriptionList = subscriptionMapper.getSubscriptionByCondition(new SubscriptionQuery().setName(name).setStatus(0).setType(2).setPageSize(1));
         Asserts.notEmpty(subscriptionList, "还没有被关注哦");
@@ -96,7 +96,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleDeleteTweet(BotMessageAction messageAction) {
-        String name = messageAction.getParamOrDefault("name", messageAction.getValue());
+        String name = messageAction.getBodyOrDefault("name", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
 
         Asserts.notBlank(name, "格式错啦(name)");
@@ -117,7 +117,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleAddTweet(BotMessageAction messageAction) {
-        String name = messageAction.getParamOrDefault("name", messageAction.getValue());
+        String name = messageAction.getBodyOrDefault("name", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         Long senderId = botSender.getId();
 
@@ -139,7 +139,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleDeleteSubscription(BotMessageAction messageAction) {
-        String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+        String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         Long senderId = botSender.getId();
 
@@ -161,7 +161,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleAddSubscription(BotMessageAction messageAction) {
-        String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+        String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         Long senderId = botSender.getId();
 
@@ -184,7 +184,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleDeleteDynamic(BotMessageAction messageAction) {
-        String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+        String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         Long senderId = botSender.getId();
 
@@ -206,7 +206,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleAddDynamic(BotMessageAction messageAction) {
-        String key = messageAction.getParamOrDefault("key", messageAction.getValue());
+        String key = messageAction.getBodyOrDefault("key", messageAction.getValue());
         BotSender botSender = messageAction.getBotSender();
         Long senderId = botSender.getId();
 

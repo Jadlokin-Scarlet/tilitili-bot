@@ -78,7 +78,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleTag(BotMessageAction messageAction) {
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
@@ -93,7 +93,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleUser(BotMessageAction messageAction) {
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
@@ -209,7 +209,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleLikeRecommend(BotMessageAction messageAction) {
         BotRobot bot = messageAction.getBot();
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
@@ -266,7 +266,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();
 
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
@@ -295,7 +295,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handlePid(BotMessageAction messageAction) {
         BotRobot bot = messageAction.getBot();
-        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
+        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
@@ -318,10 +318,10 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handlePixiv(BotMessageAction messageAction) throws UnsupportedEncodingException {
-        String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
-        String user = messageAction.getParam("u");
-        String source = messageAction.getParamOrDefault("source", "pixiv");
-        String num = messageAction.getParamOrDefault("num", "1");
+        String searchKey = messageAction.getValueOrDefault(messageAction.getBody("tag"));
+        String user = messageAction.getBody("u");
+        String source = messageAction.getBodyOrDefault("source", "pixiv");
+        String num = messageAction.getBodyOrDefault("num", "1");
         String r18 = "safe";
 
         return pixivService.handlePixiv(messageAction, source, searchKey, user, r18, num);

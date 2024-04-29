@@ -31,15 +31,15 @@ public class PixivR18Handle extends ExceptionRespMessageHandle {
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) throws UnsupportedEncodingException, InterruptedException {
 //        BotSender botSender = messageAction.getBotSender();
-//        String pro = messageAction.getParamOrDefault("pro", "0");
-        String searchKey = messageAction.getValueOrDefault(messageAction.getParam("tag"));
-        String user = messageAction.getParam("u");
-        String source = messageAction.getParamOrDefault("source", "pixiv");
-        String num = messageAction.getParamOrDefault("num", "1");
+//        String pro = messageAction.getBodyOrDefault("pro", "0");
+        String searchKey = messageAction.getValueOrDefault(messageAction.getBody("tag"));
+        String user = messageAction.getBody("u");
+        String source = messageAction.getBodyOrDefault("source", "pixiv");
+        String num = messageAction.getBodyOrDefault("num", "1");
 //        String sendMessageId = messageAction.getMessageId();
 //        BotMessage botMessage = messageAction.getBotMessage();
         String titleKey = messageAction.getKeyWithoutPrefix();
-        String r18 = keyMap.getOrDefault(titleKey, messageAction.getParamOrDefault("r18", "2"));
+        String r18 = keyMap.getOrDefault(titleKey, messageAction.getBodyOrDefault("r18", "2"));
 
         return pixivService.handlePixiv(messageAction, source, searchKey, user, r18, num);
     }

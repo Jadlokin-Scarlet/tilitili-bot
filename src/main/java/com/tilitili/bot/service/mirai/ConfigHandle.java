@@ -9,13 +9,13 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -46,73 +46,74 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
     public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();
-        Map<String, String> paramMap = messageAction.getParamMap();
+        List<Pair<String, String>> paramList = messageAction.getParamList();
 
         if (messageAction.getValue().contains(" ")) {
             String[] valueList = messageAction.getValue().split(" ");
-            paramMap.put(valueList[0], valueList[1]);
+            paramList.add(Pair.of(valueList[0], valueList[1]));
         } else {
-            paramMap.put(messageAction.getValue(), null);
+            paramList.add(Pair.of(messageAction.getValue(), null));
         }
 
         List<String> respList = new ArrayList<>();
 
-        try {
-            String autoSellFish = paramMap.get(autoSellFishKey);
-            if (autoSellFish != null) {
-                Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
-                if ("yes".equals(autoSellFish)) {
-                    Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellRepeatFishKey);
-                    respList.add("之后钓到的鱼将会自动回收喵。");
-                } else {
-                    respList.add(autoSellFishKey + "关闭喵。");
+        for (Pair<String, String> param : paramList) {
+            try {
+                String key = param.getKey();
+                switch (key) {
+                    case autoSellFishKey: {
+                        String autoSellFish = param.getValue();
+                        if (autoSellFish != null) {
+                            Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
+                            if ("yes".equals(autoSellFish)) {
+                                Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellRepeatFishKey);
+                                respList.add("之后钓到的鱼将会自动回收喵。");
+                            } else {
+                                respList.add(autoSellFishKey + "关闭喵。");
+                            }
+                            botConfigManager.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
+                        }
+                        break;
+                    }
+                    case autoSellRepeatFishKey: {
+                        String autoSellRepeatFish = param.getValue();
+                        if (autoSellRepeatFish != null) {
+                            Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
+                            if ("yes".equals(autoSellRepeatFish)) {
+                                Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellFishKey);
+                                respList.add("之后钓到的重复的鱼将会自动回收喵。");
+                            } else {
+                                respList.add(autoSellRepeatFishKey + "关闭喵。");
+                            }
+                            botConfigManager.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
+                        }
+                        break;
+                    }
+                    case favoriteUserIdKey: {
+                        List<BotUserDTO> atList = messageAction.getAtList();
+                        Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
+                        String newValue = atList.isEmpty()? null: String.valueOf(atList.get(0).getId());
+                        int result = botConfigManager.addOrUpdateUserConfig(userId, favoriteUserIdKey, newValue);
+                        if (result == 1) {
+                            respList.add("设置老婆QQ成功喵。");
+                        } else if (result == -1) {
+                            respList.add("已移除老婆QQ喵。");
+                        }
+                        break;
+                    }
+                    case aiSystemKey: {
+                        String aiSystem = param.getValue();
+                        if (aiSystem != null) {
+                            botConfigManager.addOrUpdateUserConfig(userId, aiSystemKey, aiSystem);
+                            respList.add("设置ai语境成功喵。");
+                        }
+                        break;
+                    }
+                    default: throw new AssertException(key + "是什么？");
                 }
-                botConfigManager.addOrUpdateUserConfig(userId, autoSellFishKey, autoSellFish);
+            } catch (AssertException e) {
+                respList.add(e.getMessage());
             }
-        } catch (AssertException e) {
-            respList.add(e.getMessage());
-        }
-
-        try {
-            String autoSellRepeatFish = paramMap.get(autoSellRepeatFishKey);
-            if (autoSellRepeatFish != null) {
-                Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
-                if ("yes".equals(autoSellRepeatFish)) {
-                    Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellFishKey);
-                    respList.add("之后钓到的重复的鱼将会自动回收喵。");
-                } else {
-                    respList.add(autoSellRepeatFishKey + "关闭喵。");
-                }
-                botConfigManager.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, autoSellRepeatFish);
-            }
-        } catch (AssertException e) {
-            respList.add(e.getMessage());
-        }
-
-        try {
-            if (paramMap.containsKey(favoriteUserIdKey)) {
-                List<BotUserDTO> atList = messageAction.getAtList();
-                Asserts.isTrue(atList.size() < 2, "一次配置只能@一个人哦");
-                String newValue = atList.isEmpty()? null: String.valueOf(atList.get(0).getId());
-                int result = botConfigManager.addOrUpdateUserConfig(userId, favoriteUserIdKey, newValue);
-                if (result == 1) {
-                    respList.add("设置老婆QQ成功喵。");
-                } else if (result == -1) {
-                    respList.add("已移除老婆QQ喵。");
-                }
-            }
-        } catch (AssertException e) {
-            respList.add(e.getMessage());
-        }
-
-        try {
-            String aiSystem = paramMap.get(aiSystemKey);
-            if (aiSystem != null) {
-                botConfigManager.addOrUpdateUserConfig(userId, aiSystemKey, aiSystem);
-                respList.add("设置ai语境成功喵。");
-            }
-        } catch (AssertException e) {
-            respList.add(e.getMessage());
         }
 
         if (!respList.isEmpty()) {

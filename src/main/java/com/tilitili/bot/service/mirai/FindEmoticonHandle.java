@@ -22,7 +22,7 @@ public class FindEmoticonHandle extends ExceptionRespMessageHandle {
 
 	@Override
     public BotMessage handleMessage(BotMessageAction messageAction) {
-//        String tag = messageAction.getParamOrDefault("tag", messageAction.getValue());
+//        String tag = messageAction.getBodyOrDefault("tag", messageAction.getValue());
 //        Asserts.notBlank(tag, "格式错啦(tag)");
 //
 //        BotMessage botMessage = messageAction.getBotMessage();

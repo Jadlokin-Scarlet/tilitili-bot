@@ -41,8 +41,8 @@ public class RecallHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
 //        Long qq = messageAction.getBotMessage().getQq();
-//        String pid = messageAction.getParamOrDefault("pid", messageAction.getValue());
-        String all = messageAction.getParamOrDefault("all", messageAction.getValue());
+//        String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
+        String all = messageAction.getBodyOrDefault("all", messageAction.getValue());
         String quoteMessageId = messageAction.getQuoteMessageId();
         boolean recallAll = Objects.equals(all, "1");
 

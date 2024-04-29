@@ -43,8 +43,8 @@ public class TranslateHandle extends ExceptionRespMessageHandle {
             enText = quoteMessage.getBotMessageChainList().stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_PLAIN)).map(BotMessageChain::getText).collect(Collectors.joining(""));
         }
         List<String> imageList = botMessageService.getImageListOrQuoteImage(messageAction);
-        String from = messageAction.getParam("from");
-        String to = messageAction.getParam("to");
+        String from = messageAction.getBody("from");
+        String to = messageAction.getBody("to");
 
         String url = imageList.isEmpty()? "": imageList.get(0);
         String bodyNotNull = enText == null? "": enText;

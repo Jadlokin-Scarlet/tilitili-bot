@@ -3,12 +3,15 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.BotKey;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotTaskDTO;
+import com.tilitili.common.entity.query.BotKeyQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotRoleManager;
+import com.tilitili.common.mapper.mysql.BotKeyMapper;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
 import com.tilitili.common.utils.Asserts;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class HelpHandle extends ExceptionRespMessageHandle {
@@ -25,12 +29,14 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     private final Map<String, BaseMessageHandle> messageHandleMap;
     private final BotSenderTaskMappingMapper botSenderTaskMappingMapper;
     private final BotRoleManager botRoleManager;
+    private final BotKeyMapper botKeyMapper;
 
-    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRoleManager botRoleManager) {
+    public HelpHandle(BotTaskMapper botTaskMapper, Map<String, BaseMessageHandle> messageHandleMap, BotSenderTaskMappingMapper botSenderTaskMappingMapper, BotRoleManager botRoleManager, BotKeyMapper botKeyMapper) {
         this.botTaskMapper = botTaskMapper;
         this.messageHandleMap = messageHandleMap;
         this.botSenderTaskMappingMapper = botSenderTaskMappingMapper;
         this.botRoleManager = botRoleManager;
+        this.botKeyMapper = botKeyMapper;
     }
 
     @Override
@@ -53,8 +59,16 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         List<Long> taskIdList = new ArrayList<>();
         for (String taskName : taskNameList.split("，")) {
             BotTask task = botTaskMapper.getBotTaskByNick(taskName);
-            Asserts.notNull(task, "%s是什么", taskName);
-            taskIdList.add(task.getId());
+            if (task != null) {
+                taskIdList.add(task.getId());
+            } else {
+                List<BotKey> botKeyList = botKeyMapper.getBotKeyByCondition(new BotKeyQuery().setKey(taskName));
+                Asserts.checkEquals(botKeyList.size(), 1, "%s是什么", taskName);
+                for (BotKey botKey : botKeyList) {
+                    task = botTaskMapper.getBotTaskById(botKey.getTaskId());
+                    taskIdList.add(task.getId());
+                }
+            }
         }
 
         for (Long taskId : taskIdList) {
@@ -77,8 +91,18 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         List<Long> taskIdList = new ArrayList<>();
         for (String taskName : taskNameList.split("，")) {
             BotTask task = botTaskMapper.getBotTaskByNick(taskName);
-            Asserts.notNull(task, "%s是什么", taskName);
-            taskIdList.add(task.getId());
+            if (task != null) {
+                Asserts.checkEquals(task.getStatus(), 0, "%s暂不可用");
+                taskIdList.add(task.getId());
+            } else {
+                List<BotKey> botKeyList = botKeyMapper.getBotKeyByCondition(new BotKeyQuery().setKey(taskName));
+                Asserts.checkEquals(botKeyList.size(), 1, "%s是什么", taskName);
+                for (BotKey botKey : botKeyList) {
+                    task = botTaskMapper.getBotTaskById(botKey.getTaskId());
+                    Asserts.checkEquals(task.getStatus(), 0, "%s暂不可用");
+                    taskIdList.add(task.getId());
+                }
+            }
         }
 
         for (Long taskId : taskIdList) {
@@ -91,7 +115,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handelHelp(BotMessageAction messageAction) {
-        String paramListStr = messageAction.getValueOrDefault("").trim();//.replaceAll("\\s+", " ")
+        String paramListStr = messageAction.getValueOrDefault("");//.replaceAll("\\s+", " ")
         ;
 //        String sendType = messageAction.getBotMessage().getSendType();
 //        String guildPrefix = sendType.equals(SendTypeEnum.Guild_Message.sendType)? ".": "";
@@ -101,6 +125,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
         if (botTaskDTOList.isEmpty()) {
             return null;
         }
+        List<Long> taskIdList = botTaskDTOList.stream().map(BotTaskDTO::getId).collect(Collectors.toList());
 
         if (StringUtils.isBlank(paramListStr)) {
             StringBuilder reply = new StringBuilder("咱可以帮你做这些事！查看详情发送（帮助 [指令]）\n");
@@ -109,15 +134,24 @@ public class HelpHandle extends ExceptionRespMessageHandle {
                 String key = botTask.getKeyListStr() == null ? "" : botTask.getKeyListStr();
                 reply.append(String.format("%s. %s: %s\n", i + 1, botTask.getNick(), key));
             }
-            if (reply.charAt(reply.length() - 1) == '\n') {
+//            if (reply.charAt(reply.length() - 1) == '\n') {
                 reply.deleteCharAt(reply.length() - 1);
-            }
+//            }
             return BotMessage.simpleTextMessage(reply.toString());
         } else if (! paramListStr.contains(" ")) {
             BotTask botTask = getBotTaskByTaskName(botSender, paramListStr);
+            Asserts.isTrue(taskIdList.contains(botTask.getId()), "%s是啥", paramListStr);
             BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
-            String reply = String.format("[%s]的作用是[%s]。", paramListStr, messageHandle.getHelpMessage(botTask));
-            return BotMessage.simpleTextMessage(reply);
+            StringBuilder reply = new StringBuilder(String.format("[%s]的作用是[%s]。\n", paramListStr, messageHandle.getHelpMessage(botTask)));
+
+            List<BotKey> botKeyList = botKeyMapper.getBotKeyByCondition(new BotKeyQuery().setTaskId(botTask.getId()));
+            for (int i = 0; i < botKeyList.size(); i++) {
+                BotKey botKey = botKeyList.get(i);
+                String desc = botKey.getDescription() == null ? "暂无简介" : botKey.getDescription();
+                reply.append(String.format("%s. %s: %s\n", i + 1, botKey.getKey(), desc));
+            }
+            reply.deleteCharAt(reply.length() - 1);
+            return BotMessage.simpleTextMessage(reply.toString());
         } else {
             int paramIndex = paramListStr.indexOf(" ");
             String taskName = paramListStr.substring(0, paramIndex).trim();
@@ -125,7 +159,8 @@ public class HelpHandle extends ExceptionRespMessageHandle {
 
             BotTask botTask = getBotTaskByTaskName(botSender, taskName);
             BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
-            String reply = String.format("[%s]的作用是[%s]。", paramListStr, messageHandle.getHelpMessage(botTask, taskKey));
+            String help = messageHandle.getHelpMessage(botTask, taskKey);
+            String reply = String.format("[%s]的作用是[%s]。", paramListStr, help == null? "暂无简介": help);
             return BotMessage.simpleTextMessage(reply);
         }
     }

@@ -19,8 +19,8 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String name = messageAction.getParam("项目");
-		String branches = messageAction.getParam("分支");
+		String name = messageAction.getBody("项目");
+		String branches = messageAction.getBody("分支");
 		String value = messageAction.getValue();
 		if (name == null && value != null) {
 			if (value.contains(" ")) {

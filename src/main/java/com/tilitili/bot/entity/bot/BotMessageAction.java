@@ -10,9 +10,9 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.utils.CollectionUtils;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,7 @@ public class BotMessageAction extends BaseDTO {
     private final List<BotUserDTO> atList;
     private final String body;
     private final String messageId;
-    private final Map<String, String> paramMap;
+    private final List<Pair<String, String>> paramList;
     private final Map<String, String> bodyMap;
     private String text;
     private String head;
@@ -47,7 +47,7 @@ public class BotMessageAction extends BaseDTO {
         this.botMessage = botMessage;
         this.bot = bot;
         this.session = session;
-        this.paramMap = new HashMap<>();
+        this.paramList = new ArrayList<>();
         this.bodyMap = new HashMap<>();
         this.messageId = botMessage.getMessageId();
 
@@ -87,16 +87,17 @@ public class BotMessageAction extends BaseDTO {
             }
         }
 
-        for (String line : lineList) {
-            Matcher splitMatcher = Pattern.compile("[=＝]").matcher(line);
-            if (splitMatcher.find()) {
-                int splitIndex = splitMatcher.end();
-                String key = line.substring(0, splitIndex - 1).trim();
-                String value = line.substring(splitIndex).trim();
-                paramMap.put(key, value);
-            }
-        }
+//        for (String line : lineList) {
+//            Matcher splitMatcher = Pattern.compile("[=＝]").matcher(line);
+//            if (splitMatcher.find()) {
+//                int splitIndex = splitMatcher.end();
+//                String key = line.substring(0, splitIndex - 1).trim();
+//                String value = line.substring(splitIndex).trim();
+//                paramList.put(key, value);
+//            }
+//        }
 
+        // 允许参数值存在换行
         if (body != null) {
             String[] bodySplit = body.split("[=＝]");
             String key = bodySplit[0];
@@ -104,10 +105,13 @@ public class BotMessageAction extends BaseDTO {
                 String split = bodySplit[i];
                 if (split.contains("\n")) {
                     int index = split.lastIndexOf("\n");
-                    bodyMap.put(key, split.substring(0, index));
+                    String value = split.substring(0, index);
+                    bodyMap.put(key, value);
+                    paramList.add(Pair.of(key, value));
                     key = split.substring(index + 1);
                 } else {
                     bodyMap.put(key, split);
+                    paramList.add(Pair.of(key, split));
                 }
             }
         }
@@ -143,16 +147,8 @@ public class BotMessageAction extends BaseDTO {
     }
 
 
-    public Map<String, String> getParamMap() {
-        return paramMap;
-    }
-
-    public String getParam(String paramKey) {
-        return paramMap.get(paramKey);
-    }
-
-    public String getParamOrDefault(String paramKey, String defaultValue) {
-        return paramMap.getOrDefault(paramKey, defaultValue);
+    public List<Pair<String, String>> getParamList() {
+        return paramList;
     }
 
     public String getBody(String bodyKey) {
