@@ -78,7 +78,7 @@ public class GomokuHandle extends ExceptionRespMessageHandle {
             winner = gomoku.getPlayerA();
         }
         session.remove("GomokuHandle.gomoku");
-        return BotMessage.simpleTextMessage(String.format("获胜者是，%s！", winner.getName()));
+        return BotMessage.simpleTextMessage(String.format("获胜者是，%s！", winner == null? "???": winner.getName()));
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
