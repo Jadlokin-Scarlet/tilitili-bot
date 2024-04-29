@@ -27,15 +27,8 @@ public class BotUserService {
 	}
 
 	public BaseModel<PageModel<BotUserDTO>> listBotUser(BotUserQuery query) {
-		int total;
-		List<BotUserDTO> userDTOList;
-		if (query.getAdminUserId() != null || query.getBotId() != null) {
-			total = botUserManager.countBotUserByAdmin(query);
-			userDTOList = botUserManager.getBotUserByAdmin(query);
-		} else {
-			total = botUserManager.countBotUserByCondition(query);
-			userDTOList = botUserManager.getBotUserByCondition(query);
-		}
+		int total = botUserManager.countBotUserByAdmin(query);
+		List<BotUserDTO> userDTOList = botUserManager.getBotUserByAdmin(query);
 		List<BotUserDTO> userList = userDTOList.stream().distinct().collect(Collectors.toList());
 		return PageModel.of(total, query.getPageSize(), query.getCurrent(), userList);
 	}
