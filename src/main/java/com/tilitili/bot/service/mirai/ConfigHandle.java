@@ -66,7 +66,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
                         if (autoSellFish != null) {
                             Asserts.isTrue(booleanTextList.contains(autoSellFish), "只能填(%s)哦", String.join(",", booleanTextList));
                             if ("yes".equals(autoSellFish)) {
-                                Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellRepeatFishKey);
+                                botConfigManager.addOrUpdateUserConfig(userId, autoSellRepeatFishKey, "no");
                                 respList.add("之后钓到的鱼将会自动回收喵。");
                             } else {
                                 respList.add(autoSellFishKey + "关闭喵。");
@@ -80,7 +80,7 @@ public class ConfigHandle extends ExceptionRespMessageHandle {
                         if (autoSellRepeatFish != null) {
                             Asserts.isTrue(booleanTextList.contains(autoSellRepeatFish), "只能填(%s)哦", String.join(",", booleanTextList));
                             if ("yes".equals(autoSellRepeatFish)) {
-                                Asserts.isTrue(botConfigManager.getBooleanUserConfigCache(userId, autoSellRepeatFishKey), "你已经设置了(%s)", autoSellFishKey);
+                                botConfigManager.addOrUpdateUserConfig(userId, autoSellFishKey, "no");
                                 respList.add("之后钓到的重复的鱼将会自动回收喵。");
                             } else {
                                 respList.add(autoSellRepeatFishKey + "关闭喵。");
