@@ -8,12 +8,12 @@ import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.mcping.McPingMod;
 import com.tilitili.common.entity.view.bot.mcping.McPingResponse;
-import com.tilitili.common.entity.view.request.MinecraftPlayer;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -122,8 +123,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 			BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
-			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot);
-			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
+			List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
+			String playerListStr = userList.stream().map(BotUserDTO::getEnName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
 
@@ -134,8 +135,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			if (targetBotSender != null) {
 				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
-				List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot);
-				String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
+				List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
+				String playerListStr = userList.stream().map(BotUserDTO::getEnName).collect(Collectors.joining("，"));
 				return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 			}
 		}
@@ -145,6 +146,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handleMcp(BotMessageAction messageAction) throws IOException {
 		BotSessionService.MiraiSession session = messageAction.getSession();
+		Long senderId = messageAction.getBotSender().getId();
 		String key = messageAction.getKeyWithoutPrefix();
 		Asserts.notBlank(key, "key是啥");
 		if (key.equals("mcpd")) {
@@ -154,15 +156,34 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("记住啦！下次mcp不用加地址了。");
 		}
 		String url = messageAction.getValueOrDefault(session.get(hostKey));
+		if (StringUtils.isBlank(url)) {
+			// 先查绑定的转发消息渠道
+			List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
+			if (!forwardConfigList.isEmpty()) {
+				BotForwardConfig forwardConfig = forwardConfigList.get(0);
+				Long targetSenderId = forwardConfig.getTargetSenderId();
+				BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
+				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
+				url = minecraftBot.getHost();
+			}
+
+			// 再查mc bind
+			Long bindSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
+			if (bindSenderId != null) {
+				BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(bindSenderId);
+				if (targetBotSender != null) {
+					BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
+					url = minecraftBot.getHost();
+				}
+			}
+		}
 		Asserts.notBlank(url, "没有地址");
-		String url2 = url.contains(":")? url: url + ":25565";
-		if (!url2.contains(":")) url2 += ":25565";
-//		Asserts.isTrue(url2.contains(":"), "地址格式不对");
-		String host = url2.substring(0, url2.indexOf(":"));
-		String port = url2.substring(url2.indexOf(":") + 1);
+		URL urlFormat = new URL(url);
+		String host = urlFormat.getHost();
+		int port = urlFormat.getPort() != -1 ? urlFormat.getPort() : 25565;
 		McPingResponse response;
 		try {
-			response = mcPingManager.mcPing(new InetSocketAddress(host, Integer.parseInt(port)));
+			response = mcPingManager.mcPing(new InetSocketAddress(host, port));
 		} catch (SocketTimeoutException | ConnectException e) {
 			throw new AssertException("网络异常", e);
 		}
