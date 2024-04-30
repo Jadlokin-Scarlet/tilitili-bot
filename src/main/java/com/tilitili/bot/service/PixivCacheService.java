@@ -225,10 +225,6 @@ public class PixivCacheService {
 		return sendMessageManager.handleLongTextMessage(bot, botSender, messageChainList);
 	}
 
-//	public void saveImageFromPixiv(String pid) {
-//		saveImageFromPixiv(pid, pid, Collections.emptyList());
-//	}
-
 	@Retryable(value= {AssertException.class},maxAttempts = 2)
 	public FindImageResult findImage(String url) {
 		Asserts.notBlank(url, "找不到图片");
