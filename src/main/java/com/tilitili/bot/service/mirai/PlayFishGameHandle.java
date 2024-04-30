@@ -233,11 +233,11 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			BotItem botItem = botItemMapper.getBotItemById(itemId);
 			resultList.add(BotMessageChain.ofPlain(String.format("钓到一个%s，%s", botItem.getName(), botItem.getDescription())));
 
-			boolean hasItem = botUserItemMappingManager.hasItem(botUser.getId(), botItem.getId());
+			boolean hasItem = botUserItemMappingManager.hasItem(userId, botItem.getId());
 			// 自动回收
-			boolean autoSellFish = "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.autoSellFishKey));
+			boolean autoSellFish = "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(userId, ConfigHandle.autoSellFishKey));
 			// 回收重复
-			boolean autoSellRepeatFish = hasItem && "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.autoSellRepeatFishKey));
+			boolean autoSellRepeatFish = hasItem && "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(userId, ConfigHandle.autoSellRepeatFishKey));
 			// 只回收不大于2000的
 			boolean notPrecious = botItem.getSellPrice() <= 2000;
 			if ((autoSellFish || autoSellRepeatFish) && notPrecious) {
@@ -308,6 +308,13 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add(BotMessageChain.ofPlain("为您自动兑换鱼饵10份(-10)，谢谢惠顾。\n"));
 		}
 
+		FishPlayer oldFishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		if (oldFishPlayer != null) {
+			Asserts.checkEquals(oldFishPlayer.getStatus(), FishPlayerConstant.STATUS_FAIL, "你已经在钓啦！");
+			BotMessage endMessage = this.handleEnd(messageAction);
+			resultList.add(BotMessageChain.ofPlain("自动收竿："));
+			resultList.addAll(endMessage.getBotMessageChainList());
+		}
 		Asserts.checkNull(fishPlayerMapper.getValidFishPlayerByUserId(userId), "你已经在钓啦！");
 		BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
 		Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
