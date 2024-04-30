@@ -235,8 +235,8 @@ public class PixivCacheService {
 		Asserts.isFalse(imageList.isEmpty(), "没找到🤕");
 		Element image = imageList.get(0);
 
-		String imageUrl = image.select(".resulttableimage img").attr("src");
 		String rate = image.select(".resultsimilarityinfo").text();
+		String imageUrl = image.select(".resulttableimage img").attr("src");
 		Elements linkList = image.select(".resultcontentcolumn a");
 		Asserts.notBlank(rate, "没找到😑");
 		Asserts.notBlank(imageUrl, "没找到😑");
