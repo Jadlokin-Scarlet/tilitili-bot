@@ -144,7 +144,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
             StringBuilder reply = new StringBuilder(String.format("[%s]的作用是[%s]。\n", paramListStr, messageHandle.getHelpMessage(botTask)));
 
-            List<BotKey> botKeyList = botKeyMapper.getBotKeyByCondition(new BotKeyQuery().setTaskId(botTask.getId()));
+            List<BotKey> botKeyList = botKeyMapper.getBotKeyByCondition(new BotKeyQuery().setTaskId(botTask.getId()).setStatus(0).setHidden(0));
             for (int i = 0; i < botKeyList.size(); i++) {
                 BotKey botKey = botKeyList.get(i);
                 String desc = botKey.getDescription() == null ? "暂无简介" : botKey.getDescription();
