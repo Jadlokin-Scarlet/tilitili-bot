@@ -113,8 +113,11 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	private BotMessage handelMcList(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
+
+		// 先查绑定的转发消息渠道
 		List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
-		for (BotForwardConfig forwardConfig : forwardConfigList) {
+		if (!forwardConfigList.isEmpty()) {
+			BotForwardConfig forwardConfig = forwardConfigList.get(0);
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
 			BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
@@ -123,11 +126,20 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
 			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 		}
-//		if (senderId == 3758L) {
-//			List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(MinecraftServerEnum.RANK_CHANNEL_MINECRAFT);
-//			String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
-//			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
-//		}
+
+		// 再查mc bind
+		Long bindSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
+		if (bindSenderId != null) {
+			BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(bindSenderId);
+			if (targetBotSender != null) {
+				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
+
+				List<MinecraftPlayer> playerList = minecraftManager.listOnlinePlayer(minecraftBot);
+				String playerListStr = playerList.stream().map(MinecraftPlayer::getDisplayName).map(minecraftManager::trimMcName).collect(Collectors.joining("，"));
+				return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
+			}
+		}
+
 		return null;
 	}
 
