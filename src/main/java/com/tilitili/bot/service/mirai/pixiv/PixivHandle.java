@@ -319,7 +319,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handlePixiv(BotMessageAction messageAction) throws UnsupportedEncodingException {
         String searchKey = messageAction.getValueOrDefault(messageAction.getBody("tag"));
-        String user = messageAction.getBodyOrDefault("u");
+        String user = messageAction.getBody("u");
         String source = messageAction.getBodyOrDefault("source", "pixiv");
         String num = messageAction.getBodyOrDefault("num", "1");
         String r18 = "safe";

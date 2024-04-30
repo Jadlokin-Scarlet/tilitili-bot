@@ -166,6 +166,7 @@ public class PixivCacheService {
 		boolean canSS = !"safe".equals(r18);
 
 		String userId = pixivManager.getUserIdByNameProxy(userName);
+		Asserts.notNull(userId, "没有查询到用户");
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		List<BotPixivSendRecord> recordList = botPixivSendRecordMapper.getPixivSendRecordByPidList(userPidList, senderId, botUserId);
 		List<String> recordPidList = recordList.stream().map(BotPixivSendRecord::getPid).collect(Collectors.toList());
