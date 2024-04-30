@@ -33,6 +33,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -205,9 +206,9 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
 			for (String url : urlList) {
-				String uploadImageResult = this.downloadPixivImageAndUploadToOSS(url, pageCount);
+				File localFile = this.downloadPixivImageAndUploadToLocal(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofImage(uploadImageResult));
+				messageChainList.add(BotMessageChain.ofImage(localFile));
 			}
 		} else {
 //			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
@@ -279,6 +280,26 @@ public class PixivCacheService {
 			String shortUrl = shortUrlServiceInterface.generateShortUrl(ossUrl).getUrl();
 			Asserts.notNull(shortUrl, "啊嘞，上传失败了。");
 			return shortUrl;
+		} catch (IOException e) {
+			throw new AssertException("啊嘞，不对劲", e);
+		}
+	}
+	// 用这个就不能本地跑，要bot和bot在一个服务器上
+	private File downloadPixivImageAndUploadToLocal(String url, Integer pageCount) {
+		log.info("downloadPixivImageAndUploadToLocal pageCount={} url={}", pageCount, url);
+//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+//		if (pageCount > 1) {
+//			int page = Integer.parseInt(list.get(2)) + 1;
+//			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
+//		} else {
+//			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
+//		}
+		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
+		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
+		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
+			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
+			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
+			return file.getFile();
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
 		}
