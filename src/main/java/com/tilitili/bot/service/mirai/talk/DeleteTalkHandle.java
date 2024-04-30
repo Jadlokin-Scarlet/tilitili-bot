@@ -10,11 +10,10 @@ import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
 import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+@Deprecated
 public class DeleteTalkHandle extends ExceptionRespMessageHandle {
 	private final BotTalkMapper botTalkMapper;
 	private final BotTalkManager botTalkManager;

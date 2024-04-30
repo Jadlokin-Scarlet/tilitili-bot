@@ -14,10 +14,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotTalkManager;
 import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.mapper.mysql.BotTalkMapper;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.QQUtil;
-import com.tilitili.common.utils.StreamUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +29,8 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	private final BotTalkMapper botTalkMapper;
 	private final BotTalkManager botTalkManager;
 	private static final String reqKey = "TalkHandle.reqKey";
-	private static final String statusKey = "TalkHandle.statusKey";
+	private static final String addStatusKey = "TalkHandle.addStatusKey";
+	private static final String delStatusKey = "TalkHandle.delStatusKey";
 	private static final Gson gson = new Gson();
 
 	@Autowired
@@ -49,7 +47,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		Long userId = botUser.getId();
 
 		String senderReqKey = reqKey + userId;
-		String senderStatusKey = statusKey + userId;
+		String senderStatusKey = addStatusKey + userId;
 
 		session.remove(senderStatusKey);
 		session.remove(senderReqKey);
@@ -59,6 +57,44 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) {
+		switch (messageAction.getKeyWithoutPrefix()) {
+			case "对话": return handleAdd(messageAction);
+			case "移除对话": return handleDelete(messageAction);
+			default: throw new AssertException();
+		}
+	}
+
+	private BotMessage handleDelete(BotMessageAction messageAction) {
+		BotSessionService.MiraiSession session = messageAction.getSession();
+		BotMessage botMessage = messageAction.getBotMessage();
+		BotUserDTO botUser = messageAction.getBotUser();
+		String value = messageAction.getValue();
+		String req = messageAction.getBodyOrDefault("提问", value);
+		Long userId = botUser.getId();
+
+		String senderStatusKey = delStatusKey + userId;
+
+		List<String> imageList = messageAction.getImageList();
+		BotTalk botTalk = null;
+		if (session.containsKey(senderStatusKey)) {
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(TalkHandle.convertMessageToString(botMessage), botMessage);
+		} else if (StringUtils.isNotBlank(req)) {
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(Gsons.toJson(BotMessage.simpleTextMessage(req)), botMessage);
+		} else if (CollectionUtils.isNotEmpty(imageList)) {
+			botTalk = botTalkManager.getJsonTalkOrOtherTalk(Gsons.toJson(BotMessage.simpleImageMessage(QQUtil.getImageUrl(imageList.get(0)))), botMessage);
+		} else if (! session.containsKey(senderStatusKey)) {
+			session.put(senderStatusKey, "1");
+			return BotMessage.simpleTextMessage("请告诉我关键词吧");
+		}
+//		List<BotTalk> botTalkList = botTalkManager.getBotTalkByBotMessage(req, botMessage);
+		session.remove(senderStatusKey);
+		Asserts.notNull(botTalk, "没找到。");
+		botTalkMapper.updateBotTalkSelective(new BotTalk().setId(botTalk.getId()).setStatus(-1));
+		return BotMessage.simpleTextMessage("移除了。");
+	}
+
+
+	private BotMessage handleAdd(BotMessageAction messageAction) {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotMessage botMessage = messageAction.getBotMessage();
@@ -73,7 +109,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		Long userId = botUser.getId();
 
 		String senderReqKey = reqKey + userId;
-		String senderStatusKey = statusKey + userId;
+		String senderStatusKey = addStatusKey + userId;
 
 		String value = messageAction.getValue() == null? "": messageAction.getValue();
 		String reqStr = messageAction.getBodyOrDefault("提问", value.contains(" ")? value.substring(0, value.indexOf(" ")).trim(): value);
@@ -157,9 +193,11 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = botMessageAction.getBotUser();
 		Long userId = botUser.getId();
 		BotSessionService.MiraiSession session = botMessageAction.getSession();
-		String senderStatusKey = statusKey + userId;
-		if (session.containsKey(senderStatusKey)) {
+		if (session.containsKey(addStatusKey + userId)) {
 			return "对话";
+		}
+		if (session.containsKey(delStatusKey + userId)) {
+			return "移除对话";
 		}
 		return null;
 	}
