@@ -32,10 +32,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class McPingHandle extends ExceptionRespMessageHandle {
-	private final String hostKey = "hostKey";
+	private static final String hostKey = "hostKey";
 
 	private final McPingManager mcPingManager;
-	private final MinecraftManager minecraftManager;
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotRobotCacheManager botRobotCacheManager;
@@ -44,9 +43,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final BotRoleManager botRoleManager;
 
 	@Autowired
-	public McPingHandle(McPingManager mcPingManager, MinecraftManager minecraftManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager, BotRoleManager botRoleManager) {
+	public McPingHandle(McPingManager mcPingManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager, BotRoleManager botRoleManager) {
 		this.mcPingManager = mcPingManager;
-		this.minecraftManager = minecraftManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
@@ -84,6 +82,12 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private BotMessage handleWhiteList(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
 		Long mcSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
+		if (mcSenderId == null) {
+			List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
+			if (!forwardConfigList.isEmpty()) {
+				mcSenderId = forwardConfigList.get(0).getTargetSenderId();
+			}
+		}
 		Asserts.notNull(mcSenderId, "未绑定服务器");
 		BotSender mcBotSender = botSenderCacheManager.getValidBotSenderById(mcSenderId);
 		BotRobot mcBot = botRobotCacheManager.getValidBotRobotById(mcBotSender.getSendBot());
@@ -121,11 +125,13 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			BotForwardConfig forwardConfig = forwardConfigList.get(0);
 			Long targetSenderId = forwardConfig.getTargetSenderId();
 			BotSender targetBotSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
-			BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
+			if (targetBotSender != null) {
+				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
-			List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
-			String playerListStr = userList.stream().map(BotUserDTO::getEnName).collect(Collectors.joining("，"));
-			return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
+				List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
+				String playerListStr = userList.stream().map(BotUserDTO::getEnName).collect(Collectors.joining("，"));
+				return BotMessage.simpleTextMessage("当前在线玩家：" + playerListStr);
+			}
 		}
 
 		// 再查mc bind
@@ -141,7 +147,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			}
 		}
 
-		return null;
+		return BotMessage.simpleTextMessage("未绑定服务器");
 	}
 
 	private BotMessage handleMcp(BotMessageAction messageAction) throws IOException {
@@ -177,7 +183,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 				}
 			}
 		}
-		Asserts.notBlank(url, "没有地址");
+		Asserts.notBlank(url, "没有地址，请发送（帮助 mcp）查看详情");
 		URL urlFormat = new URL(url);
 		String host = urlFormat.getHost();
 		int port = urlFormat.getPort() != -1 ? urlFormat.getPort() : 25565;
