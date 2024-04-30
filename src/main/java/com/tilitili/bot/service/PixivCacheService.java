@@ -276,8 +276,6 @@ public class PixivCacheService {
 		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
 		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
-			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
 			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
 			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
 			String shortUrl = shortUrlServiceInterface.generateShortUrl(ossUrl).getUrl();
@@ -300,10 +298,7 @@ public class PixivCacheService {
 		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
 		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
-			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			UploadImageResult result = botManager.uploadImage(bot, file.getFile());
-			return result;
+			return botManager.uploadImage(bot, file.getFile());
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
 		}
