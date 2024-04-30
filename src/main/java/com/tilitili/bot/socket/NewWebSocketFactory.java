@@ -25,6 +25,7 @@ public class NewWebSocketFactory {
 	private final BotService botService;
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final ExecutorService executor;
+	private volatile boolean close = false;
 
 	public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
 		this.botManager = botManager;
@@ -40,6 +41,9 @@ public class NewWebSocketFactory {
 	}
 
 	private void upBotBlocking0(Long botId) {
+		if (close) {
+			return;
+		}
 		Asserts.notNull(botId, "参数异常");
 		BotRobot bot = botRobotCacheManager.getBotRobotById(botId);
 		Asserts.notNull(bot, "权限不足");
@@ -83,6 +87,7 @@ public class NewWebSocketFactory {
 	}
 
 	public void close() {
+		this.close = true;
 		for (WebSocket webSocket : webSocketMap.values()) {
 			webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "");
 		}
