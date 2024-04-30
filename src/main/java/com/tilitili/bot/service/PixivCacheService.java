@@ -283,8 +283,8 @@ public class PixivCacheService {
 	}
 	// 用这个就不能本地跑，要bot和bot在一个服务器上
 	private UploadImageResult downloadPixivImageAndUploadToBot(BotRobot bot, String url, Integer pageCount) {
-		log.info("downloadPixivImageAndUploadToBot pageCount={} url={}", pageCount, url);
 //		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+		log.info("downloadPixivImageAndUploadToBot pageCount={} url={}", pageCount, url);
 //		if (pageCount > 1) {
 //			int page = Integer.parseInt(list.get(2)) + 1;
 //			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
