@@ -12,10 +12,12 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
+import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.exception.AssertSeseException;
+import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.LoliconManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.manager.SendMessageManager;
@@ -33,7 +35,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -55,14 +56,16 @@ public class PixivCacheService {
 	@DubboReference
 	private ShortUrlServiceInterface shortUrlServiceInterface;
 	private final PixivLoginUserMapper pixivLoginUserMapper;
+	private final BotManager botManager;
 
 	@Autowired
-	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager, PixivLoginUserMapper pixivLoginUserMapper) {
+	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager, PixivLoginUserMapper pixivLoginUserMapper, BotManager botManager) {
 		this.botPixivSendRecordMapper = botPixivSendRecordMapper;
 		this.loliconManager = loliconManager;
 		this.pixivManager = pixivManager;
 		this.sendMessageManager = sendMessageManager;
 		this.pixivLoginUserMapper = pixivLoginUserMapper;
+		this.botManager = botManager;
 	}
 
 	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException {
@@ -206,9 +209,9 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
 			for (String url : urlList) {
-				File localFile = this.downloadPixivImageAndUploadToLocal(url, pageCount);
+				UploadImageResult result = this.downloadPixivImageAndUploadToBot(bot, url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofImage(localFile));
+				messageChainList.add(BotMessageChain.ofImage(result));
 			}
 		} else {
 //			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
@@ -285,8 +288,8 @@ public class PixivCacheService {
 		}
 	}
 	// 用这个就不能本地跑，要bot和bot在一个服务器上
-	private File downloadPixivImageAndUploadToLocal(String url, Integer pageCount) {
-		log.info("downloadPixivImageAndUploadToLocal pageCount={} url={}", pageCount, url);
+	private UploadImageResult downloadPixivImageAndUploadToBot(BotRobot bot, String url, Integer pageCount) {
+		log.info("downloadPixivImageAndUploadToBot pageCount={} url={}", pageCount, url);
 //		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
 //		if (pageCount > 1) {
 //			int page = Integer.parseInt(list.get(2)) + 1;
@@ -299,7 +302,8 @@ public class PixivCacheService {
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
 			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
 			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			return file.getFile();
+			UploadImageResult result = botManager.uploadImage(bot, file.getFile());
+			return result;
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
 		}
