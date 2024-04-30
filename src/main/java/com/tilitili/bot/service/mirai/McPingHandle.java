@@ -82,12 +82,6 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private BotMessage handleWhiteList(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
 		Long mcSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
-		if (mcSenderId == null) {
-			List<BotForwardConfig> forwardConfigList = botForwardConfigMapper.getBotForwardConfigByCondition(new BotForwardConfigQuery().setSourceSenderId(senderId));
-			if (!forwardConfigList.isEmpty()) {
-				mcSenderId = forwardConfigList.get(0).getTargetSenderId();
-			}
-		}
 		Asserts.notNull(mcSenderId, "未绑定服务器");
 		BotSender mcBotSender = botSenderCacheManager.getValidBotSenderById(mcSenderId);
 		BotRobot mcBot = botRobotCacheManager.getValidBotRobotById(mcBotSender.getSendBot());
