@@ -70,7 +70,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		Asserts.isTrue(botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser()), "权限不足");
 		if (StringUtils.isBlank(bindSenderIdSrt)) {
 			Long bindSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
-			botConfigManager.addOrUpdateSenderConfig(senderId, "mcBind", 0L);
+			botConfigManager.deleteSenderConfig(senderId, "mcBind");
 			return BotMessage.simpleTextMessage("解绑服务器"+bindSenderId);
 		}
 		Asserts.isNumber(bindSenderIdSrt, "格式错啦(服务器id)");
