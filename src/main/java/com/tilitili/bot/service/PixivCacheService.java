@@ -298,7 +298,6 @@ public class PixivCacheService {
 		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
 		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			log.info("上传文件指botId="+bot.getId()+"file-length="+file.getFile().length());
 			return botManager.uploadImage(bot, file.getFile());
 		} catch (IOException e) {
 			throw new AssertException("啊嘞，不对劲", e);
