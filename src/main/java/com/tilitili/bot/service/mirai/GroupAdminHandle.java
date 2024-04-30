@@ -59,7 +59,8 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 		BotAdminStatistics adminStatistics = botAdminStatisticsMapper.getBotAdminStatisticsBySenderIdAndUserId(botSender.getId(), botUser.getId());
 		if (adminStatistics != null) {
-			Asserts.isTrue(adminStatistics.getUpdateTime().before(DateUtils.getCurrentDay()), "今天已经投过票啦，不能反悔哦，明天再来吧。");
+			BotUserDTO targetUser = botUserManager.getValidBotUserByIdWithParent(adminStatistics.getTargetUserId());
+			Asserts.isTrue(adminStatistics.getUpdateTime().before(DateUtils.getCurrentDay()), "今天已经投给%s啦，不能反悔哦，明天再来吧。", targetUser.getName());
 		}
 
 		Asserts.notEmpty(atList, "谁?");
