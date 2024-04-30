@@ -26,7 +26,7 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"self_id\":1701008067,\"user_id\":545459363,\"time\":1714412288,\"message_id\":-2147450162,\"real_id\":-2147450162,\"message_type\":\"group\",\"sender\":{\"user_id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"card\":\"\",\"role\":\"member\"},\"raw_message\":\"投降\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"投降\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":698034152}");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(24L), "{\"s\":0,\"d\":{\"channel_type\":\"GROUP\",\"type\":9,\"target_id\":\"7818625731373538\",\"author_id\":\"1240983673\",\"content\":\"\\u4e0d\\u8272 cirno 1000users\\u5165\\u308a\",\"extra\":{\"type\":9,\"code\":\"\",\"guild_id\":\"7240290365245748\",\"guild_type\":0,\"channel_name\":\"\\u5f00\\u9ed1\\u5566bot\\u6d4b\\u8bd5\",\"author\":{\"id\":\"1240983673\",\"username\":\"Jadlokin_Scarlet\",\"identify_num\":\"0574\",\"online\":true,\"os\":\"Websocket\",\"status\":1,\"avatar\":\"https:\\/\\/img.kookapp.cn\\/avatars\\/2024-02\\/IdlyxmKR5K06j06j.png?x-oss-process=style\\/icon\",\"vip_avatar\":\"https:\\/\\/img.kookapp.cn\\/avatars\\/2024-02\\/IdlyxmKR5K06j06j.png?x-oss-process=style\\/icon\",\"banner\":\"\",\"nickname\":\"Jadlokin_Scarlet\",\"roles\":[],\"is_vip\":false,\"vip_amp\":false,\"bot\":false,\"nameplate\":[],\"decorations_id_map\":{\"join_voice\":10024,\"background\":10208},\"is_sys\":false},\"visible_only\":null,\"mention\":[],\"mention_all\":false,\"mention_roles\":[],\"mention_here\":false,\"nav_channels\":[],\"kmarkdown\":{\"raw_content\":\"\\u4e0d\\u8272 cirno 1000users\\u5165\\u308a\",\"mention_part\":[],\"mention_role_part\":[],\"channel_part\":[],\"spl\":[]},\"emoji\":[],\"last_msg_content\":\"Jadlokin_Scarlet\\uff1a\\u4e0d\\u8272 cirno 1000users\\u5165\\u308a\",\"send_msg_device\":1},\"msg_id\":\"d82016e0-e79a-4356-8dc4-15a454bdc0af\",\"msg_timestamp\":1714489201213,\"nonce\":\"ZVSfMZm5GueA1YLuBhynnNTT\",\"from_type\":1},\"extra\":{\"verifyToken\":\"TDL6pBx66bwXbyfo\",\"encryptKey\":\"\",\"callbackUrl\":\"\"},\"sn\":119}");
 //		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
 //		tester.testHandleMessage(bot, "");
 	}
@@ -34,6 +34,6 @@ public class BotServiceTest {
 	@Test
 	public void testHandle() throws Exception {
 		BaseMessageHandle handle = messageHandleMap.get("playFishGameHandle");
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("抛竿", 181L, 3384L, 2L)));
+		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("抛竿", 181L, 4490L, 2L)));
 	}
 }

@@ -12,7 +12,6 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
-import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
@@ -205,7 +204,7 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
 			for (String url : urlList) {
-				UploadImageResult uploadImageResult = this.downloadPixivImageAndUploadToQQ(url, pageCount);
+				String uploadImageResult = this.downloadPixivImageAndUploadToOSS(url, pageCount);
 				messageChainList.add(BotMessageChain.ofPlain("\n"));
 				messageChainList.add(BotMessageChain.ofImage(uploadImageResult));
 			}
@@ -258,34 +257,6 @@ public class PixivCacheService {
 		String pid = StringUtils.patten1("&illust_id=(\\d+)", link);
 		Asserts.isNumber(pid, "似乎不是Pixiv图片。");
 		return pid;
-	}
-
-
-	private UploadImageResult downloadPixivImageAndUploadToQQ(String url, Integer pageCount) {
-		log.info("downloadPixivImageAndUploadToQQ pageCount={} url={}", pageCount, url);
-//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
-//		if (pageCount > 1) {
-//			int page = Integer.parseInt(list.get(2)) + 1;
-//			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3)));
-//		} else {
-//			return new UploadImageResult().setUrl(String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3)));
-//		}
-//
-		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
-		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
-		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			Asserts.isTrue(file.exists(), "啊嘞，下载失败了。");
-			Asserts.notEquals(file.length(), 0L, "啊嘞，下载失败了。");
-			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
-			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
-			return new UploadImageResult().setUrl(ossUrl);
-//			UploadImageResult uploadImageResult = botManager.uploadImage(file);
-//			Asserts.notNull(uploadImageResult.getImageId(), "啊嘞，上传失败了。");
-//			Asserts.notNull(uploadImageResult.getUrl(), "啊嘞，上传失败了。");
-//			return uploadImageResult;
-		} catch (IOException e) {
-			throw new AssertException("啊嘞，不对劲", e);
-		}
 	}
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
