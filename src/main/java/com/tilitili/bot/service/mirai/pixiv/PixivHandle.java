@@ -5,10 +5,10 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.PixivCacheService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotConfigConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotTask;
-import com.tilitili.common.entity.PixivLoginUser;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -16,9 +16,9 @@ import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoTag;
 import com.tilitili.common.entity.view.bot.pixiv.PixivRecommendIllust;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
-import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.CollectionUtils;
 import com.tilitili.common.utils.RedisCache;
@@ -48,18 +48,18 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     private final BotTaskMapper botTaskMapper;
     private final BotMessageService botMessageService;
     private final PixivCacheManager pixivManager;
-    private final PixivLoginUserMapper pixivLoginUserMapper;
+    private final BotConfigManager botConfigManager;
     private final RedisCache redisCache;
 
     private final Map<String, String> keyModeMap = ImmutableMap.of("推荐色图", "all", "推荐色色", "r18", "推荐不色", "safe", "tjst", "all", "tjss", "r18", "tjbs", "safe");
 
     @Autowired
-    public PixivHandle(PixivCacheService pixivService, BotTaskMapper botTaskMapper, BotMessageService botMessageService, PixivCacheManager pixivManager, PixivLoginUserMapper pixivLoginUserMapper, RedisCache redisCache) {
+    public PixivHandle(PixivCacheService pixivService, BotTaskMapper botTaskMapper, BotMessageService botMessageService, PixivCacheManager pixivManager, BotConfigManager botConfigManager, RedisCache redisCache) {
         this.pixivService = pixivService;
         this.botTaskMapper = botTaskMapper;
         this.botMessageService = botMessageService;
         this.pixivManager = pixivManager;
-        this.pixivLoginUserMapper = pixivLoginUserMapper;
+        this.botConfigManager = botConfigManager;
         this.redisCache = redisCache;
     }
 
@@ -132,13 +132,11 @@ public class PixivHandle extends ExceptionRespMessageHandle {
 
         String pixivImageRedisKey = pixivImageKey + userId;
 
-        PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserByUserId(userId);
+        String cookie = botConfigManager.getStringUserConfigCache(userId, BotConfigConstant.pixivCookieKey);
         if ((isBookmark || isNoBookmark) && !redisCache.exists(pixivImageRedisKey)) {
             log.info("无可收藏的pid");
             return null;
         }
-        Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
-        String cookie = pixivLoginUser.getCookie();
         Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
 
         log.debug("PixivRecommendHandle bookmark");
@@ -278,9 +276,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
 
         Asserts.notNull(pixivManager.getPageListProxy(pid), "啊嘞，不对劲");
 
-        PixivLoginUser pixivLoginUser = pixivLoginUserMapper.getPixivLoginUserByUserId(userId);
-        Asserts.notNull(pixivLoginUser, "先私聊绑定pixiv账号吧。");
-        String cookie = pixivLoginUser.getCookie();
+        String cookie = botConfigManager.getStringUserConfigCache(userId, BotConfigConstant.pixivCookieKey);
         Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
 
         String token = pixivManager.getPixivToken(userId, cookie);

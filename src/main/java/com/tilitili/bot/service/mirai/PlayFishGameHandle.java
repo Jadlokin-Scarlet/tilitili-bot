@@ -14,12 +14,12 @@ import com.tilitili.common.entity.query.FishConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.manager.BotUserItemMappingManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.*;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
-import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +41,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final FishConfigMapper fishConfigMapper;
 	private final BotItemMapper botItemMapper;
 	private final BotUserManager botUserManager;
-	private final BotPlaceMapper botPlaceMapper;
 	private final BotUserMapMappingMapper botUserMapMappingMapper;
-	private final BotUserConfigMapper botUserConfigMapper;
-	private final RedisCache redisCache;
+	private final BotConfigManager botConfigManager;
 	private final PlayFishGameNewHandle playFishGameNewHandle;
 
 	private List<Long> testBotList = new ArrayList<>();
@@ -61,7 +59,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, BotUserConfigMapper botUserConfigMapper, RedisCache redisCache, PlayFishGameNewHandle playFishGameNewHandle) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotUserMapMappingMapper botUserMapMappingMapper, BotConfigManager botConfigManager, PlayFishGameNewHandle playFishGameNewHandle) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -69,10 +67,8 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.fishConfigMapper = fishConfigMapper;
 		this.botItemMapper = botItemMapper;
 		this.botUserManager = botUserManager;
-		this.botPlaceMapper = botPlaceMapper;
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
-		this.botUserConfigMapper = botUserConfigMapper;
-		this.redisCache = redisCache;
+		this.botConfigManager = botConfigManager;
 		this.playFishGameNewHandle = playFishGameNewHandle;
 
 		this.random = new Random(System.currentTimeMillis());
@@ -235,9 +231,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 			boolean hasItem = botUserItemMappingManager.hasItem(userId, botItem.getId());
 			// 自动回收
-			boolean autoSellFish = "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(userId, ConfigHandle.autoSellFishKey));
+			boolean autoSellFish = botConfigManager.getBooleanUserConfigCache(userId, ConfigHandle.autoSellFishKey);
 			// 回收重复
-			boolean autoSellRepeatFish = hasItem && "yes".equals(botUserConfigMapper.getValueByUserIdAndKey(userId, ConfigHandle.autoSellRepeatFishKey));
+			boolean autoSellRepeatFish = hasItem && botConfigManager.getBooleanUserConfigCache(userId, ConfigHandle.autoSellRepeatFishKey);
 			// 只回收不大于2000的
 			boolean notPrecious = botItem.getSellPrice() <= 2000;
 			if ((autoSellFish || autoSellRepeatFish) && notPrecious) {

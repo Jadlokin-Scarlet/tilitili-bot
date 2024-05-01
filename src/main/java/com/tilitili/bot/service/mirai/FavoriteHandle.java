@@ -15,11 +15,11 @@ import com.tilitili.common.entity.query.BotItemQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.BotMessageNode;
-import com.tilitili.common.manager.BotFavoriteManager;
-import com.tilitili.common.manager.BotUserItemMappingManager;
-import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.manager.FunctionTalkManager;
-import com.tilitili.common.mapper.mysql.*;
+import com.tilitili.common.manager.*;
+import com.tilitili.common.mapper.mysql.BotFavoriteActionAddMapper;
+import com.tilitili.common.mapper.mysql.BotFavoriteMapper;
+import com.tilitili.common.mapper.mysql.BotFavoriteTalkMapper;
+import com.tilitili.common.mapper.mysql.BotItemMapper;
 import com.tilitili.common.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,11 +41,11 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 	private final Random random;
 	private final BotUserManager botUserManager;
-	private final BotUserConfigMapper botUserConfigMapper;
+	private final BotConfigManager botConfigManager;
 	private final FunctionTalkManager functionTalkManager;
 
 	@Autowired
-	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, BotUserManager botUserManager, BotUserConfigMapper botUserConfigMapper, FunctionTalkManager functionTalkManager) {
+	public FavoriteHandle(RedisCache redisCache, BotItemMapper botItemMapper, BotFavoriteMapper botFavoriteMapper, BotFavoriteManager botFavoriteManager, BotFavoriteTalkMapper botFavoriteTalkMapper, BotUserItemMappingManager botUserItemMappingManager, BotFavoriteActionAddMapper botFavoriteActionAddMapper, BotUserManager botUserManager, BotConfigManager botConfigManager, FunctionTalkManager functionTalkManager) {
 		this.redisCache = redisCache;
 		this.botItemMapper = botItemMapper;
 		this.botUserManager = botUserManager;
@@ -54,7 +54,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		this.botFavoriteTalkMapper = botFavoriteTalkMapper;
 		this.botUserItemMappingManager = botUserItemMappingManager;
 		this.botFavoriteActionAddMapper = botFavoriteActionAddMapper;
-		this.botUserConfigMapper = botUserConfigMapper;
+		this.botConfigManager = botConfigManager;
 		this.functionTalkManager = functionTalkManager;
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -285,7 +285,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private String replaceResp(BotMessageAction messageAction, String name, String resp) {
 		BotUserDTO botUser = messageAction.getBotUser();
 
-		String favoriteUserIdStr = botUserConfigMapper.getValueByUserIdAndKey(botUser.getId(), ConfigHandle.favoriteUserIdKey);
+		String favoriteUserIdStr = botConfigManager.getStringUserConfigCache(botUser.getId(), ConfigHandle.favoriteUserIdKey);
 
 		resp = resp.replaceAll("\\{name}", name);
 		resp = resp.replaceAll("\\{master}", botUser.getName());

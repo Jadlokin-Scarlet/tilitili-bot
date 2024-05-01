@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.api.ShortUrlServiceInterface;
 import com.tilitili.common.component.CloseableTempFile;
+import com.tilitili.common.constant.BotConfigConstant;
 import com.tilitili.common.entity.BotPixivSendRecord;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -17,12 +18,8 @@ import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.exception.AssertSeseException;
-import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.LoliconManager;
-import com.tilitili.common.manager.PixivCacheManager;
-import com.tilitili.common.manager.SendMessageManager;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
-import com.tilitili.common.mapper.mysql.PixivLoginUserMapper;
 import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -55,16 +52,16 @@ public class PixivCacheService {
 	private final AtomicBoolean lock2Flag = new AtomicBoolean(false);
 	@DubboReference
 	private ShortUrlServiceInterface shortUrlServiceInterface;
-	private final PixivLoginUserMapper pixivLoginUserMapper;
+	private final BotConfigManager botConfigManager;
 	private final BotManager botManager;
 
 	@Autowired
-	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager, PixivLoginUserMapper pixivLoginUserMapper, BotManager botManager) {
+	public PixivCacheService(BotPixivSendRecordMapper botPixivSendRecordMapper, LoliconManager loliconManager, PixivCacheManager pixivManager, SendMessageManager sendMessageManager, BotConfigManager botConfigManager, BotManager botManager) {
 		this.botPixivSendRecordMapper = botPixivSendRecordMapper;
 		this.loliconManager = loliconManager;
 		this.pixivManager = pixivManager;
 		this.sendMessageManager = sendMessageManager;
-		this.pixivLoginUserMapper = pixivLoginUserMapper;
+		this.botConfigManager = botConfigManager;
 		this.botManager = botManager;
 	}
 
@@ -269,7 +266,7 @@ public class PixivCacheService {
 //		} else {
 //			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 //		}
-		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
+		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
 		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
 			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
@@ -291,7 +288,7 @@ public class PixivCacheService {
 //		} else {
 //			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
 //		}
-		String cookie = pixivLoginUserMapper.getPixivLoginUserById(2L).getCookie();
+		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
 		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
 		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
 			return botManager.uploadImage(bot, file.getFile());
