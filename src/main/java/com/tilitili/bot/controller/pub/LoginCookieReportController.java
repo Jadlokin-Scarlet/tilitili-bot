@@ -2,7 +2,6 @@ package com.tilitili.bot.controller.pub;
 
 import com.tilitili.bot.controller.BaseController;
 import com.tilitili.bot.entity.request.ReportCookieRequest;
-import com.tilitili.common.entity.BotAdmin;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.mapper.mysql.BotAdminMapper;
@@ -32,9 +31,8 @@ public class LoginCookieReportController extends BaseController {
 		Asserts.notNull(request, "参数异常");
 		Asserts.notBlank(request.getKey(), "参数异常");
 		Asserts.notBlank(request.getCookie(), "参数异常");
-		Asserts.notBlank(request.getCode(), "参数异常");
-		BotAdmin botAdmin = botAdminMapper.getBotAdminByCode(request.getCode());
-		botConfigManager.addOrUpdateUserConfig(botAdmin.getUserId(), request.getKey(), request.getCookie());
+		Asserts.notNull(request.getUserId(), "参数异常");
+		botConfigManager.addOrUpdateUserConfig(request.getUserId(), request.getKey(), request.getCookie());
 		return BaseModel.success();
 	}
 

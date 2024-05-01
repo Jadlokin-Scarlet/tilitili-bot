@@ -4,6 +4,7 @@ public class ReportCookieRequest {
     private String key;
     private String cookie;
     private String code;
+    private Long userId;
 
     public String getKey() {
         return key;
@@ -29,6 +30,15 @@ public class ReportCookieRequest {
 
     public ReportCookieRequest setCode(String code) {
         this.code = code;
+        return this;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public ReportCookieRequest setUserId(Long userId) {
+        this.userId = userId;
         return this;
     }
 }
