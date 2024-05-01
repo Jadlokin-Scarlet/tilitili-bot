@@ -91,7 +91,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		respBuilder.append("。\n");
 
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.filter(e -> !botConfigManager.getBooleanUserConfigCache(e.getKey(), "禁用管理员"))
+				.filter(e -> !Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(e.getKey(), "禁用管理员")))
 				.filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
 		if (sortedStatisticsList.isEmpty()) {
 			respBuilder.append("还没有人票数达标。");
