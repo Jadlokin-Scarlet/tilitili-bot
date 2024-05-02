@@ -7,6 +7,7 @@ import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,11 +27,13 @@ public class NewWebSocketFactory {
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final ExecutorService executor;
 	private volatile boolean close = false;
+	private final RedisCache redisCache;
 
-	public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager) {
+	public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager, RedisCache redisCache) {
 		this.botManager = botManager;
 		this.botService = botService;
 		this.botRobotCacheManager = botRobotCacheManager;
+		this.redisCache = redisCache;
 		this.webSocketMap = new HashMap<>();
 		this.botIdLockMap = new ConcurrentHashMap<>();
 		this.executor = Executors.newFixedThreadPool(botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setStatus(0)) + 1);
@@ -52,6 +55,17 @@ public class NewWebSocketFactory {
 				log.info("初始化websocket, bot={}", this.logBot(bot));
 				Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
 				if (!webSocketMap.containsKey(botId)) {
+					if (redisCache.exists("ws_lock")) {
+						return;
+					}
+					if (!redisCache.exists("ws_cnt")) {
+						redisCache.increment("ws_cnt", 1L, 60);
+					} else {
+						redisCache.increment("ws_cnt");
+					}
+					if (redisCache.getValueLong("ws_cnt") > 100) {
+						redisCache.setValue("ws_lock", "yes", 60 * 10);
+					}
 					webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
 					log.info("初始化websocket完成, bot={}", this.logBot(bot));
 				}
