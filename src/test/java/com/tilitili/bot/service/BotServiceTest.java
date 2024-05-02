@@ -26,9 +26,9 @@ public class BotServiceTest {
 
 	@Test
 	public void syncHandleTextMessage() {
-		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"self_id\":1701008067,\"user_id\":545459363,\"time\":1714653237,\"message_id\":-2147442335,\"real_id\":-2147442335,\"message_type\":\"group\",\"sender\":{\"user_id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"card\":\"\",\"role\":\"admin\"},\"raw_message\":\"投票管理员@Cirno\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"投票管理员\"},\"type\":\"text\"},{\"data\":{\"text\":\"@Cirno\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":698034152}");
 //		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
 //		tester.testHandleMessage(bot, "");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"self_id\":1701008067,\"user_id\":545459363,\"time\":1714653237,\"message_id\":-2147442335,\"real_id\":-2147442335,\"message_type\":\"group\",\"sender\":{\"user_id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"card\":\"\",\"role\":\"admin\"},\"raw_message\":\"投票管理员@Cirno\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"投票管理员\"},\"type\":\"text\"},{\"data\":{\"text\":\"@Cirno\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":698034152}");
 	}
 
 	@Test
