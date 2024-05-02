@@ -3,6 +3,7 @@ package com.tilitili.bot.service.mirai;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.constant.BotConfigConstant;
 import com.tilitili.common.entity.BotAdminStatistics;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -102,7 +103,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 				Long cnt = entry.getValue();
 
 				BotUserDTO adminUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), userId);
-				Boolean giveUp = botConfigManager.getBooleanUserConfigCache(userId, "禁用管理员");
+				Boolean giveUp = botConfigManager.getBooleanUserConfigCache(userId, BotConfigConstant.giveUpAdminKey);
 				respBuilder.append("\n");
 				if (giveUp) {
 					respBuilder.append(String.format("%s(%s票,弃权)", adminUser.getName(), cnt));
@@ -120,11 +121,11 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (!Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员"))) {
+		if (!Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), BotConfigConstant.giveUpAdminKey))) {
 			return null;
 		}
 
-		botConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", false);
+		botConfigManager.addOrUpdateUserConfig(botUser.getId(), BotConfigConstant.giveUpAdminKey, false);
 		return BotMessage.simpleTextMessage("好的喵");
 //		List<BotUserDTO> atList = messageAction.getAtList();
 //
@@ -144,12 +145,12 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员"))) {
+		if (Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), BotConfigConstant.giveUpAdminKey))) {
 			return null;
 		}
 
 		botManager.setMemberAdmin(bot, botSender, botUser, false);
-		botConfigManager.addOrUpdateUserConfig(botUser.getId(), "禁用管理员", true);
+		botConfigManager.addOrUpdateUserConfig(botUser.getId(), BotConfigConstant.giveUpAdminKey, true);
 		return BotMessage.simpleTextMessage("好的喵");
 
 
