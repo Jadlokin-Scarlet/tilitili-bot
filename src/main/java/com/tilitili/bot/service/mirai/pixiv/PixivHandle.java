@@ -204,7 +204,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         Integer pageCount = illust.getPageCount();
 
         log.debug("PixivRecommendHandle get make messageChainList");
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, illust.getTitle(), illust.getUserName(), pid, sl, pageCount, canSS);
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
 
         log.debug("PixivRecommendHandle save result");
         redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);
@@ -262,7 +262,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         Integer pageCount = illust.getPageCount();
 
         log.debug("PixivRecommendHandle get make messageChainList");
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, illust.getTitle(), illust.getUserName(), recommendPid, sl, pageCount, canSS);
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, recommendPid, sl, pageCount, canSS);
         return BotMessage.simpleListMessage(messageChainList);
     }
 
@@ -316,7 +316,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         Integer sl = info.getSl();
         Integer pageCount = info.getPageCount();
         String userName = info.getUserName();
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, title, userName, pid, sl, pageCount, canSS);
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
         return BotMessage.simpleListMessage(messageChainList);
     }
 

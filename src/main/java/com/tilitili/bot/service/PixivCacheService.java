@@ -65,7 +65,7 @@ public class PixivCacheService {
 		this.botManager = botManager;
 	}
 
-	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String user, String r18, String num) throws UnsupportedEncodingException {
+	public BotMessage handlePixiv(BotMessageAction messageAction, String source, String searchKey, String userId, String r18, String num) throws UnsupportedEncodingException {
 		try {
 			Asserts.isTrue(lockFlag.compareAndSet(false, true), "猪脑过载，你先别急Σ（ﾟдﾟlll）");
 			String searchKeyOrDefault = searchKey == null ? "チルノ" : searchKey;
@@ -73,7 +73,7 @@ public class PixivCacheService {
 				case "lolicon":
 					return sendLoliconImage(messageAction, searchKeyOrDefault, num, r18);
 				case "pixiv": {
-					if (StringUtils.isNotBlank(user)) return sendPixivUserImage(messageAction, user, r18);
+					if (StringUtils.isNotBlank(userId)) return sendPixivUserImage(messageAction, userId, r18);
 					else return sendPixivImage(messageAction, searchKeyOrDefault, r18);
 				}
 				default:
@@ -118,7 +118,7 @@ public class PixivCacheService {
 
 				List<BotMessageChain> messageChainList;
 				try {
-					messageChainList = this.getImageChainList(bot, botSender, title, userName, pid, sl, pageCount, canSS);
+					messageChainList = this.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
 				} catch (AssertSeseException e) {
 					log.warn(e.getMessage(), e);
 					continue;
@@ -158,7 +158,7 @@ public class PixivCacheService {
 		return BotMessage.simpleListMessage(messageChainList);//.setQuote(messageAction.getMessageId());
 	}
 
-	private BotMessage sendPixivUserImage(BotMessageAction messageAction, String userName, String r18) {
+	private BotMessage sendPixivUserImage(BotMessageAction messageAction, String userId, String r18) {
 		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
@@ -166,7 +166,6 @@ public class PixivCacheService {
 		Long botUserId = botUser.getId();
 		boolean canSS = !"safe".equals(r18);
 
-		String userId = pixivManager.getUserIdByNameProxy(userName);
 		Asserts.notNull(userId, "没有查询到用户");
 		List<String> userPidList = pixivManager.getUserPidListProxy(userId);
 		List<BotPixivSendRecord> recordList = botPixivSendRecordMapper.getPixivSendRecordByPidList(userPidList, senderId, botUserId);
@@ -180,7 +179,7 @@ public class PixivCacheService {
 			Integer pageCount = info.getPageCount();
 			List<BotMessageChain> messageChainList;
 			try {
-				messageChainList = this.getImageChainList(bot, botSender, title, userName, pid, sl, pageCount, canSS);
+				messageChainList = this.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
 			} catch (AssertSeseException e) {
 				log.warn(e.getMessage(), e);
 				continue;
@@ -192,7 +191,7 @@ public class PixivCacheService {
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}
 
-	public List<BotMessageChain> getImageChainList(BotRobot bot, BotSender botSender, String title, String userName, String pid, Integer sl, Integer pageCount, Boolean canSS) {
+	public List<BotMessageChain> getImageChainList(BotRobot bot, BotSender botSender, String pid, Integer sl, Integer pageCount, Boolean canSS) {
 		if (sl >= 5 && !canSS) {
 			throw new AssertSeseException();
 		}
