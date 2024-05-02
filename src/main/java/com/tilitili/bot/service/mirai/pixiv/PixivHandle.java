@@ -28,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -102,19 +99,20 @@ public class PixivHandle extends ExceptionRespMessageHandle {
             pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
             Asserts.notBlank(pid, "找不到pid");
         }
-        if (StringUtils.isNumber(pid)) {
-//            Asserts.isNumber(pid, "格式错啦(pid)");
+        Asserts.isNumber(pid, "格式错啦(pid)");
+        PixivInfoIllust info = pixivManager.getInfoProxy(pid);
+        String userId = info.getUserId();
+        String userName = info.getUserName();
 
-            PixivInfoIllust info = pixivManager.getInfoProxy(pid);
-            String userName = info.getUserName();
+        List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
+        boolean canSS = !botTaskList.isEmpty();
 
-            return BotMessage.simpleTextMessage(String.format("[%s]的作者是 %s", pid, userName));
-        } else {
-            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
-            boolean canSS = !botTaskList.isEmpty();
-            String r18 = canSS? "all": "safe";
-            return pixivService.handlePixiv(messageAction, "pixiv", "", pid, r18, "1");
-        }
+        BotMessage botMessage = pixivService.handlePixiv(messageAction, "pixiv", "", userId, canSS ? "all" : "safe", "1");
+
+        List<BotMessageChain> resp = new ArrayList<>();
+        resp.add(BotMessageChain.ofPlain(String.format("[%s]的作者是 %s\n该作者的其他作品：\n", pid, userName)));
+        resp.addAll(botMessage.getBotMessageChainList());
+        return BotMessage.simpleListMessage(resp);
     }
 
     private BotMessage handleRecommend(BotMessageAction messageAction) {
