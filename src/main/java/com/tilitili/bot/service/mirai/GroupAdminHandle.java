@@ -9,11 +9,13 @@ import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotAdminStatisticsQuery;
+import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotAdminStatisticsMapper;
+import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +34,15 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 	private final BotUserManager botUserManager;
 	private final BotAdminStatisticsMapper botAdminStatisticsMapper;
 	private final BotConfigManager botConfigManager;
+	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 
 	@Autowired
-	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper, BotConfigManager botConfigManager) {
+	public GroupAdminHandle(BotManager botManager, BotUserManager botUserManager, BotAdminStatisticsMapper botAdminStatisticsMapper, BotConfigManager botConfigManager, BotUserSenderMappingMapper botUserSenderMappingMapper) {
 		this.botManager = botManager;
 		this.botUserManager = botUserManager;
 		this.botAdminStatisticsMapper = botAdminStatisticsMapper;
 		this.botConfigManager = botConfigManager;
+		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 	}
 
 	@Override
@@ -94,13 +98,23 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 				.collect(Collectors.toList());
 
+		int total = botUserSenderMappingMapper.countBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
+		// 向上取证
+		int adminLimit = total / 10;
+		int adminTotal = 10;
+
 		if (sortedStatisticsList.isEmpty()) {
 			respBuilder.append("还没有人票数达标。");
 		} else {
+			int adminCnt = 0;
 			respBuilder.append("下一届管理员为：");
 			for (Map.Entry<Long, Long> entry : sortedStatisticsList) {
 				Long userId = entry.getKey();
 				Long cnt = entry.getValue();
+
+				if (cnt <= adminLimit) {
+					break;
+				}
 
 				BotUserDTO adminUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), userId);
 				Boolean giveUp = botConfigManager.getBooleanUserConfigCache(userId, BotConfigConstant.giveUpAdminKey);
@@ -109,6 +123,9 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 					respBuilder.append(String.format("%s(%s票,弃权)", adminUser.getName(), cnt));
 				} else {
 					respBuilder.append(String.format("%s(%s票)", adminUser.getName(), cnt));
+					if (++adminCnt >= adminTotal) {
+						break;
+					}
 				}
 			}
 		}
