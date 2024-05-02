@@ -228,9 +228,9 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 
 			boolean hasItem = botUserItemMappingManager.hasItem(botUser.getId(), botItem.getId());
 			// 自动回收
-			boolean autoSellFish = botConfigManager.getBooleanUserConfigCache(botUser.getId(), ConfigHandle.autoSellFishKey);
+			boolean autoSellFish = Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), ConfigHandle.autoSellFishKey));
 			// 回收重复
-			boolean autoSellRepeatFish = hasItem && botConfigManager.getBooleanUserConfigCache(botUser.getId(), ConfigHandle.autoSellRepeatFishKey);
+			boolean autoSellRepeatFish = hasItem && Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), ConfigHandle.autoSellRepeatFishKey));
 			// 只回收不大于2000的
 			boolean notPrecious = botItem.getSellPrice() <= 2000;
 			if ((autoSellFish || autoSellRepeatFish) && notPrecious) {

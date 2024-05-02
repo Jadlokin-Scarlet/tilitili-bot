@@ -112,7 +112,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (!botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员")) {
+		if (!Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员"))) {
 			return null;
 		}
 
@@ -136,7 +136,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员")) {
+		if (Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), "禁用管理员"))) {
 			return null;
 		}
 
