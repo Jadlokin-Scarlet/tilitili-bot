@@ -166,9 +166,9 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		String value = messageAction.getValue();
 
 		BotUserSenderMapping mapping = botUserSenderMappingMapper.getBotUserSenderMappingBySenderIdAndUserId(botSender.getId(), botUser.getId());
+		boolean isAdmin = BotUserSenderMappingConstant.PERMISSION_ADMIN.equals(mapping.getPermission());
 		// 只有no为不弃权，其他都是弃权
 		boolean giveUpAdmin = !"no".equals(value);
-		boolean isAdmin = BotUserSenderMappingConstant.PERMISSION_ADMIN.equals(mapping.getPermission());
 
 		if (giveUpAdmin && isAdmin) {
 			botManager.setMemberAdmin(bot, botSender, botUser, false);
