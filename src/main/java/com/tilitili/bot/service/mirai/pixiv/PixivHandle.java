@@ -144,7 +144,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
             log.info("无可收藏的pid");
             return null;
         }
-        Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
+        Asserts.notBlank(cookie, "先私聊管理员绑定pixiv账号吧。");
 
         log.debug("PixivRecommendHandle bookmark");
         if (isBookmark) {
@@ -284,7 +284,7 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         Asserts.notNull(pixivManager.getPageListProxy(pid), "啊嘞，不对劲");
 
         String cookie = botConfigManager.getStringUserConfigCache(userId, BotConfigConstant.pixivCookieKey);
-        Asserts.notBlank(cookie, "先私聊绑定pixiv账号吧。");
+        Asserts.notBlank(cookie, "先私聊管理员绑定pixiv账号吧。");
 
         String token = pixivManager.getPixivToken(userId, cookie);
         pixivManager.bookmarkImageForCookie(pid, cookie, token);
