@@ -92,20 +92,29 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         return BotMessage.simpleTextMessage(String.format("[%s]的tag有：%s", pid, tagList));
     }
 
-    private BotMessage handleUser(BotMessageAction messageAction) {
+    private BotMessage handleUser(BotMessageAction messageAction) throws UnsupportedEncodingException {
+        BotSender botSender = messageAction.getBotSender();
         String pid = messageAction.getBodyOrDefault("pid", messageAction.getValue());
         if (StringUtils.isBlank(pid)) {
             pid = botMessageService.getQuotePid(messageAction);
         }
         if (StringUtils.isBlank(pid)) {
             pid = pixivService.findPixivImage(botMessageService.getFirstImageListOrQuoteImage(messageAction));
+            Asserts.notBlank(pid, "找不到pid");
         }
-        Asserts.isNumber(pid, "格式错啦(pid)");
+        if (StringUtils.isNumber(pid)) {
+//            Asserts.isNumber(pid, "格式错啦(pid)");
 
-        PixivInfoIllust info = pixivManager.getInfoProxy(pid);
-        String userName = info.getUserName();
+            PixivInfoIllust info = pixivManager.getInfoProxy(pid);
+            String userName = info.getUserName();
 
-        return BotMessage.simpleTextMessage(String.format("[%s]的作者是 %s", pid, userName));
+            return BotMessage.simpleTextMessage(String.format("[%s]的作者是 %s", pid, userName));
+        } else {
+            List<BotTask> botTaskList = botTaskMapper.getBotTaskListBySenderIdAndKey(botSender.getId(), "ss", "");
+            boolean canSS = !botTaskList.isEmpty();
+            String r18 = canSS? "all": "safe";
+            return pixivService.handlePixiv(messageAction, "pixiv", "", pid, r18, "1");
+        }
     }
 
     private BotMessage handleRecommend(BotMessageAction messageAction) {
