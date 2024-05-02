@@ -102,7 +102,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 
 		int total = botUserSenderMappingMapper.countBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setSenderId(botSender.getId()));
 		// 向上取证
-		int adminLimit = total / 10;
+		int adminLimit = Math.max((total + 9) / 10, 2);
 		int adminTotal = 10;
 
 		if (sortedStatisticsList.isEmpty()) {
@@ -114,7 +114,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 				Long userId = entry.getKey();
 				Long cnt = entry.getValue();
 
-				if (cnt <= adminLimit) {
+				if (cnt < adminLimit) {
 					break;
 				}
 
