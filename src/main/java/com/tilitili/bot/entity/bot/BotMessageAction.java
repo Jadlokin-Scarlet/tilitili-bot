@@ -119,8 +119,8 @@ public class BotMessageAction extends BaseDTO {
         List<BotMessageChain> quoteMessageList = botMessageChainList.stream().filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_QUOTE)).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(quoteMessageList)) {
             BotMessageChain quoteMessageChain = quoteMessageList.get(0);
-            quoteMessageId = quoteMessageChain.getId();
             quoteUser = quoteMessageChain.getQuoteUser();
+            quoteMessageId = quoteMessageChain.getId();
         }
     }
 
