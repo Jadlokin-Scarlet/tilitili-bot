@@ -4,9 +4,11 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.BotSessionService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.constant.BotConfigConstant;
+import com.tilitili.common.constant.BotUserSenderMappingConstant;
 import com.tilitili.common.entity.BotAdminStatistics;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotAdminStatisticsQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
@@ -51,7 +53,7 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		switch (key) {
 			case "弃权管理员": return handleDeleteAdmin(messageAction);
 			case "投票管理员": return handleStatistics(messageAction);
-			case "管理员": return handleAdmin(messageAction);
+//			case "管理员": return handleAdmin(messageAction);
 		}
 		return null;
 	}
@@ -161,13 +163,17 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
+		String value = messageAction.getValue();
 
-		if (Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(botUser.getId(), BotConfigConstant.giveUpAdminKey))) {
-			return null;
+		BotUserSenderMapping mapping = botUserSenderMappingMapper.getBotUserSenderMappingBySenderIdAndUserId(botSender.getId(), botUser.getId());
+		// 只有no为不弃权，其他都是弃权
+		boolean giveUpAdmin = !"no".equals(value);
+		boolean isAdmin = BotUserSenderMappingConstant.PERMISSION_ADMIN.equals(mapping.getPermission());
+
+		if (giveUpAdmin && isAdmin) {
+			botManager.setMemberAdmin(bot, botSender, botUser, false);
 		}
-
-		botManager.setMemberAdmin(bot, botSender, botUser, false);
-		botConfigManager.addOrUpdateUserConfig(botUser.getId(), BotConfigConstant.giveUpAdminKey, true);
+		botConfigManager.addOrUpdateUserConfig(botUser.getId(), BotConfigConstant.giveUpAdminKey, giveUpAdmin);
 		return BotMessage.simpleTextMessage("好的喵");
 
 
