@@ -91,17 +91,25 @@ public class GroupAdminHandle extends ExceptionRespMessageHandle {
 		respBuilder.append("。\n");
 
 		List<Map.Entry<Long, Long>> sortedStatisticsList = statisticsMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.filter(e -> !Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(e.getKey(), "禁用管理员")))
-				.filter(e -> e.getValue() > 2).limit(3).collect(Collectors.toList());
+				.collect(Collectors.toList());
+
 		if (sortedStatisticsList.isEmpty()) {
 			respBuilder.append("还没有人票数达标。");
 		} else {
-			String adminList = sortedStatisticsList.stream().map(e -> {
-				BotUserDTO adminUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), e.getKey());
-				return String.format("%s(%s票)", adminUser.getName(), e.getValue());
-			}).collect(Collectors.joining(","));
+			respBuilder.append("下一届管理员为：");
+			for (Map.Entry<Long, Long> entry : sortedStatisticsList) {
+				Long userId = entry.getKey();
+				Long cnt = entry.getValue();
 
-			respBuilder.append(String.format("下一届管理员为：%s", adminList));
+				BotUserDTO adminUser = botUserManager.getValidBotUserByIdWithParent(botSender.getId(), userId);
+				Boolean giveUp = botConfigManager.getBooleanUserConfigCache(userId, "禁用管理员");
+				respBuilder.append("\n");
+				if (giveUp) {
+					respBuilder.append(String.format("%s(%s票,弃权)", adminUser.getName(), cnt));
+				} else {
+					respBuilder.append(String.format("%s(%s票)", adminUser.getName(), cnt));
+				}
+			}
 		}
 
 		return BotMessage.simpleTextMessage(respBuilder.toString()).setQuote(messageAction.getMessageId());

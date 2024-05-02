@@ -8,6 +8,7 @@ public class BotUserVO extends BotUserDTO {
 	public BotUserVO(BotUserDTO botUser, Boolean isAdmin) {
 		this.setId(botUser.getId());
 		this.setName(botUser.getName());
+		this.setFace(botUser.getFace());
 		this.isAdmin = isAdmin;
 	}
 
