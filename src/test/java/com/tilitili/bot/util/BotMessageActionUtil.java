@@ -16,7 +16,7 @@ public class BotMessageActionUtil {
     }
     public static BotMessageAction buildEmptyAction(String message, Long userId) {
         List<BotMessageChain> chainList = Collections.singletonList(BotMessageChain.ofPlain(message));
-        return new BotMessageAction(new BotMessage().setBotMessageChainList(chainList).setBotUser(new BotUserDTO().setId(userId)), null, null);
+        return new BotMessageAction(new BotMessage().setBotMessageChainList(chainList).setBotUser(new BotUserDTO().setId(userId)), null);
     }
 
 	public static BotMessageAction buildEmptyAction(String message, Long userId, Long senderId, Long botId) {
@@ -25,6 +25,6 @@ public class BotMessageActionUtil {
 		return new BotMessageAction(new BotMessage().setBotMessageChainList(chainList)
 				.setBotUser(new BotUserDTO().setId(userId))
 				.setBotSender(new BotSender().setId(senderId))
-				.setBot(bot), null, bot);
+				.setBot(bot), null);
 	}
 }

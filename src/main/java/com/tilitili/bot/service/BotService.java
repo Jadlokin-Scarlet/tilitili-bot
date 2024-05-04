@@ -79,6 +79,7 @@ public class BotService {
             log.debug("解析失败 botId="+bot.getId());
             return;
         }
+        Asserts.checkEquals(botMessage.getBot().getId(), bot.getId(), "不对劲");
         if (botMessage.getBotUser() != null
                 && botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setUserId(botMessage.getBotUser().getId())) == 1) {
             log.info("跳过自己消息");
@@ -112,7 +113,7 @@ public class BotService {
             lockUserId.add(botUser.getId());
             Asserts.checkNull(userIdLockMap.putIfAbsent(botUser.getId(), true), "听我说你先别急。");
             // 解析指令
-            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session, bot);
+            BotMessageAction botMessageAction = new BotMessageAction(botMessage, session);
             for (BotUserDTO atUser : botMessageAction.getAtList().stream().distinct().collect(Collectors.toList())) {
                 Long atUserId = atUser.getId();
                 if (Objects.equals(atUserId, botUser.getId())) continue;

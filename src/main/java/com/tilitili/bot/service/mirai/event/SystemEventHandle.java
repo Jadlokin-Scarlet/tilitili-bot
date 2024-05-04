@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -38,6 +39,8 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 		this.botRobotCacheManager = botRobotCacheManager;
 	}
 
+	private final List<Integer> messageTypeList = Arrays.asList(0, 2);
+
 	@Override
 	public List<BotMessage> handleEventNew(BotRobot bot, BotMessage botMessage) {
 		BotUserDTO botUser = botMessage.getBotUser();
@@ -53,12 +56,14 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 
 		List<BotMessage> respList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
-			Long targetSenderId = forwardConfig.getTargetSenderId();
-			BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
-			Asserts.notNull(targetSender, "找不到渠道");
+			if (messageTypeList.contains(forwardConfig.getMessageType())) {
+				Long targetSenderId = forwardConfig.getTargetSenderId();
+				BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
+				Asserts.notNull(targetSender, "找不到渠道");
 
-			BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
-			respList.add(resp);
+				BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
+				respList.add(resp);
+			}
 		}
 		return respList;
 	}

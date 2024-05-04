@@ -76,6 +76,8 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 				if (!newMessageChainList.isEmpty() && blackList4370.contains(newMessageChainList.get(0).getUrl())) {
 					return null;
 				}
+			} else if (forwardConfig.getMessageType() == 2) {
+				return null;
 			} else {
 				throw new AssertException();
 			}

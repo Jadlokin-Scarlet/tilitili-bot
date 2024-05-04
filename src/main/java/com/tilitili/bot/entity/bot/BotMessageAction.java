@@ -41,11 +41,11 @@ public class BotMessageAction extends BaseDTO {
     private BotUserDTO quoteUser;
     private BotMessage quoteMessage;
 
-    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session, BotRobot bot) {
+    public BotMessageAction(BotMessage botMessage, BotSessionService.MiraiSession session) {
         this.botSender = botMessage.getBotSender();
         this.botUser = botMessage.getBotUser();
         this.botMessage = botMessage;
-        this.bot = bot;
+        this.bot = botMessage.getBot();
         this.session = session;
         this.paramList = new ArrayList<>();
         this.bodyMap = new HashMap<>();

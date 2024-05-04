@@ -16,7 +16,7 @@ public class BotMessageService {
 	public String getQuotePid(BotMessageAction messageAction) {
 		if (messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
 			String text = quoteMessageAction.getText();
 			String pid = StringUtils.patten1("pid: (\\d+)", text);
 			if (StringUtils.isBlank(pid) && text.contains("https://www.pixiv.net")) {
@@ -35,7 +35,7 @@ public class BotMessageService {
 
 		if (CollectionUtils.isEmpty(imageUrlList) && messageAction.getQuoteMessage() != null) {
 			BotMessage quoteMessage = messageAction.getQuoteMessage();
-			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null, null);
+			BotMessageAction quoteMessageAction = new BotMessageAction(quoteMessage, null);
 			imageUrlList = quoteMessageAction.getImageList();
 		}
 
