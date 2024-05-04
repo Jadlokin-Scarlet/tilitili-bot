@@ -79,7 +79,7 @@ public class BotService {
             log.debug("解析失败 botId="+bot.getId());
             return;
         }
-        Asserts.checkEquals(botMessage.getBot().getId(), bot.getId(), "不对劲");
+        botMessage.setBot(bot);
         if (botMessage.getBotUser() != null
                 && botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setUserId(botMessage.getBotUser().getId())) == 1) {
             log.info("跳过自己消息");
