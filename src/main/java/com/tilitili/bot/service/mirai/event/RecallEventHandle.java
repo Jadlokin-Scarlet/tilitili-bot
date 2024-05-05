@@ -24,9 +24,9 @@ import java.util.List;
 @Component
 public class RecallEventHandle extends BaseEventHandleAdapt {
 	private final BotSenderCacheManager botSenderCacheManager;
-	private final BotMessageRecordMapper botMessageRecordMapper;
 	private final BotManager botManager;
 	private final BotRobotCacheManager botRobotCacheManager;
+	private final BotMessageRecordMapper botMessageRecordMapper;
 	private final BotSendMessageRecordMapper botSendMessageRecordMapper;
 
 	@Autowired
