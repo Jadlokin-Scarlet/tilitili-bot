@@ -212,11 +212,11 @@ public class TwentyOneTable {
 			result.add(BotMessageChain.ofAt(nowPlayer.getBotUser()));
 		}
 		List<String> chooseList = Lists.newArrayList("进货", "摆烂");
-		if (nowTwentyOneCardList.getCardList().size() == 2 && nowPlayer.getCardListList().size() == 1) {
+		if (nowPlayer.getCardListList().size() == 1 && nowTwentyOneCardList.getCardList().size() == 2) {
 			chooseList.add("投降");
-		}
-		if (nowTwentyOneCardList.getCardList().size() == 2 && Objects.equals(nowTwentyOneCardList.getCardList().get(0).getValue(), nowTwentyOneCardList.getCardList().get(1).getValue())) {
-			chooseList.add("分家");
+			if (Objects.equals(nowTwentyOneCardList.getCardList().get(0).getValue(), nowTwentyOneCardList.getCardList().get(1).getValue())) {
+				chooseList.add("分家");
+			}
 		}
 		if (nowTwentyOneCardList.getCardList().size() == 2) {
 			chooseList.add("孤注一掷");
