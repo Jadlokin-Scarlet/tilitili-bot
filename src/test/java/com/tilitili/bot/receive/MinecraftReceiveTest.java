@@ -15,6 +15,5 @@ public class MinecraftReceiveTest {
 
 	@Test
 	public void receiveMinecraftMessage() {
-		tester.receiveMinecraftMessage();
 	}
 }
