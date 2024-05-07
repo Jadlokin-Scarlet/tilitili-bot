@@ -21,7 +21,7 @@ public class BotAdminController extends BaseController {
     private final BotAdminService botAdminService;
     private final RedisCache redisCache;
 
-    private static final String REMEMBER_TOKEN_KEY = "BotAdminController.rememberTokenKey-";
+    public static final String REMEMBER_TOKEN_KEY = "BotAdminController.rememberTokenKey-";
     private static final int TIMEOUT = 60 * 60 * 24 * 30;
 
     public BotAdminController(BotAdminService botAdminService, RedisCache redisCache) {
@@ -52,6 +52,7 @@ public class BotAdminController extends BaseController {
             Cookie cookie = new Cookie("token", newToken);
             cookie.setMaxAge(TIMEOUT);
             cookie.setHttpOnly(true);
+            cookie.setPath("/");
             response.addCookie(cookie);
             redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
             redisCache.setValue(REMEMBER_TOKEN_KEY+botUser.getId(), newToken, TIMEOUT);
@@ -69,10 +70,12 @@ public class BotAdminController extends BaseController {
     @ResponseBody
     public BaseModel<?> loginOut(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser, HttpSession session, HttpServletResponse response) {
         session.removeAttribute("botUser");
-        String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
-        redisCache.delete(REMEMBER_TOKEN_KEY+token);
-        redisCache.delete(REMEMBER_TOKEN_KEY+botUser.getId());
         response.addCookie(new Cookie("token", ""));
+        if (botUser != null) {
+            String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
+            redisCache.delete(REMEMBER_TOKEN_KEY + token);
+            redisCache.delete(REMEMBER_TOKEN_KEY + botUser.getId());
+        }
         return new BaseModel<>("", true);
     }
 
