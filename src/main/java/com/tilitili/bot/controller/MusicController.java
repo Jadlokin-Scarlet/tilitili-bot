@@ -20,6 +20,7 @@ import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/api/music")
 public class MusicController extends BaseController{

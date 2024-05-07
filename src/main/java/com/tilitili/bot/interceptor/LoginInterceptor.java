@@ -49,7 +49,6 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 				Arrays.stream(request.getCookies()).filter(StreamUtil.isEqual(Cookie::getName, "token"))
 						.map(Cookie::getValue).findFirst().orElse(null);
 		if (botUser == null && StringUtils.isNotBlank(token)) {
-			log.info("login by token={}", token);
 			Long userId = redisCache.getValueLong(BotAdminController.REMEMBER_TOKEN_KEY + token);
 			botUser = botAdminService.getBotUserWithIsAdmin(userId);
 			session.setAttribute("botUser", botUser);
