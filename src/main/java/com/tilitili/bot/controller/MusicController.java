@@ -18,6 +18,7 @@ import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -87,7 +88,7 @@ public class MusicController extends BaseController{
 		return emitter;
 	}
 
-	@JmsListener(destination = "KtvUpdateMessage")
+	@JmsListener(destination = JmsTemplateFactory.KEY_KTV_UPDATE, containerFactory = "topicFactory")
 	public void ktvUpdateMessage(Long botId) {
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botId, redisCache);
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
