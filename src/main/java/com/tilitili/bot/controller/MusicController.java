@@ -71,6 +71,7 @@ public class MusicController extends BaseController{
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
 		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
 		response.setTheMusic(theMusic);
+		response.setBotId(botSender.getBot());
 		return BaseModel.success(response);
 	}
 

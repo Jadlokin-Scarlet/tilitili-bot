@@ -15,4 +15,13 @@ public class ListPlayerMusicResponse extends BaseDTO {
 		this.theMusic = theMusic;
 		return this;
 	}
+
+	public Long getBotId() {
+		return botId;
+	}
+
+	public ListPlayerMusicResponse setBotId(Long botId) {
+		this.botId = botId;
+		return this;
+	}
 }
