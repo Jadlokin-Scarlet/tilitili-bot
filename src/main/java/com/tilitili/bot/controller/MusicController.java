@@ -111,8 +111,8 @@ public class MusicController extends BaseController{
 			try {
 				emitter.send(SseEmitter.event().name("ktvUpdate").data(response));
 			} catch (Exception e) {
-				log.warn("下发事件异常，移除emitter", e);
 				iterator.remove();
+				log.warn("下发事件异常，移除emitter", e);
 			}
 		}
 	}
