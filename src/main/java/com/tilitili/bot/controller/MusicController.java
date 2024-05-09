@@ -103,6 +103,7 @@ public class MusicController extends BaseController{
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
 		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
 		response.setTheMusic(theMusic);
+		response.setBotId(botId);
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
 		for (Iterator<SseEmitter> iterator = emitterList.iterator(); iterator.hasNext(); ) {
