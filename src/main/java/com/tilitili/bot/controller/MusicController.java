@@ -21,6 +21,8 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +34,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @Controller
@@ -77,19 +81,33 @@ public class MusicController extends BaseController{
 		return BaseModel.success(response);
 	}
 
-	@RequestMapping("/player/event")
-	public SseEmitter registerSubscribe() {
-		SseEmitter emitter = new SseEmitter();
-		emitterList.add(emitter);
+	@GetMapping("/player/event")
+	public ResponseEntity<SseEmitter> registerSubscribe() {
+		log.info("new sseEmitter");
+		SseEmitter sseEmitter = new SseEmitter(-1L);
+		emitterList.add(sseEmitter);
 
-		emitter.onCompletion(()->emitterList.remove(emitter));
-		emitter.onTimeout(()->emitterList.remove(emitter));
+		sseEmitter.onCompletion(()-> {
+			log.info("completion");
+			emitterList.remove(sseEmitter);
+		});
+		sseEmitter.onTimeout(()-> {
+			log.info("timeout");
+			emitterList.remove(sseEmitter);
+		});
+		sseEmitter.onError((e) -> {
+			log.warn("error", e);
+			emitterList.remove(sseEmitter);
+		});
 
-		return emitter;
+		return new ResponseEntity<>(sseEmitter, HttpStatus.OK);
 	}
+
+	private final ScheduledExecutorService scheduled =  Executors.newScheduledThreadPool(10);
 
 	@JmsListener(destination = JmsTemplateFactory.KEY_KTV_UPDATE, containerFactory = "topicFactory")
 	public void ktvUpdateMessage(Long botId) {
+		log.info("send to emitter botId={} size={}", botId, emitterList.size());
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botId, redisCache);
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
 		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
@@ -98,7 +116,7 @@ public class MusicController extends BaseController{
 		for (Iterator<SseEmitter> iterator = this.emitterList.iterator(); iterator.hasNext(); ) {
 			SseEmitter emitter = iterator.next();
 			try {
-				emitter.send(response);
+				emitter.send(SseEmitter.event().name("ktvUpdate").data(response));
 			} catch (Exception e) {
 				log.warn("下发事件异常，移除emitter", e);
 				iterator.remove();
