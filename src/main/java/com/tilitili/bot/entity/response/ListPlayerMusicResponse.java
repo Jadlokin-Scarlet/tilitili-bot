@@ -4,6 +4,7 @@ import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 
 public class ListPlayerMusicResponse extends BaseDTO {
+	private Long botId;
 	private PlayerMusicDTO theMusic;
 
 	public PlayerMusicDTO getTheMusic() {
