@@ -4,10 +4,7 @@ import com.tilitili.bot.controller.BotAdminController;
 import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.service.BotAdminService;
 import com.tilitili.common.entity.view.BaseModel;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.RedisCache;
-import com.tilitili.common.utils.StreamUtil;
-import com.tilitili.common.utils.StringUtils;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -54,6 +51,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 						.map(Cookie::getValue).findFirst().orElse(null);
 		if (botUser == null && StringUtils.isNotBlank(token)) {
 			Long userId = redisCache.getValueLong(BotAdminController.REMEMBER_TOKEN_KEY + token);
+			Asserts.notNull(userId, "自动登陆失效，请重新登陆");
 			botUser = botAdminService.getBotUserWithIsAdmin(userId);
 			session.setAttribute("botUser", botUser);
 		}

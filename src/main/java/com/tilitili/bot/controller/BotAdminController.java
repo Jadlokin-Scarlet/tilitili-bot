@@ -48,16 +48,17 @@ public class BotAdminController extends BaseController {
     public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
+
+        String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
+        redisCache.delete(REMEMBER_TOKEN_KEY+token);
+        redisCache.delete(REMEMBER_TOKEN_KEY+botUser.getId());
+        response.addCookie(new Cookie("token", ""));
+
         if (request.getRemember() != null && request.getRemember()) {
             String newToken = UUID.randomUUID().toString();
             response.addCookie(generateCookie(newToken));
             redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
             redisCache.setValue(REMEMBER_TOKEN_KEY+botUser.getId(), newToken, TIMEOUT);
-        } else {
-            String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
-            redisCache.delete(REMEMBER_TOKEN_KEY+token);
-            redisCache.delete(REMEMBER_TOKEN_KEY+botUser.getId());
-            response.addCookie(new Cookie("token", ""));
         }
         session.setAttribute("botUser", botUser);
         return new BaseModel<>("登录成功", true, botUser);
