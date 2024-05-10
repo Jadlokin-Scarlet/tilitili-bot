@@ -86,7 +86,7 @@ public class DynamicController extends BaseController {
     private String getJumpUrl(String externalId, Integer type) {
         if (SubscriptionConstant.TYPE_BILIBILI_LIVE_ROOM == type) {
             List<Subscription> subscriptionList = subscriptionMapper.getSubscriptionByCondition(new SubscriptionQuery().setType(type).setValue(externalId).setStatus(0));
-            Asserts.checkEquals(subscriptionList.size(), 1, "找不到关注");
+            Asserts.isFalse(subscriptionList.isEmpty(), "找不到关注");
             return bilibiliManager.getRoomUrlByRoomId(subscriptionList.get(0).getRoomId());
         }
 
