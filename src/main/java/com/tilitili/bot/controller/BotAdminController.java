@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,11 +50,7 @@ public class BotAdminController extends BaseController {
         BotUserVO botUser = botAdminService.login(request);
         if (request.getRemember() != null && request.getRemember()) {
             String newToken = UUID.randomUUID().toString();
-            Cookie cookie = new Cookie("token", newToken);
-            cookie.setMaxAge(TIMEOUT);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            response.addCookie(generateCookie(newToken));
             redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
             redisCache.setValue(REMEMBER_TOKEN_KEY+botUser.getId(), newToken, TIMEOUT);
         } else {
@@ -66,11 +63,21 @@ public class BotAdminController extends BaseController {
         return new BaseModel<>("登录成功", true, botUser);
     }
 
+    @NotNull
+    private static Cookie generateCookie(String newToken) {
+        Cookie cookie = new Cookie("token", newToken);
+        cookie.setMaxAge(TIMEOUT);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        return cookie;
+    }
+
     @PostMapping("/loginOut")
     @ResponseBody
     public BaseModel<?> loginOut(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser, HttpSession session, HttpServletResponse response) {
         session.removeAttribute("botUser");
-        response.addCookie(new Cookie("token", ""));
+        response.addCookie(generateCookie(""));
         if (botUser != null) {
             String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
             redisCache.delete(REMEMBER_TOKEN_KEY + token);

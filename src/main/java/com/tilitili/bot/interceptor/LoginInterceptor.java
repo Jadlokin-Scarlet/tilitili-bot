@@ -44,6 +44,10 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		if (url.contains("/pub")) {
 			return true;
 		}
+		// eventSource没有cookie，需要另做认证
+		if ("text/event-stream".equals(request.getHeader("Accept"))) {
+			return true;
+		}
 		// token自动登陆
 		String token = request.getCookies() == null? null:
 				Arrays.stream(request.getCookies()).filter(StreamUtil.isEqual(Cookie::getName, "token"))

@@ -6,6 +6,7 @@ import com.tilitili.common.entity.dto.PlayerMusicDTO;
 public class ListPlayerMusicResponse extends BaseDTO {
 	private Long botId;
 	private PlayerMusicDTO theMusic;
+	private String eventToken;
 
 	public PlayerMusicDTO getTheMusic() {
 		return theMusic;
@@ -22,6 +23,15 @@ public class ListPlayerMusicResponse extends BaseDTO {
 
 	public ListPlayerMusicResponse setBotId(Long botId) {
 		this.botId = botId;
+		return this;
+	}
+
+	public String getEventToken() {
+		return eventToken;
+	}
+
+	public ListPlayerMusicResponse setEventToken(String eventToken) {
+		this.eventToken = eventToken;
 		return this;
 	}
 }

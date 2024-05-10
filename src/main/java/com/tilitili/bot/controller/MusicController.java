@@ -67,16 +67,23 @@ public class MusicController extends BaseController{
 		BotUserSenderMapping mapping = mappingList.stream().findFirst().orElse(null);
 		Asserts.notNull(mapping, "你好像还没加入语音");
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(mapping.getSenderId());
+
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
+
+		String eventToken = UUID.randomUUID().toString();
+		redisCache.setValue("MusicController.eventToken-"+eventToken, "yes", 10);
+
 		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
 		response.setTheMusic(theMusic);
 		response.setBotId(botSender.getBot());
+		response.setEventToken(eventToken);
 		return BaseModel.success(response);
 	}
 
 	@GetMapping("/player/{botId}/event")
-	public ResponseEntity<SseEmitter> registerSubscribe(@PathVariable Long botId) {
+	public ResponseEntity<SseEmitter> registerSubscribe(@PathVariable Long botId, @RequestParam String eventToken) {
+		Asserts.isTrue(redisCache.delete("MusicController.eventToken-"+eventToken), "参数异常");
 		log.info("new sseEmitter");
 		SseEmitter sseEmitter = new SseEmitter(-1L);
 		emitterMap.computeIfAbsent(botId, key -> new LinkedList<>()).add(sseEmitter);
