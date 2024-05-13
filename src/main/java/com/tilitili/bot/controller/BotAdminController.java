@@ -37,6 +37,7 @@ public class BotAdminController extends BaseController {
                                          HttpSession session) {
         if (botUser == null && StringUtils.isNotBlank(token)) {
             Long userId = redisCache.getValueLong(REMEMBER_TOKEN_KEY + token);
+            redisCache.delete(REMEMBER_TOKEN_KEY + token);
             botUser = botAdminService.getBotUserWithIsAdmin(userId);
             session.setAttribute("botUser", botUser);
         }
@@ -49,16 +50,10 @@ public class BotAdminController extends BaseController {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
 
-        String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
-        redisCache.delete(REMEMBER_TOKEN_KEY+token);
-        redisCache.delete(REMEMBER_TOKEN_KEY+botUser.getId());
-        response.addCookie(new Cookie("token", ""));
-
         if (request.getRemember() != null && request.getRemember()) {
             String newToken = UUID.randomUUID().toString();
             response.addCookie(generateCookie(newToken));
             redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
-            redisCache.setValue(REMEMBER_TOKEN_KEY+botUser.getId(), newToken, TIMEOUT);
         }
         session.setAttribute("botUser", botUser);
         return new BaseModel<>("登录成功", true, botUser);
@@ -76,14 +71,9 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/loginOut")
     @ResponseBody
-    public BaseModel<?> loginOut(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser, HttpSession session, HttpServletResponse response) {
+    public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response) {
         session.removeAttribute("botUser");
         response.addCookie(generateCookie(""));
-        if (botUser != null) {
-            String token = redisCache.getValueString(REMEMBER_TOKEN_KEY + botUser.getId());
-            redisCache.delete(REMEMBER_TOKEN_KEY + token);
-            redisCache.delete(REMEMBER_TOKEN_KEY + botUser.getId());
-        }
         return new BaseModel<>("", true);
     }
 

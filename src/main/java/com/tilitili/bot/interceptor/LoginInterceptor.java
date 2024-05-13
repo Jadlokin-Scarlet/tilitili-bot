@@ -51,6 +51,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 						.map(Cookie::getValue).findFirst().orElse(null);
 		if (botUser == null && StringUtils.isNotBlank(token)) {
 			Long userId = redisCache.getValueLong(BotAdminController.REMEMBER_TOKEN_KEY + token);
+			redisCache.delete(BotAdminController.REMEMBER_TOKEN_KEY + token);
 			Asserts.notNull(userId, "自动登陆失效，请重新登陆");
 			botUser = botAdminService.getBotUserWithIsAdmin(userId);
 			session.setAttribute("botUser", botUser);
