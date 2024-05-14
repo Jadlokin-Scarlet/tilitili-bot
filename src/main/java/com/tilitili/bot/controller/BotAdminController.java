@@ -2,45 +2,35 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.entity.request.BotAdminRequest;
+import com.tilitili.bot.interceptor.LoginInterceptor;
 import com.tilitili.bot.service.BotAdminService;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
-import com.tilitili.common.utils.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/admin")
 public class BotAdminController extends BaseController {
     private final BotAdminService botAdminService;
     private final RedisCache redisCache;
+    private final LoginInterceptor loginInterceptor;
 
-    public static final String REMEMBER_TOKEN_KEY = "BotAdminController.rememberTokenKey-";
-    private static final int TIMEOUT = 60 * 60 * 24 * 30;
-
-    public BotAdminController(BotAdminService botAdminService, RedisCache redisCache) {
+    public BotAdminController(BotAdminService botAdminService, RedisCache redisCache, LoginInterceptor loginInterceptor) {
         this.botAdminService = botAdminService;
         this.redisCache = redisCache;
+        this.loginInterceptor = loginInterceptor;
     }
 
     @GetMapping("/isLogin")
     @ResponseBody
-    public BaseModel<BotUserVO> isLogin(@SessionAttribute(value = "botUser", required = false) BotUserVO botUser,
-                                         @CookieValue(value = "token", required = false) String token,
-                                         HttpSession session) {
-        if (botUser == null && StringUtils.isNotBlank(token)) {
-            Long userId = redisCache.getValueLong(REMEMBER_TOKEN_KEY + token);
-            redisCache.delete(REMEMBER_TOKEN_KEY + token);
-            botUser = botAdminService.getBotUserWithIsAdmin(userId);
-            session.setAttribute("botUser", botUser);
-        }
+    public BaseModel<BotUserVO> isLogin(HttpServletRequest request, HttpServletResponse response) {
+        BotUserVO botUser = loginInterceptor.getSessionUserOrReLoginByToken(request, response);
         return new BaseModel<>("", true, botUser);
     }
 
@@ -49,31 +39,19 @@ public class BotAdminController extends BaseController {
     public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
-
+        // 直接下发新token，不管有没有旧token
         if (request.getRemember() != null && request.getRemember()) {
-            String newToken = UUID.randomUUID().toString();
-            response.addCookie(generateCookie(newToken));
-            redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
+            loginInterceptor.makeNewToken(response, botUser);
         }
         session.setAttribute("botUser", botUser);
         return new BaseModel<>("登录成功", true, botUser);
-    }
-
-    @NotNull
-    private static Cookie generateCookie(String newToken) {
-        Cookie cookie = new Cookie("token", newToken);
-        cookie.setMaxAge(TIMEOUT);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        return cookie;
     }
 
     @PostMapping("/loginOut")
     @ResponseBody
     public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response) {
         session.removeAttribute("botUser");
-        response.addCookie(generateCookie(""));
+        response.addCookie(loginInterceptor.generateCookie(""));
         return new BaseModel<>("", true);
     }
 
