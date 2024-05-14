@@ -83,9 +83,11 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		if (botUser == null && StringUtils.isNotBlank(token)) {
 			// 消耗token登陆
 			botUser = getBotUserUseToken(token);
-			session.setAttribute("botUser", botUser);
-			// 下发新token
-			makeNewToken(response, botUser);
+			if (botUser != null) {
+				session.setAttribute("botUser", botUser);
+				// 下发新token
+				makeNewToken(response, botUser);
+			}
 		}
 		return botUser;
 	}
@@ -94,7 +96,9 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 	private BotUserVO getBotUserUseToken(String token) {
 		Long userId = redisCache.getValueLong(REMEMBER_TOKEN_KEY + token);
 		redisCache.delete(REMEMBER_TOKEN_KEY + token);
-		Asserts.notNull(userId, "自动登陆失效，请重新登陆");
+		if (userId == null) {
+			return null;
+		}
 		return botAdminService.getBotUserWithIsAdmin(userId);
 	}
 
