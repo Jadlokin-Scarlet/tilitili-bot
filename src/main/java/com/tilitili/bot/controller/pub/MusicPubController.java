@@ -45,36 +45,6 @@ public class MusicPubController extends BaseController {
 			log.info("timeout");
 			emitterMap.get(botId).remove(sseEmitter);
 		});
-		sseEmitter.onError((e) -> {
-			log.warn("error", e);
-			emitterMap.get(botId).remove(sseEmitter);
-		});
-
-//		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
-		ktvUpdateMessage(botId);
-//		}, 0, 10, TimeUnit.SECONDS);
-
-		return sseEmitter;
-	}
-
-	@GetMapping("/player/{botId}/event2")
-	public SseEmitter registerSubscribe(@PathVariable Long botId) {
-		log.info("new sseEmitter");
-		SseEmitter sseEmitter = new SseEmitter(-1L);
-		emitterMap.computeIfAbsent(botId, key -> new LinkedList<>()).add(sseEmitter);
-
-		sseEmitter.onCompletion(()-> {
-			log.info("completion");
-			emitterMap.get(botId).remove(sseEmitter);
-		});
-		sseEmitter.onTimeout(()-> {
-			log.info("timeout");
-			emitterMap.get(botId).remove(sseEmitter);
-		});
-		sseEmitter.onError((e) -> {
-			log.warn("error", e);
-			emitterMap.get(botId).remove(sseEmitter);
-		});
 
 //		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
 		ktvUpdateMessage(botId);
@@ -104,5 +74,4 @@ public class MusicPubController extends BaseController {
 		}
 //		log.info("send ktv update end");
 	}
-
 }
