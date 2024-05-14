@@ -27,8 +27,7 @@ public class CorsConfig implements WebMvcConfigurer {
 		config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept","Authorization", "Cache-Control"));
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
 
-		source.registerCorsConfiguration("/api/pul/**", config);
-		source.registerCorsConfiguration("/api/pul/*", config);
+		source.registerCorsConfiguration("/api/**", config);
 	}
 
 	private void configDefault(UrlBasedCorsConfigurationSource source) {
