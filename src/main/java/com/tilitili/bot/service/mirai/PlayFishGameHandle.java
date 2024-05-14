@@ -310,6 +310,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			BotMessage endMessage = this.handleEnd(messageAction);
 			resultList.add(BotMessageChain.ofPlain("自动收竿："));
 			resultList.addAll(endMessage.getBotMessageChainList());
+			resultList.add(BotMessageChain.ofPlain("\n"));
 		}
 		Asserts.checkNull(fishPlayerMapper.getValidFishPlayerByUserId(userId), "你已经在钓啦！");
 		BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
