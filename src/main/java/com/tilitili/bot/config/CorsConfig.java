@@ -23,7 +23,7 @@ public class CorsConfig implements WebMvcConfigurer {
 	private void configDefault(UrlBasedCorsConfigurationSource source) {
 		final CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOriginPatterns(Collections.singletonList("*.tilitili.club"));
+		config.setAllowedOriginPatterns(Collections.singletonList("*"));
 		config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept","Authorization", "Cache-Control"));
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
 
