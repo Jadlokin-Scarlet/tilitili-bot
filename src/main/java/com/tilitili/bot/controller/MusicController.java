@@ -21,8 +21,6 @@ import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -82,7 +80,7 @@ public class MusicController extends BaseController{
 	}
 
 	@GetMapping("/player/{botId}/event")
-	public ResponseEntity<SseEmitter> registerSubscribe(@PathVariable Long botId, @RequestParam String eventToken) {
+	public SseEmitter registerSubscribe(@PathVariable Long botId, @RequestParam String eventToken) {
 		Asserts.isTrue(redisCache.delete("MusicController.eventToken-"+eventToken), "参数异常");
 		log.info("new sseEmitter");
 		SseEmitter sseEmitter = new SseEmitter(-1L);
@@ -101,8 +99,38 @@ public class MusicController extends BaseController{
 			emitterMap.get(botId).remove(sseEmitter);
 		});
 
-		return new ResponseEntity<>(sseEmitter, HttpStatus.OK);
+//		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
+//			ktvUpdateMessage(botId);
+//		}, 0, 10, TimeUnit.SECONDS);
+
+		return sseEmitter;
 	}
+
+//	@GetMapping("/player/{botId}/event2")
+//	public SseEmitter registerSubscribeTest(@PathVariable Long botId) {
+//		log.info("new sseEmitter");
+//		SseEmitter sseEmitter = new SseEmitter(-1L);
+//		emitterMap.computeIfAbsent(botId, key -> new LinkedList<>()).add(sseEmitter);
+//
+//		sseEmitter.onCompletion(()-> {
+//			log.info("completion");
+//			emitterMap.get(botId).remove(sseEmitter);
+//		});
+//		sseEmitter.onTimeout(()-> {
+//			log.info("timeout");
+//			emitterMap.get(botId).remove(sseEmitter);
+//		});
+//		sseEmitter.onError((e) -> {
+//			log.warn("error", e);
+//			emitterMap.get(botId).remove(sseEmitter);
+//		});
+//
+//		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
+//			ktvUpdateMessage(botId);
+//		}, 0, 10, TimeUnit.SECONDS);
+//
+//		return sseEmitter;
+//	}
 
 	@JmsListener(destination = JmsTemplateFactory.KEY_KTV_UPDATE, containerFactory = "topicFactory")
 	public void ktvUpdateMessage(Long botId) {
@@ -113,6 +141,7 @@ public class MusicController extends BaseController{
 		response.setBotId(botId);
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
+		log.info("send ktv update to botId={} size={}", botId, emitterList.size());
 		for (Iterator<SseEmitter> iterator = emitterList.iterator(); iterator.hasNext(); ) {
 			SseEmitter emitter = iterator.next();
 			try {
@@ -122,6 +151,7 @@ public class MusicController extends BaseController{
 				log.warn("下发事件异常，移除emitter", e);
 			}
 		}
+//		log.info("send ktv update end");
 	}
 
 }
