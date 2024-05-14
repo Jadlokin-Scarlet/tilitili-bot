@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.net.http.WebSocket;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,7 +19,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Component
 public class NewWebSocketFactory {
-	private final HashMap<Long, WebSocket> webSocketMap;
+	private final ConcurrentHashMap<Long, WebSocket> webSocketMap;
 	private final ConcurrentHashMap<Long, Boolean> botIdLockMap;
 	private final BotManager botManager;
 	private final BotService botService;
@@ -34,7 +33,7 @@ public class NewWebSocketFactory {
 		this.botService = botService;
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.redisCache = redisCache;
-		this.webSocketMap = new HashMap<>();
+		this.webSocketMap = new ConcurrentHashMap<>();
 		this.botIdLockMap = new ConcurrentHashMap<>();
 		this.executor = Executors.newFixedThreadPool(botRobotCacheManager.countBotRobotByCondition(new BotRobotQuery().setStatus(0)) + 1);
 	}
