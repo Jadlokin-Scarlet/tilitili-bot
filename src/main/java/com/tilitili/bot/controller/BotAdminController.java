@@ -6,7 +6,6 @@ import com.tilitili.bot.interceptor.LoginInterceptor;
 import com.tilitili.bot.service.BotAdminService;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.RedisCache;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +17,10 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/api/admin")
 public class BotAdminController extends BaseController {
     private final BotAdminService botAdminService;
-    private final RedisCache redisCache;
     private final LoginInterceptor loginInterceptor;
 
-    public BotAdminController(BotAdminService botAdminService, RedisCache redisCache, LoginInterceptor loginInterceptor) {
+    public BotAdminController(BotAdminService botAdminService, LoginInterceptor loginInterceptor) {
         this.botAdminService = botAdminService;
-        this.redisCache = redisCache;
         this.loginInterceptor = loginInterceptor;
     }
 
