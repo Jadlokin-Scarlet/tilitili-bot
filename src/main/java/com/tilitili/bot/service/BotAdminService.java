@@ -144,7 +144,7 @@ public class BotAdminService {
         Asserts.isTrue(redisCache.setNotExist(emailCodeLockKey + email, "yes", 1, TimeUnit.MINUTES), "收不到验证码请联系管理员");
 
         redisCache.setValue(emailCodeKey + email, emailCode);
-        if ("dev".equals(active) && testEmail.equals(email)) {
+        if (!"pro".equals(active) && testEmail.equals(email)) {
             sendMessageManager.sendMessage(BotMessage.simpleTextMessage("验证码："+emailCode).setSenderId(BotSenderConstant.MASTER_SENDER_ID));
         } else {
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
