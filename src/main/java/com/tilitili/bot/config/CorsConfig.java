@@ -31,7 +31,6 @@ public class CorsConfig implements WebMvcConfigurer {
 		source.registerCorsConfiguration("/api/**", config);
 		source.registerCorsConfiguration("/api/pul/**", config);
 		source.registerCorsConfiguration("/api/pub/cookie/**", config);
-		source.registerCorsConfiguration("/api/pub/cookie/", config);
 	}
 
 	private void configDefault(UrlBasedCorsConfigurationSource source) {
