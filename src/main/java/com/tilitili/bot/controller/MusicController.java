@@ -100,7 +100,7 @@ public class MusicController extends BaseController{
 		});
 
 //		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
-//			ktvUpdateMessage(botId);
+			ktvUpdateMessage(botId);
 //		}, 0, 10, TimeUnit.SECONDS);
 
 		return sseEmitter;
