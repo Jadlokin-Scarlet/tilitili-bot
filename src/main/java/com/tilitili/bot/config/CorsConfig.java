@@ -15,7 +15,12 @@ public class CorsConfig implements WebMvcConfigurer {
 	@Bean
 	public CorsFilter corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		this.configPul(source);
+		this.configDefault(source);
+		return new CorsFilter(source);
+	}
 
+	private void configDefault(UrlBasedCorsConfigurationSource source) {
 		final CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
 		config.setAllowedOriginPatterns(Collections.singletonList("*.tilitili.club"));
@@ -23,6 +28,15 @@ public class CorsConfig implements WebMvcConfigurer {
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
 
 		source.registerCorsConfiguration("/**", config);
-		return new CorsFilter(source);
+	}
+
+	private void configPul(UrlBasedCorsConfigurationSource source) {
+		final CorsConfiguration config = new CorsConfiguration();
+		config.setAllowCredentials(true);
+		config.setAllowedOriginPatterns(Collections.singletonList("*"));
+		config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept","Authorization", "Cache-Control"));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
+
+		source.registerCorsConfiguration("/api/pul/**", config);
 	}
 }
