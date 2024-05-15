@@ -66,8 +66,11 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 	}
 
 	private List<HeiVoice> searchHeiVoice(String search, int pageNo) {
-		int offset = (pageNo - 1) / 20;
-		String url = String.format("https://chat.xiaoheihe.cn/chatroom/v2/msg/voice_pack/platform/list?client_type=heybox_chat&x_client_type=web&os_type=web&x_os_type=Windows&device_info=Chrome&x_app=heybox_chat&version=999.0.3&web_version=1.0.0&chat_os_type=web&chat_version=1.21.3&offset=%s&limit=20&key=%s&order=&hkey=4C93878&nonce=D51AE5C114CC7D3352E6EB01311D769F&_time=1715600258&_chat_time=1715600258005",
+		int offset = (pageNo - 1) * 20;
+		String url = String.format("https://chat.xiaoheihe.cn/chatroom/v2/msg/voice_pack/platform/list?" +
+						"client_type=heybox_chat&x_client_type=web&os_type=web&x_os_type=Windows&device_info=Chrome&x_app=heybox_chat&version=999.0.3&web_version=1.0.0&chat_os_type=web&chat_version=1.21.3&" +
+						"offset=%s&limit=20&key=%s" +
+						"&order=&hkey=4C93878&nonce=D51AE5C114CC7D3352E6EB01311D769F&_time=1715600258&_chat_time=1715600258005",
 				offset,
 				URLEncoder.encode(search, StandardCharsets.UTF_8));
 		String result = HttpClientUtil.httpGet(url, ImmutableMap.of("cookie", heiCookie, "User-Agent", HttpClientUtil.defaultUserAgent));
