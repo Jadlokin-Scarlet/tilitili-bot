@@ -48,7 +48,7 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		List<HeiVoice> voiceList = searchHeiVoice(search);
 		Asserts.notEmpty(voiceList, "没搜到");
 		HeiVoice heiVoice = voiceList.stream().filter(StreamUtil.isEqual(HeiVoice::getName, search)).findFirst().orElse(voiceList.get(0));
-		Asserts.checkEquals(heiVoice, search, "好像没有，以下是搜索结果：\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("，")));
+		Asserts.checkEquals(heiVoice, search, "好像没有，以下是搜索结果：\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
 		String url = String.format("https://hf.max-c.com/voice/%s.mp3", heiVoice.getPath());
 
 		PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
