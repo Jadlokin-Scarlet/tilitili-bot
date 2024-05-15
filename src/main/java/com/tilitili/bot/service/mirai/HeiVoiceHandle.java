@@ -13,10 +13,7 @@ import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.hei.HeiVoice;
 import com.tilitili.common.entity.view.bot.hei.HeiVoiceResponse;
 import com.tilitili.common.entity.view.bot.hei.HeiVoiceSearchResult;
-import com.tilitili.common.utils.Asserts;
-import com.tilitili.common.utils.Gsons;
-import com.tilitili.common.utils.HttpClientUtil;
-import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,6 +41,11 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
+
+		if (StringUtils.isBlank(search)) {
+			List<HeiVoice> voiceList = searchHeiVoice("");
+			return BotMessage.simpleTextMessage("以下是热门语音，输入（语音 页数）翻页\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
+		}
 
 		List<HeiVoice> voiceList = searchHeiVoice(search);
 		Asserts.notEmpty(voiceList, "没搜到");
