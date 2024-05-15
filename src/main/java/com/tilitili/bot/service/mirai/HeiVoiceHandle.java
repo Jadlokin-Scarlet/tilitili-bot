@@ -1,7 +1,5 @@
 package com.tilitili.bot.service.mirai;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
@@ -11,27 +9,22 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.hei.HeiVoice;
-import com.tilitili.common.entity.view.bot.hei.HeiVoiceResponse;
-import com.tilitili.common.entity.view.bot.hei.HeiVoiceSearchResult;
+import com.tilitili.common.manager.HeiVoiceManager;
 import com.tilitili.common.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class HeiVoiceHandle extends ExceptionRespMessageHandle {
-	@Value("${HeiVoiceHandle.heiCookie:}")
-	private String heiCookie;
-
+	private final HeiVoiceManager heiVoiceManager;
 	private final MusicService musicService;
 
-	public HeiVoiceHandle(MusicService musicService) {
+	public HeiVoiceHandle(HeiVoiceManager heiVoiceManager, MusicService musicService) {
+		this.heiVoiceManager = heiVoiceManager;
 		this.musicService = musicService;
 	}
 
@@ -45,11 +38,11 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		if (StringUtils.isBlank(search) || StringUtils.isNumber(search)) {
 			int pageNo = StringUtils.isBlank(search)? 1: Integer.parseInt(search);
 			Asserts.isRange(1, pageNo, 100, "页数不对劲");
-			List<HeiVoice> voiceList = searchHeiVoice("", pageNo);
+			List<HeiVoice> voiceList = heiVoiceManager.searchHeiVoice("", pageNo);
 			return BotMessage.simpleTextMessage("以下是热门语音，输入（语音 页数）翻页\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
 		}
 
-		List<HeiVoice> voiceList = searchHeiVoice(search, 1);
+		List<HeiVoice> voiceList = heiVoiceManager.searchHeiVoice(search, 1);
 		Asserts.notEmpty(voiceList, "没搜到");
 		HeiVoice heiVoice = voiceList.stream().filter(StreamUtil.isEqual(HeiVoice::getName, search)).findFirst().orElse(voiceList.get(0));
 		Asserts.checkEquals(heiVoice.getName(), search, "好像没有，以下是搜索结果：\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
@@ -63,21 +56,5 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
         } else {
 			return null;
 		}
-	}
-
-	private List<HeiVoice> searchHeiVoice(String search, int pageNo) {
-		int offset = (pageNo - 1) * 20;
-		String url = String.format("https://chat.xiaoheihe.cn/chatroom/v2/msg/voice_pack/platform/list?" +
-						"client_type=heybox_chat&x_client_type=web&os_type=web&x_os_type=Windows&device_info=Chrome&x_app=heybox_chat&version=999.0.3&web_version=1.0.0&chat_os_type=web&chat_version=1.21.3&" +
-						"offset=%s&limit=20&key=%s" +
-						"&order=&hkey=4C93878&nonce=D51AE5C114CC7D3352E6EB01311D769F&_time=1715600258&_chat_time=1715600258005",
-				offset,
-				URLEncoder.encode(search, StandardCharsets.UTF_8));
-		String result = HttpClientUtil.httpGet(url, ImmutableMap.of("cookie", heiCookie, "User-Agent", HttpClientUtil.defaultUserAgent));
-		Asserts.notBlank(result, "网络异常");
-		HeiVoiceResponse<HeiVoiceSearchResult> response = Gsons.fromJson(result, new TypeToken<HeiVoiceResponse<HeiVoiceSearchResult>>(){}.getType());
-		Asserts.notNull(response, "网络异常");
-		Asserts.checkEquals(response.getStatus(), "ok", "请求失败(%s)", response.getMsg());
-		return response.getResult().getList();
 	}
 }
