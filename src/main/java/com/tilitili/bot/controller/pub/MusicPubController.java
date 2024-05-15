@@ -6,7 +6,6 @@ import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
-import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.*;
@@ -32,8 +30,8 @@ public class MusicPubController extends BaseController {
 	}
 
 	@GetMapping("/player/{botId}/event")
-	public SseEmitter registerSubscribe(@PathVariable Long botId, @RequestParam String eventToken) {
-		Asserts.isTrue(redisCache.delete("MusicController.eventToken-"+eventToken), "参数异常");
+	public SseEmitter registerSubscribe(@PathVariable Long botId) {
+//		Asserts.isTrue(redisCache.delete("MusicController.eventToken-"+eventToken), "参数异常");
 		log.info("new sseEmitter");
 		SseEmitter sseEmitter = new SseEmitter(-1L);
 		emitterMap.computeIfAbsent(botId, key -> new LinkedList<>()).add(sseEmitter);
