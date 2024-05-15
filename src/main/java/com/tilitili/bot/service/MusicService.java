@@ -201,7 +201,7 @@ public class MusicService {
             return null;
         }
 
-        return ktvServiceInterface.restartKtv(voiceSender.getId());
+        return ktvServiceInterface.restartKtv(botSender.getId(), voiceSender.getId());
 //        String data = Gsons.toJson(ImmutableMap.of("voiceSenderId", voiceSender.getId()));
 //        String result = this.post("restart", data);
 //        BaseModel<Boolean> resp = Gsons.fromJson(result, new TypeToken<BaseModel<Boolean>>(){}.getType());
