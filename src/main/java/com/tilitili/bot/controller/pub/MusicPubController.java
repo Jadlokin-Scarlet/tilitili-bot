@@ -4,8 +4,7 @@ import com.tilitili.bot.controller.BaseController;
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
-import com.tilitili.common.entity.dto.PlayerMusicDTO;
-import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.dto.KtvEvent;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -45,24 +44,23 @@ public class MusicPubController extends BaseController {
 			emitterMap.get(botId).remove(sseEmitter);
 		});
 
-		ktvUpdateMessage(botId);
+		ktvUpdateMessage(new KtvEvent().setType(KtvEvent.TYPE_UPDATE).setBotId(botId));
 
 		return sseEmitter;
 	}
 
-	@JmsListener(destination = JmsTemplateFactory.KEY_KTV_UPDATE, containerFactory = "topicFactory")
-	public void ktvUpdateMessage(Long botId) {
+	@JmsListener(destination = JmsTemplateFactory.KEY_KTV_MESSAGE, containerFactory = "topicFactory")
+	public void ktvUpdateMessage(KtvEvent event) {
+		Long botId = event.getBotId();
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botId, redisCache);
-		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
-		List<PlayerMusicDTO> playerQueue = musicRedisQueue.getPlayerQueue();
-		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
-		Boolean stopFlag = musicRedisQueue.getStopFlag();
 
 		WebControlDataVO response = new WebControlDataVO();
-		response.setTheMusic(theMusic);
-		response.setPlayerQueue(playerQueue);
-		response.setMusicList(musicList);
-		response.setStopFlag(stopFlag);
+		if (KtvEvent.TYPE_UPDATE.equals(event.getType())) {
+			response.setTheMusic(musicRedisQueue.getTheMusic());
+			response.setPlayerQueue(musicRedisQueue.getPlayerQueue());
+			response.setMusicList(musicRedisQueue.getMusicList());
+		}
+		response.setStopFlag(event.getStop());
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
 		log.info("send ktv update to botId={} size={}", botId, emitterList.size());
