@@ -6,7 +6,6 @@ import com.tilitili.bot.entity.request.UpdateRoleMappingRequest;
 import com.tilitili.common.entity.BotMenu;
 import com.tilitili.common.entity.BotMenuRoleMapping;
 import com.tilitili.common.entity.BotRole;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotMenuQuery;
 import com.tilitili.common.entity.query.BotMenuRoleMappingQuery;
 import com.tilitili.common.mapper.mysql.BotMenuMapper;
@@ -30,8 +29,8 @@ public class BotMenuService {
         this.botRoleMapper = botRoleMapper;
     }
 
-    public List<MenuDTO> getMenuList(BotUserDTO botUser) {
-        List<BotMenu> menuList = botMenuMapper.getUserMenuList(botUser.getId());
+    public List<MenuDTO> getMenuList(Long userId) {
+        List<BotMenu> menuList = botMenuMapper.getUserMenuList(userId);
         menuList.sort(Comparator.comparingInt(BotMenu::getLevel));
         List<MenuDTO> result = new ArrayList<>();
         Map<Long, MenuDTO> idIndexMap = new HashMap<>();

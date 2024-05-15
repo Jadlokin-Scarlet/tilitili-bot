@@ -1,7 +1,6 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.annotation.BotAdminCheck;
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.entity.MenuDTO;
 import com.tilitili.bot.entity.request.UpdateRoleMappingRequest;
 import com.tilitili.bot.service.BotMenuService;
@@ -27,8 +26,8 @@ public class BotMenuController extends BaseController {
 
     @GetMapping("/menuList")
     @ResponseBody
-    public BaseModel<List<MenuDTO>> menuList(@SessionAttribute(value = "botUser") BotUserVO botUser) {
-        List<MenuDTO> menuList = botMenuService.getMenuList(botUser);
+    public BaseModel<List<MenuDTO>> menuList(@SessionAttribute(value = "userId") Long userId) {
+        List<MenuDTO> menuList = botMenuService.getMenuList(userId);
         return BaseModel.success(menuList);
     }
 

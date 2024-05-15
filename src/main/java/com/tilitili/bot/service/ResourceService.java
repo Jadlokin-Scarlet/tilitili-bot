@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.tilitili.common.constant.BotRobotConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.resource.Resource;
 import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.manager.BotTaskManager;
@@ -20,7 +19,7 @@ import java.util.function.Supplier;
 @Service
 public class ResourceService {
     private final Map<String, Supplier<List<Resource>>> resourceMap = new HashMap<>();
-    private final Map<String, Function<BotUserDTO, List<Resource>>> adminResourceMap = new HashMap<>();
+    private final Map<String, Function<Long, List<Resource>>> adminResourceMap = new HashMap<>();
 
     @Autowired
     public ResourceService(BotRoleManager botRoleManager, BotTaskManager botTaskManager, BotSenderService botSenderService) {
@@ -33,9 +32,9 @@ public class ResourceService {
         adminResourceMap.put("botSenderList", botSenderService::listBotSenderResource);
     }
 
-    public List<Resource> getResource(BotUserDTO botUser, String resourceName) {
+    public List<Resource> getResource(Long userId, String resourceName) {
         if (adminResourceMap.containsKey(resourceName)) {
-            return adminResourceMap.get(resourceName).apply(botUser);
+            return adminResourceMap.get(resourceName).apply(userId);
         }
         return resourceMap.getOrDefault(resourceName, Collections::emptyList).get();
     }

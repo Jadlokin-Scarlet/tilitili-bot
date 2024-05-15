@@ -1,27 +1,29 @@
 package com.tilitili.bot.controller;
 
-import com.tilitili.bot.entity.BotUserVO;
-import com.tilitili.bot.entity.response.ListPlayerMusicResponse;
+import com.tilitili.bot.entity.WebControlDataVO;
+import com.tilitili.bot.service.MusicService;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.emnus.SendTypeEnum;
+import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.PlayerMusicList;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
+import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.view.BaseModel;
+import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotSenderCacheManager;
+import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,39 +36,92 @@ public class MusicController extends BaseController{
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final RedisCache redisCache;
+	private final MusicService musicService;
+	private final BotRobotCacheManager botRobotCacheManager;
+	private final BotUserManager botUserManager;
 
-	public MusicController(PlayerMusicListMapper playerMusicListMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderCacheManager botSenderCacheManager, RedisCache redisCache) {
+	public MusicController(PlayerMusicListMapper playerMusicListMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderCacheManager botSenderCacheManager, RedisCache redisCache, MusicService musicService, BotRobotCacheManager botRobotCacheManager, BotUserManager botUserManager) {
 		this.playerMusicListMapper = playerMusicListMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.redisCache = redisCache;
+		this.musicService = musicService;
+		this.botRobotCacheManager = botRobotCacheManager;
+		this.botUserManager = botUserManager;
 	}
 
 	@GetMapping("/list")
 	@ResponseBody
-	public BaseModel<List<PlayerMusicList>> listMusic(@SessionAttribute(value = "botUser") BotUserVO botUser) {
-		List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(botUser.getId()));
+	public BaseModel<List<PlayerMusicList>> listMusic(@SessionAttribute(value = "userId") Long userId) {
+		List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
 		return BaseModel.success(listList);
 	}
 
 	@GetMapping("/player")
 	@ResponseBody
-	public BaseModel<ListPlayerMusicResponse> getPlayerData(@SessionAttribute(value = "botUser") BotUserVO botUser) {
-		List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.listOnlineMappingBySendTypeAndUserId(SendTypeEnum.KOOK_MESSAGE_STR, botUser.getId());
+	public BaseModel<WebControlDataVO> getPlayerData(@SessionAttribute(value = "userId") Long userId) {
+		List<BotUserSenderMapping> mappingList = botUserSenderMappingMapper.listOnlineMappingBySendTypeAndUserId(SendTypeEnum.KOOK_MESSAGE_STR, userId);
 		BotUserSenderMapping mapping = mappingList.stream().findFirst().orElse(null);
 		Asserts.notNull(mapping, "你好像还没加入语音");
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(mapping.getSenderId());
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
+		List<PlayerMusicDTO> playerQueue = musicRedisQueue.getPlayerQueue();
+		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
+		Boolean stopFlag = musicRedisQueue.getStopFlag();
 
 		String eventToken = UUID.randomUUID().toString();
 		redisCache.setValue("MusicController.eventToken-"+eventToken, "yes", 10);
 
-		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
-		response.setTheMusic(theMusic);
+		WebControlDataVO response = new WebControlDataVO();
 		response.setBotId(botSender.getBot());
+		response.setSenderId(botSender.getId());
 		response.setEventToken(eventToken);
+		response.setTheMusic(theMusic);
+		response.setPlayerQueue(playerQueue);
+		response.setMusicList(musicList);
+		response.setStopFlag(stopFlag);
 		return BaseModel.success(response);
+	}
+
+	@PostMapping("/player/stop")
+	@ResponseBody
+	public BaseModel<?> stop(@RequestBody WebControlDataVO data, @SessionAttribute(value = "userId") Long userId) {
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
+		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+		musicService.stopMusic(bot, botSender, botUser);
+		return BaseModel.success();
+	}
+
+	@PostMapping("/player/start")
+	@ResponseBody
+	public BaseModel<?> start(@RequestBody WebControlDataVO data, @SessionAttribute(value = "userId") Long userId) {
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
+		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+		musicService.startMusic(bot, botSender, botUser);
+		return BaseModel.success();
+	}
+
+	@PostMapping("/player/last")
+	@ResponseBody
+	public BaseModel<?> last(@RequestBody WebControlDataVO data, @SessionAttribute(value = "userId") Long userId) {
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
+		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+		musicService.lastMusic(bot, botSender, botUser);
+		return BaseModel.success();
+	}
+
+	@PostMapping("/player/list/start")
+	@ResponseBody
+	public BaseModel<?> startList(@RequestBody WebControlDataVO data, @SessionAttribute(value = "userId") Long userId) {
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
+		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+		musicService.startList(bot, botSender, botUser);
+		return BaseModel.success();
 	}
 }

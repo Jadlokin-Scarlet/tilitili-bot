@@ -1,7 +1,6 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotConfigUpdateRequest;
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.common.entity.BotConfig;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.manager.BotConfigManager;
@@ -24,18 +23,18 @@ public class BotConfigController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<List<BotConfig>> listConfig(@SessionAttribute(value = "botUser") BotUserVO botUser) {
-        List<BotConfig> configList = botConfigManager.listBotConfigByUserIdWithoutPrefix(botUser.getId());
+    public BaseModel<List<BotConfig>> listConfig(@SessionAttribute(value = "userId") Long userId) {
+        List<BotConfig> configList = botConfigManager.listBotConfigByUserIdWithoutPrefix(userId);
         return BaseModel.success(configList);
     }
 
     @PostMapping("/update")
     @ResponseBody
-    public BaseModel<?> updateConfig(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody BotConfigUpdateRequest request) {
+    public BaseModel<?> updateConfig(@SessionAttribute(value = "userId") Long userId, @RequestBody BotConfigUpdateRequest request) {
         List<BotConfig> configList = request.getConfigList();
         Asserts.notEmpty(configList, "参数异常");
         for (BotConfig config : configList) {
-            botConfigManager.addOrUpdateUserConfig(botUser.getId(), config.getKey(), config.getValue());
+            botConfigManager.addOrUpdateUserConfig(userId, config.getKey(), config.getValue());
         }
         return BaseModel.success();
     }

@@ -1,7 +1,6 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotFunctionTalkDTO;
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.entity.request.ImportRandomTalkRequest;
 import com.tilitili.bot.service.RandomTalkService;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
@@ -24,14 +23,14 @@ public class RandomTalkController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(@SessionAttribute(value = "botUser") BotUserVO botUser, BotFunctionTalkQuery query) {
-        return randomTalkService.listRandomTalk(query.setAdminUserId(botUser.getId()));
+    public BaseModel<PageModel<BotFunctionTalkDTO>> listRandomTalk(@SessionAttribute(value = "userId") Long userId, BotFunctionTalkQuery query) {
+        return randomTalkService.listRandomTalk(query.setAdminUserId(userId));
     }
 
     @PostMapping("/import")
     @ResponseBody
-    public BaseModel<String> importRandomTalk(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody ImportRandomTalkRequest request) {
+    public BaseModel<String> importRandomTalk(@SessionAttribute(value = "userId") Long userId, @RequestBody ImportRandomTalkRequest request) {
         Asserts.notBlank(request.getFile(), "参数异常");
-        return randomTalkService.importRandomTalk(botUser, request.getFile());
+        return randomTalkService.importRandomTalk(userId, request.getFile());
     }
 }

@@ -27,7 +27,8 @@ public class BotAdminController extends BaseController {
     @GetMapping("/isLogin")
     @ResponseBody
     public BaseModel<BotUserVO> isLogin(HttpServletRequest request, HttpServletResponse response) {
-        BotUserVO botUser = loginInterceptor.getSessionUserOrReLoginByToken(request, response);
+        Long userId = loginInterceptor.getSessionUserOrReLoginByToken(request, response);
+        BotUserVO botUser = botAdminService.getBotUserWithIsAdmin(userId);
         return new BaseModel<>("", true, botUser);
     }
 
@@ -38,16 +39,16 @@ public class BotAdminController extends BaseController {
         BotUserVO botUser = botAdminService.login(request);
         // 直接下发新token，不管有没有旧token
         if (request.getRemember() != null && request.getRemember()) {
-            loginInterceptor.makeNewToken(response, botUser);
+            loginInterceptor.makeNewToken(response, botUser.getId());
         }
-        session.setAttribute("botUser", botUser);
+        session.setAttribute("userId", botUser.getId());
         return new BaseModel<>("登录成功", true, botUser);
     }
 
     @PostMapping("/loginOut")
     @ResponseBody
     public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response) {
-        session.removeAttribute("botUser");
+        session.removeAttribute("userId");
         response.addCookie(loginInterceptor.generateCookie(""));
         return new BaseModel<>("", true);
     }

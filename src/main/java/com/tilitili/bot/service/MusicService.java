@@ -7,12 +7,14 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.MusicCloudManager;
+import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.StringUtils;
@@ -33,11 +35,13 @@ public class MusicService {
     private final MusicCloudManager musicCloudManager;
     @DubboReference(timeout = 8000)
     private KtvServiceInterface ktvServiceInterface;
+    private final PlayerMusicMapper playerMusicMapper;
 
-    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager) {
+    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager, PlayerMusicMapper playerMusicMapper) {
         this.botManager = botManager;
         this.bilibiliManager = bilibiliManager;
         this.musicCloudManager = musicCloudManager;
+        this.playerMusicMapper = playerMusicMapper;
     }
 
     public BotMessage pushPlayListToQuote(BotRobot bot, BotSender botSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
@@ -87,6 +91,17 @@ public class MusicService {
             String lastStr = playerMusicNameList.size() < 2? "": String.format("，前面还有%s首", playerMusicNameList.size()-1);
             return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", music.getName(), lastStr));
         }
+    }
+
+    public BotMessage startList(BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+        List<PlayerMusicDTO> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId())).stream().map(music -> {
+            PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+            playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName()).setIcon(music.getIcon());
+            return playerMusic;
+        }).collect(Collectors.toList());
+        Asserts.notEmpty(musicList, "歌单空空如也，先导入歌单吧");
+        PlayerMusicSongList playerMusicSongList = new PlayerMusicSongList().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
+        return this.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
     }
 
     public List<String> lastMusic(BotRobot bot, BotSender botSender, BotUserDTO botUser) {

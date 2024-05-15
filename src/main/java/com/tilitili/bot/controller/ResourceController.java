@@ -1,6 +1,5 @@
 package com.tilitili.bot.controller;
 
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.service.ResourceService;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.resource.Resource;
@@ -28,10 +27,10 @@ public class ResourceController extends BaseController {
 
     @GetMapping("")
     @ResponseBody
-    public BaseModel<?> getResources(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestParam List<String> needResourcesList) {
+    public BaseModel<?> getResources(@SessionAttribute(value = "userId") Long userId, @RequestParam List<String> needResourcesList) {
         Map<String, List<Resource>> resourceMap = new HashMap<>();
         for (String resourceName : needResourcesList) {
-            resourceMap.put(resourceName, resourceService.getResource(botUser, resourceName));
+            resourceMap.put(resourceName, resourceService.getResource(userId, resourceName));
         }
         return BaseModel.success(resourceMap);
     }

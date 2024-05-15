@@ -47,10 +47,10 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 			return true;
 		}
 		// 自动登陆
-		BotUserVO botUser = this.getSessionUserOrReLoginByToken(request, response);
+		Long userId = this.getSessionUserOrReLoginByToken(request, response);
 
 		//未登录
-		if (botUser == null){
+		if (userId == null){
 			this.returnResp(response,new BaseModel<>("请重新登录"));
 			return false;
 		}
@@ -73,40 +73,41 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		}
 	}
 
-	public BotUserVO getSessionUserOrReLoginByToken(HttpServletRequest request, HttpServletResponse response) {
+	public Long getSessionUserOrReLoginByToken(HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession();
-		BotUserVO botUser = (BotUserVO)session.getAttribute("botUser");
+		Long userId = (Long) session.getAttribute("userId");
 		String token = request.getCookies() == null? null:
 				Arrays.stream(request.getCookies()).filter(StreamUtil.isEqual(Cookie::getName, "token"))
 						.map(Cookie::getValue).findFirst().orElse(null);
 		// 如果登陆状态已失效，但是有token，就自动登陆
-		if (botUser == null && StringUtils.isNotBlank(token)) {
+		if (userId == null && StringUtils.isNotBlank(token)) {
 			// 消耗token登陆
-			botUser = getBotUserUseToken(token);
-			if (botUser != null) {
-				session.setAttribute("botUser", botUser);
+			userId = getBotUserUseToken(token);
+			if (userId != null) {
+				session.setAttribute("userId", userId);
 				// 下发新token
-				makeNewToken(response, botUser);
+				makeNewToken(response, userId);
 			}
 		}
-		return botUser;
+		return userId;
 	}
 
 	// 消耗token，用于自动登陆
-	private BotUserVO getBotUserUseToken(String token) {
+	private Long getBotUserUseToken(String token) {
 		Long userId = redisCache.getValueLong(REMEMBER_TOKEN_KEY + token);
 		redisCache.delete(REMEMBER_TOKEN_KEY + token);
 		if (userId == null) {
 			return null;
 		}
-		return botAdminService.getBotUserWithIsAdmin(userId);
+		BotUserVO botUser = botAdminService.getBotUserWithIsAdmin(userId);
+		return botUser.getId();
 	}
 
 	// 新建token，一式两份，同时创建同时销毁
-	public void makeNewToken(HttpServletResponse response, BotUserVO botUser) {
+	public void makeNewToken(HttpServletResponse response, Long userId) {
 		String newToken = UUID.randomUUID().toString();
 		response.addCookie(generateCookie(newToken));
-		redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, botUser.getId(), TIMEOUT);
+		redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, userId, TIMEOUT);
 	}
 
 	@NotNull

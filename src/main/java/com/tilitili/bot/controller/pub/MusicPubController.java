@@ -1,10 +1,11 @@
 package com.tilitili.bot.controller.pub;
 
 import com.tilitili.bot.controller.BaseController;
-import com.tilitili.bot.entity.response.ListPlayerMusicResponse;
+import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
+import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
@@ -46,9 +47,7 @@ public class MusicPubController extends BaseController {
 			emitterMap.get(botId).remove(sseEmitter);
 		});
 
-//		Executors.newScheduledThreadPool(10).scheduleWithFixedDelay(() -> {
 		ktvUpdateMessage(botId);
-//		}, 0, 10, TimeUnit.SECONDS);
 
 		return sseEmitter;
 	}
@@ -57,9 +56,15 @@ public class MusicPubController extends BaseController {
 	public void ktvUpdateMessage(Long botId) {
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botId, redisCache);
 		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
-		ListPlayerMusicResponse response = new ListPlayerMusicResponse();
+		List<PlayerMusicDTO> playerQueue = musicRedisQueue.getPlayerQueue();
+		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
+		Boolean stopFlag = musicRedisQueue.getStopFlag();
+
+		WebControlDataVO response = new WebControlDataVO();
 		response.setTheMusic(theMusic);
-		response.setBotId(botId);
+		response.setPlayerQueue(playerQueue);
+		response.setMusicList(musicList);
+		response.setStopFlag(stopFlag);
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
 		log.info("send ktv update to botId={} size={}", botId, emitterList.size());

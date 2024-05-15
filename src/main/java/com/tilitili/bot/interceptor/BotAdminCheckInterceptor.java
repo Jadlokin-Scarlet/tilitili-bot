@@ -3,7 +3,6 @@ package com.tilitili.bot.interceptor;
 import com.tilitili.bot.annotation.BotAdminCheck;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotRoleUserMapping;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,9 @@ public class BotAdminCheckInterceptor implements HandlerInterceptor {
             if (botAdminCheckAnnotation != null) {
                 HttpSession session = request.getSession();
                 // 从会话中获取数据
-                BotUserDTO botUser = (BotUserDTO) session.getAttribute("botUser");
+                Long userId = (Long) session.getAttribute("userId");
 
-                BotRoleUserMapping mapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+                BotRoleUserMapping mapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(userId, BotRoleConstant.adminRole);
                 Asserts.notNull(mapping, "权限不足");
             }
         }

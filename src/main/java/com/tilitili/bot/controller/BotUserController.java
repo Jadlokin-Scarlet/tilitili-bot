@@ -1,6 +1,5 @@
 package com.tilitili.bot.controller;
 
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.service.BotUserService;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotRoleUserMapping;
@@ -25,25 +24,25 @@ public class BotUserController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<BotUserDTO>> listBotUser(@SessionAttribute(value = "botUser") BotUserVO botUser, BotUserQuery query) {
-        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+    public BaseModel<PageModel<BotUserDTO>> listBotUser(@SessionAttribute(value = "userId") Long userId, BotUserQuery query) {
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(userId, BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setAdminUserId(botUser.getId());
+            query.setAdminUserId(userId);
         }
         return botUserService.listBotUser(query);
     }
 
     @PostMapping("/status")
     @ResponseBody
-    public BaseModel<?> changeStatus(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody BotUserDTO updBotUser) {
-        botUserService.changeStatus(botUser.getId(), updBotUser);
+    public BaseModel<?> changeStatus(@SessionAttribute(value = "userId") Long userId, @RequestBody BotUserDTO updBotUser) {
+        botUserService.changeStatus(userId, updBotUser);
         return BaseModel.success();
     }
 
     @PostMapping("/bind")
     @ResponseBody
-    public BaseModel<?> bindUser(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody BotUserDTO updBotUser) {
-        botUserService.bindUser(botUser.getId(), updBotUser.getId(), updBotUser.getQq());
+    public BaseModel<?> bindUser(@SessionAttribute(value = "userId") Long userId, @RequestBody BotUserDTO updBotUser) {
+        botUserService.bindUser(userId, updBotUser.getId(), updBotUser.getQq());
         return BaseModel.success();
     }
 }

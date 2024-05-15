@@ -1,7 +1,6 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.BotRobotSenderMappingDTO;
-import com.tilitili.bot.entity.BotUserVO;
 import com.tilitili.bot.entity.request.UpdateBotRobotSenderMappingIndexRequest;
 import com.tilitili.bot.entity.request.UpdateBotSenderTaskRequest;
 import com.tilitili.bot.service.BotSenderService;
@@ -30,18 +29,18 @@ public class BotSenderController extends BaseController {
 
     @GetMapping("/list")
     @ResponseBody
-    public BaseModel<PageModel<Map<String, Object>>> listBotSender(@SessionAttribute(value = "botUser") BotUserVO botUser, BotSenderQuery query) {
-        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+    public BaseModel<PageModel<Map<String, Object>>> listBotSender(@SessionAttribute(value = "userId") Long userId, BotSenderQuery query) {
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(userId, BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setAdminUserId(botUser.getId());
+            query.setAdminUserId(userId);
         }
         return botSenderService.listBotSender(query);
     }
 
     @PostMapping("/update")
     @ResponseBody
-    public BaseModel<?> updateBotSenderTask(@SessionAttribute(value = "botUser") BotUserVO botUser, @RequestBody UpdateBotSenderTaskRequest request) {
-        botSenderService.updateBotSenderTask(botUser, request);
+    public BaseModel<?> updateBotSenderTask(@SessionAttribute(value = "userId") Long userId, @RequestBody UpdateBotSenderTaskRequest request) {
+        botSenderService.updateBotSenderTask(userId, request);
         return BaseModel.success();
     }
 

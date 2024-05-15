@@ -5,7 +5,6 @@ import com.tilitili.bot.annotation.BotAuthorityCheck;
 import com.tilitili.common.constant.BotRoleConstant;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotRoleUserMapping;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.mapper.mysql.BotRoleUserMappingMapper;
 import com.tilitili.common.utils.Asserts;
@@ -42,10 +41,10 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
             if (botAuthorityCheckAnnotation != null) {
                 HttpSession session = request.getSession();
                 // 从会话中获取数据
-                BotUserDTO botUser = (BotUserDTO) session.getAttribute("botUser");
-                Asserts.notNull(botUser, "参数异常");
+                Asserts.notNull(session.getAttribute("userId"), "参数异常");
+                Long userId = (Long) session.getAttribute("userId");
 
-                BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+                BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(userId, BotRoleConstant.adminRole);
                 if (adminMapping == null) {
                     String idStr = this.getBotId(request);
                     Asserts.notNull(idStr, "参数异常");
@@ -53,7 +52,7 @@ public class BotAuthorityCheckInterceptor implements HandlerInterceptor {
 
                     BotRobot bot = botRobotCacheManager.getBotRobotById(id);
                     Asserts.notNull(bot, "参数异常");
-                    Asserts.checkEquals(bot.getMasterId(), botUser.getId(), "权限异常");
+                    Asserts.checkEquals(bot.getMasterId(), userId, "权限异常");
                 }
             }
         }

@@ -5,7 +5,6 @@ import com.tilitili.bot.service.mirai.talk.AddRandomTalkHandle;
 import com.tilitili.common.component.CloseableTempFile;
 import com.tilitili.common.entity.BotFunctionTalk;
 import com.tilitili.common.entity.BotSender;
-import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotFunctionTalkQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
@@ -58,9 +57,9 @@ public class RandomTalkService {
         return PageModel.of(total, query.getPageSize(), query.getCurrent(), result);
     }
 
-    public BaseModel<String> importRandomTalk(BotUserDTO botUser, String ossUrl) {
+    public BaseModel<String> importRandomTalk(Long userId, String ossUrl) {
         try (CloseableTempFile file = CloseableTempFile.ofUrl(ossUrl, null)) {
-            String resp = addRandomTalkHandle.doHandleRandomTalkFile(file.getFile(), botUser.getId());
+            String resp = addRandomTalkHandle.doHandleRandomTalkFile(file.getFile(), userId);
             return BaseModel.success(resp);
         } catch (IOException e) {
             log.info("下载文件失败", e);

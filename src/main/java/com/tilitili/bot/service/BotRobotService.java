@@ -48,10 +48,10 @@ public class BotRobotService {
         this.botAdminMapper = botAdminMapper;
     }
 
-    public BaseModel<PageModel<BotRobotDTO>> list(BotUserDTO botUser, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
-        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(botUser.getId(), BotRoleConstant.adminRole);
+    public BaseModel<PageModel<BotRobotDTO>> list(Long userId, BotRobotQuery query) throws InvocationTargetException, IllegalAccessException {
+        BotRoleUserMapping adminMapping = botRoleUserMappingMapper.getBotRoleUserMappingByUserIdAndRoleId(userId, BotRoleConstant.adminRole);
         if (adminMapping == null) {
-            query.setMasterId(botUser.getId());
+            query.setMasterId(userId);
         }
         int total = botRobotCacheManager.countBotRobotByCondition(query);
         List<BotRobot> list = botRobotCacheManager.getBotRobotByCondition(query);
@@ -90,12 +90,12 @@ public class BotRobotService {
         }
     }
 
-    public void addBot(BotUserDTO botUser, BotRobot bot) {
+    public void addBot(Long userId, BotRobot bot) {
         Asserts.notNull(bot, "参数异常");
         Asserts.notNull(bot.getType(), "参数异常");
         bot.setStatus(-1);
-        bot.setMasterId(botUser.getId());
-        BotAdmin botAdmin = botAdminMapper.getBotAdminByUserId(botUser.getId());
+        bot.setMasterId(userId);
+        BotAdmin botAdmin = botAdminMapper.getBotAdminByUserId(userId);
         bot.setUserId(botAdmin.getId());
         switch (bot.getType()) {
             case BotRobotConstant.TYPE_MIRAI: {
