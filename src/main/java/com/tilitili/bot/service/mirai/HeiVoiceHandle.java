@@ -42,9 +42,10 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		BotRobot bot = messageAction.getBot();
 		BotSender botSender = messageAction.getBotSender();
 
-		if (StringUtils.isNumber(search)) {
-			Asserts.isRange(1, Integer.parseInt(search), 100, "页数不对劲");
-			List<HeiVoice> voiceList = searchHeiVoice("", Integer.parseInt(search));
+		if (StringUtils.isBlank(search) || StringUtils.isNumber(search)) {
+			int pageNo = StringUtils.isBlank(search)? 1: Integer.parseInt(search);
+			Asserts.isRange(1, pageNo, 100, "页数不对劲");
+			List<HeiVoice> voiceList = searchHeiVoice("", pageNo);
 			return BotMessage.simpleTextMessage("以下是热门语音，输入（语音 页数）翻页\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
 		}
 
