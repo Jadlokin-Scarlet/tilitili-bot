@@ -69,7 +69,6 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		HeiVoiceResponse<HeiVoiceSearchResult> response = Gsons.fromJson(result, new TypeToken<HeiVoiceResponse<HeiVoiceSearchResult>>(){}.getType());
 		Asserts.notNull(response, "网络异常");
 		Asserts.checkEquals(response.getStatus(), "ok", "请求失败(%s)", response.getMsg());
-		List<HeiVoice> voiceList = response.getResult().getList();
-		return voiceList;
+		return response.getResult().getList();
 	}
 }
