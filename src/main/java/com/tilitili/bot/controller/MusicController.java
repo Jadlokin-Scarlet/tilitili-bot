@@ -2,16 +2,12 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.bot.service.MusicService;
-import com.tilitili.common.component.music.MusicQueueFactory;
-import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.PlayerMusicList;
 import com.tilitili.common.entity.dto.BotUserDTO;
-import com.tilitili.common.entity.dto.PlayerMusicDTO;
-import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.manager.BotRobotCacheManager;
@@ -65,12 +61,6 @@ public class MusicController extends BaseController{
 		Asserts.notNull(mapping, "你好像还没加入语音");
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(mapping.getSenderId());
 
-		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
-		PlayerMusicDTO theMusic = musicRedisQueue.getTheMusic();
-		List<PlayerMusicDTO> playerQueue = musicRedisQueue.getPlayerQueue();
-		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
-		Boolean stopFlag = musicRedisQueue.getStopFlag();
-
 		String eventToken = UUID.randomUUID().toString();
 		redisCache.setValue("MusicController.eventToken-"+eventToken, "yes", 10);
 
@@ -78,10 +68,6 @@ public class MusicController extends BaseController{
 		response.setBotId(botSender.getBot());
 		response.setSenderId(botSender.getId());
 		response.setEventToken(eventToken);
-		response.setTheMusic(theMusic);
-		response.setPlayerQueue(playerQueue);
-		response.setMusicList(musicList);
-		response.setStopFlag(stopFlag);
 		return BaseModel.success(response);
 	}
 
