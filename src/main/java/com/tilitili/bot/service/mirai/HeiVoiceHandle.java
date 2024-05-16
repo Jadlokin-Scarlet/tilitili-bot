@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,10 +23,14 @@ import java.util.stream.Collectors;
 public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 	private final HeiVoiceManager heiVoiceManager;
 	private final MusicService musicService;
+	private final RedisCache redisCache;
 
-	public HeiVoiceHandle(HeiVoiceManager heiVoiceManager, MusicService musicService) {
+	private static final String VOICE_NAME_MAP_KEY = "HeiVoiceHandle.voiceNameMap-";
+
+	public HeiVoiceHandle(HeiVoiceManager heiVoiceManager, MusicService musicService, RedisCache redisCache) {
 		this.heiVoiceManager = heiVoiceManager;
 		this.musicService = musicService;
+		this.redisCache = redisCache;
 	}
 
 	@Override
@@ -42,11 +47,15 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("以下是热门语音，输入（语音 页数）翻页\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
 		}
 
-		List<HeiVoice> voiceList = heiVoiceManager.searchHeiVoice(search, 1);
-		Asserts.notEmpty(voiceList, "没搜到");
-		HeiVoice heiVoice = voiceList.stream().filter(StreamUtil.isEqual(HeiVoice::getName, search)).findFirst().orElse(voiceList.get(0));
-		Asserts.checkEquals(heiVoice.getName(), search, "好像没有，以下是搜索结果：\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
-		String url = String.format("https://hf.max-c.com/voice/%s.%s", heiVoice.getPath(), heiVoice.getExt());
+		String url = redisCache.getValueString(VOICE_NAME_MAP_KEY + search);
+		if (url == null) {
+			List<HeiVoice> voiceList = heiVoiceManager.searchHeiVoice(search, 1);
+			Asserts.notEmpty(voiceList, "没搜到");
+			HeiVoice heiVoice = voiceList.stream().filter(StreamUtil.isEqual(HeiVoice::getName, search)).findFirst().orElse(voiceList.get(0));
+			Asserts.checkEquals(heiVoice.getName(), search, "好像没有，以下是搜索结果：\n" + voiceList.stream().map(HeiVoice::getName).collect(Collectors.joining("\n")));
+			url = String.format("https://hf.max-c.com/voice/%s.%s", heiVoice.getPath(), heiVoice.getExt());
+		}
+		redisCache.setValue(VOICE_NAME_MAP_KEY + search, url, TimeUnit.DAYS.toSeconds(7));
 
 		PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
 		playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的喊话", botUser.getName()));
