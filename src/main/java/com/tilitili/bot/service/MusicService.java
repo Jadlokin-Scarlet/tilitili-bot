@@ -44,11 +44,8 @@ public class MusicService {
     }
 
     public void pushPlayListToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
-        if (voiceSender == null) {
-            log.info("未在语音频道");
-            return;
-        }
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) return;
 
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
@@ -56,9 +53,8 @@ public class MusicService {
     }
 
     public Boolean pushMusicToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicDTO music) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) {
-            log.info("未在语音频道");
             return false;
         }
         String token = bot.getVerifyKey();
@@ -79,49 +75,36 @@ public class MusicService {
     }
 
     public void lastMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
-        if (voiceSender == null) {
-            log.info("未在语音频道");
-            return;
-        }
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) return;
 
         ktvServiceInterface.lastMusic(textSender.getId(), voiceSender.getId());
     }
 
     public void stopMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
-        if (voiceSender == null) {
-            log.info("未在语音频道");
-            return;
-        }
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) return;
 
         ktvServiceInterface.stopMusic(textSender.getId(), voiceSender.getId());
     }
 
     public void clearMusicList(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
-        if (voiceSender == null) {
-            log.info("未在语音频道");
-            return;
-        }
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) return;
 
         ktvServiceInterface.clearMusicList(voiceSender.getId());
     }
 
     public void startMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
-        if (voiceSender == null) {
-            log.info("未在语音频道");
-            return;
-        }
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) return;
 
         ktvServiceInterface.startMusic(textSender.getId(), voiceSender.getId());
     }
 
     public Boolean loopPlayer(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) {
-            log.info("未在语音频道");
             return null;
         }
 
@@ -129,9 +112,8 @@ public class MusicService {
     }
 
     public Boolean restartKtv(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
-        BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) {
-            log.info("未在语音频道");
             return null;
         }
 
@@ -234,5 +216,19 @@ public class MusicService {
             default:
                 throw new AssertException();
         }
+    }
+
+    private BotSender getVoiceSenderOrNull(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
+        BotSender voiceSender;
+        try {
+            voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
+        } catch (AssertException e) {
+            voiceSender = null;
+        }
+        if (voiceSender == null) {
+            log.info("未在语音频道");
+            return null;
+        }
+        return voiceSender;
     }
 }
