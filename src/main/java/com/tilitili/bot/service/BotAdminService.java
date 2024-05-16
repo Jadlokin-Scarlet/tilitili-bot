@@ -212,4 +212,15 @@ public class BotAdminService {
         this.checkRegisterEmail(email);
         this.checkRegisterEmailCode(email, emailCode);
     }
+
+    public String getUserBindCode(Long userId) {
+        BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+        if (botUser.getBindCode() != null) {
+            return botUser.getBindCode();
+        }
+        String bindCode = this.generateRandomCode();
+        botUserManager.updateBotUserSelective(new BotUserDTO().setId(botUser.getId()).setBindCode(bindCode));
+
+        return botUser.getBindCode();
+    }
 }

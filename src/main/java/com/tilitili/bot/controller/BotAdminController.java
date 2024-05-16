@@ -110,4 +110,9 @@ public class BotAdminController extends BaseController {
         return this.login(request, session, response);
     }
 
+    @GetMapping("/bindCode")
+    @ResponseBody
+    public BaseModel<?> getBindCode(@SessionAttribute("userId") Long userId) {
+        return BaseModel.success(botAdminService.getUserBindCode(userId));
+    }
 }

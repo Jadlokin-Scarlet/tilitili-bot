@@ -11,6 +11,7 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.BotUserSenderMapping;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
+import com.tilitili.common.entity.query.BotUserQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -27,6 +28,7 @@ import com.tilitili.common.utils.RedisCache;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class BindHandle extends ExceptionRespMessageToSenderHandle {
@@ -58,8 +60,35 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 			case "申请合体": return handleApply(messageAction);
 			case "合体！": return handleAccept(messageAction);
 			case "合体": return handleAdminBind(messageAction);
+			case "绑定码": return handleBindCode(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleBindCode(BotMessageAction messageAction) {
+		BotUserDTO parentUser = messageAction.getBotUser();
+		Asserts.checkNull(parentUser.getBindCode(), "你已绑定！");
+		Asserts.checkNull(parentUser.getParentId());
+		String bindCode = messageAction.getValue();
+		Asserts.notNull(bindCode, "格式错啦（绑定码）");
+		List<BotUserDTO> bindCodeList = botUserManager.getBotUserByCondition(new BotUserQuery().setBindCode(bindCode));
+		// 一个绑定码应该只存在于一个账号关系树中，通过getBotUserByCondition取出来的应该都是数顶点用户，所以去重后应该只剩下一个
+		List<BotUserDTO> bindCodeListDistinct = bindCodeList.stream().distinct().collect(Collectors.toList());
+		Asserts.checkEquals(bindCodeListDistinct.size(), 1);
+		BotUserDTO subUser = bindCodeListDistinct.get(0);
+		Asserts.checkNull(subUser.getParentId());
+		// ?
+		Asserts.notEquals(parentUser.getType(), subUser.getType());
+
+		// 虽然好像没必要，但还是让QQ类型账号作为父账号
+		if (subUser.getType() == BotUserConstant.USER_TYPE_QQ) {
+			// 父子反转
+			botUserManager.bindUser(parentUser, subUser);
+		} else {
+			botUserManager.bindUser(subUser, parentUser);
+		}
+
+		return null;
 	}
 
 	private BotMessage handleAdminBind(BotMessageAction messageAction) {
