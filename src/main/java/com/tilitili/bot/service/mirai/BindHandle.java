@@ -88,7 +88,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 			botUserManager.bindUser(subUser, parentUser);
 		}
 
-		return null;
+		return BotMessage.simpleTextMessage("绑定成功！");
 	}
 
 	private BotMessage handleAdminBind(BotMessageAction messageAction) {
