@@ -82,7 +82,8 @@ public class SignHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleQueryRankMessage(BotMessageAction messageAction) {
-		List<BotUserRankDTO> rankDTOList = botUserItemMappingMapper.getBotUserScoreRank(5);
+		Long senderId = messageAction.getBotSender().getId();
+		List<BotUserRankDTO> rankDTOList = botUserItemMappingMapper.getBotUserScoreRank(senderId, 5);
 //		List<BotUser> userList = botUserMapper.getBotUserByCondition(new BotUserQuery().setStatus(0).setSorter("score").setSorted("desc").setPageSize(10));
 //		if (userList.size() > 10) userList = userList.subList(0, 10);
 

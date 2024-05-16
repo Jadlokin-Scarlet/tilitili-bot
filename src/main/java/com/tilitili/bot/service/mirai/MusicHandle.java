@@ -5,6 +5,8 @@ import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.component.music.MusicQueueFactory;
+import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.emnus.MusicType;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -147,7 +149,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         BotRobot bot = messageAction.getBot();
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
-        return musicService.startList(bot, botSender, botUser);
+        musicService.startList(bot, botSender, botUser);
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+        return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", redisQueue.getMusicList().getName()));
     }
 
     private BotMessage handleConfirmClear(BotMessageAction messageAction) {
@@ -205,7 +209,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage(String.format("删除歌单%d歌曲%d成功.", listCnt, musicCnt));
         } else {
-            PlayerMusicDTO theMusic = musicService.getTheMusic(messageAction.getBot(), messageAction.getBotSender(), botUser);
+            MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+            PlayerMusicDTO theMusic = redisQueue.getTheMusic();
             if (theMusic == null) {
                 return null;
             }
@@ -277,7 +282,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleList(BotMessageAction messageAction) {
-        List<String> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+        List<String> playerMusicList = redisQueue.getMusicNameList();
+//        List<String> playerMusicList = musicService.listMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         if (playerMusicList == null) {
             return null;
         }
@@ -295,45 +302,38 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleStart(BotMessageAction messageAction) {
-        List<String> playerMusicList = musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
-        if (playerMusicList == null) {
-            return null;
-        }
-        if (playerMusicList.isEmpty()) {
+        musicService.startMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+        if (redisQueue.isEmptyAll()) {
             return BotMessage.simpleTextMessage("播放列表空空如也。");
         } else {
-            return BotMessage.emptyMessage();
+            return BotMessage.simpleTextMessage("继续播放");
         }
     }
 
     private BotMessage handleStop(BotMessageAction messageAction) {
-        List<String> playerMusicList = musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
-        if (playerMusicList == null) {
-            return null;
-        }
-        if (playerMusicList.size() < 2) {
+        musicService.stopMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+
+        String lastName = redisQueue.lastName();
+        if (lastName == null) {
             return BotMessage.simpleTextMessage("已暂停，无下一首，点歌以继续。");
         }
-        return BotMessage.simpleTextMessage(String.format("已暂停，输入继续播放下一首：[%s]。", playerMusicList.get(1)));
+        return BotMessage.simpleTextMessage(String.format("已暂停，输入继续播放下一首：[%s]。", lastName));
     }
 
     private BotMessage handleClear(BotMessageAction messageAction) {
-        List<String> playerMusicList = musicService.clearMusicList(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
-        if (playerMusicList == null) {
-            return null;
-        }
+        musicService.clearMusicList(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
         return BotMessage.simpleTextMessage("已清理播放列表，无下一首，点歌以继续。");
     }
 
     private BotMessage handleLast(BotMessageAction messageAction) {
-        List<String> playerMusicList = musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
-        if (playerMusicList == null) {
-            return null;
-        }
-        if (playerMusicList.size() < 2) {
+        musicService.lastMusic(messageAction.getBot(), messageAction.getBotSender(), messageAction.getBotUser());
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+        if (redisQueue.isEmptyAll()) {
             return BotMessage.simpleTextMessage("播放列表空空如也。");
         }
-        return BotMessage.emptyMessage();
+        return BotMessage.simpleTextMessage("切歌成功");
     }
 
     private BotMessage handleChoose(BotMessageAction messageAction) {
@@ -371,14 +371,16 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
         PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
         if (playerMusicList != null) {
-            BotMessage botMessage = null;
             for (PlayerMusicDTO playerMusic : playerMusicList) {
-                botMessage = musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
+                musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
             }
-            return botMessage;
+            String nameListStr = playerMusicList.stream().map(PlayerMusicDTO::getName).collect(Collectors.joining("、"));
+            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", nameListStr, redisQueue.sizePlayerQueue()));
         } else if (playerMusicSongList != null) {
-            return musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
+            musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
+            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", redisQueue.getMusicList().getName()));
         } else {
             return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey, index);
         }
@@ -388,7 +390,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
         PlayerMusicDTO playerMusic = new PlayerMusicDTO();
         playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId())).setIcon(song.getAlbum().getPicUrl());
-        return musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
+        musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
+        MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
+        return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", playerMusic.getName(), redisQueue.sizePlayerQueue()));
     }
 
     private BotMessage handleMusicCouldSearch(BotRobot bot, BotSender botSender, BotUserDTO botUser, String searchKey, Integer theIndex) {
