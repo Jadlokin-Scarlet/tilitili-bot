@@ -29,6 +29,7 @@ public class BotAdminController extends BaseController {
     public BaseModel<BotUserVO> isLogin(HttpServletRequest request, HttpServletResponse response) {
         Long userId = loginInterceptor.getSessionUserOrReLoginByToken(request, response);
         BotUserVO botUser = botAdminService.getBotUserWithIsAdmin(userId);
+        Asserts.notNull(botUser, "请重新登录");
         return new BaseModel<>("", true, botUser);
     }
 
@@ -112,7 +113,7 @@ public class BotAdminController extends BaseController {
 
     @GetMapping("/bindCode")
     @ResponseBody
-    public BaseModel<?> getBindCode(@SessionAttribute("userId") Long userId) {
+    public BaseModel<?> getBindCode(@SessionAttribute(value = "userId") Long userId) {
         return BaseModel.success(botAdminService.getUserBindCode(userId));
     }
 }

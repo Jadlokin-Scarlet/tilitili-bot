@@ -108,6 +108,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		String newToken = UUID.randomUUID().toString();
 		response.addCookie(generateCookie(newToken));
 		redisCache.setValue(REMEMBER_TOKEN_KEY+newToken, userId, TIMEOUT);
+		log.info("new token={} userId={}", newToken, userId);
 	}
 
 	@NotNull
