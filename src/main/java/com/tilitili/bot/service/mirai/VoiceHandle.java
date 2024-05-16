@@ -75,7 +75,7 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
 
         playerMusicDTO.setFileUrl(url).setVolume(6).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的台词", botUser.getName()));
-        if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
+        if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO)) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
             return BotMessage.simpleTextMessage("已添加到播放列表");
 //        } else {

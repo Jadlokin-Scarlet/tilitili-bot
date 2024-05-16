@@ -9,7 +9,6 @@ import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
-import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
@@ -44,47 +43,28 @@ public class MusicService {
         this.playerMusicMapper = playerMusicMapper;
     }
 
-    public BotMessage pushPlayListToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
+    public void pushPlayListToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
-            return null;
+            return;
         }
 
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
-
-        List<String> playerMusicNameList = ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), null, playerMusicSongList);
-//        String req = Gsons.toJson(ImmutableMap.of("textSenderId", botSender.getId(), "voiceSenderId", voiceSender.getId(), "musicList", playerMusicSongList));
-//        String result = this.post("add", req);
-//        BaseModel<List<String>> resp = Gsons.fromJson(result, new TypeToken<BaseModel<List<String>>>(){}.getType());
-//        Asserts.notNull(resp, "网络异常");
-//        Asserts.isTrue(resp.getSuccess(), resp.getMessage());
-//        List<String> playerMusicNameList = resp.getData();
-        if (playerMusicNameList == null) {
-            return null;
-        } else {
-            return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", playerMusicSongList.getName()));
-        }
+        ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), null, playerMusicSongList);
     }
 
-    public BotMessage pushMusicToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicDTO music) {
+    public Boolean pushMusicToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicDTO music) {
         BotSender voiceSender = botManager.getUserWhereVoice(bot, textSender, botUser);
         if (voiceSender == null) {
             log.info("未在语音频道");
-            return null;
+            return false;
         }
         String token = bot.getVerifyKey();
         Asserts.notNull(token, "啊嘞，不对劲");
-
-
-        List<String> playerMusicNameList = ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), music, null);
-        if (playerMusicNameList == null) {
-            return null;
-        } else {
-            String lastStr = playerMusicNameList.size() < 2? "": String.format("，前面还有%s首", playerMusicNameList.size()-1);
-            return BotMessage.simpleTextMessage(String.format("点歌[%s]成功%s。", music.getName(), lastStr));
-        }
+        ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), music, null);
+        return true;
     }
 
     public void startList(BotRobot bot, BotSender textSender, BotUserDTO botUser) {

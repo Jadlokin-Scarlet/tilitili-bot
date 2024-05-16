@@ -50,11 +50,11 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 
 		PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
 		playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的喊话", botUser.getName()));
-		if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO) == null) {
+		if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO)) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
 			return BotMessage.simpleTextMessage("已添加到播放列表");
         } else {
-			return null;
+			return BotMessage.simpleVoiceIdMessage(null, url);
 		}
 	}
 }
