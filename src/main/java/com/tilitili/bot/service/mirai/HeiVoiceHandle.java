@@ -31,9 +31,9 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		String search = messageAction.getValue();
-		BotRobot bot = messageAction.getBot();
 		BotUserDTO botUser = messageAction.getBotUser();
 		BotSender botSender = messageAction.getBotSender();
+		BotRobot bot = messageAction.getBot();
 
 		if (StringUtils.isBlank(search) || StringUtils.isNumber(search)) {
 			int pageNo = StringUtils.isBlank(search)? 1: Integer.parseInt(search);
