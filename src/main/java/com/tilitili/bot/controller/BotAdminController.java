@@ -39,8 +39,8 @@ public class BotAdminController extends BaseController {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
 
-        boolean isTokenValid = loginInterceptor.isTokenValidOrRemove(token, response);
-        if (request.getRemember() != null && request.getRemember() && !isTokenValid) {
+        loginInterceptor.removeToken(token, response);
+        if (request.getRemember() != null && request.getRemember()) {
             loginInterceptor.makeNewToken(response, botUser.getId());
         }
         session.setAttribute("userId", botUser.getId());
@@ -49,9 +49,9 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/loginOut")
     @ResponseBody
-    public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response) {
+    public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response, @CookieValue String token) {
         session.removeAttribute("userId");
-        response.addCookie(loginInterceptor.generateCookie(""));
+        loginInterceptor.removeToken(token, response);
         return new BaseModel<>("", true);
     }
 

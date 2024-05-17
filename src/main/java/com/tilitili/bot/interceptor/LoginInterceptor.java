@@ -121,14 +121,11 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 		return cookie;
 	}
 
-	public boolean isTokenValidOrRemove(String token, HttpServletResponse response) {
+	public void removeToken(String token, HttpServletResponse response) {
 		if (StringUtils.isBlank(token)) {
-			return false;
+			return;
 		}
-		Boolean exists = redisCache.exists(REMEMBER_TOKEN_KEY + token);
-		if (!exists) {
-			response.addCookie(generateCookie(""));
-		}
-		return exists;
+		redisCache.delete(REMEMBER_TOKEN_KEY + token);
+		response.addCookie(generateCookie(""));
 	}
 }
