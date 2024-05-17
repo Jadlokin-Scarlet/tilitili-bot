@@ -9,6 +9,11 @@ public class BotUserVO extends BotUserDTO {
 		this.setId(botUser.getId());
 		this.setName(botUser.getName());
 		this.setFace(botUser.getFace());
+		this.setQq(botUser.getQq());
+		this.setTinyId(botUser.getTinyId());
+		this.setKookUserId(botUser.getKookUserId());
+		this.setQqGuildUserId(botUser.getQqGuildUserId());
+		this.setQqMemberOpenid(botUser.getQqMemberOpenid());
 		this.isAdmin = isAdmin;
 	}
 

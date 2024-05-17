@@ -221,6 +221,6 @@ public class BotAdminService {
         String bindCode = this.generateRandomCode();
         botUserManager.updateBotUserSelective(new BotUserDTO().setId(botUser.getId()).setBindCode(bindCode));
 
-        return botUser.getBindCode();
+        return bindCode;
     }
 }
