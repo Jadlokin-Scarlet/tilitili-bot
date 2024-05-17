@@ -35,11 +35,12 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/login")
     @ResponseBody
-    public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
+    public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response, @CookieValue String token) {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
-        // 直接下发新token，不管有没有旧token
-        if (request.getRemember() != null && request.getRemember()) {
+
+        boolean isTokenValid = loginInterceptor.isTokenValidOrRemove(token, response);
+        if (request.getRemember() != null && request.getRemember() && !isTokenValid) {
             loginInterceptor.makeNewToken(response, botUser.getId());
         }
         session.setAttribute("userId", botUser.getId());
@@ -84,7 +85,7 @@ public class BotAdminController extends BaseController {
     public BaseModel<?> register(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
         botAdminService.register(request);
-        return this.login(request, session, response);
+        return this.login(request, session, response, null);
     }
 
     @PostMapping("/checkEmailQuick")
@@ -108,7 +109,7 @@ public class BotAdminController extends BaseController {
     public BaseModel<?> registerQuick(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response) {
         Asserts.notNull(request, "参数异常");
         botAdminService.registerQuick(request);
-        return this.login(request, session, response);
+        return this.login(request, session, response, null);
     }
 
     @GetMapping("/bindCode")
