@@ -113,8 +113,8 @@ public class NewWebSocketFactory {
 	}
 
 	public void testUp(long botId) {
-		botIdLockMap.remove(botId);
 		webSocketMap.remove(botId);
+		botIdLockMap.remove(botId);
 		upBotBlocking(botId);
 	}
 }
