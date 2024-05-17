@@ -35,7 +35,7 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/login")
     @ResponseBody
-    public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response, @CookieValue String token) {
+    public BaseModel<BotUserVO> login(@RequestBody BotAdminRequest request, HttpSession session, HttpServletResponse response, @CookieValue(required = false) String token) {
         Asserts.notNull(request, "参数异常");
         BotUserVO botUser = botAdminService.login(request);
 
@@ -49,7 +49,7 @@ public class BotAdminController extends BaseController {
 
     @PostMapping("/loginOut")
     @ResponseBody
-    public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response, @CookieValue String token) {
+    public BaseModel<?> loginOut(HttpSession session, HttpServletResponse response, @CookieValue(required = false) String token) {
         session.removeAttribute("userId");
         loginInterceptor.removeToken(token, response);
         return new BaseModel<>("", true);
