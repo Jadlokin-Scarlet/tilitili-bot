@@ -92,7 +92,7 @@ public class MusicService {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
 
-        ktvServiceInterface.clearMusicList(voiceSender.getId());
+        ktvServiceInterface.clearMusicList(textSender.getId(), voiceSender.getId());
     }
 
     public void startMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
