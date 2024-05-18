@@ -1,5 +1,6 @@
 package com.tilitili.bot.controller;
 
+import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.common.emnus.SendTypeEnum;
@@ -18,12 +19,23 @@ import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.HttpClientUtil;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,7 +83,7 @@ public class MusicController extends BaseController{
 
 	@GetMapping("/fileUrl")
 	@ResponseBody
-	public BaseModel<String> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long musicId) {
+	public BaseModel<String> getFileUrl(@SessionAttribute(value = "userId") Long userId, Long musicId) {
 		PlayerMusic playerMusic = playerMusicMapper.getPlayerMusicById(musicId);
 		Asserts.notNull(playerMusic, "参数异常");
 		Asserts.checkEquals(playerMusic.getUserId(), userId, "参数异常");
@@ -81,6 +93,37 @@ public class MusicController extends BaseController{
 		BotSender firstSender = botSenderCacheManager.getValidBotSenderById(firstSenderMapping.get(0).getSenderId());
 
 		return BaseModel.success(playerMusicManager.getFileUrl(firstSender.getBot(), new PlayerMusicDTO(playerMusic)));
+	}
+
+	@GetMapping("/fileStream")
+	public ResponseEntity<InputStreamResource> getFileStream(@SessionAttribute(value = "userId") Long userId, Long musicId) throws IOException {
+		PlayerMusic playerMusic = playerMusicMapper.getPlayerMusicById(musicId);
+		Asserts.notNull(playerMusic, "参数异常");
+		Asserts.checkEquals(playerMusic.getUserId(), userId, "参数异常");
+
+		List<BotUserSenderMapping> firstSenderMapping = botUserSenderMappingMapper.getBotUserSenderMappingByCondition(new BotUserSenderMappingQuery().setUserId(userId).setPageSize(1).setPageNo(1));
+		Asserts.isFalse(firstSenderMapping.isEmpty());
+		BotSender firstSender = botSenderCacheManager.getValidBotSenderById(firstSenderMapping.get(0).getSenderId());
+
+		String url = playerMusicManager.getFileUrl(firstSender.getBot(), new PlayerMusicDTO(playerMusic));
+		Map<String, String> headers = playerMusicManager.getHeaders(playerMusic);
+		InputStream audioStream = HttpClientUtil.downloadSteam(url, headers);
+		log.info("url={} headers={}", url, headers);
+		Asserts.notNull(audioStream, "下载文件失败");
+//		Asserts.isTrue(audioStream.available() > 0, "下载文件异常");
+
+		HttpHeaders respHeader = new HttpHeaders();
+		respHeader.setContentType(MediaType.parseMediaType("audio/mp3"));
+		return new ResponseEntity<>(new InputStreamResource(audioStream), respHeader, HttpStatus.OK);
+	}
+
+	public static void main(String[] args) throws IOException {
+		Path tempFile = Files.createTempFile("file-", ".mp3");
+		InputStream inputStream = HttpClientUtil.downloadSteam("https://music.163.com/song/media/outer/url?sc=wmv&id=558754068",
+				ImmutableMap.of("User-Agent", HttpClientUtil.defaultUserAgent, "Referer", "https://music.163.com/"));
+		Files.deleteIfExists(tempFile);
+		Files.copy(inputStream, tempFile);
+		System.out.println(tempFile.toAbsolutePath());
 	}
 
 
