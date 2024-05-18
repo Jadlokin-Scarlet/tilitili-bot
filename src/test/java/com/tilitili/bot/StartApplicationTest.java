@@ -96,7 +96,7 @@ class StartApplicationTest {
 
     @Test
     public void ktvTest() {
-        System.out.println(ktvServiceInterface.getTheMusic(123L));
+//        System.out.println(ktvServiceInterface.getTheMusic(123L));
     }
 
     @Test
