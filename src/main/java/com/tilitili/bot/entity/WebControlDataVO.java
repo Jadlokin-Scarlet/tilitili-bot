@@ -13,7 +13,7 @@ public class WebControlDataVO extends BaseDTO {
 	private PlayerMusicDTO theMusic;
 	private List<PlayerMusicDTO> playerQueue;
 	private PlayerMusicSongList musicList;
-	private Boolean stopFlag;
+	private Boolean playing;
 
 	public PlayerMusicDTO getTheMusic() {
 		return theMusic;
@@ -69,12 +69,12 @@ public class WebControlDataVO extends BaseDTO {
 		return this;
 	}
 
-	public Boolean getStopFlag() {
-		return stopFlag;
+	public Boolean getPlaying() {
+		return playing;
 	}
 
-	public WebControlDataVO setStopFlag(Boolean stopFlag) {
-		this.stopFlag = stopFlag;
+	public WebControlDataVO setPlaying(Boolean playing) {
+		this.playing = playing;
 		return this;
 	}
 }

@@ -61,7 +61,8 @@ public class MusicPubController extends BaseController {
 			response.setPlayerQueue(musicRedisQueue.getPlayerQueue());
 			response.setMusicList(musicRedisQueue.getMusicList());
 		}
-		response.setStopFlag(PlayerMusicDTO.STATUS_STOP.equals(musicRedisQueue.getStatus()));
+		// PlayerMusicDTO.STATUS_PLAY.equals(Optional.ofNullable(musicRedisQueue.getStatus()).orElse(PlayerMusicDTO.STATUS_STOP))
+		response.setPlaying(PlayerMusicDTO.STATUS_PLAY.equals(musicRedisQueue.getStatus()));
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
 		log.info("send ktv update to botId={} size={}", botId, emitterList.size());
