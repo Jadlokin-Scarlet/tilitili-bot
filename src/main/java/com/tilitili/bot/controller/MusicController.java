@@ -2,6 +2,8 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.bot.service.MusicService;
+import com.tilitili.common.component.music.MusicQueueFactory;
+import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
@@ -104,6 +106,11 @@ public class MusicController extends BaseController{
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
 		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+
+		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
+		if (musicRedisQueue.isEmptyAll()) {
+			musicService.startList(bot, botSender, botUser);
+		}
 		musicService.startMusic(bot, botSender, botUser);
 		return BaseModel.success();
 	}
@@ -115,16 +122,6 @@ public class MusicController extends BaseController{
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
 		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
 		musicService.lastMusic(bot, botSender, botUser);
-		return BaseModel.success();
-	}
-
-	@PostMapping("/player/list/start")
-	@ResponseBody
-	public BaseModel<?> startList(@RequestBody WebControlDataVO data, @SessionAttribute(value = "userId") Long userId) {
-		BotSender botSender = botSenderCacheManager.getValidBotSenderById(data.getSenderId());
-		BotRobot bot = botRobotCacheManager.getValidBotRobotById(data.getBotId());
-		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
-		musicService.startList(bot, botSender, botUser);
 		return BaseModel.success();
 	}
 }

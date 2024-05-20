@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.entity.dto.KtvEvent;
+import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.utils.JmsTemplateFactory;
 import com.tilitili.common.utils.RedisCache;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class MusicPubController extends BaseController {
 			response.setPlayerQueue(musicRedisQueue.getPlayerQueue());
 			response.setMusicList(musicRedisQueue.getMusicList());
 		}
-		response.setStopFlag(event.getStop());
+		response.setStopFlag(PlayerMusicDTO.STATUS_STOP.equals(musicRedisQueue.getStatus()));
 
 		List<SseEmitter> emitterList = this.emitterMap.getOrDefault(botId, Collections.emptyList());
 		log.info("send ktv update to botId={} size={}", botId, emitterList.size());
