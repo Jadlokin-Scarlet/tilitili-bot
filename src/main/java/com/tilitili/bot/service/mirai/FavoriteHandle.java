@@ -106,7 +106,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		int favorite = botFavorite.getFavorite();
 		String level = botFavorite.getLevel();
 		int favoriteLimit = FavoriteEnum.getFavoriteLimit(level);
-		String limitStr = favorite == favoriteLimit? "，好感度已满，达成一定条件即可更进一步喵": "";
+		String limitStr = favorite == favoriteLimit? "，好感度已满，达成一定条件(比如送某个道具)即可更进一步喵": "";
 		return BotMessage.simpleTextMessage(String.format("当前好感度为%s(%s)%s", favorite, level, limitStr));
 	}
 
