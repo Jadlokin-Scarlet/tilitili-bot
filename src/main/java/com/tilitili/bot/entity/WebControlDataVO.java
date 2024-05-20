@@ -7,9 +7,6 @@ import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import java.util.List;
 
 public class WebControlDataVO extends BaseDTO {
-	private Long botId;
-	private Long senderId;
-	private String eventToken;
 	private PlayerMusicDTO theMusic;
 	private List<PlayerMusicDTO> playerQueue;
 	private PlayerMusicSongList musicList;
@@ -21,33 +18,6 @@ public class WebControlDataVO extends BaseDTO {
 
 	public WebControlDataVO setTheMusic(PlayerMusicDTO theMusic) {
 		this.theMusic = theMusic;
-		return this;
-	}
-
-	public Long getBotId() {
-		return botId;
-	}
-
-	public WebControlDataVO setBotId(Long botId) {
-		this.botId = botId;
-		return this;
-	}
-
-	public String getEventToken() {
-		return eventToken;
-	}
-
-	public WebControlDataVO setEventToken(String eventToken) {
-		this.eventToken = eventToken;
-		return this;
-	}
-
-	public Long getSenderId() {
-		return senderId;
-	}
-
-	public WebControlDataVO setSenderId(Long senderId) {
-		this.senderId = senderId;
 		return this;
 	}
 
