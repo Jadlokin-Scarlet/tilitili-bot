@@ -88,38 +88,37 @@ public class MusicController extends BaseController{
 	@PostMapping("/player/stop")
 	@ResponseBody
 	public BaseModel<?> stop(@SessionAttribute(value = "userId") Long userId) {
-		BotSender botSender = botSenderCacheManager.getActiveSender(userId);
-		Asserts.notNull(botSender, "你好像还没加入语音");
-		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
-		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
-		musicService.stopMusic(bot, botSender, botUser);
+		BotSender voiceSender = botSenderCacheManager.getActiveSender(userId);
+		Asserts.notNull(voiceSender, "你好像还没加入语音");
+		BotSender textSender = musicService.getTextSenderOrNull(voiceSender);
+		musicService.stopMusic(textSender, voiceSender);
 		return BaseModel.success();
 	}
 
 	@PostMapping("/player/start")
 	@ResponseBody
 	public BaseModel<?> start(@SessionAttribute(value = "userId") Long userId) {
-		BotSender botSender = botSenderCacheManager.getActiveSender(userId);
-		Asserts.notNull(botSender, "你好像还没加入语音");
-		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
+		BotSender voiceSender = botSenderCacheManager.getActiveSender(userId);
+		Asserts.notNull(voiceSender, "你好像还没加入语音");
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(voiceSender.getBot());
 		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
+		BotSender textSender = musicService.getTextSenderOrNull(voiceSender);
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
 		if (musicRedisQueue.isEmptyAll()) {
-			musicService.startList(bot, botSender, botUser);
+			musicService.startList(textSender, voiceSender, botUser);
 		}
-		musicService.startMusic(bot, botSender, botUser);
+		musicService.startMusic(textSender, voiceSender);
 		return BaseModel.success();
 	}
 
 	@PostMapping("/player/last")
 	@ResponseBody
 	public BaseModel<?> last(@SessionAttribute(value = "userId") Long userId) {
-		BotSender botSender = botSenderCacheManager.getActiveSender(userId);
-		Asserts.notNull(botSender, "你好像还没加入语音");
-		BotRobot bot = botRobotCacheManager.getValidBotRobotById(botSender.getBot());
-		BotUserDTO botUser = botUserManager.getValidBotUserByIdWithParent(userId);
-		musicService.lastMusic(bot, botSender, botUser);
+		BotSender voiceSender = botSenderCacheManager.getActiveSender(userId);
+		Asserts.notNull(voiceSender, "你好像还没加入语音");
+		BotSender textSender = musicService.getTextSenderOrNull(voiceSender);
+		musicService.lastMusic(textSender, voiceSender);
 		return BaseModel.success();
 	}
 }

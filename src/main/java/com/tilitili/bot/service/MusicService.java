@@ -7,11 +7,13 @@ import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.query.BotSenderQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bilibili.video.VideoView;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BilibiliManager;
 import com.tilitili.common.manager.BotManager;
+import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.MusicCloudManager;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
@@ -35,20 +37,23 @@ public class MusicService {
     @DubboReference(timeout = 8000)
     private KtvServiceInterface ktvServiceInterface;
     private final PlayerMusicMapper playerMusicMapper;
+    private final BotSenderCacheManager botSenderCacheManager;
 
-    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager, PlayerMusicMapper playerMusicMapper) {
+    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager, PlayerMusicMapper playerMusicMapper, BotSenderCacheManager botSenderCacheManager) {
         this.botManager = botManager;
         this.bilibiliManager = bilibiliManager;
         this.musicCloudManager = musicCloudManager;
         this.playerMusicMapper = playerMusicMapper;
+        this.botSenderCacheManager = botSenderCacheManager;
     }
 
     public void pushPlayListToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicSongList playerMusicSongList) {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
+        pushPlayListToQuote(textSender, voiceSender, playerMusicSongList);
+    }
 
-        String token = bot.getVerifyKey();
-        Asserts.notNull(token, "啊嘞，不对劲");
+    public void pushPlayListToQuote(BotSender textSender, BotSender voiceSender, PlayerMusicSongList playerMusicSongList) {
         ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), null, playerMusicSongList);
     }
 
@@ -57,13 +62,23 @@ public class MusicService {
         if (voiceSender == null) {
             return false;
         }
-        String token = bot.getVerifyKey();
-        Asserts.notNull(token, "啊嘞，不对劲");
+        return pushMusicToQuote(textSender, voiceSender, music);
+    }
+
+    public Boolean pushMusicToQuote(BotSender textSender, BotSender voiceSender, PlayerMusicDTO music) {
         ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), music, null);
         return true;
     }
 
     public void startList(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
+        BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
+        if (voiceSender == null) {
+            return;
+        }
+        startList(textSender, voiceSender, botUser);
+    }
+
+    public void startList(BotSender textSender, BotSender voiceSender, BotUserDTO botUser) {
         List<PlayerMusicDTO> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId())).stream().map(music -> {
             PlayerMusicDTO playerMusic = new PlayerMusicDTO();
             playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName()).setIcon(music.getIcon());
@@ -71,20 +86,25 @@ public class MusicService {
         }).collect(Collectors.toList());
         Asserts.notEmpty(musicList, "歌单空空如也，先导入歌单吧");
         PlayerMusicSongList playerMusicSongList = new PlayerMusicSongList().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
-        this.pushPlayListToQuote(bot, textSender, botUser, playerMusicSongList);
+        this.pushPlayListToQuote(textSender, voiceSender, playerMusicSongList);
     }
 
     public void lastMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
-
+        lastMusic(textSender, voiceSender);
+    }
+    public void lastMusic(BotSender textSender, BotSender voiceSender) {
         ktvServiceInterface.lastMusic(textSender.getId(), voiceSender.getId());
     }
 
     public void stopMusic(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
+        stopMusic(textSender, voiceSender);
+    }
 
+    public void stopMusic(BotSender textSender, BotSender voiceSender) {
         ktvServiceInterface.stopMusic(textSender.getId(), voiceSender.getId());
     }
 
@@ -92,6 +112,10 @@ public class MusicService {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
 
+        clearMusicList(textSender, voiceSender);
+    }
+
+    public void clearMusicList(BotSender textSender, BotSender voiceSender) {
         ktvServiceInterface.clearMusicList(textSender.getId(), voiceSender.getId());
     }
 
@@ -99,6 +123,10 @@ public class MusicService {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) return;
 
+        startMusic(textSender, voiceSender);
+    }
+
+    public void startMusic(BotSender textSender, BotSender voiceSender) {
         ktvServiceInterface.startMusic(textSender.getId(), voiceSender.getId());
     }
 
@@ -108,6 +136,10 @@ public class MusicService {
             return null;
         }
 
+        return loopPlayer(voiceSender);
+    }
+
+    public Boolean loopPlayer(BotSender voiceSender) {
         return ktvServiceInterface.loopPlayer(voiceSender.getId());
     }
 
@@ -117,6 +149,10 @@ public class MusicService {
             return null;
         }
 
+        return restartKtv(textSender, voiceSender);
+    }
+
+    public Boolean restartKtv(BotSender textSender, BotSender voiceSender) {
         return ktvServiceInterface.restartKtv(textSender.getId(), voiceSender.getId());
     }
 
@@ -230,5 +266,22 @@ public class MusicService {
             return null;
         }
         return voiceSender;
+    }
+
+    public BotSender getTextSenderOrNull(BotSender voiceSender) {
+        BotSender textSender;
+        try {
+            Asserts.notNull(voiceSender.getKookGuildId());
+            List<BotSender> senderList = botSenderCacheManager.getBotSenderByCondition(new BotSenderQuery().setKookGuildId(voiceSender.getKookGuildId()).setName("点歌台"));
+            Asserts.checkEquals(senderList.size(), 1);
+            textSender = senderList.get(0);
+        } catch (AssertException e) {
+            textSender = null;
+        }
+        if (textSender == null) {
+            log.info("未找到点歌台频道");
+            return null;
+        }
+        return textSender;
     }
 }
