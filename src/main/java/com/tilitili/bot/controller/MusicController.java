@@ -10,6 +10,7 @@ import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.PlayerMusicList;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
+import com.tilitili.common.entity.dto.PlayerMusicSongList;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.BaseModel;
@@ -77,9 +78,14 @@ public class MusicController extends BaseController{
 		WebControlDataVO response = new WebControlDataVO();
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
+		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
+		if (musicList != null) {
+			musicList.setMusicList(null);
+		}
+
 		response.setTheMusic(musicRedisQueue.getTheMusic());
 		response.setPlayerQueue(musicRedisQueue.getPlayerQueue());
-		response.setMusicList(musicRedisQueue.getMusicList().setMusicList(null));
+		response.setMusicList(musicList);
 		// PlayerMusicDTO.STATUS_PLAY.equals(Optional.ofNullable(musicRedisQueue.getStatus()).orElse(PlayerMusicDTO.STATUS_STOP))
 		response.setPlaying(PlayerMusicDTO.STATUS_PLAY.equals(musicRedisQueue.getStatus()));
 		return BaseModel.success(response);
