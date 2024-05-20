@@ -79,7 +79,7 @@ public class MusicController extends BaseController{
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
 		response.setTheMusic(musicRedisQueue.getTheMusic());
 		response.setPlayerQueue(musicRedisQueue.getPlayerQueue());
-		response.setMusicList(musicRedisQueue.getMusicList());
+		response.setMusicList(musicRedisQueue.getMusicList().setMusicList(null));
 		// PlayerMusicDTO.STATUS_PLAY.equals(Optional.ofNullable(musicRedisQueue.getStatus()).orElse(PlayerMusicDTO.STATUS_STOP))
 		response.setPlaying(PlayerMusicDTO.STATUS_PLAY.equals(musicRedisQueue.getStatus()));
 		return BaseModel.success(response);
