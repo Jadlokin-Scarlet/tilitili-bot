@@ -102,7 +102,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		List<String> successList = new ArrayList<>();
 		List<String> failList = new ArrayList<>();
 		for (String playerName : playerNameList) {
-			String result = botManager.execCommand(mcBot, "lp user " + playerName + " parent set player");
+			String result = botManager.execCommand(mcBot, "lp user " + playerName + " parent set wanjia");
 			if ("".equals(result)) {
 				successList.add(playerName);
 			} else {
