@@ -120,10 +120,10 @@ public class MusicController extends BaseController{
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
 		if (musicRedisQueue.isEmptyAll()) {
-			if (request.getListId() != null) {
-				musicService.startList(textSender, voiceSender, request.getListId());
-			} else {
+			if (request.getListId() == null) {
 				musicService.startList(textSender, voiceSender, botUser);
+			} else {
+				musicService.startList(textSender, voiceSender, request.getListId());
 			}
 		}
 		musicService.startMusic(textSender, voiceSender);
