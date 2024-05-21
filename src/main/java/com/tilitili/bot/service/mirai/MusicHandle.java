@@ -116,6 +116,12 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
             PlayerMusicSongList playerMusicSongList = musicService.getMusicListByListId(list.getType(), list.getExternalId());
+
+            PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId());
+            if (playerMusicSongList.getIcon() != null && !playerMusicSongList.getIcon().equals(oldPlayerMusicList.getIcon())) {
+                playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicSongList.getIcon()));
+            }
+
             List<PlayerMusicDTO> newMusicList = playerMusicSongList.getMusicList();
             List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
 
@@ -241,7 +247,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (playerMusicSongList != null) {
             playerMusicList.addAll(playerMusicSongList.getMusicList());
             if (playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId()) == null) {
-                PlayerMusicList newList = new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId());
+                PlayerMusicList newList = new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId()).setIcon(playerMusicSongList.getIcon());
                 playerMusicListMapper.addPlayerMusicListSelective(newList);
                 listId = newList.getId();
             }
