@@ -60,9 +60,9 @@ public class MusicController extends BaseController{
 
 	@GetMapping("/last")
 	@ResponseBody
-	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId) {
-		int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId));
-		List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)));
+	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId) {
+		int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId));
+		List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)));
 		Asserts.notNull(lastMusic, "没有音乐了");
 		return BaseModel.success(lastMusic.get(0));
 	}
