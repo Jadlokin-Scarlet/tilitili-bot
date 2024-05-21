@@ -14,7 +14,7 @@ import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.PlayerMusicList;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
-import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -112,42 +112,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleSyncList(BotMessageAction messageAction) {
         Long userId = messageAction.getBotUser().getId();
-        List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
-        Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
-        for (PlayerMusicList list : listList) {
-            PlayerMusicSongList playerMusicSongList = musicService.getMusicListByListId(list.getType(), list.getExternalId());
-
-            PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId());
-            if (playerMusicSongList.getIcon() != null && !playerMusicSongList.getIcon().equals(oldPlayerMusicList.getIcon())) {
-                playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicSongList.getIcon()));
-            }
-
-            List<PlayerMusicDTO> newMusicList = playerMusicSongList.getMusicList();
-            List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
-
-            List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            for (PlayerMusicDTO newMusic : newMusicList) {
-                if (oldExternalIdList.contains(newMusic.getExternalId())) {
-                    continue;
-                }
-                PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
-                if (otherMusic != null) {
-                    playerMusicMapper.updatePlayerMusicSelective(new PlayerMusic().setId(otherMusic.getId()).setListId(list.getId()));
-                } else {
-                    newMusic.setUserId(userId);
-                    newMusic.setListId(list.getId());
-                    playerMusicMapper.addPlayerMusicSelective(newMusic);
-                }
-            }
-
-            List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            for (PlayerMusic oldMusic : oldMusicList) {
-                if (newExternalIdList.contains(oldMusic.getExternalId())) {
-                    continue;
-                }
-                playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
-            }
-        }
+        musicService.syncMusic(userId);
         return BotMessage.simpleTextMessage("同步完毕");
     }
 
@@ -192,15 +157,15 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         if (StringUtils.isNotBlank(searchKey)) {
             MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
             List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-            PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+            PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
             if (playerMusicList == null) {
                 playerMusicList = new ArrayList<>();
             }
             int musicCnt = 0;
             int listCnt = 0;
-            if (playerMusicSongList != null) {
-                playerMusicList.addAll(playerMusicSongList.getMusicList());
-                PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId());
+            if (playerMusicListDTO != null) {
+                playerMusicList.addAll(playerMusicListDTO.getMusicList());
+                PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId());
                 if (dbList != null) {
                     playerMusicListMapper.deletePlayerMusicListByPrimary(dbList.getId());
                     listCnt++;
@@ -239,15 +204,15 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-        PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
         if (playerMusicList == null) {
             playerMusicList = new ArrayList<>();
         }
         Long listId = null;
-        if (playerMusicSongList != null) {
-            playerMusicList.addAll(playerMusicSongList.getMusicList());
-            if (playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicSongList.getType(), playerMusicSongList.getExternalId()) == null) {
-                PlayerMusicList newList = new PlayerMusicList().setUserId(userId).setName(playerMusicSongList.getName()).setType(playerMusicSongList.getType()).setExternalId(playerMusicSongList.getExternalId()).setIcon(playerMusicSongList.getIcon());
+        if (playerMusicListDTO != null) {
+            playerMusicList.addAll(playerMusicListDTO.getMusicList());
+            if (playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId()) == null) {
+                PlayerMusicList newList = new PlayerMusicList().setUserId(userId).setName(playerMusicListDTO.getName()).setType(playerMusicListDTO.getType()).setExternalId(playerMusicListDTO.getExternalId()).setIcon(playerMusicListDTO.getIcon());
                 playerMusicListMapper.addPlayerMusicListSelective(newList);
                 listId = newList.getId();
             }
@@ -376,7 +341,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
         List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-        PlayerMusicSongList playerMusicSongList = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
         MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
         if (playerMusicList != null) {
             for (PlayerMusicDTO playerMusic : playerMusicList) {
@@ -384,8 +349,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             }
             String nameListStr = playerMusicList.stream().map(PlayerMusicDTO::getName).collect(Collectors.joining("、"));
             return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", nameListStr, redisQueue.sizePlayerQueue()));
-        } else if (playerMusicSongList != null) {
-            musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicSongList);
+        } else if (playerMusicListDTO != null) {
+            musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicListDTO);
             return BotMessage.simpleTextMessage(String.format("加载歌单[%s]成功，即将随机播放。", redisQueue.getMusicList().getName()));
         } else {
             return this.handleMusicCouldSearch(bot, botSender, botUser, searchKey, index);

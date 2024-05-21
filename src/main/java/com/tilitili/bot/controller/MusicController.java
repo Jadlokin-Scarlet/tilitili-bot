@@ -1,6 +1,7 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.WebControlDataVO;
+import com.tilitili.bot.entity.request.StartPlayerRequest;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
@@ -10,7 +11,7 @@ import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.PlayerMusicList;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
-import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.BaseModel;
@@ -66,6 +67,13 @@ public class MusicController extends BaseController{
 		return BaseModel.success(lastMusic.get(0));
 	}
 
+	@PostMapping("/sync")
+	@ResponseBody
+	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId) {
+		musicService.syncMusic(userId);
+		return BaseModel.success();
+	}
+
 
 
 
@@ -78,7 +86,7 @@ public class MusicController extends BaseController{
 		WebControlDataVO response = new WebControlDataVO();
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(botSender.getBot(), redisCache);
-		PlayerMusicSongList musicList = musicRedisQueue.getMusicList();
+		PlayerMusicListDTO musicList = musicRedisQueue.getMusicList();
 		if (musicList != null) {
 			musicList.setMusicList(null);
 		}
@@ -103,7 +111,7 @@ public class MusicController extends BaseController{
 
 	@PostMapping("/player/start")
 	@ResponseBody
-	public BaseModel<?> start(@SessionAttribute(value = "userId") Long userId) {
+	public BaseModel<?> start(@SessionAttribute(value = "userId") Long userId, @RequestBody StartPlayerRequest request) {
 		BotSender voiceSender = botSenderCacheManager.getActiveSender(userId);
 		Asserts.notNull(voiceSender, "你好像还没加入语音");
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(voiceSender.getBot());
@@ -112,7 +120,11 @@ public class MusicController extends BaseController{
 
 		MusicRedisQueue musicRedisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
 		if (musicRedisQueue.isEmptyAll()) {
-			musicService.startList(textSender, voiceSender, botUser);
+			if (request.getListId() != null) {
+				musicService.startList(textSender, voiceSender, request.getListId());
+			} else {
+				musicService.startList(textSender, voiceSender, botUser);
+			}
 		}
 		musicService.startMusic(textSender, voiceSender);
 		return BaseModel.success();

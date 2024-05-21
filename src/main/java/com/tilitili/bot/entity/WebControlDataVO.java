@@ -2,14 +2,14 @@ package com.tilitili.bot.entity;
 
 import com.tilitili.common.entity.dto.BaseDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
-import com.tilitili.common.entity.dto.PlayerMusicSongList;
+import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 
 import java.util.List;
 
 public class WebControlDataVO extends BaseDTO {
 	private PlayerMusicDTO theMusic;
 	private List<PlayerMusicDTO> playerQueue;
-	private PlayerMusicSongList musicList;
+	private PlayerMusicListDTO musicList;
 	private Boolean playing;
 
 	public PlayerMusicDTO getTheMusic() {
@@ -30,11 +30,11 @@ public class WebControlDataVO extends BaseDTO {
 		return this;
 	}
 
-	public PlayerMusicSongList getMusicList() {
+	public PlayerMusicListDTO getMusicList() {
 		return musicList;
 	}
 
-	public WebControlDataVO setMusicList(PlayerMusicSongList musicList) {
+	public WebControlDataVO setMusicList(PlayerMusicListDTO musicList) {
 		this.musicList = musicList;
 		return this;
 	}
