@@ -5,6 +5,7 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -72,10 +73,10 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
 
 //        String voiceId = botManager.uploadVoice(bot, wavFile);
 //        Asserts.notBlank(voiceId, "上传失败");
-        PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
+        PlayerMusic playerMusic = new PlayerMusic();
 
-        playerMusicDTO.setFileUrl(url).setVolume(6).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的台词", botUser.getName()));
-        if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO)) {
+        playerMusic.setFileUrl(url).setType(PlayerMusicDTO.TYPE_VOICE).setName(String.format("%s的台词", botUser.getName()));
+        if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic)) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
             return BotMessage.simpleTextMessage("已添加到播放列表");
 //        } else {

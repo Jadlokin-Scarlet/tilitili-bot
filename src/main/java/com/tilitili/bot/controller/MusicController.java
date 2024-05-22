@@ -1,7 +1,9 @@
 package com.tilitili.bot.controller;
 
+import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.bot.entity.request.StartPlayerRequest;
+import com.tilitili.bot.entity.MusicSearchVO;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
@@ -15,9 +17,8 @@ import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
 import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.BaseModel;
-import com.tilitili.common.manager.BotRobotCacheManager;
-import com.tilitili.common.manager.BotSenderCacheManager;
-import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -40,8 +42,11 @@ public class MusicController extends BaseController{
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotUserManager botUserManager;
 	private final PlayerMusicMapper playerMusicMapper;
+	private final MusicCloudManager musicCloudManager;
+	private final BotSenderManager botSenderManager;
+	private final PlayerMusicManager playerMusicManager;
 
-	public MusicController(PlayerMusicListMapper playerMusicListMapper, BotSenderCacheManager botSenderCacheManager, RedisCache redisCache, MusicService musicService, BotRobotCacheManager botRobotCacheManager, BotUserManager botUserManager, PlayerMusicMapper playerMusicMapper) {
+	public MusicController(PlayerMusicListMapper playerMusicListMapper, BotSenderCacheManager botSenderCacheManager, RedisCache redisCache, MusicService musicService, BotRobotCacheManager botRobotCacheManager, BotUserManager botUserManager, PlayerMusicMapper playerMusicMapper, MusicCloudManager musicCloudManager, BotSenderManager botSenderManager, PlayerMusicManager playerMusicManager) {
 		this.playerMusicListMapper = playerMusicListMapper;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.redisCache = redisCache;
@@ -49,13 +54,22 @@ public class MusicController extends BaseController{
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.botUserManager = botUserManager;
 		this.playerMusicMapper = playerMusicMapper;
+		this.musicCloudManager = musicCloudManager;
+		this.botSenderManager = botSenderManager;
+		this.playerMusicManager = playerMusicManager;
 	}
 
 	@GetMapping("/list")
 	@ResponseBody
-	public BaseModel<List<PlayerMusicList>> listMusic(@SessionAttribute(value = "userId") Long userId) {
+	public BaseModel<List<PlayerMusicListDTO>> listMusic(@SessionAttribute(value = "userId") Long userId) {
 		List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
-		return BaseModel.success(listList);
+		List<PlayerMusicListDTO> result = listList.stream().map(list -> {
+			PlayerMusicListDTO listDTO = new PlayerMusicListDTO(list);
+			List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listDTO.getId()));
+			listDTO.setMusicList(musicList);
+			return listDTO;
+		}).collect(Collectors.toList());
+		return BaseModel.success(result);
 	}
 
 	@GetMapping("/last")
@@ -71,6 +85,52 @@ public class MusicController extends BaseController{
 	@ResponseBody
 	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId) {
 		musicService.syncMusic(userId);
+		return BaseModel.success();
+	}
+
+	@GetMapping("/search")
+	@ResponseBody
+	public BaseModel<MusicSearchVO> searchMusic(@SessionAttribute(value = "userId") Long userId, String searchKey) {
+		MusicSearchKeyHandleResult result = musicService.handleSearchKey(searchKey);
+			if (result.getPlayerMusicList() != null || result.getPlayerMusicListDTO() != null) {
+			return BaseModel.success(new MusicSearchVO().setPlayerMusicList(result.getPlayerMusicList()).setPlayerMusicListDTO(result.getPlayerMusicListDTO()));
+		} else {
+			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+			Asserts.notNull(firstSender);
+			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
+			return BaseModel.success(new MusicSearchVO().setSongList(musicCloudManager.searchMusicList(bot, searchKey)));
+		}
+	}
+
+	@PostMapping("/add")
+	@ResponseBody
+	public BaseModel<?> addMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody MusicSearchVO request) {
+		if (request.getSongList() != null) {
+			MusicCloudSong song = request.getSongList().get(0);
+			Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
+			PlayerMusic playerMusic = new PlayerMusicDTO(type, song);
+
+			PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, type, playerMusic.getExternalId());
+			Asserts.checkNull(dbMusic, "该歌曲已被收藏");
+
+			PlayerMusicList list = playerMusicManager.getOrAddDefaultPlayerMusicList(userId);
+			playerMusicMapper.addPlayerMusicSelective(playerMusic.setListId(list.getId()).setUserId(userId));
+		} else if (request.getPlayerMusicList() != null) {
+			PlayerMusic playerMusic = request.getPlayerMusicList().get(0);
+
+			PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId());
+			Asserts.checkNull(dbMusic, "该歌曲已被收藏");
+
+			PlayerMusicList list = playerMusicManager.getOrAddDefaultPlayerMusicList(userId);
+			playerMusicMapper.addPlayerMusicSelective(playerMusic.setListId(list.getId()).setUserId(userId));
+		} else {
+			PlayerMusicListDTO musicList = request.getPlayerMusicListDTO();
+
+			PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, musicList.getType(), musicList.getExternalId());
+			Asserts.checkNull(dbList, "该歌单已被收藏");
+			playerMusicListMapper.addPlayerMusicListSelective(musicList.setUserId(userId));
+		}
+
 		return BaseModel.success();
 	}
 

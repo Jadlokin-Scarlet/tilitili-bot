@@ -1,31 +1,31 @@
 package com.tilitili.bot.entity;
 
+import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BaseDTO;
-import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 
 import java.util.List;
 
 public class WebControlDataVO extends BaseDTO {
-	private PlayerMusicDTO theMusic;
-	private List<PlayerMusicDTO> playerQueue;
+	private PlayerMusic theMusic;
+	private List<PlayerMusic> playerQueue;
 	private PlayerMusicListDTO musicList;
 	private Boolean playing;
 
-	public PlayerMusicDTO getTheMusic() {
+	public PlayerMusic getTheMusic() {
 		return theMusic;
 	}
 
-	public WebControlDataVO setTheMusic(PlayerMusicDTO theMusic) {
+	public WebControlDataVO setTheMusic(PlayerMusic theMusic) {
 		this.theMusic = theMusic;
 		return this;
 	}
 
-	public List<PlayerMusicDTO> getPlayerQueue() {
+	public List<PlayerMusic> getPlayerQueue() {
 		return playerQueue;
 	}
 
-	public WebControlDataVO setPlayerQueue(List<PlayerMusicDTO> playerQueue) {
+	public WebControlDataVO setPlayerQueue(List<PlayerMusic> playerQueue) {
 		this.playerQueue = playerQueue;
 		return this;
 	}

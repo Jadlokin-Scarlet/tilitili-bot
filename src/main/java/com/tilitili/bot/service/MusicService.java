@@ -63,7 +63,7 @@ public class MusicService {
         ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), null, playerMusicListDTO);
     }
 
-    public Boolean pushMusicToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicDTO music) {
+    public Boolean pushMusicToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusic music) {
         BotSender voiceSender = getVoiceSenderOrNull(bot, textSender, botUser);
         if (voiceSender == null) {
             return false;
@@ -71,7 +71,7 @@ public class MusicService {
         return pushMusicToQuote(textSender, voiceSender, music);
     }
 
-    public Boolean pushMusicToQuote(BotSender textSender, BotSender voiceSender, PlayerMusicDTO music) {
+    public Boolean pushMusicToQuote(BotSender textSender, BotSender voiceSender, PlayerMusic music) {
         ktvServiceInterface.addMusic(textSender.getId(), voiceSender.getId(), music, null);
         return true;
     }
@@ -156,7 +156,7 @@ public class MusicService {
 
     public MusicSearchKeyHandleResult handleSearchKey(String searchKey) {
         PlayerMusicListDTO playerMusicListDTO = null;
-        List<PlayerMusicDTO> playerMusicList = null;
+        List<PlayerMusic> playerMusicList = null;
 
         // 短网址
         if (searchKey.contains("b23.tv")) {
@@ -179,8 +179,8 @@ public class MusicService {
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
             playerMusicListDTO = musicCloudManager.getPlayerList(listId);
 
-            List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusicDTO::getExternalId).collect(Collectors.toList());
-            List<PlayerMusicDTO> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+            List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+            List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
             playerMusicListDTO.setMusicList(playerMusicListDetail);
         } else if (searchKey.contains("space.bilibili.com")) {
             // https://space.bilibili.com/23210308/favlist?fid=940681308&ftype=create
@@ -200,7 +200,7 @@ public class MusicService {
                 Asserts.notEmpty(videoInfo.getPages(), "获取视频信息失败");
                 int pn = StringUtils.isBlank(pnStr)? 0: Integer.parseInt(pnStr) - 1;
 
-                PlayerMusicDTO playerMusic = new PlayerMusicDTO();
+                PlayerMusic playerMusic = new PlayerMusic();
                 playerMusic.setType(PlayerMusicDTO.TYPE_BILIBILI).setName(videoInfo.getTitle())
                         .setExternalId(bv).setExternalSubId(String.valueOf(videoInfo.getPages().get(pn).getCid()))
                         .setIcon(videoInfo.getPic());
@@ -221,7 +221,7 @@ public class MusicService {
                 playerMusicList.add(musicCloudManager.getProgramById(songId));
             }
         }
-        return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicSongList(playerMusicListDTO);
+        return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicListDTO(playerMusicListDTO);
     }
 
     public PlayerMusicListDTO getMusicListByListId(Integer type, String listId) {
@@ -230,8 +230,8 @@ public class MusicService {
                 return musicCloudManager.getProgramPlayerList(Long.valueOf(listId));
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
                 PlayerMusicListDTO playerMusicListDTO = musicCloudManager.getPlayerList(Long.valueOf(listId));
-                List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusicDTO::getExternalId).collect(Collectors.toList());
-                List<PlayerMusicDTO> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+                List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+                List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
                 playerMusicListDTO.setMusicList(playerMusicListDetail);
                 return playerMusicListDTO;
             case PlayerMusicDTO.TYPE_BILIBILI:
@@ -271,13 +271,10 @@ public class MusicService {
     public void startList(BotSender textSender, BotSender voiceSender, Long listId) {
         PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(listId);
         Asserts.notNull(playerMusicList, "没找到歌单");
-        List<PlayerMusicDTO> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listId)).stream().map(music -> {
-            PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-            playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName()).setIcon(music.getIcon());
-            return playerMusic;
-        }).collect(Collectors.toList());
+        List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listId));
         Asserts.notEmpty(musicList, "歌单空空如也");
-        PlayerMusicListDTO playerMusicListDTO = new PlayerMusicListDTO().setName(playerMusicList.getName()).setMusicList(musicList);
+        PlayerMusicListDTO playerMusicListDTO = new PlayerMusicListDTO().setMusicList(musicList);
+        playerMusicListDTO.setName(playerMusicList.getName());
         this.pushPlayListToQuote(textSender, voiceSender, playerMusicListDTO);
     }
 
@@ -290,13 +287,10 @@ public class MusicService {
     }
 
     public void startList(BotSender textSender, BotSender voiceSender, BotUserDTO botUser) {
-        List<PlayerMusicDTO> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId())).stream().map(music -> {
-            PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-            playerMusic.setType(music.getType()).setExternalId(music.getExternalId()).setExternalSubId(music.getExternalSubId()).setName(music.getName()).setIcon(music.getIcon());
-            return playerMusic;
-        }).collect(Collectors.toList());
+        List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(botUser.getId()));
         Asserts.notEmpty(musicList, "歌单空空如也，先导入歌单吧");
-        PlayerMusicListDTO playerMusicListDTO = new PlayerMusicListDTO().setName(botUser.getName() + "的个人歌单").setMusicList(musicList);
+        PlayerMusicListDTO playerMusicListDTO = new PlayerMusicListDTO().setMusicList(musicList);
+        playerMusicListDTO.setName(botUser.getName() + "的个人歌单");
         this.pushPlayListToQuote(textSender, voiceSender, playerMusicListDTO);
     }
 
@@ -311,11 +305,11 @@ public class MusicService {
                 playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicListDTO.getIcon()));
             }
 
-            List<PlayerMusicDTO> newMusicList = playerMusicListDTO.getMusicList();
+            List<PlayerMusic> newMusicList = playerMusicListDTO.getMusicList();
             List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
 
             List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            for (PlayerMusicDTO newMusic : newMusicList) {
+            for (PlayerMusic newMusic : newMusicList) {
                 if (oldExternalIdList.contains(newMusic.getExternalId())) {
                     continue;
                 }

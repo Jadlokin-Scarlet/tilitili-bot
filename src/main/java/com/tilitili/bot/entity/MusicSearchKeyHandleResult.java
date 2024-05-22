@@ -1,29 +1,29 @@
 package com.tilitili.bot.entity;
 
-import com.tilitili.common.entity.dto.PlayerMusicDTO;
+import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 
 import java.util.List;
 
 public class MusicSearchKeyHandleResult {
-    private List<PlayerMusicDTO> playerMusicList;
+    private List<PlayerMusic> playerMusicList;
     private PlayerMusicListDTO playerMusicListDTO;
 
 
-    public PlayerMusicListDTO getPlayerMusicSongList() {
+    public PlayerMusicListDTO getPlayerMusicListDTO() {
         return playerMusicListDTO;
     }
 
-    public MusicSearchKeyHandleResult setPlayerMusicSongList(PlayerMusicListDTO playerMusicListDTO) {
+    public MusicSearchKeyHandleResult setPlayerMusicListDTO(PlayerMusicListDTO playerMusicListDTO) {
         this.playerMusicListDTO = playerMusicListDTO;
         return this;
     }
 
-    public List<PlayerMusicDTO> getPlayerMusicList() {
+    public List<PlayerMusic> getPlayerMusicList() {
         return playerMusicList;
     }
 
-    public MusicSearchKeyHandleResult setPlayerMusicList(List<PlayerMusicDTO> playerMusicList) {
+    public MusicSearchKeyHandleResult setPlayerMusicList(List<PlayerMusic> playerMusicList) {
         this.playerMusicList = playerMusicList;
         return this;
     }

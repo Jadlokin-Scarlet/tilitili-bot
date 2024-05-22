@@ -5,12 +5,16 @@ import com.tilitili.bot.service.MusicService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
+import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.hei.HeiVoice;
 import com.tilitili.common.manager.HeiVoiceManager;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.StreamUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -57,9 +61,9 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 		}
 		redisCache.setValue(VOICE_NAME_MAP_KEY + search, url, TimeUnit.DAYS.toSeconds(7));
 
-		PlayerMusicDTO playerMusicDTO = new PlayerMusicDTO();
-		playerMusicDTO.setFileUrl(url).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的喊话", botUser.getName()));
-		if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusicDTO)) {
+		PlayerMusic playerMusic = new PlayerMusic();
+		playerMusic.setFileUrl(url).setType(PlayerMusicDTO.TYPE_FILE).setName(String.format("%s的喊话", botUser.getName()));
+		if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic)) {
 //            return BotMessage.simpleVoiceIdMessage(voiceId, url);
 			return BotMessage.simpleTextMessage("已添加到播放列表");
         } else {

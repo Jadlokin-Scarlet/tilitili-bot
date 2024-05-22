@@ -156,8 +156,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         String searchKey = messageAction.getSubValue();
         if (StringUtils.isNotBlank(searchKey)) {
             MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
-            List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-            PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
+            List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+            PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
             if (playerMusicList == null) {
                 playerMusicList = new ArrayList<>();
             }
@@ -171,7 +171,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                     listCnt++;
                 }
             }
-            for (PlayerMusicDTO playerMusic : playerMusicList) {
+            for (PlayerMusic playerMusic : playerMusicList) {
                 PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId());
                 if (dbMusic != null) {
                     playerMusicMapper.deletePlayerMusicByPrimary(dbMusic.getId());
@@ -203,8 +203,8 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         messageAction.getSession().remove("waitSearchKeyList-"+userId);
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
-        List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
         if (playerMusicList == null) {
             playerMusicList = new ArrayList<>();
         }
@@ -217,7 +217,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
                 listId = newList.getId();
             }
         }
-        for (PlayerMusicDTO playerMusic : playerMusicList) {
+        for (PlayerMusic playerMusic : playerMusicList) {
             playerMusic.setUserId(userId);
             playerMusic.setListId(listId);
             if (playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId()) == null) {
@@ -340,14 +340,14 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         messageAction.getSession().remove("waitSearchKey-"+botUser.getId());
 
         MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
-        List<PlayerMusicDTO> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
-        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicSongList();
+        List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
+        PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
         MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
         if (playerMusicList != null) {
-            for (PlayerMusicDTO playerMusic : playerMusicList) {
+            for (PlayerMusic playerMusic : playerMusicList) {
                 musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
             }
-            String nameListStr = playerMusicList.stream().map(PlayerMusicDTO::getName).collect(Collectors.joining("、"));
+            String nameListStr = playerMusicList.stream().map(PlayerMusic::getName).collect(Collectors.joining("、"));
             return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", nameListStr, redisQueue.sizePlayerQueue()));
         } else if (playerMusicListDTO != null) {
             musicService.pushPlayListToQuote(bot, botSender, botUser, playerMusicListDTO);
@@ -359,8 +359,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
 
     private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song) {
         Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
-        PlayerMusicDTO playerMusic = new PlayerMusicDTO();
-        playerMusic.setType(type).setName(song.getName()).setExternalId(String.valueOf(song.getId())).setIcon(song.getAlbum().getPicUrl());
+        PlayerMusic playerMusic = new PlayerMusicDTO(type, song);
         musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
         MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
         return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", playerMusic.getName(), redisQueue.sizePlayerQueue()));
