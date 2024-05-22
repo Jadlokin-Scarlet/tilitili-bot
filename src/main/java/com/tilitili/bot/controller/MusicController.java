@@ -65,8 +65,8 @@ public class MusicController extends BaseController{
 		List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
 		List<PlayerMusicListDTO> result = listList.stream().map(list -> {
 			PlayerMusicListDTO listDTO = new PlayerMusicListDTO(list);
-			List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listDTO.getId()));
-			listDTO.setMusicList(musicList);
+//			List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listDTO.getId()));
+//			listDTO.setMusicList(musicList);
 			return listDTO;
 		}).collect(Collectors.toList());
 		return BaseModel.success(result);
