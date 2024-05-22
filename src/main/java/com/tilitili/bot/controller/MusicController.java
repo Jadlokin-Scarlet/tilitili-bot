@@ -1,9 +1,11 @@
 package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
-import com.tilitili.bot.entity.WebControlDataVO;
-import com.tilitili.bot.entity.request.StartPlayerRequest;
 import com.tilitili.bot.entity.MusicSearchVO;
+import com.tilitili.bot.entity.WebControlDataVO;
+import com.tilitili.bot.entity.request.DeleteMusicRequest;
+import com.tilitili.bot.entity.request.StartPlayerRequest;
+import com.tilitili.bot.entity.request.SyncMusicRequest;
 import com.tilitili.bot.service.MusicService;
 import com.tilitili.common.component.music.MusicQueueFactory;
 import com.tilitili.common.component.music.MusicRedisQueue;
@@ -27,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -63,7 +66,10 @@ public class MusicController extends BaseController{
 	@ResponseBody
 	public BaseModel<List<PlayerMusicListDTO>> listMusic(@SessionAttribute(value = "userId") Long userId) {
 		List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
-		List<PlayerMusicListDTO> result = listList.stream().map(list -> {
+
+		List<PlayerMusicListDTO> result = listList.stream()
+				.sorted(Comparator.comparingInt(list -> PlayerMusicDTO.TYPE_FILE == list.getType() &&  "0".equals(list.getExternalId()) ? 0 : 1))
+				.map(list -> {
 			PlayerMusicListDTO listDTO = new PlayerMusicListDTO(list);
 //			List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setListId(listDTO.getId()));
 //			listDTO.setMusicList(musicList);
@@ -83,16 +89,23 @@ public class MusicController extends BaseController{
 
 	@PostMapping("/sync")
 	@ResponseBody
-	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId) {
-		musicService.syncMusic(userId);
+	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody SyncMusicRequest request) {
+		if (request.getListId() != null) {
+			PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(request.getListId());
+			musicService.syncMusic(userId, playerMusicList);
+		} else {
+			musicService.syncMusic(userId);
+		}
 		return BaseModel.success();
 	}
 
 	@GetMapping("/search")
 	@ResponseBody
 	public BaseModel<MusicSearchVO> searchMusic(@SessionAttribute(value = "userId") Long userId, String searchKey) {
-		MusicSearchKeyHandleResult result = musicService.handleSearchKey(searchKey);
-			if (result.getPlayerMusicList() != null || result.getPlayerMusicListDTO() != null) {
+		MusicSearchKeyHandleResult result = musicService.handleSearchKey(searchKey, false);
+		if (result.getPlayerMusicList() != null) {
+			return BaseModel.success(new MusicSearchVO().setPlayerMusicList(result.getPlayerMusicList()).setPlayerMusicListDTO(result.getPlayerMusicListDTO()));
+		} else if (result.getPlayerMusicListDTO() != null) {
 			return BaseModel.success(new MusicSearchVO().setPlayerMusicList(result.getPlayerMusicList()).setPlayerMusicListDTO(result.getPlayerMusicListDTO()));
 		} else {
 			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
@@ -129,6 +142,23 @@ public class MusicController extends BaseController{
 			PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, musicList.getType(), musicList.getExternalId());
 			Asserts.checkNull(dbList, "该歌单已被收藏");
 			playerMusicListMapper.addPlayerMusicListSelective(musicList.setUserId(userId));
+			musicService.syncMusic(userId);
+		}
+
+		return BaseModel.success();
+	}
+
+	@PostMapping("/delete")
+	@ResponseBody
+	public BaseModel<?> deleteMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody DeleteMusicRequest request) {
+		if (request.getListId() != null) {
+			Long listId = request.getListId();
+
+			PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(listId);
+			Asserts.notNull(playerMusicList, "参数异常");
+			Asserts.checkEquals(playerMusicList.getUserId(), userId, "参数异常");
+
+			playerMusicListMapper.deletePlayerMusicListByPrimary(listId);
 		}
 
 		return BaseModel.success();

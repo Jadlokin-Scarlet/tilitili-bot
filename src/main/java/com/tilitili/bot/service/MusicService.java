@@ -155,6 +155,10 @@ public class MusicService {
 
 
     public MusicSearchKeyHandleResult handleSearchKey(String searchKey) {
+        return handleSearchKey(searchKey, true);
+    }
+
+    public MusicSearchKeyHandleResult handleSearchKey(String searchKey, boolean needAllList) {
         PlayerMusicListDTO playerMusicListDTO = null;
         List<PlayerMusic> playerMusicList = null;
 
@@ -173,11 +177,11 @@ public class MusicService {
 
         if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            playerMusicListDTO = musicCloudManager.getProgramPlayerList(listId);
+            playerMusicListDTO = musicCloudManager.getProgramPlayerList(listId, needAllList);
         } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
             // https://music.163.com/playlist?id=649428962&userid=361260659
             Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
-            playerMusicListDTO = musicCloudManager.getPlayerList(listId);
+            playerMusicListDTO = musicCloudManager.getPlayerList(listId, needAllList);
 
             List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
             List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
@@ -187,7 +191,7 @@ public class MusicService {
             String fid = StringUtils.patten1("fid=(\\d+)", searchKey);
             Asserts.notBlank(fid, "啊嘞，不对劲");
 
-            playerMusicListDTO = bilibiliManager.getFavoriteList(fid);
+            playerMusicListDTO = bilibiliManager.getFavoriteList(fid, needAllList);
         } else if (searchKey.contains("bilibili.com") || !searchBvList.isEmpty()) {
             // https://www.bilibili.com/video/BV12L411r7Nh/
             Asserts.notEmpty(searchBvList, "啊嘞，不对劲");
@@ -298,38 +302,45 @@ public class MusicService {
         List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
         Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
-            PlayerMusicListDTO playerMusicListDTO = this.getMusicListByListId(list.getType(), list.getExternalId());
+            syncMusic(userId, list);
+        }
+    }
 
-            PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId());
-            if (playerMusicListDTO.getIcon() != null && !playerMusicListDTO.getIcon().equals(oldPlayerMusicList.getIcon())) {
-                playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicListDTO.getIcon()));
+    public void syncMusic(Long userId, PlayerMusicList list) {
+        Asserts.notNull(list.getType());
+        Asserts.notNull(list.getExternalId());
+        Asserts.notNull(list.getId());
+        PlayerMusicListDTO playerMusicListDTO = this.getMusicListByListId(list.getType(), list.getExternalId());
+
+        PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId());
+        if (playerMusicListDTO.getIcon() != null && !playerMusicListDTO.getIcon().equals(oldPlayerMusicList.getIcon())) {
+            playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicListDTO.getIcon()));
+        }
+
+        List<PlayerMusic> newMusicList = playerMusicListDTO.getMusicList();
+        List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
+
+        List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+        for (PlayerMusic newMusic : newMusicList) {
+            if (oldExternalIdList.contains(newMusic.getExternalId())) {
+                continue;
             }
-
-            List<PlayerMusic> newMusicList = playerMusicListDTO.getMusicList();
-            List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
-
-            List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            for (PlayerMusic newMusic : newMusicList) {
-                if (oldExternalIdList.contains(newMusic.getExternalId())) {
-                    continue;
-                }
-                PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
-                if (otherMusic != null) {
-                    playerMusicMapper.updatePlayerMusicSelective(new PlayerMusic().setId(otherMusic.getId()).setListId(list.getId()));
-                } else {
-                    newMusic.setUserId(userId);
-                    newMusic.setListId(list.getId());
-                    playerMusicMapper.addPlayerMusicSelective(newMusic);
-                }
+            PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
+            if (otherMusic != null) {
+                playerMusicMapper.updatePlayerMusicSelective(new PlayerMusic().setId(otherMusic.getId()).setListId(list.getId()));
+            } else {
+                newMusic.setUserId(userId);
+                newMusic.setListId(list.getId());
+                playerMusicMapper.addPlayerMusicSelective(newMusic);
             }
+        }
 
-            List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            for (PlayerMusic oldMusic : oldMusicList) {
-                if (newExternalIdList.contains(oldMusic.getExternalId())) {
-                    continue;
-                }
-                playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
+        List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+        for (PlayerMusic oldMusic : oldMusicList) {
+            if (newExternalIdList.contains(oldMusic.getExternalId())) {
+                continue;
             }
+            playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
         }
     }
 }
