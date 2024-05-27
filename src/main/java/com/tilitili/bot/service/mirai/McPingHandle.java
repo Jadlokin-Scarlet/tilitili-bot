@@ -65,8 +65,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleBind(BotMessageAction messageAction) {
-		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
-		if (!canUseBotAdminTask) {
+		boolean isMember = BotUserDTO.PERMISSION_MEMBER.equals(messageAction.getBotUser().getPermission());
+		if (isMember) {
 			return null;
 		}
 		Long senderId = messageAction.getBotSender().getId();
@@ -87,8 +87,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleWhiteList(BotMessageAction messageAction) {
-		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
-		if (!canUseBotAdminTask) {
+		boolean isMember = BotUserDTO.PERMISSION_MEMBER.equals(messageAction.getBotUser().getPermission());
+		if (isMember) {
 			return null;
 		}
 		Long senderId = messageAction.getBotSender().getId();
