@@ -196,7 +196,14 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		try {
 			response = mcPingManager.mcPing(new InetSocketAddress(host, port));
 		} catch (IOException e) {
-			throw new AssertException("网络异常", e);
+			try {
+				BotMessage resp = this.handelMcList(messageAction);
+				List<BotMessageChain> respList = resp.getBotMessageChainList();
+				respList.add(0, BotMessageChain.ofPlain("mc ping失败，一下是在线玩家查询结果：\n"));
+				return BotMessage.simpleListMessage(respList);
+			} catch (Exception ee) {
+				throw new AssertException("网络异常", e);
+			}
 		}
 		Asserts.notNull(response, "服务器不在线");
 		Integer onlinePlayerCnt = response.getPlayers().getOnline();
