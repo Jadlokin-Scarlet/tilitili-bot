@@ -65,6 +65,10 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleBind(BotMessageAction messageAction) {
+		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+		if (!canUseBotAdminTask) {
+			return null;
+		}
 		Long senderId = messageAction.getBotSender().getId();
 		String bindSenderIdSrt = messageAction.getValue();
 		Asserts.isTrue(botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser()), "权限不足");
@@ -83,6 +87,10 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleWhiteList(BotMessageAction messageAction) {
+		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
+		if (!canUseBotAdminTask) {
+			return null;
+		}
 		Long senderId = messageAction.getBotSender().getId();
 		Long mcSenderId = botConfigManager.getLongSenderConfigCache(senderId, "mcBind");
 		Asserts.notNull(mcSenderId, "未绑定服务器");
