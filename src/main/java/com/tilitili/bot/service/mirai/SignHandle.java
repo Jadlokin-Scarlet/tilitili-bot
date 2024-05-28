@@ -24,10 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -112,7 +112,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 
 		int addScore = 150;
 		try {
-			if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock", 1, TimeUnit.SECONDS)) {
+			if (! session.putIfAbsent(externalIdLockKey + botUser.getId(), "lock", Duration.ofSeconds(1))) {
 				log.info("别签到刷屏");
 				return null;
 			}

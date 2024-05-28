@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -479,7 +479,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 
 		// 凌晨4点刷新
 		String dayStr = DateUtils.formatDateYMD(DateUtils.addTime(new Date(), Calendar.HOUR_OF_DAY, -4));
-		Asserts.isTrue(redisCache.setNotExist(String.format("redemption-%s-%s", userId, dayStr), "yes", 1, TimeUnit.DAYS), "阿伟，你咋又来赎牛子哦。");
+		Asserts.isTrue(redisCache.putIfAbsent(String.format("redemption-%s-%s", userId, dayStr), "yes", Duration.ofDays(1)), "阿伟，你咋又来赎牛子哦。");
 
 		Integer realRedemptionLength = botUserManager.safeUpdateScore(botUser, -redemptionLength);
 		Asserts.checkEquals(realRedemptionLength, -redemptionLength, "啊嘞，不对劲");

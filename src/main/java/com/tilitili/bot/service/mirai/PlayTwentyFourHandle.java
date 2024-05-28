@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -121,8 +122,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 		BotSessionService.MiraiSession session = messageAction.getSession();
 		String result = messageAction.getValue();
 		if (!session.containsKey(numListKey)) return null;
-		Asserts.isTrue(session.putIfAbsent(lockKey, "lock", 1, TimeUnit.SECONDS), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
 		try {
+			Asserts.isTrue(session.tryTimeoutLock(lockKey, Duration.ofSeconds(1)), "猪脑过载，你先别急 Σ（ﾟдﾟlll）");
 			Asserts.notBlank(result, "你想答什么。");
 			String resultAfterReplace = result;
 			for (Map.Entry<String, String> entry : replaceMap.entrySet()) {

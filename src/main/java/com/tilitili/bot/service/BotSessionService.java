@@ -4,9 +4,9 @@ import com.tilitili.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class BotSessionService {
@@ -61,8 +61,11 @@ public class BotSessionService {
         public void put(String key, String value, int delay) {
             redisCache.setValue(this.generateKey(key), value, delay);
         }
-        public Boolean putIfAbsent(String key, String value, int delay, TimeUnit unit) {
-            return redisCache.setNotExist(this.generateKey(key), value, delay, unit);
+        public Boolean putIfAbsent(String key, String value, Duration expireTime) {
+            return redisCache.putIfAbsent(this.generateKey(key), value, expireTime);
+        }
+        public Boolean tryTimeoutLock(String key, Duration expireTime) {
+            return redisCache.tryTimeoutLock(this.generateKey(key), expireTime);
         }
         public boolean containsKey(String key) {
             return redisCache.exists(this.generateKey(key));

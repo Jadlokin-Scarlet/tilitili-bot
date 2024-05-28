@@ -22,8 +22,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Service
@@ -141,7 +141,7 @@ public class BotAdminService {
     private void generateAndSendEmail(String email) {
         String emailCode = this.generateRandomCode();
 
-        Asserts.isTrue(redisCache.setNotExist(emailCodeLockKey + email, "yes", 1, TimeUnit.MINUTES), "收不到验证码请联系管理员");
+        Asserts.isTrue(redisCache.putIfAbsent(emailCodeLockKey + email, "yes", Duration.ofMinutes(1)), "收不到验证码请联系管理员");
 
         redisCache.setValue(emailCodeKey + email, emailCode);
         if (!"pro".equals(active) && testEmail.equals(email)) {
