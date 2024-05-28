@@ -269,8 +269,8 @@ public class PixivCacheService {
 	}
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
-		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
 //		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
 //		if (pageCount > 1) {
 //			int page = Integer.parseInt(list.get(2)) + 1;
 //			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
