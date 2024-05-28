@@ -216,7 +216,8 @@ public class PlayTwentyFourHandle extends ExceptionRespMessageToSenderHandle {
 			}
 			List<Integer> reIndexNumList = indexList.stream().map(numList::get).collect(Collectors.toList());
 			List<String> opList = Arrays.asList("+", "-", "*", "/");
-			for (int jndex = 0; jndex < 64; jndex++) {
+			// 0是全+，太简单了
+			for (int jndex = 1; jndex < 64; jndex++) {
 				List<Integer> jndexList = Arrays.asList(
 						jndex / 4 / 4,
 						jndex / 4 % 4,
