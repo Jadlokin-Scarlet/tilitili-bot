@@ -154,11 +154,12 @@ public class MusicController extends BaseController{
 		if (request.getListId() != null) {
 			Long listId = request.getListId();
 
-			PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(listId);
-			Asserts.notNull(playerMusicList, "参数异常");
-			Asserts.checkEquals(playerMusicList.getUserId(), userId, "参数异常");
+			PlayerMusicList musicList = playerMusicListMapper.getPlayerMusicListById(listId);
+			Asserts.notNull(musicList, "参数异常");
+			Asserts.checkEquals(musicList.getUserId(), userId, "参数异常");
 
 			playerMusicListMapper.deletePlayerMusicListByPrimary(listId);
+			musicService.syncMusic(userId);
 		}
 
 		return BaseModel.success();

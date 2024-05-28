@@ -299,6 +299,10 @@ public class MusicService {
     }
 
     public void syncMusic(Long userId) {
+        List<PlayerMusic> noListPlayerMusicList = playerMusicMapper.getNoListMusicList(userId);
+        for (PlayerMusic noListPlayerMusic : noListPlayerMusicList) {
+            playerMusicMapper.deletePlayerMusicByPrimary(noListPlayerMusic.getId());
+        }
         List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
         Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
