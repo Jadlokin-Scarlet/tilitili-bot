@@ -285,7 +285,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 	private String replaceResp(BotMessageAction messageAction, String name, String resp) {
 		BotUserDTO botUser = messageAction.getBotUser();
 
-		String favoriteUserIdStr = botConfigManager.getStringUserConfigCache(botUser.getId(), ConfigHandle.favoriteUserIdKey);
+		String favoriteUserIdStr = null; //botConfigManager.getStringUserConfigCache(botUser.getId(), ConfigHandle.favoriteUserIdKey);
 
 		resp = resp.replaceAll("\\{name}", name);
 		resp = resp.replaceAll("\\{master}", botUser.getName());
