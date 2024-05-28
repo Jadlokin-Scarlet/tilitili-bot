@@ -16,11 +16,7 @@ import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.manager.BotRoleManager;
-import com.tilitili.common.manager.BotSenderCacheManager;
-import com.tilitili.common.manager.BotSenderTaskMappingManager;
-import com.tilitili.common.manager.BotUserManager;
-import com.tilitili.common.mapper.mysql.BotCattleMapper;
+import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
@@ -37,21 +33,21 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 	private final RedisCache redisCache;
 	private final BotUserManager botUserManager;
 	private final BotSenderCacheManager botSenderCacheManager;
-	private final BotCattleMapper botCattleMapper;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
 	private final BotSenderTaskMappingManager botSenderTaskMappingManager;
-	private final BotRoleManager botRoleManager ;
+	private final BotRoleManager botRoleManager;
+	private final BotUserBindManager botUserBindManager;
 
-	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotCattleMapper botCattleMapper, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotRoleManager botRoleManager) {
+	public BindHandle(RedisCache redisCache, BotUserManager botUserManager, BotSenderCacheManager botSenderCacheManager, BotForwardConfigMapper botForwardConfigMapper, BotUserSenderMappingMapper botUserSenderMappingMapper, BotSenderTaskMappingManager botSenderTaskMappingManager, BotRoleManager botRoleManager, BotUserBindManager botUserBindManager) {
 		this.redisCache = redisCache;
 		this.botUserManager = botUserManager;
 		this.botSenderCacheManager = botSenderCacheManager;
-		this.botCattleMapper = botCattleMapper;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botSenderTaskMappingManager = botSenderTaskMappingManager;
 		this.botRoleManager = botRoleManager;
+		this.botUserBindManager = botUserBindManager;
 	}
 
 	@Override
@@ -83,9 +79,9 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 		// 虽然好像没必要，但还是让QQ类型账号作为父账号
 		if (subUser.getType() == BotUserConstant.USER_TYPE_QQ) {
 			// 父子反转
-			botUserManager.bindUser(parentUser, subUser);
+			botUserBindManager.bindUser(parentUser, subUser);
 		} else {
-			botUserManager.bindUser(subUser, parentUser);
+			botUserBindManager.bindUser(subUser, parentUser);
 		}
 
 		return BotMessage.simpleTextMessage("绑定成功！");
@@ -109,7 +105,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		Asserts.checkEquals(parentUser.getType(), 0, "啊嘞，不对劲");
 
-		botUserManager.bindUser(subUser, parentUser);
+		botUserBindManager.bindUser(subUser, parentUser);
 
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);
@@ -132,7 +128,7 @@ public class BindHandle extends ExceptionRespMessageToSenderHandle {
 
 		long sourceUserId = Long.parseLong(sourceKey.replaceAll(applyKey, ""));
 		BotUserDTO sourceBotUser = botUserManager.getValidBotUserByIdWithParent(sourceUserId);
-		botUserManager.bindUser(sourceBotUser, botUser);
+		botUserBindManager.bindUser(sourceBotUser, botUser);
 
 		redisCache.delete(sourceKey);
 		redisCache.delete(targetKey);

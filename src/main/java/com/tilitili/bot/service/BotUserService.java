@@ -7,6 +7,7 @@ import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.PageModel;
 import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.manager.BotUserManager;
+import com.tilitili.common.manager.BotUserBindManager;
 import com.tilitili.common.mapper.mysql.BotUserSenderMappingMapper;
 import com.tilitili.common.utils.Asserts;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,13 @@ public class BotUserService {
 	private final BotUserManager botUserManager;
 	private final BotRoleManager botRoleManager;
 	private final BotUserSenderMappingMapper botUserSenderMappingMapper;
+	private final BotUserBindManager botUserBindManager;
 
-	public BotUserService(BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotRoleManager botRoleManager) {
+	public BotUserService(BotUserManager botUserManager, BotUserSenderMappingMapper botUserSenderMappingMapper, BotRoleManager botRoleManager, BotUserBindManager botUserBindManager) {
 		this.botUserManager = botUserManager;
 		this.botUserSenderMappingMapper = botUserSenderMappingMapper;
 		this.botRoleManager = botRoleManager;
+		this.botUserBindManager = botUserBindManager;
 	}
 
 	public BaseModel<PageModel<BotUserDTO>> listBotUser(BotUserQuery query) {
@@ -49,6 +52,6 @@ public class BotUserService {
 
 		BotUserDTO subUser = botUserManager.getValidBotUserByIdWithParent(null, userId);
 		BotUserDTO parentUser = botUserManager.getValidBotUserByExternalIdWithParent(BotUserConstant.USER_TYPE_QQ, qq);
-		botUserManager.bindUser(subUser, parentUser);
+		botUserBindManager.bindUser(subUser, parentUser);
 	}
 }
