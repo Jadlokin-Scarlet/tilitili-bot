@@ -115,10 +115,13 @@ public class PixivCacheService {
 				if (recordPidList.contains(pid)) {
 					continue;
 				}
+				if (sl >= 5 && !canSS) {
+					throw new AssertSeseException();
+				}
 
 				List<BotMessageChain> messageChainList;
 				try {
-					messageChainList = this.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
+					messageChainList = this.getImageChainList(bot, botSender, pid, sl);
 				} catch (AssertSeseException e) {
 					log.warn(e.getMessage(), e);
 					continue;
@@ -177,9 +180,12 @@ public class PixivCacheService {
 			String title = info.getTitle();
 			Integer sl = info.getSl();
 			Integer pageCount = info.getPageCount();
+			if (sl >= 5 && !canSS) {
+				throw new AssertSeseException();
+			}
 			List<BotMessageChain> messageChainList;
 			try {
-				messageChainList = this.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
+				messageChainList = this.getImageChainList(bot, botSender, pid, sl);
 			} catch (AssertSeseException e) {
 				log.warn(e.getMessage(), e);
 				continue;
@@ -191,11 +197,9 @@ public class PixivCacheService {
 		return BotMessage.simpleTextMessage("啊嘞，似乎没有了？");
 	}
 
-	public List<BotMessageChain> getImageChainList(BotRobot bot, BotSender botSender, String pid, Integer sl, Integer pageCount, Boolean canSS) {
-		if (sl >= 5 && !canSS) {
-			throw new AssertSeseException();
-		}
+	public List<BotMessageChain> getImageChainList(BotRobot bot, BotSender botSender, String pid, Integer sl) {
 		List<String> urlList = pixivManager.getPageListProxy(pid);
+		Integer pageCount = urlList.size();
 		urlList = urlList.subList(0, Math.min(5, urlList.size()));
 
 		List<BotMessageChain> messageChainList = new ArrayList<>();
@@ -205,16 +209,24 @@ public class PixivCacheService {
 		messageChainList.add(BotMessageChain.ofPlain("\npid: "+pid));
 		if (sl < 5) {
 			for (String url : urlList) {
-				UploadImageResult result = this.downloadPixivImageAndUploadToBot(bot, url, pageCount);
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofImage(result));
+				try {
+					UploadImageResult result = this.downloadPixivImageAndUploadToBot(bot, url, pageCount);
+					messageChainList.add(BotMessageChain.ofPlain("\n"));
+					messageChainList.add(BotMessageChain.ofImage(result));
+				} catch (AssertException e) {
+					messageChainList.add(BotMessageChain.ofPlain("下载失败：%s\n", url));
+				}
 			}
 		} else {
 //			messageChainList.add(BotMessageChain.ofPlain("\n原图: "));
 			for (String url : urlList) {
-				String ossUrl = this.downloadPixivImageAndUploadToOSS(url, pageCount);
-				messageChainList.add(BotMessageChain.ofPlain("\n"));
-				messageChainList.add(BotMessageChain.ofLink(ossUrl != null? ossUrl: url));
+				try {
+					String ossUrl = this.downloadPixivImageAndUploadToOSS(url, pageCount);
+					messageChainList.add(BotMessageChain.ofPlain("\n"));
+					messageChainList.add(BotMessageChain.ofLink(ossUrl != null? ossUrl: url));
+				} catch (AssertException e) {
+					messageChainList.add(BotMessageChain.ofPlain("下载失败：%s\n", url));
+				}
 			}
 		}
 		// 限制一下文字部分长度

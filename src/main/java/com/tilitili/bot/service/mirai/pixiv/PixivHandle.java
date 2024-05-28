@@ -16,6 +16,7 @@ import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoTag;
 import com.tilitili.common.entity.view.bot.pixiv.PixivRecommendIllust;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.exception.AssertSeseException;
 import com.tilitili.common.manager.BotConfigManager;
 import com.tilitili.common.manager.PixivCacheManager;
 import com.tilitili.common.mapper.mysql.BotTaskMapper;
@@ -202,9 +203,12 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         String pid = illust.getId();
         Integer sl = illust.getSl();
         Integer pageCount = illust.getPageCount();
+        if (sl >= 5 && !canSS) {
+            throw new AssertSeseException();
+        }
 
         log.debug("PixivRecommendHandle get make messageChainList");
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl);
 
         log.debug("PixivRecommendHandle save result");
         redisCache.setValue(pixivImageRedisKey, pid + "_" + mode, 120);
@@ -260,9 +264,12 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         String recommendPid = illust.getId();
         Integer sl = illust.getSl();
         Integer pageCount = illust.getPageCount();
+        if (sl >= 5 && !canSS) {
+            throw new AssertSeseException();
+        }
 
         log.debug("PixivRecommendHandle get make messageChainList");
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, recommendPid, sl, pageCount, canSS);
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, recommendPid, sl);
         return BotMessage.simpleListMessage(messageChainList);
     }
 
@@ -316,7 +323,11 @@ public class PixivHandle extends ExceptionRespMessageHandle {
         Integer sl = info.getSl();
         Integer pageCount = info.getPageCount();
         String userName = info.getUserName();
-        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl, pageCount, canSS);
+        if (sl >= 5 && !canSS) {
+            throw new AssertSeseException();
+        }
+
+        List<BotMessageChain> messageChainList = pixivService.getImageChainList(bot, botSender, pid, sl);
         return BotMessage.simpleListMessage(messageChainList);
     }
 
