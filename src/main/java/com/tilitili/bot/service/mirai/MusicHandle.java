@@ -181,7 +181,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             return BotMessage.simpleTextMessage(String.format("删除歌单%d歌曲%d成功.", listCnt, musicCnt));
         } else {
             MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
-            PlayerMusicDTO theMusic = redisQueue.getTheMusic();
+            PlayerMusic theMusic = redisQueue.getTheMusic();
             if (theMusic == null) {
                 return null;
             }

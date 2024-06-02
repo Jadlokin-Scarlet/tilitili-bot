@@ -143,7 +143,7 @@ public class MusicService {
         return ktvServiceInterface.restartKtv(textSender.getId(), voiceSender.getId());
     }
 
-    public String getMusicJumpUrl(PlayerMusicDTO theMusic) {
+    public String getMusicJumpUrl(PlayerMusic theMusic) {
         switch (theMusic.getType()) {
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: return "https://music.163.com/song?id="+theMusic.getExternalId();
