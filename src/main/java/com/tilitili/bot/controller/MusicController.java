@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/api/music")
 public class MusicController extends BaseController{
-	private final PlayerMusicListMapper playerMusicListMapper;
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final RedisCache redisCache;
 	private final MusicService musicService;
@@ -48,6 +47,7 @@ public class MusicController extends BaseController{
 	private final MusicCloudManager musicCloudManager;
 	private final BotSenderManager botSenderManager;
 	private final PlayerMusicManager playerMusicManager;
+	private final PlayerMusicListMapper playerMusicListMapper;
 
 	public MusicController(PlayerMusicListMapper playerMusicListMapper, BotSenderCacheManager botSenderCacheManager, RedisCache redisCache, MusicService musicService, BotRobotCacheManager botRobotCacheManager, BotUserManager botUserManager, PlayerMusicMapper playerMusicMapper, MusicCloudManager musicCloudManager, BotSenderManager botSenderManager, PlayerMusicManager playerMusicManager) {
 		this.playerMusicListMapper = playerMusicListMapper;
