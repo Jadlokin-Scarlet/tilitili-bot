@@ -423,7 +423,6 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotCattle botCattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(botCattle, "我不倒啊。");
 		List<BotCattleRecord> botCattleRecordList = botCattleRecordMapper.getBotCattleRecordByUserId(userId);
-		Asserts.notEmpty(botCattleRecordList, "我不倒啊");
 		List<String> chainList = new ArrayList<>();
 		String title = String.format("当前%.2fcm。", botCattle.getLength() / 100.0);
 		chainList.add(title);
