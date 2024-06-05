@@ -294,22 +294,24 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notNull(theCattle, "巧妇难为无米炊。");
 		Asserts.notNull(otherCattle, "拔剑四顾心茫然。");
 
+		List<BotMessageChain> respList = new ArrayList<>();
 		// 发起者需要校验牛子可用性
 		String theRedisKey = cattleSleepKey + theUserId;
 		Long theExpire = redisCache.getExpire(theRedisKey);
 		if (theExpire > 0) {
 			boolean hasItem = botUserItemMappingManager.hasItem(theUserId, BotItemConstant.CATTLE_REFRESH);
+			BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
 			if (!hasItem) {
 				botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(theUserId).setItemId(BotItemConstant.CATTLE_REFRESH));
+				String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(theUserId).getScore());
+				respList.add(BotMessageChain.ofPlain(String.format("兑换%s成功，剩余积分%s%n", refreshItem.getName(), nowScore)));
 			}
-			BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
 			Asserts.isTrue(botItemService.useItemWithoutError(botSender, theUser, refreshItem), "啊嘞，不对劲");
 		}
 
 		int length = random.nextInt(1000);
 		log.info(String.format("%s和%s比划", theUserId, otherUserId));
 
-		List<BotMessageChain> respList = new ArrayList<>();
 		botCattleManager.safeCalculateCattle(theUserId, otherUserId, length, -length);
 		botCattleRecordMapper.addBotCattleRecordSelective(new BotCattleRecord().setSourceUserId(theUserId).setTargetUserId(otherUserId).setSourceLengthDiff(length).setTargetLengthDiff(-length).setResult(0).setLength(length));
 		respList.add(BotMessageChain.ofPlain(String.format("一番胶战后，你赢得了%.2fcm，现在有%.2fcm。", length / 100.0, (theCattle.getLength() + length) / 100.0)));
