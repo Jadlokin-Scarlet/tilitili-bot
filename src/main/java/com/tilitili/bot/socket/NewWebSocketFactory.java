@@ -88,6 +88,7 @@ public class NewWebSocketFactory {
 	public Integer getWsStatus(BotRobot bot) {
 		WebSocket webSocket = webSocketMap.get(bot.getId());
 		if (webSocket == null) {
+
 			return -1;
 		}
 		return webSocket.isInputClosed() || webSocket.isOutputClosed()? -1: 0;

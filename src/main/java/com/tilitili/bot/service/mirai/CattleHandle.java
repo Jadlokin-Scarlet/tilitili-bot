@@ -7,6 +7,7 @@ import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotUserConstant;
 import com.tilitili.common.entity.*;
 import com.tilitili.common.entity.dto.BotUserDTO;
+import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.query.BotCattleQuery;
 import com.tilitili.common.entity.query.BotUserSenderMappingQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
@@ -107,10 +108,21 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		BotUserDTO botUser = messageAction.getBotUser();
 		Long userId = botUser.getId();
 		String redisKey = cattleSleepKey + userId;
-		Long expire = redisCache.getExpire(redisKey);
-		if (expire > 0) {
-			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
-		}
+//		Long expire = redisCache.getExpire(redisKey);
+
+		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
+
+//		int max = 5;
+//		int selfCnt = expire > 0? 0: 1;
+//		int itemCnt = Math.min(max - selfCnt, botUserItemMappingManager.countItem(botUser, BotItemConstant.CATTLE_REFRESH));
+//		int buyCnt = Math.min(max - selfCnt - itemCnt, botUser.getScore() / refreshItem.getPrice());
+//		int pkCnt = selfCnt + itemCnt + buyCnt;
+//		Asserts.isTrue(pkCnt > 0, "积分好像不够惹。休息%s再来吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+
+
+//		if (expire > 0) {
+//			Asserts.isTrue(botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH), "节制啊，再休息%s吧", expire > 60 ? expire / 60 + "分钟" : expire + "秒");
+//		}
 
 		BotCattle cattle = botCattleMapper.getValidBotCattleByUserId(userId);
 		Asserts.notNull(cattle, "巧妇难为无米炊。");
@@ -128,37 +140,73 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.notEmpty(senderCattleList, "拔剑四顾心茫然。");
 		Collections.shuffle(senderCattleList);
 
-		BotItem refreshItem = botItemMapper.getBotItemById(BotItemConstant.CATTLE_REFRESH);
-
 		List<BotMessageChain> respList = new ArrayList<>();
+		int buyCnt = 0;
 		int useCnt = 0;
-		for (int index = 0; index < Math.min(5, senderCattleList.size()); index++) {
+		for (int i = 0; i < 5; i++) {
 			boolean hasCd = redisCache.getExpire(redisKey) > 0;
-			boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH);
-			if (hasCd && !hasItem) {
-				break;
-			}
-
 			if (hasCd) {
+				boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH);
+				if (!hasItem) {
+					try {
+						botUserItemMappingManager.safeBuyItem(new SafeTransactionDTO().setUserId(userId).setItemId(BotItemConstant.CATTLE_REFRESH));
+						buyCnt++;
+					} catch (AssertException e) {
+						respList.add(BotMessageChain.ofPlain(e.getMessage()));
+						break;
+					}
+				}
 				Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
-				useCnt ++;
+				useCnt++;
 			}
 
-			BotCattle otherCattle = senderCattleList.get(index);
+			BotCattle otherCattle = senderCattleList.get(i);
 			Long otherUserId = otherCattle.getUserId();
 			String otherRedisKey = cattleSleepKey + otherUserId;
 
-			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
+			if (i != 0) respList.add(BotMessageChain.ofPlain("\n"));
 			respList.addAll(this.pk(botSender.getId(), userId, otherUserId, true));
 
 			redisCache.setValue(redisKey, "yes", 60*60);
 			redisCache.setValue(otherRedisKey, "yes", 60*60);
 		}
-		if (useCnt > 1) {
+		if (useCnt > 0) {
 			respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
-		} else if (useCnt == 1) {
-			respList.add(0, BotMessageChain.ofPlain(String.format("%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
 		}
+		if (buyCnt > 0) {
+			String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
+			respList.add(0, BotMessageChain.ofPlain(String.format("兑换%s个%s成功，剩余积分%s%n", buyCnt, refreshItem.getName(), nowScore)));
+		}
+
+
+//		int useCnt = 0;
+//		for (int index = 0; index < Math.min(5, senderCattleList.size()); index++) {
+//			boolean hasCd = redisCache.getExpire(redisKey) > 0;
+//			boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH);
+//			if (hasCd && !hasItem) {
+//				break;
+//			}
+//
+//			if (hasCd) {
+//				Asserts.isTrue(botItemService.useItem(botSender, botUser, refreshItem), "啊嘞，不对劲");
+//				useCnt ++;
+//			}
+//
+//			BotCattle otherCattle = senderCattleList.get(index);
+//			Long otherUserId = otherCattle.getUserId();
+//			String otherRedisKey = cattleSleepKey + otherUserId;
+//
+//			if (index != 0) respList.add(BotMessageChain.ofPlain("\n"));
+//			respList.addAll(this.pk(botSender.getId(), userId, otherUserId, true));
+//
+//			redisCache.setValue(redisKey, "yes", 60*60);
+//			redisCache.setValue(otherRedisKey, "yes", 60*60);
+//		}
+//		if (useCnt > 1) {
+//			respList.add(0, BotMessageChain.ofPlain(String.format("连灌%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
+//		} else if (useCnt == 1) {
+//			respList.add(0, BotMessageChain.ofPlain(String.format("%s瓶伟哥，你感觉自己充满了力量%n", useCnt)));
+//		}
 
 		return BotMessage.simpleListMessage(respList).setQuote(messageId);
 	}
