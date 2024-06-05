@@ -143,12 +143,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		List<BotMessageChain> respList = new ArrayList<>();
 		int buyCnt = 0;
 		int useCnt = 0;
-		for (int i = 0; i < 5; i++) {
-			BotCattle otherCattle = senderCattleList.get(i);
-			if (otherCattle == null) {
-				break;
-			}
-
+		for (int i = 0; i < Math.min(5, senderCattleList.size()); i++) {
 			boolean hasCd = redisCache.getExpire(redisKey) > 0;
 			if (hasCd) {
 				boolean hasItem = botUserItemMappingManager.hasItem(userId, BotItemConstant.CATTLE_REFRESH);
@@ -165,6 +160,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 				useCnt++;
 			}
 
+			BotCattle otherCattle = senderCattleList.get(i);
 			Long otherUserId = otherCattle.getUserId();
 			String otherRedisKey = cattleSleepKey + otherUserId;
 
