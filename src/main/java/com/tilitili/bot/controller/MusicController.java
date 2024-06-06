@@ -80,14 +80,14 @@ public class MusicController extends BaseController{
 
 	@GetMapping("/last")
 	@ResponseBody
-	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId) {
-		int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId));
-		List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
-		Asserts.notNull(lastMusic, "没有音乐了");
+	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId) {
+		int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId));
+		List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
+		Asserts.notEmpty(lastMusic, "没有音乐了");
 		return BaseModel.success(lastMusic.get(0));
 	}
 
-	@PostMapping("/sync")
+	@PostMapping("/list/sync")
 	@ResponseBody
 	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody SyncMusicRequest request) {
 		if (request.getListId() != null) {
@@ -148,7 +148,7 @@ public class MusicController extends BaseController{
 		return BaseModel.success();
 	}
 
-	@PostMapping("/delete")
+	@DeleteMapping("/list")
 	@ResponseBody
 	public BaseModel<?> deleteMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody DeleteMusicRequest request) {
 		if (request.getListId() != null) {
@@ -165,6 +165,18 @@ public class MusicController extends BaseController{
 		return BaseModel.success();
 	}
 
+	@PostMapping("/{musicId}/volume")
+	@ResponseBody
+	public BaseModel<?> editMusicVolume(@SessionAttribute(value = "userId") Long userId, @PathVariable Long musicId, @RequestBody PlayerMusic request) {
+		Asserts.notNull(musicId, "参数异常");
+		Asserts.notNull(request, "参数异常");
+		PlayerMusic playerMusic = playerMusicMapper.getPlayerMusicById(musicId);
+		Asserts.notNull(playerMusic, "参数异常");
+		Asserts.checkEquals(playerMusic.getUserId(), userId, "参数异常");
+		int cnt = playerMusicMapper.updatePlayerMusicVolume(musicId, request.getVolume());
+		Asserts.checkEquals(cnt, 1, "更新失败");
+		return BaseModel.success();
+	}
 
 
 
