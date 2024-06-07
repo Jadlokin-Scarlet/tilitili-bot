@@ -176,11 +176,11 @@ public class MusicService {
         List<String> searchBvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
 
         if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
-            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            String listId = StringUtils.patten1("[?&]id=(\\d+)", searchKey);
             playerMusicListDTO = musicCloudManager.getProgramPlayerList(listId, needAllList);
         } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
             // https://music.163.com/playlist?id=649428962&userid=361260659
-            Long listId = Long.valueOf(StringUtils.patten1("[?&]id=(\\d+)", searchKey));
+            String listId = StringUtils.patten1("[?&]id=(\\d+)", searchKey);
             playerMusicListDTO = musicCloudManager.getPlayerList(listId, needAllList);
 
             List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
@@ -231,9 +231,9 @@ public class MusicService {
     public PlayerMusicListDTO getMusicListByListId(Integer type, String listId) {
         switch (type) {
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM:
-                return musicCloudManager.getProgramPlayerList(Long.valueOf(listId));
+                return musicCloudManager.getProgramPlayerList(listId);
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
-                PlayerMusicListDTO playerMusicListDTO = musicCloudManager.getPlayerList(Long.valueOf(listId));
+                PlayerMusicListDTO playerMusicListDTO = musicCloudManager.getPlayerList(listId);
                 List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
                 List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
                 playerMusicListDTO.setMusicList(playerMusicListDetail);
