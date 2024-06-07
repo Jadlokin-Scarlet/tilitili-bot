@@ -120,10 +120,9 @@ public class MusicController extends BaseController{
 	public BaseModel<?> addMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody MusicSearchVO request) {
 		if (request.getSongList() != null) {
 			MusicCloudSong song = request.getSongList().get(0);
-			Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
-			PlayerMusic playerMusic = new PlayerMusicDTO(type, song);
+			PlayerMusic playerMusic = new PlayerMusicDTO(PlayerMusicDTO.TYPE_MUSIC_CLOUD, song);
 
-			PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, type, playerMusic.getExternalId());
+			PlayerMusic dbMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, playerMusic.getType(), playerMusic.getExternalId());
 			Asserts.checkNull(dbMusic, "该歌曲已被收藏");
 
 			PlayerMusicList list = playerMusicManager.getOrAddDefaultPlayerMusicList(userId);

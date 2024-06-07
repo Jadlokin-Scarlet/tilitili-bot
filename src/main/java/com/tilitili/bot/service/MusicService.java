@@ -317,21 +317,19 @@ public class MusicService {
         PlayerMusicListDTO playerMusicListDTO = this.getMusicListByListId(list.getType(), list.getExternalId());
 
         PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId());
-        if (playerMusicListDTO.getIcon() != null && !playerMusicListDTO.getIcon().equals(oldPlayerMusicList.getIcon())) {
-            playerMusicListMapper.updatePlayerMusicListSelective(new PlayerMusicList().setId(oldPlayerMusicList.getId()).setIcon(playerMusicListDTO.getIcon()));
+        PlayerMusicList updPlayerMusicList = this.checkMusicListData(oldPlayerMusicList, list);
+        if (updPlayerMusicList != null) {
+            playerMusicListMapper.updatePlayerMusicListSelective(updPlayerMusicList);
         }
 
         List<PlayerMusic> newMusicList = playerMusicListDTO.getMusicList();
-        List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
-
-        List<String> oldExternalIdList = oldMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
         for (PlayerMusic newMusic : newMusicList) {
-            if (oldExternalIdList.contains(newMusic.getExternalId())) {
-                continue;
-            }
-            PlayerMusic otherMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
-            if (otherMusic != null) {
-                playerMusicMapper.updatePlayerMusicSelective(new PlayerMusic().setId(otherMusic.getId()).setListId(list.getId()));
+            PlayerMusic oldMusic = playerMusicMapper.getPlayerMusicByUserIdAndTypeAndExternalId(userId, newMusic.getType(), newMusic.getExternalId());
+            if (oldMusic != null) {
+                PlayerMusic updMusic = this.checkMusicData(oldMusic, newMusic);
+                if (updMusic != null) {
+                    playerMusicMapper.updatePlayerMusicSelective(updMusic);
+                }
             } else {
                 newMusic.setUserId(userId);
                 newMusic.setListId(list.getId());
@@ -340,11 +338,50 @@ public class MusicService {
         }
 
         List<String> newExternalIdList = newMusicList.stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+        List<PlayerMusic> oldMusicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(list.getId()));
         for (PlayerMusic oldMusic : oldMusicList) {
             if (newExternalIdList.contains(oldMusic.getExternalId())) {
                 continue;
             }
             playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
         }
+    }
+
+    private PlayerMusicList checkMusicListData(PlayerMusicList dbPlayerMusicList, PlayerMusicList playerMusicList) {
+        PlayerMusicList updPlayerMusicList = null;
+        if (!Objects.equals(dbPlayerMusicList.getName(), playerMusicList.getName())) {
+            updPlayerMusicList = new PlayerMusicList().setName(playerMusicList.getName());
+        }
+        if (playerMusicList.getIcon() != null && !Objects.equals(dbPlayerMusicList.getIcon(), playerMusicList.getIcon())) {
+            if (updPlayerMusicList == null) updPlayerMusicList = new PlayerMusicList();
+            updPlayerMusicList.setIcon(playerMusicList.getIcon());
+        }
+        if (updPlayerMusicList == null) {
+            return null;
+        }
+        return updPlayerMusicList.setId(dbPlayerMusicList.getId());
+    }
+
+    private PlayerMusic checkMusicData(PlayerMusic dbPlayerMusic, PlayerMusic playerMusic) {
+        PlayerMusic updPlayerMusic = null;
+        if (!Objects.equals(dbPlayerMusic.getName(), playerMusic.getName())) {
+            updPlayerMusic = new PlayerMusic().setName(playerMusic.getName());
+        }
+        if (playerMusic.getListId() != null && !Objects.equals(dbPlayerMusic.getListId(), playerMusic.getListId())) {
+            if (updPlayerMusic == null) updPlayerMusic = new PlayerMusic();
+            updPlayerMusic.setListId(playerMusic.getListId());
+        }
+        if (playerMusic.getIcon() != null && !Objects.equals(dbPlayerMusic.getIcon(), playerMusic.getIcon())) {
+            if (updPlayerMusic == null) updPlayerMusic = new PlayerMusic();
+            updPlayerMusic.setIcon(playerMusic.getIcon());
+        }
+        if (playerMusic.getVip() != null && !Objects.equals(dbPlayerMusic.getVip(), playerMusic.getVip())) {
+            if (updPlayerMusic == null) updPlayerMusic = new PlayerMusic();
+            updPlayerMusic.setVip(playerMusic.getVip());
+        }
+        if (updPlayerMusic == null) {
+            return null;
+        }
+        return updPlayerMusic.setId(dbPlayerMusic.getId());
     }
 }

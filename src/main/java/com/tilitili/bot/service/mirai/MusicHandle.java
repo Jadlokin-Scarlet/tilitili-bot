@@ -358,8 +358,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleMusicCouldLink(BotRobot bot, BotSender botSender, BotUserDTO botUser, MusicCloudSong song) {
-        Integer type = song.getFee() == 1? PlayerMusicDTO.TYPE_MUSIC_CLOUD_VIP: PlayerMusicDTO.TYPE_MUSIC_CLOUD;
-        PlayerMusic playerMusic = new PlayerMusicDTO(type, song);
+        PlayerMusic playerMusic = new PlayerMusicDTO(PlayerMusicDTO.TYPE_MUSIC_CLOUD, song);
         musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic);
         MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
         return BotMessage.simpleTextMessage(String.format("点歌[%s]成功，前面还有%s首", playerMusic.getName(), redisQueue.sizePlayerQueue()));
