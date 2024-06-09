@@ -111,8 +111,9 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSyncList(BotMessageAction messageAction) {
+        BotRobot bot = messageAction.getBot();
         Long userId = messageAction.getBotUser().getId();
-        musicService.syncMusic(userId);
+        musicService.syncMusic(bot, userId);
         return BotMessage.simpleTextMessage("同步完毕");
     }
 
@@ -151,11 +152,12 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleDeleteTheMusic(BotMessageAction messageAction) {
+        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();
         String searchKey = messageAction.getSubValue();
         if (StringUtils.isNotBlank(searchKey)) {
-            MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
+            MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(bot, searchKey);
             List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
             PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
             if (playerMusicList == null) {
@@ -180,7 +182,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
             }
             return BotMessage.simpleTextMessage(String.format("删除歌单%d歌曲%d成功.", listCnt, musicCnt));
         } else {
-            MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);
+            MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(bot.getId(), redisCache);
             PlayerMusic theMusic = redisQueue.getTheMusic();
             if (theMusic == null) {
                 return null;
@@ -193,6 +195,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     }
 
     private BotMessage handleSongListImport(BotMessageAction messageAction) {
+        BotRobot bot = messageAction.getBot();
         BotUserDTO botUser = messageAction.getBotUser();
         Long userId = botUser.getId();
         String searchKey = messageAction.getSubValue();
@@ -202,7 +205,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         }
         messageAction.getSession().remove("waitSearchKeyList-"+userId);
 
-        MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
+        MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(bot, searchKey);
         List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
         PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
         if (playerMusicList == null) {
@@ -339,7 +342,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
         Asserts.notBlank(searchKey, "格式错啦(搜索词)");
         messageAction.getSession().remove("waitSearchKey-"+botUser.getId());
 
-        MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(searchKey);
+        MusicSearchKeyHandleResult musicSearchKeyHandleResult = musicService.handleSearchKey(bot, searchKey);
         List<PlayerMusic> playerMusicList = musicSearchKeyHandleResult.getPlayerMusicList();
         PlayerMusicListDTO playerMusicListDTO = musicSearchKeyHandleResult.getPlayerMusicListDTO();
         MusicRedisQueue redisQueue = MusicQueueFactory.getQueueInstance(messageAction.getBot().getId(), redisCache);

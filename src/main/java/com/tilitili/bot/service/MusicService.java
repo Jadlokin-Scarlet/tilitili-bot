@@ -154,11 +154,11 @@ public class MusicService {
     }
 
 
-    public MusicSearchKeyHandleResult handleSearchKey(String searchKey) {
-        return handleSearchKey(searchKey, true);
+    public MusicSearchKeyHandleResult handleSearchKey(BotRobot bot, String searchKey) {
+        return handleSearchKey(bot, searchKey, true);
     }
 
-    public MusicSearchKeyHandleResult handleSearchKey(String searchKey, boolean needAllList) {
+    public MusicSearchKeyHandleResult handleSearchKey(BotRobot bot, String searchKey, boolean needAllList) {
         PlayerMusicListDTO playerMusicListDTO = null;
         List<PlayerMusic> playerMusicList = null;
 
@@ -184,7 +184,7 @@ public class MusicService {
             playerMusicListDTO = musicCloudManager.getPlayerList(listId, needAllList);
 
             List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-            List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+            List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(bot, idList);
             playerMusicListDTO.setMusicList(playerMusicListDetail);
         } else if (searchKey.contains("space.bilibili.com")) {
             // https://space.bilibili.com/23210308/favlist?fid=940681308&ftype=create
@@ -215,7 +215,7 @@ public class MusicService {
             // https://music.163.com/song?id=446247397&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
 
-            playerMusicList = musicCloudManager.getPlayerListDetail(idList);
+            playerMusicList = musicCloudManager.getPlayerListDetail(bot, idList);
         } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?(dj|program)", searchKey), "")) {
             // https://music.163.com/dj?id=2071108797&userid=361260659
             List<String> idList = StringUtils.pattenAll("(?<=[?&]id=)\\d+", searchKey).stream().distinct().collect(Collectors.toList());
@@ -228,14 +228,14 @@ public class MusicService {
         return new MusicSearchKeyHandleResult().setPlayerMusicList(playerMusicList).setPlayerMusicListDTO(playerMusicListDTO);
     }
 
-    public PlayerMusicListDTO getMusicListByListId(Integer type, String listId) {
+    public PlayerMusicListDTO getMusicListByListId(BotRobot bot, Integer type, String listId) {
         switch (type) {
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM:
                 return musicCloudManager.getProgramPlayerList(listId);
             case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
                 PlayerMusicListDTO playerMusicListDTO = musicCloudManager.getPlayerList(listId);
                 List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
-                List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(idList);
+                List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(bot, idList);
                 playerMusicListDTO.setMusicList(playerMusicListDetail);
                 return playerMusicListDTO;
             case PlayerMusicDTO.TYPE_BILIBILI:
@@ -298,7 +298,7 @@ public class MusicService {
         this.pushPlayListToQuote(textSender, voiceSender, playerMusicListDTO);
     }
 
-    public void syncMusic(Long userId) {
+    public void syncMusic(BotRobot bot, Long userId) {
         List<PlayerMusic> noListPlayerMusicList = playerMusicMapper.getNoListMusicList(userId);
         for (PlayerMusic noListPlayerMusic : noListPlayerMusicList) {
             playerMusicMapper.deletePlayerMusicByPrimary(noListPlayerMusic.getId());
@@ -306,15 +306,15 @@ public class MusicService {
         List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
         Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
-            syncMusic(userId, list);
+            syncMusic(bot, userId, list);
         }
     }
 
-    public void syncMusic(Long userId, PlayerMusicList list) {
+    public void syncMusic(BotRobot bot, Long userId, PlayerMusicList list) {
         Asserts.notNull(list.getType());
         Asserts.notNull(list.getExternalId());
         Asserts.notNull(list.getId());
-        PlayerMusicListDTO playerMusicListDTO = this.getMusicListByListId(list.getType(), list.getExternalId());
+        PlayerMusicListDTO playerMusicListDTO = this.getMusicListByListId(bot, list.getType(), list.getExternalId());
 
         PlayerMusicList oldPlayerMusicList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, playerMusicListDTO.getType(), playerMusicListDTO.getExternalId());
         PlayerMusicList updPlayerMusicList = this.checkMusicListData(oldPlayerMusicList, list);

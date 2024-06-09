@@ -90,11 +90,14 @@ public class MusicController extends BaseController{
 	@PostMapping("/list/sync")
 	@ResponseBody
 	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody SyncMusicRequest request) {
+		BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+		Asserts.notNull(firstSender);
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
 		if (request.getListId() != null) {
 			PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(request.getListId());
-			musicService.syncMusic(userId, playerMusicList);
+			musicService.syncMusic(bot, userId, playerMusicList);
 		} else {
-			musicService.syncMusic(userId);
+			musicService.syncMusic(bot, userId);
 		}
 		return BaseModel.success();
 	}
@@ -102,15 +105,15 @@ public class MusicController extends BaseController{
 	@GetMapping("/search")
 	@ResponseBody
 	public BaseModel<MusicSearchVO> searchMusic(@SessionAttribute(value = "userId") Long userId, String searchKey) {
-		MusicSearchKeyHandleResult result = musicService.handleSearchKey(searchKey, false);
+		BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+		Asserts.notNull(firstSender);
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
+		MusicSearchKeyHandleResult result = musicService.handleSearchKey(bot, searchKey, false);
 		if (result.getPlayerMusicList() != null) {
 			return BaseModel.success(new MusicSearchVO().setPlayerMusicList(result.getPlayerMusicList()).setPlayerMusicListDTO(result.getPlayerMusicListDTO()));
 		} else if (result.getPlayerMusicListDTO() != null) {
 			return BaseModel.success(new MusicSearchVO().setPlayerMusicList(result.getPlayerMusicList()).setPlayerMusicListDTO(result.getPlayerMusicListDTO()));
 		} else {
-			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
-			Asserts.notNull(firstSender);
-			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
 			return BaseModel.success(new MusicSearchVO().setSongList(musicCloudManager.searchMusicList(bot, searchKey)));
 		}
 	}
@@ -141,7 +144,12 @@ public class MusicController extends BaseController{
 			PlayerMusicList dbList = playerMusicListMapper.getPlayerMusicListByUserIdAndTypeAndExternalId(userId, musicList.getType(), musicList.getExternalId());
 			Asserts.checkNull(dbList, "该歌单已被收藏");
 			playerMusicListMapper.addPlayerMusicListSelective(musicList.setUserId(userId));
-			musicService.syncMusic(userId);
+
+
+			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+			Asserts.notNull(firstSender);
+			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
+			musicService.syncMusic(bot, userId);
 		}
 
 		return BaseModel.success();
@@ -157,8 +165,13 @@ public class MusicController extends BaseController{
 			Asserts.notNull(musicList, "参数异常");
 			Asserts.checkEquals(musicList.getUserId(), userId, "参数异常");
 
+
+			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+			Asserts.notNull(firstSender);
+			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
+
 			playerMusicListMapper.deletePlayerMusicListByPrimary(listId);
-			musicService.syncMusic(userId);
+			musicService.syncMusic(bot, userId);
 		}
 
 		return BaseModel.success();
