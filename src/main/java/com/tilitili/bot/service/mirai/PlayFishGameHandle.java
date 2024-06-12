@@ -11,6 +11,7 @@ import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
+import com.tilitili.common.entity.query.FishPlayerQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
@@ -99,8 +100,22 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "鱼呢": return getStatus(messageAction);
 			case "钓鱼榜": return getRank(messageAction);
 			case "乐观榜": return getRateRank(messageAction);
+			case "摸鱼": return handleFeel(messageAction);
 			default: throw new AssertException();
 		}
+	}
+
+	private BotMessage handleFeel(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
+		List<FishPlayer> fishPlayerList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
+				.setSenderId(senderId).setStatus(FishPlayerConstant.STATUS_COLLECT)
+				.setPageSize(1).setPageNo(1)
+				.setSorter("notify_time").setSorted("desc")
+		);
+		Asserts.notNull(fishPlayerList, "鱼呢");
+		FishPlayer fishPlayer = fishPlayerList.get(0);
+
+		return null;
 	}
 
 	private BotMessage getRateRank(BotMessageAction messageAction) {
