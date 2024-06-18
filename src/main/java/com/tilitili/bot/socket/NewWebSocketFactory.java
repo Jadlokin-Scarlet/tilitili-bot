@@ -54,9 +54,7 @@ public class NewWebSocketFactory {
 				log.info("初始化websocket, bot={}", this.logBot(bot));
 				Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
 				if (!webSocketMap.containsKey(botId)) {
-					if (redisCache.exists("ws_lock_"+botId)) {
-						return;
-					}
+					Asserts.isFalse(redisCache.exists("ws_lock_"+botId), "过于频繁");
 					if (!redisCache.exists("ws_cnt_"+botId)) {
 						redisCache.increment("ws_cnt_"+botId, 1L, 60);
 					} else {
