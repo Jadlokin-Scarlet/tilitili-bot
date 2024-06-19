@@ -55,12 +55,9 @@ public class NewWebSocketFactory {
 				Asserts.checkNull(botIdLockMap.putIfAbsent(botId, true), "系统繁忙。");
 				if (!webSocketMap.containsKey(botId)) {
 					Asserts.isFalse(redisCache.exists("ws_lock_"+botId), "过于频繁");
-					if (!redisCache.exists("ws_cnt_"+botId)) {
-						redisCache.increment("ws_cnt_"+botId, 1L, 60);
-					} else {
-						redisCache.increment("ws_cnt_"+botId);
-					}
-					if (redisCache.getValueLong("ws_cnt_"+botId) > 10) {
+					Long wsCnt = redisCache.increment("ws_cnt_" + botId);
+					redisCache.expire("ws_cnt_"+botId, 60);
+					if (wsCnt > 10) {
 						redisCache.setValue("ws_lock_"+botId, "yes", 60 * 10);
 					}
 					webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
