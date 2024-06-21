@@ -115,12 +115,13 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		BotUserDTO touchUser = messageAction.getBotUser();
 		Long touchUserId = touchUser.getId();
 		List<FishPlayer> fishPlayerList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
-				.setSenderId(senderId).setStatus(FishPlayerConstant.STATUS_COLLECT)
+				.setSenderId(senderId)
 				.setPageSize(1).setPageNo(1)
 				.setSorter("notify_time").setSorted("desc")
 		);
 		Asserts.notEmpty(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
+		Asserts.checkEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_COLLECT);
 		Asserts.notEquals(fishPlayer.getUserId(), touchUserId, "自己的鱼也摸？");
 		Asserts.notNull(fishPlayer.getItemId());
 
