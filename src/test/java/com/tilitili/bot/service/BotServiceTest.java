@@ -3,7 +3,11 @@ package com.tilitili.bot.service;
 import com.tilitili.bot.StartApplication;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.util.BotMessageActionUtil;
+import com.tilitili.common.entity.BotRobot;
+import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.manager.BotRobotCacheManager;
+import com.tilitili.common.manager.BotSenderCacheManager;
+import com.tilitili.common.manager.BotUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.spring.boot.autoconfigure.DubboAutoConfiguration;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,13 @@ public class BotServiceTest {
 	BotRobotCacheManager botRobotCacheManager;
 	@Resource
 	 Map<String, BaseMessageHandle> messageHandleMap;
+	@Resource
+	private BotUserManager botUserManager;
+	@Resource
+	private BotSenderCacheManager botSenderCacheManager;
+
+
+	BotMessageActionUtil a;
 
 	@Test
 	public void syncHandleTextMessage() {
@@ -33,7 +44,12 @@ public class BotServiceTest {
 
 	@Test
 	public void testHandle() throws Exception {
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(4461L);
 		BaseMessageHandle handle = messageHandleMap.get("playFishGameHandle");
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("收杆", 13L, 4461L, 2L)));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("抛竿", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
+		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
+		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("收杆", bot, botSender, botUserManager.getValidBotUserById(13L))));
 	}
 }

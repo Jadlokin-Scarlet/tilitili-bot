@@ -27,4 +27,12 @@ public class BotMessageActionUtil {
 				.setBotSender(new BotSender().setId(senderId))
 				.setBot(bot), null);
 	}
+
+	public static BotMessageAction buildEmptyAction(String message, BotRobot bot, BotSender botSender, BotUserDTO botUser) {
+		List<BotMessageChain> chainList = Collections.singletonList(BotMessageChain.ofPlain(message));
+		return new BotMessageAction(new BotMessage().setBotMessageChainList(chainList)
+				.setBotUser(botUser)
+				.setBotSender(botSender)
+				.setBot(bot), null);
+	}
 }
