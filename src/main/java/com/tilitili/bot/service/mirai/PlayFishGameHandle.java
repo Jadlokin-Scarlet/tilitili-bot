@@ -11,6 +11,7 @@ import com.tilitili.common.entity.dto.BotItemDTO;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.SafeTransactionDTO;
 import com.tilitili.common.entity.query.FishConfigQuery;
+import com.tilitili.common.entity.query.FishPlayerTouchQuery;
 import com.tilitili.common.entity.query.FishPlayerQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
@@ -28,6 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,6 +50,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	private final PlayFishGameNewHandle playFishGameNewHandle;
 
 	private List<Long> testBotList = new ArrayList<>();
+	private final FishPlayerTouchMapper fishPlayerTouchMapper;
 
 	@Value("${PlayFishGameHandle.testBotList:}")
 	public void setTestBotList(String testBotList) {
@@ -60,7 +64,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 
 	@Autowired
-	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotUserMapMappingMapper botUserMapMappingMapper, BotConfigManager botConfigManager, PlayFishGameNewHandle playFishGameNewHandle) {
+	public PlayFishGameHandle(FishPlayerMapper fishPlayerMapper, BotUserItemMappingMapper botUserItemMappingMapper, BotUserItemMappingManager botUserItemMappingManager, FishConfigMapper fishConfigMapper, BotItemMapper botItemMapper, BotUserManager botUserManager, BotUserMapMappingMapper botUserMapMappingMapper, BotConfigManager botConfigManager, PlayFishGameNewHandle playFishGameNewHandle, FishPlayerTouchMapper fishPlayerTouchMapper) {
 //		this.fishGame = fishGame;
 		this.fishPlayerMapper = fishPlayerMapper;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
@@ -71,6 +75,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		this.botUserMapMappingMapper = botUserMapMappingMapper;
 		this.botConfigManager = botConfigManager;
 		this.playFishGameNewHandle = playFishGameNewHandle;
+		this.fishPlayerTouchMapper = fishPlayerTouchMapper;
 
 		this.random = new Random(System.currentTimeMillis());
 	}
@@ -100,12 +105,14 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "鱼呢": return getStatus(messageAction);
 			case "钓鱼榜": return getRank(messageAction);
 			case "乐观榜": return getRateRank(messageAction);
-			case "摸鱼": return handleFeel(messageAction);
+			case "摸鱼": return handleTouch(messageAction);
 			default: throw new AssertException();
 		}
 	}
 
-	private BotMessage handleFeel(BotMessageAction messageAction) {
+	private BotMessage handleTouch(BotMessageAction messageAction) {
+		BotUserDTO touchUser = messageAction.getBotUser();
+		Long touchUserId = touchUser.getId();
 		Long senderId = messageAction.getBotSender().getId();
 		List<FishPlayer> fishPlayerList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
 				.setSenderId(senderId).setStatus(FishPlayerConstant.STATUS_COLLECT)
@@ -114,8 +121,36 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		);
 		Asserts.notNull(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
+		Asserts.notNull(fishPlayer.getItemId());
 
-		return null;
+		FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+		Asserts.notNull(fishConfig);
+		Long itemId = fishConfig.getItemId();
+		Asserts.notNull(fishConfig.getItemId(), "没鱼可摸喵");
+		BotItem botItem = botItemMapper.getBotItemById(itemId);
+		Asserts.notNull(botItem);
+		Integer totalValue = botItem.getSellPrice();
+		int usableValue = totalValue * 4 / 10;
+
+		boolean precious = isPrecious(botItem);
+		Asserts.isFalse(precious, "没鱼可摸喵");
+
+		List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
+		boolean touched = touchList.stream().map(FishPlayerTouch::getTouchUserId).anyMatch(Predicate.isEqual(touchUserId));
+		Asserts.isFalse(touched, "已经摸过啦，收下留情啊");
+
+		int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
+		int remainder = usableValue - usedValue;
+		Asserts.isTrue(remainder > 0, "手下留情啊，给ta留点吧！");
+
+		int theValue = ThreadLocalRandom.current().nextInt(remainder) + 1;
+		fishPlayerTouchMapper.addFishPlayerTouchSelective(new FishPlayerTouch().setFishId(fishPlayer.getId()).setTouchUserId(touchUserId).setValue(theValue));
+
+
+		Integer updScore = botUserManager.safeUpdateScore(touchUser, botItem.getSellPrice());
+
+		String theValueRateStr = String.format("%.2f%%", theValue * 100.0 / totalValue);
+		return BotMessage.simpleTextMessage(String.format("摸到%s的鱼！(+%d分)", theValueRateStr, updScore));
 	}
 
 	private BotMessage getRateRank(BotMessageAction messageAction) {
@@ -128,6 +163,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		for (FishPlayer fishPlayer : fishPlayerList) {
 			Long userId = fishPlayer.getUserId();
 			if (fishPlayer.getItemId() == null) continue;
+			if (fishPlayer.getCollectTime() == null) continue;
 			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
 			if (fishConfig == null) continue;
 			userCntMap.merge(userId, 1, Integer::sum);
@@ -147,10 +183,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			}
 		});
 		List<String> rankList = userRateMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).limit(5)
-				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s\t%s", userCntMap.get(entry.getKey()), userScoreMap.get(entry.getKey()), botUserManager.getValidBotUserByIdWithParent(entry.getKey()).getName()))
+				.map((Map.Entry<Long, Integer> entry) -> String.format("%s %s %s", userCntMap.get(entry.getKey()), userScoreMap.get(entry.getKey()), botUserManager.getValidBotUserByIdWithParent(entry.getKey()).getName()))
 				.collect(Collectors.toList());
 
-		return BotMessage.simpleTextMessage("次数\t积分\t酋长\n" + String.join("\n", rankList));
+		return BotMessage.simpleTextMessage("次数 积分 酋长 " + String.join("\n", rankList));
 	}
 
 	private BotMessage getRank(BotMessageAction messageAction) {
@@ -161,6 +197,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Map<Long, Integer> userScoreMap = new HashMap<>();
 		for (FishPlayer fishPlayer : fishPlayerList) {
 			if (fishPlayer.getItemId() == null) continue;
+			if (fishPlayer.getCollectTime() == null) continue;
 			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
 			if (fishConfig == null) continue;
 			if (fishConfig.getPrice() != null) {
@@ -206,7 +243,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.checkEquals(fishPlayer.getVersion(), FishPlayerConstant.VERSION_OLD, "版本不兼容");
 
 		if (!FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
-			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINALL);
+			Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), fishPlayer.getStatus(), FishPlayerConstant.STATUS_FINAL);
 			Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
 			if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
@@ -218,21 +255,21 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 				throw new AssertException();
 			}
 		}
-		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINALL);
+		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_FINAL);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
-		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(fishPlayer.getPlaceId()).setStatus(0));
-		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
-		int theRate = random.nextInt(rateSum);
-		FishConfig fishConfig = null;
-		for (FishConfig config : configList) {
-			theRate -= config.getRate();
-			if (theRate <= 0) {
-				fishConfig = config;
-				break;
-			}
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setCollectTime(new Date()));
+
+		FishConfig fishConfig;
+		if (fishPlayer.getItemId() == null) {
+			fishConfig = this.randomFishConfig(fishPlayer.getPlaceId());
+			Asserts.notNull(fishConfig, "啊嘞，不对劲");
+			fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()));
+		} else {
+			fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+			Asserts.notNull(fishConfig, "啊嘞，不对劲");
 		}
-		Asserts.notNull(fishConfig, "啊嘞，不对劲");
-		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()));
+
+
 		String description = fishConfig.getDescription();
 		Long itemId = fishConfig.getItemId();
 		Integer price = fishConfig.getPrice();
@@ -249,10 +286,17 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			boolean autoSellFish = Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(userId, ConfigHandle.autoSellFishKey));
 			// 回收重复
 			boolean autoSellRepeatFish = hasItem && Boolean.TRUE.equals(botConfigManager.getBooleanUserConfigCache(userId, ConfigHandle.autoSellRepeatFishKey));
-			// 只回收不大于2000的
-			boolean notPrecious = botItem.getSellPrice() <= 2000;
-			if ((autoSellFish || autoSellRepeatFish) && notPrecious) {
-				Integer updScore = botUserManager.safeUpdateScore(botUser, botItem.getSellPrice());
+			// 过于贵重的不会回收
+			boolean notPrecious = !this.isPrecious(botItem);
+			// 是否被摸过，摸过只能回收积分
+			List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
+			boolean touched = !touchList.isEmpty();
+
+			if (touched || ((autoSellFish || autoSellRepeatFish) && notPrecious)) {
+				Integer totalValue = botItem.getSellPrice();
+				int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
+				int remainder = totalValue - usedValue;
+				Integer updScore = botUserManager.safeUpdateScore(botUser, remainder);
 				resultList.add(BotMessageChain.ofPlain(String.format("(%+d分)", updScore)));
 			} else {
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
@@ -294,6 +338,25 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		return BotMessage.simpleListMessage(resultList);
 	}
 
+	private boolean isPrecious(BotItem botItem) {
+		return botItem.getSellPrice() > 2000;
+	}
+
+	private FishConfig randomFishConfig(Long placeId) {
+		FishConfig fishConfig = null;
+		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId).setStatus(0));
+		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
+		int theRate = random.nextInt(rateSum);
+		for (FishConfig config : configList) {
+			theRate -= config.getRate();
+			if (theRate <= 0) {
+				fishConfig = config;
+				break;
+			}
+		}
+		return fishConfig;
+	}
+
 	private BotMessage handleStart(BotMessageAction messageAction) {
 		BotSender botSender = messageAction.getBotSender();
 		BotUserDTO botUser = messageAction.getBotUser();
@@ -333,12 +396,16 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
 		Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
 
+
 		FishPlayer fishPlayer = new FishPlayer();
 		fishPlayer.setUserId(userId);
 		fishPlayer.setPlaceId(placeId);
 		fishPlayer.setStatus(FishPlayerConstant.STATUS_FISHING);
 		fishPlayer.setStartTime(new Date());
 		fishPlayer.setSenderId(senderId);
+
+		FishConfig fishConfig = this.randomFishConfig(placeId);
+		fishPlayer.setItemId(fishConfig.getId());
 		fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 
 		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setNum(-1));

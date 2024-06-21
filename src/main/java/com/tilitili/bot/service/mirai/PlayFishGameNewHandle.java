@@ -95,6 +95,7 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		for (FishPlayer fishPlayer : fishPlayerList) {
 			Long userId = fishPlayer.getUserId();
 			if (fishPlayer.getItemId() == null) continue;
+			if (fishPlayer.getCollectTime() == null) continue;
 			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
 			if (fishConfig == null) continue;
 			userCntMap.merge(userId, 1, Integer::sum);
@@ -128,6 +129,7 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		Map<Long, Integer> userScoreMap = new HashMap<>();
 		for (FishPlayer fishPlayer : fishPlayerList) {
 			if (fishPlayer.getItemId() == null) continue;
+			if (fishPlayer.getCollectTime() == null) continue;
 			FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
 			if (fishConfig == null) continue;
 			if (fishConfig.getPrice() != null) {
@@ -177,12 +179,12 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		if (!FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
 			BotItem botItem = botItemMapper.getBotItemById(BotItemConstant.FISH_FOOD);
 			if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
-				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINALL);
+				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FISHING, FishPlayerConstant.STATUS_FINAL);
 				Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(botItem.getId()).setNum(1));
 				return BotMessage.simpleTextMessage("啥也没有。。");
 			} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
-				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FAIL, FishPlayerConstant.STATUS_FINALL);
+				Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_FAIL, FishPlayerConstant.STATUS_FINAL);
 				Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
 				return BotMessage.simpleTextMessage(String.format("似乎来晚了。。(%s-1)", botItem.getName()));
 			} else if (FishPlayerConstant.STATUS_STOP.equals(fishPlayer.getStatus())) {
@@ -202,6 +204,8 @@ public class PlayFishGameNewHandle extends ExceptionRespMessageToSenderHandle {
 		}
 		Integer updCnt = fishPlayerMapper.safeUpdateStatus(fishPlayer.getId(), FishPlayerConstant.STATUS_COLLECT, FishPlayerConstant.STATUS_STOP);
 		Asserts.checkEquals(updCnt, 1, "啊嘞，不对劲");
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setCollectTime(new Date()));
+
 		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(fishPlayer.getPlaceId()).setStatus(0));
 		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
 		int theRate = random.nextInt(rateSum);
