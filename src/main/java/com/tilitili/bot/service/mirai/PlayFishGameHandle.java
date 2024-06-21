@@ -111,9 +111,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 	}
 
 	private BotMessage handleTouch(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
 		BotUserDTO touchUser = messageAction.getBotUser();
 		Long touchUserId = touchUser.getId();
-		Long senderId = messageAction.getBotSender().getId();
 		List<FishPlayer> fishPlayerList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
 				.setSenderId(senderId).setStatus(FishPlayerConstant.STATUS_COLLECT)
 				.setPageSize(1).setPageNo(1)
