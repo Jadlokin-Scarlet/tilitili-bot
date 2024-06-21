@@ -141,10 +141,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Asserts.isFalse(touched, "已经摸过啦，收下留情啊");
 
 		int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
-		int remainder = usableValue - usedValue;
-		Asserts.isTrue(remainder > 0, "手下留情啊，给ta留点吧！");
+		int remainderValue = usableValue - usedValue;
+		Asserts.isTrue(remainderValue > 0, "手下留情啊，给ta留点吧！");
 
-		int theValue = ThreadLocalRandom.current().nextInt(remainder) + 1;
+		int theValue = ThreadLocalRandom.current().nextInt(remainderValue) + 1;
 		fishPlayerTouchMapper.addFishPlayerTouchSelective(new FishPlayerTouch().setFishId(fishPlayer.getId()).setTouchUserId(touchUserId).setValue(theValue));
 
 		Integer updScore = botUserManager.safeUpdateScore(touchUser, theValue);
@@ -209,6 +209,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 					userScoreMap.merge(fishPlayer.getUserId(), botItem.getSellPrice(), Integer::sum);
 				}
 			}
+			List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
+			for (FishPlayerTouch touch : touchList) {
+				userScoreMap.merge(fishPlayer.getUserId(), -touch.getValue(), Integer::sum);
+			}
 		}
 		List<String> rankList = userScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(5)
 				.map((Map.Entry<Long, Integer> entry) -> String.format("%s\t%s", entry.getValue(), botUserManager.getValidBotUserByIdWithParent(entry.getKey()).getName()))
@@ -227,7 +231,21 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
 			return BotMessage.simpleTextMessage("鱼还没来呢。");
 		} else if (FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
-			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！");
+			List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
+			String remainderRateStr;
+			if (touchList.isEmpty()) {
+				remainderRateStr = "";
+			} else {
+				Asserts.notNull(fishPlayer.getItemId());
+				FishConfig fishConfig = fishConfigMapper.getFishConfigById(fishPlayer.getItemId());
+				Asserts.notNull(fishConfig.getItemId());
+				BotItem botItem = botItemMapper.getBotItemById(fishConfig.getItemId());
+				Integer totalValue = botItem.getSellPrice();
+
+				int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
+				remainderRateStr = String.format("(剩余%.2f%%)", (totalValue - usedValue) * 100.0 / totalValue);
+			}
+			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！"+remainderRateStr);
 		} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
 			return BotMessage.simpleTextMessage("鱼已经跑啦");
 		} else {
@@ -295,9 +313,12 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			if (touched || ((autoSellFish || autoSellRepeatFish) && notPrecious)) {
 				Integer totalValue = botItem.getSellPrice();
 				int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
-				int remainder = totalValue - usedValue;
-				Integer updScore = botUserManager.safeUpdateScore(botUser, remainder);
+				int remainderValue = totalValue - usedValue;
+				Integer updScore = botUserManager.safeUpdateScore(botUser, remainderValue);
 				resultList.add(BotMessageChain.ofPlain(String.format("(%+d分)", updScore)));
+				if (touched) {
+					resultList.add(BotMessageChain.ofPlain(String.format("(%.2f%%)", remainderValue * 100.0 / totalValue)));
+				}
 			} else {
 				botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(itemId).setNum(1));
 				resultList.add(BotMessageChain.ofPlain(String.format("(%s+1)", botItem.getName())));
