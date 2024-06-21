@@ -147,7 +147,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		int theValue = ThreadLocalRandom.current().nextInt(remainder) + 1;
 		fishPlayerTouchMapper.addFishPlayerTouchSelective(new FishPlayerTouch().setFishId(fishPlayer.getId()).setTouchUserId(touchUserId).setValue(theValue));
 
-
 		Integer updScore = botUserManager.safeUpdateScore(touchUser, theValue);
 
 		String theValueRateStr = String.format("%.2f%%", theValue * 100.0 / totalValue);
