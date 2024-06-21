@@ -147,7 +147,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		fishPlayerTouchMapper.addFishPlayerTouchSelective(new FishPlayerTouch().setFishId(fishPlayer.getId()).setTouchUserId(touchUserId).setValue(theValue));
 
 
-		Integer updScore = botUserManager.safeUpdateScore(touchUser, botItem.getSellPrice());
+		Integer updScore = botUserManager.safeUpdateScore(touchUser, theValue);
 
 		String theValueRateStr = String.format("%.2f%%", theValue * 100.0 / totalValue);
 		return BotMessage.simpleTextMessage(String.format("摸到%s的鱼！(+%d分)", theValueRateStr, updScore));
