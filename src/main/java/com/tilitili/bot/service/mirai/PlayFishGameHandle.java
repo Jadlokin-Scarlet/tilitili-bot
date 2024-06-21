@@ -119,7 +119,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 				.setPageSize(1).setPageNo(1)
 				.setSorter("notify_time").setSorted("desc")
 		);
-		Asserts.notNull(fishPlayerList, "鱼呢");
+		Asserts.notEmpty(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
 		Asserts.notNull(fishPlayer.getItemId());
 
