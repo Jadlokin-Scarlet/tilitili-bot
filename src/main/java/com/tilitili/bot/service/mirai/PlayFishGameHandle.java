@@ -121,7 +121,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		);
 		Asserts.notEmpty(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
-		Asserts.checkEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_COLLECT);
+		Asserts.checkEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_COLLECT, "鱼呢");
 		Asserts.notEquals(fishPlayer.getUserId(), touchUserId, "自己的鱼也摸？");
 		Asserts.notNull(fishPlayer.getItemId());
 
