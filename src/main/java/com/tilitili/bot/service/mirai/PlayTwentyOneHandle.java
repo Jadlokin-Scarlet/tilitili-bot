@@ -56,7 +56,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 //		Asserts.notNull(botUser.getScore(), "未绑定");
 
 		switch (key) {
-			case "买水果小游戏": return this.startGame(messageAction);
+			case "水果摊小游戏": case "w21": return this.startGame(messageAction);
 			case "准备": case "zb": return this.prepareGame(messageAction);
 			case "进货": case "jh": return this.addCard(messageAction, botUser, twentyOneTable);
 			case "摆烂": case "bl": return this.stopCard(messageAction, botUser, twentyOneTable);
@@ -296,7 +296,7 @@ public class PlayTwentyOneHandle extends ExceptionRespMessageToSenderHandle {
 		switch (twentyOneTable.getStatus()) {
 			case TwentyOneTable.STATUS_WAIT:
 				twentyOneTable.waitPeoplePrepare(botMessage);
-				return BotMessage.simpleTextMessage("加入成功！请尽快准备吧。格式：(准备 10)", botMessage).setQuote(messageAction.getMessageId());
+				return BotMessage.simpleTextMessage("欢迎加入水果摊小游戏成功！请尽快准备吧。格式：(准备 10)", botMessage).setQuote(messageAction.getMessageId());
 			case TwentyOneTable.STATUS_PLAYING: return BotMessage.simpleTextMessage("加入成功！请等待下一回合吧。", botMessage).setQuote(messageAction.getMessageId());
 			default: throw new AssertException("啊嘞，似乎不对劲");
 		}
