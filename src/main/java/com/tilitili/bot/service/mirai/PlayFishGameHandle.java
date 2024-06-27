@@ -1,7 +1,7 @@
 package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
-import com.tilitili.bot.service.mirai.base.ExceptionRespMessageToSenderHandle;
+import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.component.CloseableRedisLock;
 import com.tilitili.common.constant.*;
 import com.tilitili.common.entity.*;
@@ -35,7 +35,7 @@ import java.util.stream.IntStream;
 
 @Slf4j
 @Component
-public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
+public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 	private final Random random;
 
 	private final FishPlayerMapper fishPlayerMapper;
