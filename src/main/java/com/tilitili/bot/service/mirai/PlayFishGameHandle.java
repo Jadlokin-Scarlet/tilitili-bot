@@ -124,7 +124,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 
 	private BotMessage handleTouch(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
-		BotUserDTO touchUser = messageAction.getBotUser();
+		Long touchUserId = messageAction.getBotUser().getId();
 		List<Long> fishIdList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
 				.setSenderId(senderId).setStatus(FishPlayerConstant.STATUS_COLLECT)
 		).stream().map(FishPlayer::getId).collect(Collectors.toList());
@@ -133,9 +133,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		for (Long fishId : fishIdList) {
 			try (CloseableRedisLock ignored = new CloseableRedisLock(redisCache, FISH_LOCK_KEY+fishId)) {
 				FishPlayer fishPlayer = fishPlayerMapper.getFishPlayerById(fishId);
-				successResult.add(this.touchFish(touchUser, fishPlayer));
+				successResult.add(this.touchFish(touchUserId, fishPlayer));
 			} catch (AssertException e) {
-				log.info("摸鱼{} -> {} : {}", touchUser.getId(), fishId, e.getMessage());
+				log.info("摸鱼{} -> {} : {}", touchUserId, fishId, e.getMessage());
 			}
 		}
 		
@@ -150,11 +150,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		);
 		Asserts.notEmpty(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
-		return BotMessage.simpleTextMessage(this.touchFish(touchUser, fishPlayer));
+		return BotMessage.simpleTextMessage(this.touchFish(touchUserId, fishPlayer));
 	}
 
-	private String touchFish(BotUserDTO touchUser, FishPlayer fishPlayer) {
-		Long touchUserId = touchUser.getId();
+	private String touchFish(Long touchUserId, FishPlayer fishPlayer) {
 		Asserts.notEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_FAIL, "鱼已经跑啦");
 		Asserts.checkEquals(fishPlayer.getStatus(), FishPlayerConstant.STATUS_COLLECT, "鱼呢");
 		Asserts.notEquals(fishPlayer.getUserId(), touchUserId, "自己的鱼也摸？");
@@ -185,7 +184,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		int theValue = ThreadLocalRandom.current().nextInt(remainderValue) + 1;
 		fishPlayerTouchMapper.addFishPlayerTouchSelective(new FishPlayerTouch().setFishId(fishPlayer.getId()).setTouchUserId(touchUserId).setValue(theValue));
 
-		Integer updScore = botUserManager.safeUpdateScore(touchUser, theValue);
+		Integer updScore = botUserManager.safeUpdateScore(touchUserId, theValue);
 
 		String theValueRateStr = ThreadConstant.format2f.get().format(theValue * 100.0 / totalValue) + "%";
 		return String.format("摸走%s的%s！(+%d分)", theUserBeingTouched.getName(), theValueRateStr, updScore);
