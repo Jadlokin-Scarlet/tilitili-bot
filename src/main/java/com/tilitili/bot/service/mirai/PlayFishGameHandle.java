@@ -108,9 +108,19 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			case "钓鱼榜": return getRank(messageAction);
 			case "乐观榜": return getRateRank(messageAction);
 			case "摸鱼": return handleTouch(messageAction);
+			case "测试#$": return handleTest(messageAction);
 			default: throw new AssertException();
 		}
 	}
+
+	private BotMessage handleTest(BotMessageAction messageAction) {
+		Long userId = messageAction.getBotUser().getId();
+		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
+		Asserts.notNull(fishPlayer);
+		fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setStatus(FishPlayerConstant.STATUS_COLLECT).setNotifyTime(new Date()).setScale(0));
+		return BotMessage.simpleTextMessage("好惹");
+	}
+
 
 	private BotMessage handleTouch(BotMessageAction messageAction) {
 		Long senderId = messageAction.getBotSender().getId();
@@ -176,7 +186,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 		Integer updScore = botUserManager.safeUpdateScore(touchUser, theValue);
 
 		String theValueRateStr = ThreadConstant.format2f.get().format(theValue * 100.0 / totalValue) + "%";
-		return String.format("摸走%s %s！(+%d分)", theUserBeingTouched.getName(), theValueRateStr, updScore);
+		return String.format("摸走%s的%s！(+%d分)", theUserBeingTouched.getName(), theValueRateStr, updScore);
 	}
 
 	private BotMessage getRateRank(BotMessageAction messageAction) {
