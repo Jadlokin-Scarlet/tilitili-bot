@@ -134,7 +134,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageToSenderHandle {
 			try (CloseableRedisLock ignored = new CloseableRedisLock(redisCache, FISH_LOCK_KEY+fishId)) {
 				FishPlayer fishPlayer = fishPlayerMapper.getFishPlayerById(fishId);
 				successResult.add(this.touchFish(touchUser, fishPlayer));
-			} catch (AssertException ignore) {}
+			} catch (AssertException e) {
+				log.info("摸鱼{} -> {} : {}", touchUser.getId(), fishId, e.getMessage());
+			}
 		}
 		
 		if (!successResult.isEmpty()) {
