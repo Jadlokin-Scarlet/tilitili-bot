@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.FindImageResult;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.api.ShortUrlServiceInterface;
-import com.tilitili.common.component.CloseableTempFile;
-import com.tilitili.common.constant.BotConfigConstant;
 import com.tilitili.common.entity.BotPixivSendRecord;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -13,14 +11,15 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.entity.view.bot.lolicon.SetuData;
-import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.entity.view.bot.pixiv.PixivInfoIllust;
 import com.tilitili.common.entity.view.bot.pixiv.PixivSearchIllust;
 import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.exception.AssertSeseException;
 import com.tilitili.common.manager.*;
 import com.tilitili.common.mapper.mysql.BotPixivSendRecordMapper;
-import com.tilitili.common.utils.*;
+import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.NewProxyUtil;
+import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.jsoup.Jsoup;
@@ -32,11 +31,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -210,7 +207,7 @@ public class PixivCacheService {
 		if (sl < 5) {
 			for (String url : urlList) {
 				try {
-					UploadImageResult result = this.downloadPixivImageAndUploadToBot(bot, url, pageCount);
+					String result = this.downloadPixivImageAndUploadToBot(bot, url, pageCount);
 					messageChainList.add(BotMessageChain.ofPlain("\n"));
 					messageChainList.add(BotMessageChain.ofImage(result));
 				} catch (AssertException e) {
@@ -269,42 +266,42 @@ public class PixivCacheService {
 	}
 
 	private String downloadPixivImageAndUploadToOSS(String url, Integer pageCount) {
-//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
 		log.info("downloadPixivImageAndUploadToOSS pageCount={} url={}", pageCount, url);
-//		if (pageCount > 1) {
-//			int page = Integer.parseInt(list.get(2)) + 1;
-//			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
-//		} else {
-//			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
-//		}
-		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
-		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
-		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
-			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
-			String shortUrl = shortUrlServiceInterface.generateShortUrl(ossUrl).getUrl();
-			Asserts.notNull(shortUrl, "啊嘞，上传失败了。");
-			return shortUrl;
-		} catch (IOException e) {
-			throw new AssertException("啊嘞，不对劲", e);
+		if (pageCount > 1) {
+			int page = Integer.parseInt(list.get(2)) + 1;
+			return String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(3));
+		} else {
+			return String.format("https://pixiv.re/%s.%s", list.get(0), list.get(3));
 		}
+//		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
+//		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
+//		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
+//			String ossUrl = OSSUtil.uploadOSSByFile(file.getFile(), file.getFileType());
+//			Asserts.notNull(ossUrl, "啊嘞，上传失败了。");
+//			String shortUrl = shortUrlServiceInterface.generateShortUrl(ossUrl).getUrl();
+//			Asserts.notNull(shortUrl, "啊嘞，上传失败了。");
+//			return shortUrl;
+//		} catch (IOException e) {
+//			throw new AssertException("啊嘞，不对劲", e);
+//		}
 	}
-	// 用这个就不能本地跑，要bot和bot在一个服务器上
-	private UploadImageResult downloadPixivImageAndUploadToBot(BotRobot bot, String url, Integer pageCount) {
+	private String downloadPixivImageAndUploadToBot(BotRobot bot, String url, Integer pageCount) {
 		log.info("downloadPixivImageAndUploadToBot pageCount={} url={}", pageCount, url);
-//		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
-//		if (pageCount > 1) {
-//			int page = Integer.parseInt(list.get(2)) + 1;
-//			return String.format("https://pixiv.nl/%s-%s.%s", list.get(0), page, list.get(3));
-//		} else {
-//			return String.format("https://pixiv.nl/%s.%s", list.get(0), list.get(3));
-//		}
-		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
-		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
-		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
-			return botManager.uploadImage(bot, file.getFile());
-		} catch (IOException e) {
-			throw new AssertException("啊嘞，不对劲", e);
+		List<String> list = StringUtils.extractList("/(\\d+)_(p|ugoira)(\\d+)\\.(\\w+)", url);
+		if (pageCount > 1) {
+			int page = Integer.parseInt(list.get(2)) + 1;
+			return String.format("https://pixiv.re/%s-%s.%s", list.get(0), page, list.get(3));
+		} else {
+			return String.format("https://pixiv.re/%s.%s", list.get(0), list.get(3));
 		}
+		// 用这个就不能本地跑，要bot和bot在一个服务器上
+//		String cookie = botConfigManager.getStringConfigCache(BotConfigConstant.pixivCookieKey);
+//		Map<String, String> header = ImmutableMap.of("referer", "https://www.pixiv.net", "user-agent", HttpClientUtil.defaultUserAgent, "cookie", cookie);
+//		try (CloseableTempFile file = CloseableTempFile.ofProxyUrl(url, header)) {
+//			return botManager.uploadImage(bot, file.getFile());
+//		} catch (IOException e) {
+//			throw new AssertException("啊嘞，不对劲", e);
+//		}
 	}
 }

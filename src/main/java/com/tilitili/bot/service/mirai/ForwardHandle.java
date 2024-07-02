@@ -63,6 +63,7 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 						default: return chain;
 					}
 				}).filter(Objects::nonNull).collect(Collectors.toList()));
+				respMessageList.add(BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId));
 
 				// 往Minecraft的文字传话特别提醒
 				String key = "Minecraft-message-reply-"+senderId;
@@ -76,12 +77,12 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 				if (!newMessageChainList.isEmpty() && blackList4370.contains(newMessageChainList.get(0).getUrl())) {
 					return null;
 				}
+				respMessageList.add(BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId));
 			} else if (forwardConfig.getMessageType() == 2) {
 				return null;
 			} else {
 				throw new AssertException();
 			}
-			respMessageList.add(BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId));
 		}
 		return respMessageList;
 	}
