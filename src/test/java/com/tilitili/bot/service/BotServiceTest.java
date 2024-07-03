@@ -28,9 +28,9 @@ public class BotServiceTest {
 	@Resource
 	 Map<String, BaseMessageHandle> messageHandleMap;
 	@Resource
-	private BotUserManager botUserManager;
-	@Resource
 	private BotSenderCacheManager botSenderCacheManager;
+	@Resource
+	private BotUserManager botUserManager;
 
 
 	BotMessageActionUtil a;
