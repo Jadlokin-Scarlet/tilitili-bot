@@ -23,8 +23,8 @@ public class MapHandle extends ExceptionRespMessageHandle {
 
 	public MapHandle(BotPlaceMapper botPlaceMapper, BotUserMapMappingMapper botUserMapMappingMapper, FishPlayerMapper fishPlayerMapper) {
 		this.botPlaceMapper = botPlaceMapper;
-		this.botUserMapMappingMapper = botUserMapMappingMapper;
 		this.fishPlayerMapper = fishPlayerMapper;
+		this.botUserMapMappingMapper = botUserMapMappingMapper;
 	}
 
 	@Override
