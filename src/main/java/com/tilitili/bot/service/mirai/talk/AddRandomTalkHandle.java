@@ -219,8 +219,8 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					String itemDesc = config.getItemDesc();
 					String itemGrade = config.getItemGrade();
 					String itemIcon = config.getImage();
-					Asserts.notNull(itemName, "格式错啦(itemName)");
 					Asserts.notNull(itemDesc, "格式错啦(itemDesc)");
+					Asserts.notNull(itemName, "格式错啦(itemName)");
 					Asserts.notNull(itemGrade, "格式错啦(itemGrade)");
 					Asserts.notNumber(itemName, "格式错啦，道具名称不能是数字");
 					Asserts.isFalse(itemName.contains(" *，,、"), "格式错啦，道具名称不能有[ *，,、]符号");
