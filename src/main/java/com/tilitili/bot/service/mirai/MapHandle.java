@@ -6,12 +6,17 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotPlace;
 import com.tilitili.common.entity.BotUserMapMapping;
 import com.tilitili.common.entity.FishPlayer;
+import com.tilitili.common.entity.query.BotPlaceQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.mapper.mysql.BotPlaceMapper;
 import com.tilitili.common.mapper.mysql.BotUserMapMappingMapper;
 import com.tilitili.common.mapper.mysql.FishPlayerMapper;
 import com.tilitili.common.utils.Asserts;
+import com.tilitili.common.utils.StringUtils;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class MapHandle extends ExceptionRespMessageHandle {
@@ -32,6 +37,10 @@ public class MapHandle extends ExceptionRespMessageHandle {
 		Long userId = messageAction.getBotUser().getId();
 
 		String place = messageAction.getValue();
+		if (StringUtils.isBlank(place)) {
+			List<BotPlace> placeList = botPlaceMapper.getBotPlaceByCondition(new BotPlaceQuery().setStatus(0));
+			return BotMessage.simpleTextMessage("目前可去的区域有："+ placeList.stream().map(BotPlace::getPlace).collect(Collectors.joining(",")));
+		}
 		Asserts.notBlank(place, "去哪？");
 		BotPlace botPlace = botPlaceMapper.getBotPlaceByPlace(place);
 		Asserts.notNull(botPlace, randomResp1.getResp());

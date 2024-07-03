@@ -15,32 +15,34 @@ import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.manager.BotIcePriceManager;
 import com.tilitili.common.manager.BotUserManager;
 import com.tilitili.common.mapper.mysql.BotUserItemMappingMapper;
-import com.tilitili.common.mapper.mysql.BotUserMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.DateUtils;
 import com.tilitili.common.utils.StreamUtil;
 import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Component
 public class SignHandle extends ExceptionRespMessageHandle {
 	private final static String externalIdLockKey = "signHandle.externalIdLockKey";
-	private final BotUserMapper botUserMapper;
 	private final BotUserManager botUserManager;
 	private final BotUserItemMappingMapper botUserItemMappingMapper;
 	private final BotIcePriceManager botIcePriceManager;
 
+	@Value("${SignHandle.noticeList:提说新开了一处钓场（河流），一起去看看吧！指令：（前往 河流）}")
+	public String noticeListStr;
+
 	@Autowired
-	public SignHandle(BotUserMapper botUserMapper, BotUserManager botUserManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager) {
-		this.botUserMapper = botUserMapper;
+	public SignHandle(BotUserManager botUserManager, BotUserItemMappingMapper botUserItemMappingMapper, BotIcePriceManager botIcePriceManager) {
 		this.botUserManager = botUserManager;
 		this.botUserItemMappingMapper = botUserItemMappingMapper;
 		this.botIcePriceManager = botIcePriceManager;
@@ -127,7 +129,9 @@ public class SignHandle extends ExceptionRespMessageHandle {
 
 		String time = TimeUtil.getTimeTalk();
 
-		String talk = "今天也是充满希望的一天";
+		String[] noticeList = noticeListStr.split("\n");
+		int random = ThreadLocalRandom.current().nextInt(noticeList.length + 1);
+		String talk = random == noticeList.length? "今天也是充满希望的一天": noticeList[random];
 		String message1 = String.format("%s好，%s", time, talk);
 		String message2 = String.format("(分数+%d)", addScore);
 		String tips = "";//initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
