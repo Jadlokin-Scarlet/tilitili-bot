@@ -5,6 +5,7 @@ import com.tilitili.bot.service.BotMessageService;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.exception.AssertException;
+import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.OSSUtil;
 import com.tilitili.common.utils.QQUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class ImageOssHandle extends ExceptionRespMessageHandle {
 		for (String url : imageList) {
 			try {
 				String ossUrl = OSSUtil.uploadOSSByUrl(QQUtil.getImageUrl(url), "png", -1);
+				Asserts.notNull(ossUrl, "上传失败了");
 				resultList.add(ossUrl);
 			} catch (AssertException e) {
 				resultList.add(e.getMessage());
