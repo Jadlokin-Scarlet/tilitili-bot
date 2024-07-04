@@ -172,6 +172,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 
 		boolean precious = isPrecious(botItem);
 		Asserts.isFalse(precious, "没鱼可摸喵");
+		Asserts.notEquals(botItem.getSellPrice(), 0, "没鱼可摸喵");
 
 		List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
 		boolean touched = touchList.stream().map(FishPlayerTouch::getTouchUserId).anyMatch(Predicate.isEqual(touchUserId));
