@@ -39,7 +39,7 @@ public class BotServiceTest {
 	public void syncHandleTextMessage() {
 //		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
 //		tester.testHandleMessage(bot, "");
-		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "{\"self_id\":1701008067,\"user_id\":545459363,\"time\":1720163174,\"message_id\":-2147462144,\"message_seq\":-2147462144,\"real_id\":-2147462144,\"message_type\":\"group\",\"sender\":{\"user_id\":545459363,\"nickname\":\"Jadlokin_Scarlet\",\"card\":\"\",\"role\":\"admin\"},\"raw_message\":\"在线玩家\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"在线玩家\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":644302457}");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(6L), "");
 	}
 
 	@Test
