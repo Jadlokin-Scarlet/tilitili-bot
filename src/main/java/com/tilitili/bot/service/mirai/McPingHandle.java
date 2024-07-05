@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 public class McPingHandle extends ExceptionRespMessageHandle {
 	private static final String hostKey = "hostKey";
 
-	private final McPingManager mcPingManager;
 	private final BotSenderCacheManager botSenderCacheManager;
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotConfigManager botConfigManager;
 	private final BotRoleManager botRoleManager;
+	private final McPingManager mcPingManager;
 	private final BotManager botManager;
 
 	@Autowired
