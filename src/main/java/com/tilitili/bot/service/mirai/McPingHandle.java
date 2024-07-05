@@ -133,7 +133,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			if (targetBotSender != null) {
 				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
-				List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
+				List<BotUserDTO> userList = botManager.listOnlineUser(minecraftBot, targetBotSender);
 				String playerListStr = userList.stream().map(BotUserDTO::getName).collect(Collectors.joining("，"));
 				return BotMessage.simpleTextMessage("当前在线玩家：" + playerListStr);
 			}
@@ -146,7 +146,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			if (targetBotSender != null) {
 				BotRobot minecraftBot = botRobotCacheManager.getValidBotRobotById(targetBotSender.getSendBot());
 
-				List<BotUserDTO> userList = botManager.listOnlinePlayer(minecraftBot, targetBotSender);
+				List<BotUserDTO> userList = botManager.listOnlineUser(minecraftBot, targetBotSender);
 				String playerListStr = userList.stream().map(BotUserDTO::getName).collect(Collectors.joining("，"));
 				return BotMessage.simpleTextMessage("当前在线玩家："+playerListStr);
 			}
