@@ -46,9 +46,9 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.botConfigManager = botConfigManager;
+		this.botRoleManager = botRoleManager;
 		this.mcPingManager = mcPingManager;
 		this.botManager = botManager;
-		this.botRoleManager = botRoleManager;
 	}
 
 	@Override
