@@ -37,8 +37,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 	private final BotForwardConfigMapper botForwardConfigMapper;
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final BotConfigManager botConfigManager;
-	private final BotManager botManager;
 	private final BotRoleManager botRoleManager;
+	private final BotManager botManager;
 
 	@Autowired
 	public McPingHandle(McPingManager mcPingManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager, BotRoleManager botRoleManager) {
