@@ -264,10 +264,12 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		Long userId = botUser.getId();
 
 		FishPlayer fishPlayer = fishPlayerMapper.getValidFishPlayerByUserId(userId);
-		Asserts.notNull(fishPlayer, "你还没抛竿");
+		if (fishPlayer == null) {
+			return BotMessage.simpleTextMessage("你还没抛竿").setPrivateSend(true);
+		}
 		Asserts.checkEquals(fishPlayer.getVersion(), FishPlayerConstant.VERSION_OLD, "版本不兼容");
 		if (FishPlayerConstant.STATUS_FISHING.equals(fishPlayer.getStatus())) {
-			return BotMessage.simpleTextMessage("鱼还没来呢。");
+			return BotMessage.simpleTextMessage("鱼还没来呢。").setPrivateSend(true);
 		} else if (FishPlayerConstant.STATUS_COLLECT.equals(fishPlayer.getStatus())) {
 			List<FishPlayerTouch> touchList = fishPlayerTouchMapper.getFishPlayerTouchByCondition(new FishPlayerTouchQuery().setFishId(fishPlayer.getId()));
 			String remainderRateStr;
@@ -283,9 +285,9 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 				int usedValue = touchList.stream().mapToInt(FishPlayerTouch::getValue).sum();
 				remainderRateStr = String.format("(剩余%.2f%%)", (totalValue - usedValue) * 100.0 / totalValue);
 			}
-			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！"+remainderRateStr);
+			return BotMessage.simpleTextMessage("鱼上钩了，快收杆！"+remainderRateStr).setPrivateSend(true);
 		} else if (FishPlayerConstant.STATUS_FAIL.equals(fishPlayer.getStatus())) {
-			return BotMessage.simpleTextMessage("鱼已经跑啦");
+			return BotMessage.simpleTextMessage("鱼已经跑啦").setPrivateSend(true);
 		} else {
 			throw new AssertException();
 		}
@@ -470,7 +472,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 
 		botUserItemMappingManager.addMapping(new BotUserItemMapping().setUserId(userId).setItemId(BotItemConstant.FISH_FOOD).setNum(-1));
 		resultList.add(BotMessageChain.ofPlain("抛竿成功，有动静我会再叫你哦。"));
-		return BotMessage.simpleListMessage(resultList);
+		return BotMessage.simpleListMessage(resultList).setPrivateSend(true);
 	}
 
 }

@@ -68,7 +68,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 		boolean success = botItemService.useItem(messageAction.getBotSender(), messageAction.getBotUser(), botItem);
 		Asserts.isTrue(success, "使用失败惹");
-		return BotMessage.simpleTextMessage("好惹。");
+		return BotMessage.simpleTextMessage("好惹。").setPrivateSend(true);
 	}
 
 	private BotMessage handleItemInfo(BotMessageAction messageAction) {
@@ -106,9 +106,9 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			resultList.add("有效期至：" + DateUtils.formatDateYMDHMS(botItem.getEndTime()));
 		}
 		if (botItem.getIcon() == null) {
-			return BotMessage.simpleTextMessage(String.join("\n", resultList));
+			return BotMessage.simpleTextMessage(String.join("\n", resultList)).setPrivateSend(true);
 		} else {
-			return BotMessage.simpleImageTextMessage(String.join("\n", resultList) + "\n", botItem.getIcon());
+			return BotMessage.simpleImageTextMessage(String.join("\n", resultList) + "\n", botItem.getIcon()).setPrivateSend(true);
 		}
 	}
 
@@ -135,7 +135,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 				bag.add(String.format("%s：%s", bagName, otherBag));
 			}
 		});
-		return BotMessage.simpleTextMessage(String.join("\n", bag));
+		return BotMessage.simpleTextMessage(String.join("\n", bag)).setPrivateSend(true);
 	}
 
 	private BotMessage handleSell(BotMessageAction messageAction) {
@@ -175,7 +175,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 			String numMessage = (-subNum) + "个";
 			String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
-			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + item.getName(), nowScore));
+			return BotMessage.simpleTextMessage(String.format("回收%s成功，剩余可用积分%s。", numMessage + item.getName(), nowScore)).setPrivateSend(true);
 		} else {
 			int subNum = 0;
 			for (BotItemDTO item : itemList) {
@@ -197,7 +197,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 			}
 
 			String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
-			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore));
+			return BotMessage.simpleTextMessage(String.format("回收成功，剩余可用积分%s。", nowScore)).setPrivateSend(true);
 		}
 	}
 
@@ -219,7 +219,7 @@ public class TransactionHandle extends ExceptionRespMessageToSenderHandle {
 
 		String numMessage = subNum == 1 ? "" : subNum + "个";
 		String nowScore = String.valueOf(botUserManager.getValidBotUserByIdWithParent(botUser.getId()).getScore());
-		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore));
+		return BotMessage.simpleTextMessage(String.format("兑换%s成功，剩余积分%s。", numMessage + itemName, nowScore)).setPrivateSend(true);
 	}
 
 	private Integer buyItemWithIce(Long userId, Long itemId, Integer itemNum, String itemName) {

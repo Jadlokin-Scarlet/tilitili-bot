@@ -87,7 +87,7 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		Integer icePrice = botIcePrice.getPrice() != null ? botIcePrice.getPrice() : botIcePrice.getBasePrice();
 		Integer iceNum = itemDTOList.stream().filter(StreamUtil.isEqual(BotItemDTO::getName, BotItemConstant.ICE_NAME)).map(BotItemDTO::getNum).findFirst().orElse(0);
 		int sumScore = botUser.getScore() + itemScore + icePrice * iceNum;
-		return BotMessage.simpleTextMessage(String.format("当前可用积分为%s，总积分为%s分。", botUser.getScore(), sumScore));
+		return BotMessage.simpleTextMessage(String.format("当前可用积分为%s，总积分为%s分。", botUser.getScore(), sumScore)).setPrivateSend(true);
 	}
 
 	private BotMessage handleQueryRankMessage(BotMessageAction messageAction) {
@@ -142,6 +142,6 @@ public class SignHandle extends ExceptionRespMessageHandle {
 		String message2 = String.format("(分数+%d)", addScore);
 		String tips = "";//initScore == 0 && BotUserConstant.USER_TYPE_QQ != botUser.getType()? "（tips：有共同群聊最好先申请合体再游玩积分项目": "";
 		String message = message1 + message2 + tips;
-		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId());
+		return BotMessage.simpleTextMessage(message, botMessage).setQuote(messageAction.getMessageId()).setPrivateSend(true);
 	}
 }

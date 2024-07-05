@@ -137,7 +137,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
 //            if (reply.charAt(reply.length() - 1) == '\n') {
                 reply.deleteCharAt(reply.length() - 1);
 //            }
-            return BotMessage.simpleTextMessage(reply.toString());
+            return BotMessage.simpleTextMessage(reply.toString()).setPrivateSend(true);
         } else if (! paramListStr.contains(" ")) {
             BotTask botTask = getBotTaskByTaskName(botSender, paramListStr);
             Asserts.isTrue(taskIdList.contains(botTask.getId()), "%s是啥", paramListStr);
@@ -151,7 +151,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
                 reply.append(String.format("%s. %s: %s\n", i + 1, botKey.getKey(), desc));
             }
             reply.deleteCharAt(reply.length() - 1);
-            return BotMessage.simpleTextMessage(reply.toString());
+            return BotMessage.simpleTextMessage(reply.toString()).setPrivateSend(true);
         } else {
             int paramIndex = paramListStr.indexOf(" ");
             String taskName = paramListStr.substring(0, paramIndex).trim();
@@ -161,7 +161,7 @@ public class HelpHandle extends ExceptionRespMessageHandle {
             BaseMessageHandle messageHandle = messageHandleMap.get(botTask.getName());
             String help = messageHandle.getHelpMessage(botTask, taskKey);
             String reply = String.format("[%s]的作用是[%s]。", paramListStr, help == null? "暂无简介": help);
-            return BotMessage.simpleTextMessage(reply);
+            return BotMessage.simpleTextMessage(reply).setPrivateSend(true);
         }
     }
 

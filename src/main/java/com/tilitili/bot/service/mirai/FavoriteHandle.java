@@ -93,9 +93,9 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 
 		String reply = String.format("抽到一个%s，%s(消耗%d)", giftItem.getName(), giftItem.getDescription(), price);
 		if (giftItem.getIcon() == null) {
-			return BotMessage.simpleTextMessage(reply);
+			return BotMessage.simpleTextMessage(reply).setPrivateSend(true);
 		} else {
-			return BotMessage.simpleImageTextMessage(reply, giftItem.getIcon());
+			return BotMessage.simpleImageTextMessage(reply, giftItem.getIcon()).setPrivateSend(true);
 		}
 	}
 
@@ -177,7 +177,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 //		}
 
 		List<BotMessageChain> respChainList = this.randomTalkToMessageChain(messageAction, botFavorite, filterFavoriteTalkList, addFavorite, externalText);
-		return BotMessage.simpleListMessage(respChainList);
+		return BotMessage.simpleListMessage(respChainList).setPrivateSend(true);
 	}
 
 	private BotMessage handleAction(BotMessageAction messageAction) {
