@@ -42,11 +42,11 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	@Autowired
 	public McPingHandle(McPingManager mcPingManager, BotForwardConfigMapper botForwardConfigMapper, BotSenderCacheManager botSenderCacheManager, BotRobotCacheManager botRobotCacheManager, BotConfigManager botConfigManager, BotManager botManager, BotRoleManager botRoleManager) {
-		this.mcPingManager = mcPingManager;
 		this.botForwardConfigMapper = botForwardConfigMapper;
 		this.botSenderCacheManager = botSenderCacheManager;
 		this.botRobotCacheManager = botRobotCacheManager;
 		this.botConfigManager = botConfigManager;
+		this.mcPingManager = mcPingManager;
 		this.botManager = botManager;
 		this.botRoleManager = botRoleManager;
 	}
