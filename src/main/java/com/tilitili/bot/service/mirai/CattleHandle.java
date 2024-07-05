@@ -141,7 +141,7 @@ public class CattleHandle extends ExceptionRespMessageToSenderHandle {
 		Collections.shuffle(senderCattleList);
 
 		List<BotMessageChain> respList = new ArrayList<>();
-		respList.add(BotMessageChain.ofPlain("当前%.2fcm", cattle.getLength() / 100.0));
+		respList.add(BotMessageChain.ofPlain("当前%.2fcm\n", cattle.getLength() / 100.0));
 		int pkCnt = 0;
 		int buyCnt = 0;
 		int useCnt = 0;
