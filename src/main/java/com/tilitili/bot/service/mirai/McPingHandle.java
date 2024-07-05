@@ -57,7 +57,7 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		String virtualKey = messageAction.getKeyWithoutPrefix();
 		switch (virtualKey != null? virtualKey: key) {
 			case "mcp": case "mcpd": case "mcm": case "在线人数": return handleMcp(messageAction);
-			case "mcl": case "在线玩家": case "玩家列表": return handelMcList(messageAction);
+			case "mcl": case "在线玩家": case "玩家列表": case "在线列表": return handelMcList(messageAction);
 			case "mc白名单": return handleWhiteList(messageAction);
 			case "mcBind": return handleBind(messageAction);
 			default: return null;
