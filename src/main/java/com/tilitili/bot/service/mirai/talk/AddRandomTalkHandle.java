@@ -6,6 +6,7 @@ import com.tilitili.bot.entity.RandomTalkDTO;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
 import com.tilitili.bot.util.ExcelUtil;
+import com.tilitili.common.component.CloseableTempFile;
 import com.tilitili.common.constant.BotItemConstant;
 import com.tilitili.common.constant.BotPlaceConstant;
 import com.tilitili.common.emnus.SendTypeEnum;
@@ -87,7 +88,10 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 	private BotMessage handleRandomTalkFile(BotMessageAction messageAction, BotMessageChain fileChain) {
 		BotRobot bot = messageAction.getBot();
 		File file = botManager.downloadGroupFile(bot, messageAction.getBotSender(), fileChain);
-		return BotMessage.simpleTextMessage(this.doHandleRandomTalkFile(file, null));
+
+		try (CloseableTempFile ignore = CloseableTempFile.ofFile(file)) {
+			return BotMessage.simpleTextMessage(this.doHandleRandomTalkFile(file, null));
+		}
 	}
 
 	public String doHandleRandomTalkFile(File file, Long adminUserId) {
@@ -181,6 +185,12 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		String fileId = fileChain.getId();
 		Asserts.notNull(fileId, "啊嘞，找不到文件。");
 		File file = botManager.downloadGroupFile(messageAction.getBot(), messageAction.getBotSender(), fileChain);
+		try (CloseableTempFile ignore = CloseableTempFile.ofFile(file)) {
+			return BotMessage.simpleTextMessage(this.doHandleFishFile(file));
+		}
+	}
+
+	private String doHandleFishFile(File file) {
 		ExcelResult<FishConfigDTO> excelResult = ExcelUtil.getListFromExcel(file, FishConfigDTO.class);
 		List<FishConfigDTO> resultList = excelResult.getResultList();
 		log.info("{}", resultList);
@@ -234,9 +244,9 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					newFishConfigList.add(new FishConfig().setPlaceId(placeId).setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
 				}
 			} catch (AssertException e) {
-				return BotMessage.simpleTextMessage(e.getMessage());
+				return e.getMessage();
 			} catch (Exception e) {
-				return BotMessage.simpleTextMessage("格式不对");
+				return "格式不对";
 			}
 		}
 		for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setStatus(0))) {
@@ -245,6 +255,6 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 		for (FishConfig fishConfig : newFishConfigList) {
 			fishConfigMapper.addFishConfigSelective(fishConfig);
 		}
-		return BotMessage.simpleTextMessage(String.format("搞定√(导入%s项配置，总权重%s)", newFishConfigList.size(), rateSum));
+		return String.format("搞定√(导入%s项配置，总权重%s)", newFishConfigList.size(), rateSum);
 	}
 }
