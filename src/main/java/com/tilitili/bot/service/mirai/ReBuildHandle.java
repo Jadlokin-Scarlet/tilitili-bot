@@ -19,23 +19,9 @@ public class ReBuildHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
-		String name = messageAction.getBody("项目");
-		String branches = messageAction.getBody("分支");
-		String value = messageAction.getValue();
-		if (name == null && value != null) {
-			if (value.contains(" ")) {
-				name = value.substring(0, value.indexOf(" ")).trim();
-			} else {
-				name = value;
-			}
-		}
-		if (branches == null && value != null) {
-			if (value.contains(" ")) {
-				branches = value.substring(value.indexOf(" ") + 1).trim();
-			} else {
-				branches = "reload";
-			}
-		}
+		String key = messageAction.getKeyWithoutPrefix();
+		String name = messageAction.getBodyOrDefault("项目", messageAction.getValue());
+		String branches = messageAction.getBodyOrDefault("分支", "发布".equals(key)? "master": "reload");
 		Asserts.notBlank(name, "格式错啦(项目)");
 		Asserts.notBlank(branches, "格式错啦(分支)");
 
