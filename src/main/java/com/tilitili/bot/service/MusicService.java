@@ -400,9 +400,12 @@ public class MusicService {
 
         ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
         String key = "webMusicList-" + userId;
-        musicRedisList.rightPush(key, music);
-        if (Optional.ofNullable(musicRedisList.size(key)).orElse(0L) > 10) {
-            musicRedisList.leftPop(key);
+        Long prevMusicId = Optional.ofNullable(musicRedisList.index(key, -1)).map(PlayerMusic::getId).orElse(null);
+        if (!Objects.equals(prevMusicId, music.getId())) {
+            musicRedisList.rightPush(key, music);
+            if (Optional.ofNullable(musicRedisList.size(key)).orElse(0L) > 10) {
+                musicRedisList.leftPop(key);
+            }
         }
         return music;
     }
