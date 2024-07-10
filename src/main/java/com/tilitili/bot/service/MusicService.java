@@ -2,6 +2,7 @@ package com.tilitili.bot.service;
 
 import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.common.api.KtvServiceInterface;
+import com.tilitili.common.component.CloseableRedisLock;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PlayerMusic;
@@ -400,8 +401,8 @@ public class MusicService {
 
         ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
         String key = "webMusicList-" + userId;
-        Long prevMusicId = Optional.ofNullable(musicRedisList.index(key, -1)).map(PlayerMusic::getId).orElse(null);
-        if (!Objects.equals(prevMusicId, music.getId())) {
+        // 初始化last和单曲循环不加入prev
+        if (musicId == null) {
             musicRedisList.rightPush(key, music);
             if (Optional.ofNullable(musicRedisList.size(key)).orElse(0L) > 10) {
                 musicRedisList.leftPop(key);
@@ -411,11 +412,13 @@ public class MusicService {
     }
 
     public PlayerMusic getPrevMusic(Long userId) {
-        ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
-        String key = "webMusicList-" + userId;
-        musicRedisList.rightPop(key);
-        PlayerMusic music = musicRedisList.index(key, -1);
-        Asserts.notNull(music, "已经到头惹");
-        return music;
+        try (CloseableRedisLock ignore = new CloseableRedisLock(redisCache, "prevLock-"+userId)) {
+            ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
+            String key = "webMusicList-" + userId;
+            PlayerMusic music = musicRedisList.index(key, -2);
+            Asserts.notNull(music, "已经到头惹");
+            musicRedisList.rightPop(key);
+            return music;
+        }
     }
 }
