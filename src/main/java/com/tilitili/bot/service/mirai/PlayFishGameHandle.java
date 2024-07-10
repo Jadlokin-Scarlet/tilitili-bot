@@ -192,9 +192,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage getRateRank(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
 		Date todayStartTime = DateUtils.getCurrentDay();
 		Date yesterdayStartTime = DateUtils.addDay(todayStartTime, -1);
-		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(yesterdayStartTime, todayStartTime);
+		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(senderId, yesterdayStartTime, todayStartTime);
 		Map<Long, Integer> userScoreMap = new HashMap<>();
 		Map<Long, Integer> userCntMap = new HashMap<>();
 		Map<Long, Integer> userRateMap = new HashMap<>();
@@ -228,9 +229,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage getRank(BotMessageAction messageAction) {
+		Long senderId = messageAction.getBotSender().getId();
 		Date todayStartTime = DateUtils.getCurrentDay();
 		Date yesterdayStartTime = DateUtils.addDay(todayStartTime, -1);
-		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(yesterdayStartTime, todayStartTime);
+		List<FishPlayer> fishPlayerList = fishPlayerMapper.listFishPlayerByEndTime(senderId, yesterdayStartTime, todayStartTime);
 //		List<SortObject<Long>> userScoreList = new ArrayList<>();
 		Map<Long, Integer> userScoreMap = new HashMap<>();
 		for (FishPlayer fishPlayer : fishPlayerList) {

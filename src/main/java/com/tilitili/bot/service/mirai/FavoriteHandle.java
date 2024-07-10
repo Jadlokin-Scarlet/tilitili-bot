@@ -71,7 +71,7 @@ public class FavoriteHandle extends ExceptionRespMessageHandle {
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "认领老婆": return handleStart(messageAction);
 			case "赠送": return handleGift(messageAction);
-			case "好感度查询": return handleQuery(messageAction);
+			case "好感度查询": case "查询好感度": return handleQuery(messageAction);
 			case "抽礼物": return handleBuyGift(messageAction);
 			default: return handleAction(messageAction);
 		}
