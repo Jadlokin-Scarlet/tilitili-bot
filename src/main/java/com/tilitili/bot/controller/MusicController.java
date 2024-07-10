@@ -17,7 +17,6 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
-import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.*;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -81,10 +79,13 @@ public class MusicController extends BaseController{
 	@GetMapping("/last")
 	@ResponseBody
 	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId) {
-		int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId));
-		List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
-		Asserts.notEmpty(lastMusic, "没有音乐了");
-		return BaseModel.success(lastMusic.get(0));
+		return BaseModel.success(musicService.getLastMusic(userId, listId, musicId));
+	}
+
+	@GetMapping("/prev")
+	@ResponseBody
+	public BaseModel<PlayerMusic> getPrevMusic(@SessionAttribute(value = "userId") Long userId) {
+		return BaseModel.success(musicService.getPrevMusic(userId));
 	}
 
 	@PostMapping("/list/sync")

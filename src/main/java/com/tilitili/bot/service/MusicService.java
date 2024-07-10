@@ -22,14 +22,18 @@ import com.tilitili.common.mapper.mysql.PlayerMusicListMapper;
 import com.tilitili.common.mapper.mysql.PlayerMusicMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.HttpClientUtil;
+import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,14 +47,16 @@ public class MusicService {
     private final PlayerMusicMapper playerMusicMapper;
     private final BotSenderCacheManager botSenderCacheManager;
     private final PlayerMusicListMapper playerMusicListMapper;
+    private final RedisCache redisCache;
 
-    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager, PlayerMusicMapper playerMusicMapper, BotSenderCacheManager botSenderCacheManager, PlayerMusicListMapper playerMusicListMapper) {
+    public MusicService(BotManager botManager, BilibiliManager bilibiliManager, MusicCloudManager musicCloudManager, PlayerMusicMapper playerMusicMapper, BotSenderCacheManager botSenderCacheManager, PlayerMusicListMapper playerMusicListMapper, RedisCache redisCache) {
         this.botManager = botManager;
         this.bilibiliManager = bilibiliManager;
         this.musicCloudManager = musicCloudManager;
         this.playerMusicMapper = playerMusicMapper;
         this.botSenderCacheManager = botSenderCacheManager;
         this.playerMusicListMapper = playerMusicListMapper;
+        this.redisCache = redisCache;
     }
 
     public void pushPlayListToQuote(BotRobot bot, BotSender textSender, BotUserDTO botUser, PlayerMusicListDTO playerMusicListDTO) {
@@ -383,5 +389,30 @@ public class MusicService {
             return null;
         }
         return updPlayerMusic.setId(dbPlayerMusic.getId());
+    }
+
+
+    public PlayerMusic getLastMusic(Long userId, Long listId, Long musicId) {
+        int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId));
+        List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
+        Asserts.notEmpty(lastMusic, "没有音乐了");
+        PlayerMusic music = lastMusic.get(0);
+
+        ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
+        String key = "webMusicList-" + userId;
+        musicRedisList.rightPush(key, music);
+        if (Optional.ofNullable(musicRedisList.size(key)).orElse(0L) > 10) {
+            musicRedisList.leftPop(key);
+        }
+        return music;
+    }
+
+    public PlayerMusic getPrevMusic(Long userId) {
+        ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
+        String key = "webMusicList-" + userId;
+        musicRedisList.rightPop(key);
+        PlayerMusic music = musicRedisList.index(key, -1);
+        Asserts.notNull(music, "已经到头惹");
+        return music;
     }
 }
