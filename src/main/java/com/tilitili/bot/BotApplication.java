@@ -15,10 +15,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableScheduling
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class StartApplication {
+public class BotApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(StartApplication.class, args);
+        SpringApplication.run(BotApplication.class, args);
     }
 }
 

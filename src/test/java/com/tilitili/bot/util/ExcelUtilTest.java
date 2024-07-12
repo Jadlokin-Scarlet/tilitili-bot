@@ -1,6 +1,6 @@
 package com.tilitili.bot.util;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.bot.entity.ExcelResult;
 import com.tilitili.bot.entity.FishConfigDTO;
 import com.tilitili.common.utils.Gsons;
@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.File;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 public class ExcelUtilTest {
 
 	@Test

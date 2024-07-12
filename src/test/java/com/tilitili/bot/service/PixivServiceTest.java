@@ -1,6 +1,6 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.mapper.mysql.PixivImageMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.annotation.Resource;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 public class PixivServiceTest {
 	@Resource
 	PixivCacheService tester;

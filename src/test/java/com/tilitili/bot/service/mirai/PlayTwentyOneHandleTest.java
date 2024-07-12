@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 class PlayTwentyOneHandleTest {
 	@Autowired
 	private PlayTwentyOneHandle tester;

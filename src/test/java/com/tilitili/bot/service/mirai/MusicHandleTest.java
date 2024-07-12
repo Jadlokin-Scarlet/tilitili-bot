@@ -1,6 +1,6 @@
 package com.tilitili.bot.service.mirai;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.util.BotMessageActionUtil;
 import com.tilitili.common.entity.PlayerMusicList;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 class MusicHandleTest {
 	@Autowired
 	private MusicHandle tester;

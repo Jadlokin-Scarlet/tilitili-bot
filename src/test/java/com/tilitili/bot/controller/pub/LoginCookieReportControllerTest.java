@@ -1,6 +1,6 @@
 package com.tilitili.bot.controller.pub;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.bot.entity.request.ReportCookieRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 class LoginCookieReportControllerTest {
 	@Autowired
 	private LoginCookieReportController tester;

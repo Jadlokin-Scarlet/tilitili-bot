@@ -1,6 +1,6 @@
 package com.tilitili.bot.service;
 
-import com.tilitili.bot.StartApplication;
+import com.tilitili.bot.BotApplication;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandle;
 import com.tilitili.bot.util.BotMessageActionUtil;
 import com.tilitili.common.entity.BotRobot;
@@ -18,7 +18,7 @@ import javax.annotation.Resource;
 import java.util.Map;
 
 @Slf4j
-@SpringBootTest(classes = StartApplication.class)
+@SpringBootTest(classes = BotApplication.class)
 @EnableAutoConfiguration(exclude={DubboAutoConfiguration.class})
 public class BotServiceTest {
 	@Resource

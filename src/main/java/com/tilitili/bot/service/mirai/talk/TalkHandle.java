@@ -59,7 +59,7 @@ public class TalkHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) {
 		switch (messageAction.getKeyWithoutPrefix()) {
 			case "对话": return handleAdd(messageAction);
-			case "移除对话": return handleDelete(messageAction);
+			case "移除对话": case "删除对话": return handleDelete(messageAction);
 			default: throw new AssertException();
 		}
 	}

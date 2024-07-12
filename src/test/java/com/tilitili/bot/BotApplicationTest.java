@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @SpringBootTest
-class StartApplicationTest {
+class BotApplicationTest {
     @Autowired
     private HelpHandle helpHandle;
     @Autowired
