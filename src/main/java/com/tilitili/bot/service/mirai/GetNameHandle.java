@@ -76,6 +76,6 @@ public class GetNameHandle extends ExceptionRespMessageHandle {
 		return BotMessage.simpleListMessage(Lists.newArrayList(
 				BotMessageChain.ofPlain("你的新名字是："),
 				BotMessageChain.ofImage(result)
-		));
+		)).setQuote(messageAction.getMessageId());
 	}
 }
