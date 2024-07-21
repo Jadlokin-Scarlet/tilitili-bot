@@ -7,7 +7,6 @@ import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
-import com.tilitili.common.entity.view.bot.mirai.UploadImageResult;
 import com.tilitili.common.manager.TemplateImageManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.Gsons;
@@ -72,10 +71,10 @@ public class GetNameHandle extends ExceptionRespMessageHandle {
 		String word3 = wordList3.get(ThreadLocalRandom.current().nextInt(wordList3.size()));
 		String name = word1 + word2 + word3;
 
-		UploadImageResult result = templateImageManager.getLongStringImage(bot, name, 200);
+//		UploadImageResult result = templateImageManager.getLongStringImage(bot, name, 200);
 		return BotMessage.simpleListMessage(Lists.newArrayList(
-				BotMessageChain.ofPlain("你的新名字是："),
-				BotMessageChain.ofImage(result)
+				BotMessageChain.ofPlain("你的新名字是：")
+//				, BotMessageChain.ofImage(result)
 		)).setQuote(messageAction.getMessageId());
 	}
 }
