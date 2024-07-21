@@ -74,6 +74,7 @@ public class GetNameHandle extends ExceptionRespMessageHandle {
 //		UploadImageResult result = templateImageManager.getLongStringImage(bot, name, 200);
 		return BotMessage.simpleListMessage(Lists.newArrayList(
 				BotMessageChain.ofPlain("你的新名字是：")
+				, BotMessageChain.ofPlain(name)
 //				, BotMessageChain.ofImage(result)
 		)).setQuote(messageAction.getMessageId());
 	}
