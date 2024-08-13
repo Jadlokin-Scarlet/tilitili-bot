@@ -2,6 +2,7 @@ package com.tilitili.bot.controller;
 
 import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.MusicSearchVO;
+import com.tilitili.bot.entity.PlayerMusicVO;
 import com.tilitili.bot.entity.WebControlDataVO;
 import com.tilitili.bot.entity.request.DeleteMusicRequest;
 import com.tilitili.bot.entity.request.StartPlayerRequest;
@@ -78,13 +79,13 @@ public class MusicController extends BaseController{
 
 	@GetMapping("/last")
 	@ResponseBody
-	public BaseModel<PlayerMusic> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId) {
+	public BaseModel<PlayerMusicVO> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId) {
 		return BaseModel.success(musicService.getLastMusic(userId, listId, musicId));
 	}
 
 	@GetMapping("/prev")
 	@ResponseBody
-	public BaseModel<PlayerMusic> getPrevMusic(@SessionAttribute(value = "userId") Long userId) {
+	public BaseModel<PlayerMusicVO> getPrevMusic(@SessionAttribute(value = "userId") Long userId) {
 		return BaseModel.success(musicService.getPrevMusic(userId));
 	}
 
