@@ -419,6 +419,7 @@ public class MusicService {
             PlayerMusic music = musicRedisList.index(key, -2);
             Asserts.notNull(music, "已经到头惹");
             musicRedisList.rightPop(key);
+            music = playerMusicMapper.getPlayerMusicById(music.getId());
             return new PlayerMusicVO(music, this.getMusicJumpUrl(music));
         }
     }
