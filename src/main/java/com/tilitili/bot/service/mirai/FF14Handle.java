@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONPath;
 import com.google.common.collect.ImmutableMap;
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
+import com.tilitili.common.entity.dto.HttpRequestDTO;
+import com.tilitili.common.entity.dto.HttpResponseDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.universalis.UniversalisItemPrice;
 import com.tilitili.common.utils.Asserts;
@@ -39,10 +41,10 @@ public class FF14Handle extends ExceptionRespMessageHandle {
     JSONPath searchPath = JSONPath.of("$.Results[0].ID",  Integer.class);
     private Integer search(String name) throws UnsupportedEncodingException {
         String url = "https://cafemaker.wakingsands.com/search?string="+ URLEncoder.encode(name, "utf-8") +"&indexes=item&language=chs&filters=ItemSearchCategory.ID%3E=1&columns=ID,Icon,Name,LevelItem,Rarity,ItemSearchCategory.Name,ItemSearchCategory.ID,ItemKind.Name&limit=100&sort_field=LevelItem&sort_order=desc";
-        String resp = HttpClientUtil.httpGet(url, headers);
-        Asserts.notBlank(resp, "网络异常");
+        HttpResponseDTO resp = HttpClientUtil.httpGet(HttpRequestDTO.ofUrlAndHeader(url, headers).setHttpClient(HttpClientUtil.longHttpClient));
+        Asserts.notBlank(resp.getContent(), "网络异常");
         try {
-            Object id = searchPath.extract(resp);
+            Object id = searchPath.extract(resp.getContent());
             Asserts.notNull(id, "查无此物");
             return (Integer) id;
         } catch (JSONException e) {
