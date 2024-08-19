@@ -90,7 +90,7 @@ public class PixivCacheService {
 		Long userId = botUser.getId();
 		boolean canSS = !"safe".equals(r18);
 
-		for (long pageNo = 1L; pageNo < 10; pageNo++) {
+		for (long pageNo = 1L; pageNo < 50; pageNo++) {
 			List<PixivSearchIllust> dataList = pixivManager.searchProProxy(searchKey, pageNo, r18);
 			if (CollectionUtils.isEmpty(dataList)) break;
 			List<String> pidList = dataList.stream().map(PixivSearchIllust::getId).collect(Collectors.toList());
@@ -113,7 +113,7 @@ public class PixivCacheService {
 					continue;
 				}
 				if (sl >= 5 && !canSS) {
-					throw new AssertSeseException();
+					continue;
 				}
 
 				List<BotMessageChain> messageChainList;
