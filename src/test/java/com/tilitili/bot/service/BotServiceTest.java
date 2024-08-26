@@ -45,12 +45,12 @@ public class BotServiceTest {
 	@Test
 	public void testHandle() throws Exception {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
-		BotSender botSender = botSenderCacheManager.getValidBotSenderById(4461L);
-		BaseMessageHandle handle = messageHandleMap.get("playFishGameHandle");
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("抛竿", bot, botSender, botUserManager.getValidBotUserById(13L))));
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("收杆", bot, botSender, botUserManager.getValidBotUserById(13L))));
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(181L);
+		BaseMessageHandle handle = messageHandleMap.get("recallHandle");
+		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("撤回", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("收杆", bot, botSender, botUserManager.getValidBotUserById(13L))));
 	}
 }
