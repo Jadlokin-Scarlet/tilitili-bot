@@ -13,6 +13,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -39,10 +40,10 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 
     private void upAllBotRobot() {
         List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setStatus(0));
-//        List<BotRobot> robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setType(BotRobotConstant.TYPE_KOOK));
-//        List<BotRobot> robotList = Arrays.asList(botRobotCacheManager.getBotRobotById(3L), botRobotCacheManager.getBotRobotById(5L));
-//        List<BotRobot> robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(25L));
-//        List<BotRobot> robotList = Collections.emptyList();
+//        robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setType(BotRobotConstant.TYPE_KOOK));
+//        robotList = Arrays.asList(botRobotCacheManager.getBotRobotById(3L), botRobotCacheManager.getBotRobotById(5L));
+//        robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(25L));
+        robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {
                 webSocketFactory.upBotBlocking(bot.getId());
