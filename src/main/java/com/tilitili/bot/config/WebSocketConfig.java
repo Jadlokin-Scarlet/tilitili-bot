@@ -43,7 +43,7 @@ public class WebSocketConfig implements ApplicationListener<ContextClosedEvent> 
 //        robotList = botRobotCacheManager.getBotRobotByCondition(new BotRobotQuery().setType(BotRobotConstant.TYPE_KOOK));
 //        robotList = Arrays.asList(botRobotCacheManager.getBotRobotById(3L), botRobotCacheManager.getBotRobotById(5L));
 //        robotList = Collections.singletonList(botRobotCacheManager.getBotRobotById(25L));
-        robotList = Collections.emptyList();
+//        robotList = Collections.emptyList();
         for (BotRobot bot : robotList) {
             if (BotRobotConstant.PUSH_TYPE_WS.equals(bot.getPushType())) {
                 webSocketFactory.upBotBlocking(bot.getId());
