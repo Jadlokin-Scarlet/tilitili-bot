@@ -113,7 +113,7 @@ public class MusicHandle extends ExceptionRespMessageHandle {
     private BotMessage handleSyncList(BotMessageAction messageAction) {
         BotRobot bot = messageAction.getBot();
         Long userId = messageAction.getBotUser().getId();
-        musicService.syncMusic(bot, userId);
+        musicService.syncMusicList(bot, userId);
         return BotMessage.simpleTextMessage("同步完毕");
     }
 

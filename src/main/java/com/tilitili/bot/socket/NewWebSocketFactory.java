@@ -58,7 +58,7 @@ public class NewWebSocketFactory {
 					Long wsCnt = redisCache.increment("ws_cnt_" + botId);
 					redisCache.expire("ws_cnt_"+botId, 50);
 					if (wsCnt > 10) {
-						redisCache.setValue("ws_lock_"+botId, "yes", 60 * 10);
+						redisCache.setValue("ws_lock_"+botId, String.valueOf(wsCnt), 60 * 10);
 					}
 					webSocketMap.put(botId, botManager.getWebSocket(bot, botService::syncHandleMessage, this::onClose));
 					log.info("初始化websocket完成, bot={}", this.logBot(bot));

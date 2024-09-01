@@ -4,7 +4,6 @@ import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.MusicSearchVO;
 import com.tilitili.bot.entity.PlayerMusicVO;
 import com.tilitili.bot.entity.WebControlDataVO;
-import com.tilitili.bot.entity.request.DeleteMusicRequest;
 import com.tilitili.bot.entity.request.StartPlayerRequest;
 import com.tilitili.bot.entity.request.SyncMusicRequest;
 import com.tilitili.bot.service.MusicService;
@@ -18,6 +17,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.dto.PlayerMusicListDTO;
 import com.tilitili.common.entity.query.PlayerMusicListQuery;
+import com.tilitili.common.entity.query.PlayerMusicQuery;
 import com.tilitili.common.entity.view.BaseModel;
 import com.tilitili.common.entity.view.bot.musiccloud.MusicCloudSong;
 import com.tilitili.common.manager.*;
@@ -93,13 +93,20 @@ public class MusicController extends BaseController{
 	@ResponseBody
 	public BaseModel<?> syncMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody SyncMusicRequest request) {
 		BotSender firstSender = botSenderManager.getFirstValidSender(userId);
-		Asserts.notNull(firstSender);
+		Asserts.notNull(firstSender, "参数异常");
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
 		if (request.getListId() != null) {
 			PlayerMusicList playerMusicList = playerMusicListMapper.getPlayerMusicListById(request.getListId());
-			musicService.syncMusic(bot, userId, playerMusicList);
+			if (!"0".equals(playerMusicList.getExternalId())) {
+				musicService.syncMusicList(bot, userId, playerMusicList);
+			} else {
+				List<PlayerMusic> musicList = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(playerMusicList.getId()));
+				for (PlayerMusic playerMusic : musicList) {
+					musicService.syncMusic(bot, userId, playerMusic);
+				}
+			}
 		} else {
-			musicService.syncMusic(bot, userId);
+			musicService.syncMusicList(bot, userId);
 		}
 		return BaseModel.success();
 	}
@@ -151,30 +158,27 @@ public class MusicController extends BaseController{
 			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
 			Asserts.notNull(firstSender);
 			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
-			musicService.syncMusic(bot, userId);
+			musicService.syncMusicList(bot, userId);
 		}
 
 		return BaseModel.success();
 	}
 
-	@DeleteMapping("/list")
+	@DeleteMapping("/list/{listId}")
 	@ResponseBody
-	public BaseModel<?> deleteMusic(@SessionAttribute(value = "userId") Long userId, @RequestBody DeleteMusicRequest request) {
-		if (request.getListId() != null) {
-			Long listId = request.getListId();
-
-			PlayerMusicList musicList = playerMusicListMapper.getPlayerMusicListById(listId);
-			Asserts.notNull(musicList, "参数异常");
-			Asserts.checkEquals(musicList.getUserId(), userId, "参数异常");
+	public BaseModel<?> deleteMusic(@SessionAttribute(value = "userId") Long userId, @PathVariable Long listId) {
+		Asserts.notNull(listId, "参数异常");
+		PlayerMusicList musicList = playerMusicListMapper.getPlayerMusicListById(listId);
+		Asserts.notNull(musicList, "参数异常");
+		Asserts.checkEquals(musicList.getUserId(), userId, "参数异常");
 
 
-			BotSender firstSender = botSenderManager.getFirstValidSender(userId);
-			Asserts.notNull(firstSender);
-			BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
+		BotSender firstSender = botSenderManager.getFirstValidSender(userId);
+		Asserts.notNull(firstSender);
+		BotRobot bot = botRobotCacheManager.getValidBotRobotById(firstSender.getBot());
 
-			playerMusicListMapper.deletePlayerMusicListByPrimary(listId);
-			musicService.syncMusic(bot, userId);
-		}
+		playerMusicListMapper.deletePlayerMusicListByPrimary(listId);
+		musicService.syncMusicList(bot, userId);
 
 		return BaseModel.success();
 	}

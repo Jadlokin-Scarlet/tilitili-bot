@@ -253,6 +253,23 @@ public class MusicService {
         }
     }
 
+    public PlayerMusic getMusicByExternalId(BotRobot bot, Integer type, String external) {
+        switch (type) {
+//            case PlayerMusicDTO.TYPE_MUSIC_CLOUD_PROGRAM:
+//                return musicCloudManager.get(listId);
+//            case PlayerMusicDTO.TYPE_MUSIC_CLOUD:
+//                PlayerMusicListDTO playerMusicListDTO = musicCloudManager.getPlayerList(listId);
+//                List<String> idList = playerMusicListDTO.getMusicList().stream().map(PlayerMusic::getExternalId).collect(Collectors.toList());
+//                List<PlayerMusic> playerMusicListDetail = musicCloudManager.getPlayerListDetail(bot, idList);
+//                playerMusicListDTO.setMusicList(playerMusicListDetail);
+//                return playerMusicListDTO;
+//            case PlayerMusicDTO.TYPE_BILIBILI:
+//                return bilibiliManager.getFavoriteList(listId);
+            default:
+                throw new AssertException();
+        }
+    }
+
     private BotSender getVoiceSenderOrNull(BotRobot bot, BotSender textSender, BotUserDTO botUser) {
         BotSender voiceSender;
         try {
@@ -306,7 +323,7 @@ public class MusicService {
         this.pushPlayListToQuote(textSender, voiceSender, playerMusicListDTO);
     }
 
-    public void syncMusic(BotRobot bot, Long userId) {
+    public void syncMusicList(BotRobot bot, Long userId) {
         List<PlayerMusic> noListPlayerMusicList = playerMusicMapper.getNoListMusicList(userId);
         for (PlayerMusic noListPlayerMusic : noListPlayerMusicList) {
             playerMusicMapper.deletePlayerMusicByPrimary(noListPlayerMusic.getId());
@@ -314,11 +331,11 @@ public class MusicService {
         List<PlayerMusicList> listList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery().setUserId(userId));
         Asserts.notEmpty(listList, "歌单空空如也，先导入歌单吧");
         for (PlayerMusicList list : listList) {
-            syncMusic(bot, userId, list);
+            syncMusicList(bot, userId, list);
         }
     }
 
-    public void syncMusic(BotRobot bot, Long userId, PlayerMusicList list) {
+    public void syncMusicList(BotRobot bot, Long userId, PlayerMusicList list) {
         Asserts.notNull(list.getType());
         Asserts.notNull(list.getExternalId());
         Asserts.notNull(list.getId());
@@ -352,6 +369,14 @@ public class MusicService {
                 continue;
             }
             playerMusicMapper.deletePlayerMusicByPrimary(oldMusic.getId());
+        }
+    }
+
+    public void syncMusic(BotRobot bot, Long userId, PlayerMusic oldMusic) {
+        PlayerMusic newMusic = this.getMusicByExternalId(bot, oldMusic.getType(), oldMusic.getExternalId());
+        PlayerMusic updMusic = this.checkMusicData(oldMusic, newMusic);
+        if (updMusic != null) {
+            playerMusicMapper.updatePlayerMusicSelective(updMusic);
         }
     }
 
@@ -395,8 +420,14 @@ public class MusicService {
 
 
     public PlayerMusicVO getLastMusic(Long userId, Long listId, Long musicId) {
-        int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId));
-        List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId).setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
+        PlayerMusicQuery query = new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId);
+        int musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
+        if (musicCnt == 0) {
+            query.setId(null);
+            musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
+            Asserts.notEquals(musicCnt, 0, "参数异常");
+        }
+        List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(query.setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
         Asserts.notEmpty(lastMusic, "没有音乐了");
         PlayerMusic music = lastMusic.get(0);
 
