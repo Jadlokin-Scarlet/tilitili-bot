@@ -75,7 +75,7 @@ public class SubscriptionHandle extends ExceptionRespMessageHandle {
             case "取关": return handleDeleteSubscription(messageAction);
             case "关注推特": return handleAddTweet(messageAction);
             case "取关推特": return handleDeleteTweet(messageAction);
-            case "ttoken": return handleTToken(messageAction);
+            case "tttoken": return handleTToken(messageAction);
             default: throw new AssertException();
         }
     }
