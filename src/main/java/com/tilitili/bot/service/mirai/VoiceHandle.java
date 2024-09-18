@@ -9,8 +9,6 @@ import com.tilitili.common.entity.PlayerMusic;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.dto.PlayerMusicDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
-import com.tilitili.common.manager.BotManager;
-import com.tilitili.common.manager.CheckManager;
 import com.tilitili.common.manager.VitsOPManager;
 import com.tilitili.common.utils.Asserts;
 import lombok.extern.slf4j.Slf4j;
@@ -23,17 +21,13 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class VoiceHandle extends ExceptionRespMessageHandle {
-    private final BotManager botManager;
-    private final VitsOPManager vitsOPManager;
-    private final CheckManager checkManager;
-    private final MusicService musicService;
+	private final VitsOPManager vitsOPManager;
+	private final MusicService musicService;
 
     @Autowired
-    public VoiceHandle(BotManager botManager, VitsOPManager vitsOPManager, CheckManager checkManager, MusicService musicService) {
-        this.botManager = botManager;
-        this.vitsOPManager = vitsOPManager;
-        this.checkManager = checkManager;
-        this.musicService = musicService;
+    public VoiceHandle(VitsOPManager vitsOPManager, MusicService musicService) {
+		this.vitsOPManager = vitsOPManager;
+		this.musicService = musicService;
     }
 
 	@Override
@@ -42,12 +36,12 @@ public class VoiceHandle extends ExceptionRespMessageHandle {
         BotSender botSender = messageAction.getBotSender();
         BotUserDTO botUser = messageAction.getBotUser();
         String speaker = messageAction.getBodyOrDefault("who", "派蒙");
-        String speed = messageAction.getBodyOrDefault("speed", "1.2");
+        String speed = messageAction.getBodyOrDefault("speed", "0.9");
 
-        File wavFile = new File("/home/admin/silk/voice.wav");
+//        File wavFile = new File("/home/admin/silk/voice.wav");
 //        File slkFile = new File("/home/admin/silk/voice.slk");
 
-        if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
+//        if (wavFile.exists()) Asserts.isTrue(wavFile.delete(), "删除wav失败");
 //        if (slkFile.exists()) Asserts.isTrue(slkFile.delete(), "删除slk失败");
 
         String text = messageAction.getValueOrDefault(messageAction.getBody());
