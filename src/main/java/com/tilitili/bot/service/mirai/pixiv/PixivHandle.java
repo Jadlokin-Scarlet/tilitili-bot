@@ -43,10 +43,10 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     public final static String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
 
     private final BotMessageService botMessageService;
+    private final BotConfigManager botConfigManager;
     private final PixivCacheService pixivService;
     private final BotTaskMapper botTaskMapper;
     private final PixivCacheManager pixivManager;
-    private final BotConfigManager botConfigManager;
     private final RedisCache redisCache;
 
     private final Map<String, String> keyModeMap = ImmutableMap.of("推荐色图", "all", "推荐色色", "r18", "推荐不色", "safe", "tjst", "all", "tjss", "r18", "tjbs", "safe");
