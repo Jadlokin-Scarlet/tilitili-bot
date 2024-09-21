@@ -67,25 +67,24 @@ public class HeiVoiceHandle extends ExceptionRespMessageHandle {
 			return BotMessage.simpleTextMessage("以下是已收藏语音，输入（语音 关键词）发送第一个匹配的语音\n" + bookmarkList.stream().map(BotUserVoiceBookmark::getName).collect(Collectors.joining("\n")));
 		}
 
-		try {
-			String url = this.getUrlByName(search);
+		// 先匹配收藏语音
+		String name = botUserVoiceBookmarkMapper.searchFirstUserVoice(userId, search);
+		if (StringUtils.isNotBlank(name)) {
+			String url = this.getUrlByName(name);
+
 			PlayerMusic playerMusic = generatePlayerMusic(url, botUser);
 			if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic)) {
-				return BotMessage.simpleTextMessage(String.format("已添加到播放列表，发送(收藏语音 %s)以收藏，之后就可以只输入关键词发送该语音啦！", search));
+				return BotMessage.simpleTextMessage(String.format("已添加收藏语音[%s]到播放列表", name));
 			} else {
 				return BotMessage.simpleVoiceIdMessage(null, url);
 			}
-		} catch (AssertException e) {
-			log.info(e.getMessage());
 		}
 
-		String name = botUserVoiceBookmarkMapper.searchFirstUserVoice(userId, search);
-		Asserts.notNull(name, "还没有收藏相关语音，发送（收藏语音 语音名）收藏吧！收藏成功后通过关键词发送匹配的第一个语音");
-		String url = this.getUrlByName(name);
-
+		// 没收藏就去搜
+		String url = this.getUrlByName(search);
 		PlayerMusic playerMusic = generatePlayerMusic(url, botUser);
 		if (musicService.pushMusicToQuote(bot, botSender, botUser, playerMusic)) {
-			return BotMessage.simpleTextMessage("已添加到播放列表");
+			return BotMessage.simpleTextMessage(String.format("已添加到播放列表，发送(收藏语音 %s)以收藏，之后就可以只输入关键词发送该语音啦！", search));
 		} else {
 			return BotMessage.simpleVoiceIdMessage(null, url);
 		}
