@@ -189,7 +189,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 			}
 		}
 		Asserts.notBlank(url, "没有地址，请发送（帮助 mcp）查看详情");
-		URL urlFormat = new URL(url);
+		String protocol = url.contains("://")? "": "https://";
+		URL urlFormat = new URL(protocol + url);
 		String host = urlFormat.getHost();
 		int port = urlFormat.getPort() != -1 ? urlFormat.getPort() : 25565;
 		McPingResponse response;

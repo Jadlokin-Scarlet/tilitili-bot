@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,12 +23,14 @@ class MusicHandleTest {
 	private MusicHandle tester;
 	@Autowired
 	private PlayerMusicListMapper playerMusicListMapper;
+	@Resource
+	private BotMessageActionUtil botMessageActionUtil;
 
 	@Test
 	void handleMessage() {
 		List<Long> userIdList = playerMusicListMapper.getPlayerMusicListByCondition(new PlayerMusicListQuery()).stream().map(PlayerMusicList::getUserId).distinct().collect(Collectors.toList());
 		for (Long userId : userIdList) {
-			BotMessageAction messageAction = BotMessageActionUtil.buildEmptyAction("歌单 同步", userId);
+			BotMessageAction messageAction = botMessageActionUtil.buildEmptyAction("歌单 同步", userId);
 			System.out.println(ReflectionTestUtils.invokeMethod(tester, "handleSyncList", messageAction).toString());
 		}
 	}

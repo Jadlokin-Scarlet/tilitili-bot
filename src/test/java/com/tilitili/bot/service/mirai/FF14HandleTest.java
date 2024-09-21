@@ -8,15 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
+
 @Slf4j
 @SpringBootTest(classes = BotApplication.class)
 class FF14HandleTest {
     @Autowired
     private FF14Handle tester;
+    @Resource
+    private BotMessageActionUtil botMessageActionUtil;
 
     @Test
     void handleMessage() throws Exception {
-        BotMessage botMessage = tester.handleMessage(BotMessageActionUtil.buildEmptyAction("ff 青鸟"));
+        BotMessage botMessage = tester.handleMessage(botMessageActionUtil.buildEmptyAction("ff 青鸟"));
         System.out.println(botMessage);
     }
 }

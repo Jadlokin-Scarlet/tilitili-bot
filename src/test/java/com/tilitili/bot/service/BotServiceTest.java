@@ -31,9 +31,8 @@ public class BotServiceTest {
 	private BotSenderCacheManager botSenderCacheManager;
 	@Resource
 	private BotUserManager botUserManager;
-
-
-	BotMessageActionUtil a;
+	@Resource
+	private BotMessageActionUtil botMessageActionUtil;
 
 	@Test
 	public void syncHandleTextMessage() {
@@ -47,10 +46,10 @@ public class BotServiceTest {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(3384L);
 		BaseMessageHandle handle = messageHandleMap.get("mcPingHandle");
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("mcp mc.shawnli.online", bot, botSender, botUserManager.getValidBotUserById(181L))));
-//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
-//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
-//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
-//		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("收杆", bot, botSender, botUserManager.getValidBotUserById(13L))));
+		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("mcp mc.shawnli.online", bot, botSender, botUserManager.getValidBotUserById(181L))));
+//		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
+//		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
+//		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("收杆", bot, botSender, botUserManager.getValidBotUserById(13L))));
 	}
 }
