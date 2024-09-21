@@ -46,8 +46,8 @@ public class BotServiceTest {
 	public void testHandle() throws Exception {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
 		BotSender botSender = botSenderCacheManager.getValidBotSenderById(3384L);
-		BaseMessageHandle handle = messageHandleMap.get("pixivHandle");
-		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("pid 121972954", bot, botSender, botUserManager.getValidBotUserById(181L))));
+		BaseMessageHandle handle = messageHandleMap.get("mcPingHandle");
+		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("mcp mc.shawnli.online", bot, botSender, botUserManager.getValidBotUserById(181L))));
 //		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
 //		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
 //		System.out.println(handle.handleMessageNew(BotMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
