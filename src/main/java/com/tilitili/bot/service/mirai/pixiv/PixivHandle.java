@@ -42,9 +42,9 @@ public class PixivHandle extends ExceptionRespMessageHandle {
     public final static String pixivImageListKey = "pixivImageListKey-";
     public final static String pixivImageListPageNoKey = "pixivImageListPageNoKey-";
 
+    private final BotMessageService botMessageService;
     private final PixivCacheService pixivService;
     private final BotTaskMapper botTaskMapper;
-    private final BotMessageService botMessageService;
     private final PixivCacheManager pixivManager;
     private final BotConfigManager botConfigManager;
     private final RedisCache redisCache;
