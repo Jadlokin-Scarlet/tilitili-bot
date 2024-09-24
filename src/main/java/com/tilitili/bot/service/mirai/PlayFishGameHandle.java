@@ -140,7 +140,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		}
 		
 		if (!successResult.isEmpty()) {
-			return BotMessage.simpleTextMessage(String.join("\n", successResult));
+			return BotMessage.simpleTextMessage(String.join("\n", successResult)).setQuoteAt(messageAction.getBotUser());
 		}
 
 		List<FishPlayer> fishPlayerList = fishPlayerMapper.getFishPlayerByCondition(new FishPlayerQuery()
@@ -150,7 +150,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		);
 		Asserts.notEmpty(fishPlayerList, "鱼呢");
 		FishPlayer fishPlayer = fishPlayerList.get(0);
-		return BotMessage.simpleTextMessage(this.touchFish(touchUserId, fishPlayer));
+		return BotMessage.simpleTextMessage(this.touchFish(touchUserId, fishPlayer)).setQuoteAt(messageAction.getBotUser());
 	}
 
 	private String touchFish(Long touchUserId, FishPlayer fishPlayer) {
