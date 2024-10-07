@@ -4,6 +4,7 @@ import com.tilitili.bot.entity.MusicSearchKeyHandleResult;
 import com.tilitili.bot.entity.PlayerMusicVO;
 import com.tilitili.common.api.KtvServiceInterface;
 import com.tilitili.common.component.CloseableRedisLock;
+import com.tilitili.common.component.music.MusicRedisQueue;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
 import com.tilitili.common.entity.PlayerMusic;
@@ -31,10 +32,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -419,7 +417,10 @@ public class MusicService {
     }
 
 
-    public PlayerMusicVO getLastMusic(Long userId, Long listId, Long musicId) {
+    public PlayerMusicVO getLastMusic(Long userId, Long listId, Long musicId, String loopType) {
+        if (loopType == null) {
+            loopType = MusicRedisQueue.PLAY_TYPE_RANDOM;
+        }
         PlayerMusicQuery query = new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId);
         int musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
         if (musicCnt == 0) {
@@ -427,11 +428,27 @@ public class MusicService {
             musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
             Asserts.notEquals(musicCnt, 0, "参数异常");
         }
-        List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(query.setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
-        Asserts.notEmpty(lastMusic, "没有音乐了");
-        PlayerMusic music = lastMusic.get(0);
+        PlayerMusic music;
+        switch (loopType) {
+            case MusicRedisQueue.PLAY_TYPE_RANDOM:
+            case MusicRedisQueue.PLAY_TYPE_LOOP: {
+                List<PlayerMusic> lastMusic;
+                lastMusic = playerMusicMapper.getPlayerMusicByCondition(query.setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
+                Asserts.notEmpty(lastMusic, "没有音乐了");
+                music = lastMusic.get(0);
+                break;
+            }
+            case MusicRedisQueue.PLAY_TYPE_ORDER: {
+                music = playerMusicMapper.getLastMusicById(userId, listId, musicId);
+                if (music == null) {
+                    music = playerMusicMapper.getLastMusicById(userId, listId, 0L);
+                }
+                break;
+            }
+            default: throw new AssertException("参数异常");
+        }
 
-        ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
+		ListOperations<String, PlayerMusic> musicRedisList = redisCache.getPlayerMusicRedisTemplate().opsForList();
         String key = "webMusicList-" + userId;
         // 初始化last和单曲循环不加入prev
         if (musicId == null) {

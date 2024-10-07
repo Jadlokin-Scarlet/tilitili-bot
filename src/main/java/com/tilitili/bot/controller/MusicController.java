@@ -79,8 +79,8 @@ public class MusicController extends BaseController{
 
 	@GetMapping("/last")
 	@ResponseBody
-	public BaseModel<PlayerMusicVO> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId) {
-		return BaseModel.success(musicService.getLastMusic(userId, listId, musicId));
+	public BaseModel<PlayerMusicVO> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId, String loopType) {
+		return BaseModel.success(musicService.getLastMusic(userId, listId, musicId, loopType));
 	}
 
 	@GetMapping("/prev")
