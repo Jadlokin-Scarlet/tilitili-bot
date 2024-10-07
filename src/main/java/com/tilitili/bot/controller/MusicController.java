@@ -80,6 +80,7 @@ public class MusicController extends BaseController{
 	@GetMapping("/last")
 	@ResponseBody
 	public BaseModel<PlayerMusicVO> getLastMusic(@SessionAttribute(value = "userId") Long userId, Long listId, Long musicId, String loopType) {
+		Asserts.notNull(loopType, "参数异常");
 		return BaseModel.success(musicService.getLastMusic(userId, listId, musicId, loopType));
 	}
 

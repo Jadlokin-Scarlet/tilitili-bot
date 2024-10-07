@@ -421,19 +421,25 @@ public class MusicService {
         if (loopType == null) {
             loopType = MusicRedisQueue.PLAY_TYPE_RANDOM;
         }
-        PlayerMusicQuery query = new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId);
-        int musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
-        if (musicCnt == 0) {
-            query.setId(null);
-            musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
-            Asserts.notEquals(musicCnt, 0, "参数异常");
-        }
+        int musicCnt = playerMusicMapper.countPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId));
+//        if (musicCnt == 0) {
+//            query.setId(null);
+//            musicCnt = playerMusicMapper.countPlayerMusicByCondition(query);
+//            Asserts.notEquals(musicCnt, 0, "参数异常");
+//        }
         PlayerMusic music;
         switch (loopType) {
-            case MusicRedisQueue.PLAY_TYPE_RANDOM:
             case MusicRedisQueue.PLAY_TYPE_LOOP: {
-                List<PlayerMusic> lastMusic;
-                lastMusic = playerMusicMapper.getPlayerMusicByCondition(query.setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt)+1));
+                List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId).setId(musicId));
+                if (!lastMusic.isEmpty()) {
+                    music = lastMusic.get(0);
+                    break;
+                }
+                // change to random
+            }
+            case MusicRedisQueue.PLAY_TYPE_RANDOM:{
+				List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId)
+                        .setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt) + 1));
                 Asserts.notEmpty(lastMusic, "没有音乐了");
                 music = lastMusic.get(0);
                 break;
