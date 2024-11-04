@@ -321,7 +321,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 
 			FishConfig fishConfig;
 			if (fishPlayer.getItemId() == null) {
-				fishConfig = this.randomFishConfig(fishPlayer.getPlaceId());
+				fishConfig = this.randomFishConfig(fishPlayer.getPlaceId(), userId);
 				Asserts.notNull(fishConfig, "啊嘞，不对劲");
 				fishPlayerMapper.updateFishPlayerSelective(new FishPlayer().setId(fishPlayer.getId()).setItemId(fishConfig.getId()));
 			} else {
@@ -406,9 +406,10 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		return botItem.getSellPrice() > 2000;
 	}
 
-	private FishConfig randomFishConfig(Long placeId) {
+	private FishConfig randomFishConfig(Long placeId, Long userId) {
 		FishConfig fishConfig = null;
 		List<FishConfig> configList = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId).setStatus(0));
+		Asserts.notEmpty(configList, "这里没有鱼可以钓了。。");
 		int rateSum = configList.stream().mapToInt(FishConfig::getRate).sum();
 		int theRate = random.nextInt(rateSum);
 		for (FishConfig config : configList) {
@@ -416,6 +417,16 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 			if (theRate <= 0) {
 				fishConfig = config;
 				break;
+			}
+		}
+		// 限制上钓次数  改成臭靴子
+		if (fishConfig != null && fishConfig.getFindNum() < Integer.MAX_VALUE) {
+			Integer findNum = fishConfig.getFindNum();
+			Long itemId = fishConfig.getItemId();
+			int itemCount = fishPlayerMapper.countPlayerItemFindCnt(userId, itemId);
+			if (itemCount >= findNum) {
+				List<FishConfig> noItemConfigList = fishConfigMapper.getFishConfigNoItem(placeId);
+				fishConfig = noItemConfigList.get(ThreadLocalRandom.current().nextInt(noItemConfigList.size()));
 			}
 		}
 		return fishConfig;
@@ -457,8 +468,6 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		Asserts.checkNull(fishPlayerMapper.getValidFishPlayerByUserId(userId), "你已经在钓啦！");
 		BotUserMapMapping userMapMapping = botUserMapMappingMapper.getBotUserMapMappingByUserId(userId);
 		Long placeId = userMapMapping == null? BotPlaceConstant.PLACE_FIRST_FISH: userMapMapping.getPlaceId();
-		List<FishConfig> placeFishConfig = fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setPlaceId(placeId));
-		Asserts.notEmpty(placeFishConfig, "这里没有鱼可以钓。。");
 
 
 		FishPlayer fishPlayer = new FishPlayer();
@@ -468,7 +477,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 		fishPlayer.setStartTime(new Date());
 		fishPlayer.setSenderId(senderId);
 
-		FishConfig fishConfig = this.randomFishConfig(placeId);
+		FishConfig fishConfig = this.randomFishConfig(placeId, userId);
 		fishPlayer.setItemId(fishConfig.getId());
 		fishPlayerMapper.addFishPlayerSelective(fishPlayer);
 

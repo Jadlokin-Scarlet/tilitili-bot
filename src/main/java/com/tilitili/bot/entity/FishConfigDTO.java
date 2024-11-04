@@ -26,6 +26,8 @@ public class FishConfigDTO extends BaseDTO {
 	private String image;
 	@ExcelProperty(value = "区域")
 	private String place;
+	@ExcelProperty(value = "上钩次数")
+	private String findNum;
 
 	public String getScaleStr() {
 		return scaleStr;
@@ -122,6 +124,15 @@ public class FishConfigDTO extends BaseDTO {
 
 	public FishConfigDTO setPlace(String place) {
 		this.place = place;
+		return this;
+	}
+
+	public String getFindNum() {
+		return findNum;
+	}
+
+	public FishConfigDTO setFindNum(String findNum) {
+		this.findNum = findNum;
 		return this;
 	}
 }

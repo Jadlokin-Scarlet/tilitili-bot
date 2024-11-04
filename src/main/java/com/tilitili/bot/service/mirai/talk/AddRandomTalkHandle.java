@@ -204,9 +204,11 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				Integer rate = config.getRate();
 				Integer price = config.getPrice();
 				String type = config.getType();
+				String findNumStr = config.getFindNum();
 				Asserts.notNull(cost, "格式错啦(cost)");
 				Asserts.notNull(rate, "格式错啦(rate)");
 				Asserts.notNull(type, "格式错啦(type)");
+				Integer findNum = findNumStr == null? Integer.MAX_VALUE: Integer.parseInt(findNumStr);
 				if (rate == 0) {
 					continue;
 				}
@@ -241,7 +243,7 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 					} else {
 						botItemMapper.updateBotItemSelective(new BotItem().setId(botItem.getId()).setDescription(itemDesc).setSellPrice(price).setGrade(itemGrade).setIcon(itemIcon));
 					}
-					newFishConfigList.add(new FishConfig().setPlaceId(placeId).setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate));
+					newFishConfigList.add(new FishConfig().setPlaceId(placeId).setItemId(botItem.getId()).setScale(scale).setCost(cost).setRate(rate).setFindNum(findNum));
 				}
 			} catch (AssertException e) {
 				return e.getMessage();
@@ -249,6 +251,12 @@ public class AddRandomTalkHandle extends BaseMessageHandleAdapt {
 				return "格式不对";
 			}
 		}
+		boolean hasFindNum = newFishConfigList.stream().anyMatch(StreamUtil.isNotNull(FishConfig::getFindNum));
+		boolean hasNoItemConfig = newFishConfigList.stream().anyMatch(StreamUtil.isNotNull(FishConfig::getItemId).negate());
+		if (hasFindNum) {
+			Asserts.isTrue(hasNoItemConfig, "未找到臭靴子（或其他无奖励的保底配置）");
+		}
+
 		for (FishConfig fishConfig : fishConfigMapper.getFishConfigByCondition(new FishConfigQuery().setStatus(0))) {
 			fishConfigMapper.updateFishConfigSelective(new FishConfig().setId(fishConfig.getId()).setStatus(-1));
 		}
