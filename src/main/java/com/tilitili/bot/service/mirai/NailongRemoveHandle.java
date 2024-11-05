@@ -20,6 +20,7 @@ public class NailongRemoveHandle extends ExceptionRespMessageHandle {
 	public BotMessage handleMessage(BotMessageAction messageAction) throws Exception {
 		List<String> imageList = messageAction.getImageList();
 		for (String imageUrl : imageList) {
+			imageUrl = imageUrl.replaceFirst("https", "http");
 			String result = HttpClientUtil.httpPost("http://172.27.0.7:8081/check_image?image_url=" + URLEncoder.encode(imageUrl, StandardCharsets.UTF_8));
 			log.info("check image url:{} result:{}", imageUrl, result);
 			Asserts.notBlank(result, "网络异常");
