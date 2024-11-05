@@ -47,6 +47,10 @@ public class NailongRemoveHandle extends ExceptionRespMessageHandle {
 		if (!canUseBotAdminTask) {
 			return null;
 		}
+		if (!messageAction.getSession().containsKey("NailongRemoveHandle.TDKey")) {
+			return null;
+		}
+
 		Long senderId = messageAction.getBotSender().getId();
 		BotTask task = botTaskMapper.getBotTaskByNick("撤回奶龙");
 		Asserts.notNull(task);
@@ -69,6 +73,7 @@ public class NailongRemoveHandle extends ExceptionRespMessageHandle {
 			log.info("check ok:{}", checkOk);
 			if (checkOk) {
 				botManager.recallMessage(messageAction.getBot(), messageAction.getBotSender(), messageAction.getMessageId());
+				messageAction.getSession().put("NailongRemoveHandle.TDKey", "yes", 60*10);
 				return BotMessage.simpleTextMessage("已撤回奶龙，管理员回复TD退订。");
 			}
 		}
