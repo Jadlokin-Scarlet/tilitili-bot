@@ -5,6 +5,7 @@ import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.ExceptionRespMessageHandle;
 import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.BotTask;
+import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRoleManager;
@@ -43,8 +44,8 @@ public class NailongRemoveHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleTD(BotMessageAction messageAction) {
-		boolean canUseBotAdminTask = botRoleManager.canUseBotAdminTask(messageAction.getBot(), messageAction.getBotUser());
-		if (!canUseBotAdminTask) {
+		boolean isMember = BotUserDTO.PERMISSION_MEMBER.equals(messageAction.getBotUser().getPermission());
+		if (isMember) {
 			return null;
 		}
 		if (!messageAction.getSession().containsKey("NailongRemoveHandle.TDKey")) {
