@@ -420,7 +420,7 @@ public class PlayFishGameHandle extends ExceptionRespMessageHandle {
 			}
 		}
 		// 限制上钓次数  改成臭靴子
-		if (fishConfig != null && fishConfig.getFindNum() < Integer.MAX_VALUE) {
+		if (fishConfig != null && fishConfig.getFindNum() != null && fishConfig.getFindNum() < Integer.MAX_VALUE) {
 			Integer findNum = fishConfig.getFindNum();
 			Long itemId = fishConfig.getItemId();
 			int itemCount = fishPlayerMapper.countPlayerItemFindCnt(userId, itemId);
