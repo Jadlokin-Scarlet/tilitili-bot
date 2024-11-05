@@ -7,6 +7,7 @@ import com.tilitili.common.entity.BotSenderTaskMapping;
 import com.tilitili.common.entity.BotTask;
 import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRoleManager;
 import com.tilitili.common.mapper.mysql.BotSenderTaskMappingMapper;
@@ -64,19 +65,24 @@ public class NailongRemoveHandle extends ExceptionRespMessageHandle {
 	}
 
 	private BotMessage handleRemove(BotMessageAction messageAction) {
-		List<String> imageList = messageAction.getImageList();
-		for (String imageUrl : imageList) {
-			imageUrl = imageUrl.replaceFirst("https", "http");
-			String result = HttpClientUtil.httpPost("http://172.27.0.7:8081/check_image?image_url=" + URLEncoder.encode(imageUrl, StandardCharsets.UTF_8));
-			log.info("check image url:{} result:{}", imageUrl, result);
-			Asserts.notBlank(result, "网络异常");
-			Boolean checkOk = JSONObject.parseObject(result).getBoolean("check_ok");
-			log.info("check ok:{}", checkOk);
-			if (checkOk) {
-				botManager.recallMessage(messageAction.getBot(), messageAction.getBotSender(), messageAction.getMessageId());
-				messageAction.getSession().put("NailongRemoveHandle.TDKey", "yes", 60*10);
-				return BotMessage.simpleTextMessage("已撤回奶龙，管理员回复TD退订。");
+		try {
+
+			List<String> imageList = messageAction.getImageList();
+			for (String imageUrl : imageList) {
+				imageUrl = imageUrl.replaceFirst("https", "http");
+				String result = HttpClientUtil.httpPost("http://172.27.0.7:8081/check_image?image_url=" + URLEncoder.encode(imageUrl, StandardCharsets.UTF_8));
+				log.info("check image url:{} result:{}", imageUrl, result);
+				Asserts.notBlank(result, "网络异常");
+				Boolean checkOk = JSONObject.parseObject(result).getBoolean("check_ok");
+				log.info("check ok:{}", checkOk);
+				if (checkOk) {
+					botManager.recallMessage(messageAction.getBot(), messageAction.getBotSender(), messageAction.getMessageId());
+					messageAction.getSession().put("NailongRemoveHandle.TDKey", "yes", 60*10);
+					return BotMessage.simpleTextMessage("已撤回奶龙，管理员回复TD退订。");
+				}
 			}
+		} catch (AssertException e) {
+			log.warn("检查奶龙异常", e);
 		}
 		return null;
 	}
