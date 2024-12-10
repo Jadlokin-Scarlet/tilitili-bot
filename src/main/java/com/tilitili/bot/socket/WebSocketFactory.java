@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
+@Deprecated
 public class WebSocketFactory {
     private final ConcurrentHashMap<Long, BotWebSocketWrapperImp> wrapperMap;
 //    private final Long shortUrlWebSocketKey = -1L;

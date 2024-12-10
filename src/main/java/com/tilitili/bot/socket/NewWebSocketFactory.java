@@ -8,6 +8,7 @@ import com.tilitili.common.manager.BotManager;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
+import com.tilitili.common.utils.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -91,6 +92,10 @@ public class NewWebSocketFactory {
 
 	private void onClose(Long botId) {
 		log.warn("重连websocket, botId={}", botId);
+		// 防止一连接就掉导致并发问题
+		for (int i = 0; i < 5 && !webSocketMap.containsKey(botId); i++) {
+			TimeUtil.millisecondsSleep(1000 * 10);
+		}
 		webSocketMap.remove(botId);
 		if (botRobotCacheManager.getValidBotRobotById(botId) != null) {
 			this.upBotBlocking(botId);
