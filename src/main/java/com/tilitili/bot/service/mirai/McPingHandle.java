@@ -53,8 +53,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 
 	@Override
 	public BotMessage handleMessage(BotMessageAction messageAction) throws IOException {
-		String key = messageAction.getKeyWithoutPrefix();
 		String virtualKey = messageAction.getKeyWithoutPrefix();
+		String key = messageAction.getKeyWithoutPrefix();
 		switch (virtualKey != null? virtualKey: key) {
 			case "mcBind": return handleBind(messageAction);
 			case "mcp": case "mcpd": case "mcm": case "在线人数": return handleMcp(messageAction);
