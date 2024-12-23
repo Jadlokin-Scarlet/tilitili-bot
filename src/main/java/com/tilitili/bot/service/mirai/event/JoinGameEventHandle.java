@@ -11,6 +11,7 @@ import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
 import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
@@ -68,12 +69,16 @@ public class JoinGameEventHandle extends BaseEventHandleAdapt {
 		if (!forwardConfigList.isEmpty()) {
 			Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(botSender.getId(), BotTaskConstant.ForwardTaskId), "无转发权限");
 			for (BotForwardConfig forwardConfig : forwardConfigList) {
-				Long targetSenderId = forwardConfig.getTargetSenderId();
-				BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
-				Asserts.notNull(targetSender, "找不到渠道");
-				Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
+				try {
+					Long targetSenderId = forwardConfig.getTargetSenderId();
+					BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
+					Asserts.notNull(targetSender, "找不到渠道");
+					Asserts.isTrue(botSenderTaskMappingManager.checkSenderHasTask(targetSender.getId(), BotTaskConstant.helpTaskId), "无帮助权限");
 
-				respList.add(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
+					respList.add(BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender));
+				} catch (AssertException e) {
+					log.warn("转发渠道配置失败", e);
+				}
 			}
 		}
 
