@@ -9,6 +9,7 @@ import com.tilitili.common.entity.dto.BotUserDTO;
 import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotEvent;
 import com.tilitili.common.entity.view.bot.BotMessage;
+import com.tilitili.common.exception.AssertException;
 import com.tilitili.common.manager.BotRobotCacheManager;
 import com.tilitili.common.manager.BotSenderCacheManager;
 import com.tilitili.common.manager.BotSenderTaskMappingManager;
@@ -56,13 +57,17 @@ public class SystemEventHandle extends BaseEventHandleAdapt {
 
 		List<BotMessage> respList = new ArrayList<>();
 		for (BotForwardConfig forwardConfig : forwardConfigList) {
-			if (messageTypeList.contains(forwardConfig.getMessageType())) {
-				Long targetSenderId = forwardConfig.getTargetSenderId();
-				BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
-				Asserts.notNull(targetSender, "找不到渠道");
+			try {
+				if (messageTypeList.contains(forwardConfig.getMessageType())) {
+					Long targetSenderId = forwardConfig.getTargetSenderId();
+					BotSender targetSender = botSenderCacheManager.getValidBotSenderById(targetSenderId);
+					Asserts.notNull(targetSender, "找不到渠道");
 
-				BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
-				respList.add(resp);
+					BotMessage resp = BotMessage.simpleTextMessage(botEvent.getMessage()).setBotSender(targetSender);
+					respList.add(resp);
+				}
+			} catch (AssertException e) {
+				log.warn("转发渠道配置失败", e);
 			}
 		}
 		return respList;
