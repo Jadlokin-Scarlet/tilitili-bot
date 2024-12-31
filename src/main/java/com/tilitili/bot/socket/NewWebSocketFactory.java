@@ -24,10 +24,10 @@ public class NewWebSocketFactory {
 	private final ConcurrentHashMap<Long, Boolean> botIdLockMap;
 	private final BotManager botManager;
 	private final BotService botService;
+	private final RedisCache redisCache;
 	private final BotRobotCacheManager botRobotCacheManager;
 	private final ExecutorService executor;
 	private volatile boolean close = false;
-	private final RedisCache redisCache;
 
 	public NewWebSocketFactory(BotManager botManager, BotService botService, BotRobotCacheManager botRobotCacheManager, RedisCache redisCache) {
 		this.botManager = botManager;
