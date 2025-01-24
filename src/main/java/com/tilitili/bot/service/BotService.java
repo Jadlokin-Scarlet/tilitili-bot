@@ -196,6 +196,7 @@ public class BotService {
         try {
             BotEvent botEvent = botMessage.getBotEvent();
             BotSender botSender = botMessage.getBotSender();
+            BotUserDTO botUser = botMessage.getBotUser();
             // 校验权限
             boolean hasHelp = botSenderTaskMappingManager.checkSenderHasTaskCache(botSender.getId(), BotTaskConstant.helpTaskId);
             if (!hasHelp) {
@@ -233,6 +234,9 @@ public class BotService {
                 // 没设置发送者，就默认原路发回
                 if (message.getBotSender() == null) {
                     message.setBotSender(botSender);
+                }
+                if (message.getBotUser() == null) {
+                    message.setBotUser(botUser);
                 }
                 // 记录消息和回复消息的关系
                 message.setMessageId(botMessage.getMessageId());
