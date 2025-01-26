@@ -50,7 +50,7 @@ public class JoinOrLeaveGameStatistics {
 
 	@Async
 	public void waitAndStat(BotSender botSender, BotUserDTO botUser) {
-		TimeUtil.millisecondsSleep(3);
+		TimeUtil.millisecondsSleep(4);
 		List<String> eventList;
 		try (CloseableRedisLock ignored = new CloseableRedisLock(redisCache, String.format("JoinOrLeaveGameEventHandle-lock-%s-%s", botSender.getId(), botUser.getId()))) {
 			String listKey = String.format("JoinOrLeaveGameEventHandle-eventList-%s-%s", botSender.getId(), botUser.getId());
