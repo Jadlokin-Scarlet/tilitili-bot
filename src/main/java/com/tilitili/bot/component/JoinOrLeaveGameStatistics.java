@@ -57,6 +57,7 @@ public class JoinOrLeaveGameStatistics {
 			String timeKey = String.format("JoinOrLeaveGameEventHandle-eventListTime-%s-%s", botSender.getId(), botUser.getId());
 			Long time = redisCache.getValueLong(timeKey);
 			if (time == null || System.currentTimeMillis() - time < 3000) {
+				log.info("进出统计被挤了！");
 				return;
 			}
 			redisCache.delete(listKey);
