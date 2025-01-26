@@ -60,9 +60,9 @@ public class JoinOrLeaveGameStatistics {
 				log.info("进出统计被挤了！");
 				return;
 			}
+			eventList = redisCache.lrange(listKey, 0, -1);
 			redisCache.delete(listKey);
 			redisCache.delete(timeKey);
-			eventList = redisCache.lrange(listKey, 0, -1);
 		}
 		if (CollectionUtils.isNotEmpty(eventList)) {
 			BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0).setIsSend(true);
