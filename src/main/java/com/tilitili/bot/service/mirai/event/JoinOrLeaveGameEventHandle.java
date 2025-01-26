@@ -69,7 +69,7 @@ public class JoinOrLeaveGameEventHandle extends BaseEventHandleAdapt {
 			String listKey = String.format("JoinOrLeaveGameEventHandle-eventList-%s-%s", botSender.getId(), botUser.getId());
 			String timeKey = String.format("JoinOrLeaveGameEventHandle-eventListTime-%s-%s", botSender.getId(), botUser.getId());
 			Long time = redisCache.getValueLong(timeKey);
-			if (System.currentTimeMillis() - time < 2000) {
+			if (System.currentTimeMillis() - time < 3000) {
 				redisCache.rpush(listKey, botEvent.getMessage());
 				redisCache.setValue(timeKey, System.currentTimeMillis());
 			} else {
