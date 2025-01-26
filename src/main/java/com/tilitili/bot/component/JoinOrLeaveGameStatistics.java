@@ -59,9 +59,9 @@ public class JoinOrLeaveGameStatistics {
 			if (time == null || System.currentTimeMillis() - time < 3000) {
 				return;
 			}
-			eventList = redisCache.lrange(listKey, 0, -1);
 			redisCache.delete(listKey);
 			redisCache.delete(timeKey);
+			eventList = redisCache.lrange(listKey, 0, -1);
 		}
 		if (CollectionUtils.isNotEmpty(eventList)) {
 			BotForwardConfigQuery forwardConfigQuery = new BotForwardConfigQuery().setSourceSenderId(botSender.getId()).setStatus(0).setIsSend(true);
