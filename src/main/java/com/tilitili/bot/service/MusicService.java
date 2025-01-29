@@ -181,7 +181,7 @@ public class MusicService {
 
         List<String> searchBvList = StringUtils.pattenAll("BV\\w{10}", searchKey);
 
-        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/radio")) {
+        if (searchKey.contains("163.com/#/djradio") || searchKey.contains("163.com/djradio") || searchKey.contains("163.com/radio")) {
             String listId = StringUtils.patten1("[?&]id=(\\d+)", searchKey);
             playerMusicListDTO = musicCloudManager.getProgramPlayerList(listId, needAllList);
         } else if (!Objects.equals(StringUtils.patten("163.com/(#/)?(my/)?(m/)?(music/)?playlist", searchKey), "")) {
