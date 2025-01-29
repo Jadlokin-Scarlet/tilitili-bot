@@ -38,16 +38,16 @@ public class BotServiceTest {
 	public void syncHandleTextMessage() {
 //		BotRobot bot = botRobotCacheManager.getBotRobotById(9L);
 //		tester.testHandleMessage(bot, "");
-		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(6L), "");
+		tester.testHandleMessage(botRobotCacheManager.getBotRobotById(2L), "");
 	}
 
 	@Test
 	public void testHandle() throws Exception {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
-		BotSender botSender = botSenderCacheManager.getValidBotSenderById(3777L);
-		BaseMessageHandle handle = messageHandleMap.get("helpHandle");
-		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("启用 撤回奶龙",
-				bot, botSender, botUserManager.getValidBotUserById(17077L))));
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(4854L);
+		BaseMessageHandle handle = messageHandleMap.get("transactionHandle");
+		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("背包",
+				bot, botSender, botUserManager.getValidBotUserById(26175L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
