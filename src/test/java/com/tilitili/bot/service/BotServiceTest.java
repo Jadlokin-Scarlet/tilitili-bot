@@ -44,10 +44,10 @@ public class BotServiceTest {
 	@Test
 	public void testHandle() throws Exception {
 		BotRobot bot = botRobotCacheManager.getValidBotRobotById(2L);
-		BotSender botSender = botSenderCacheManager.getValidBotSenderById(4854L);
-		BaseMessageHandle handle = messageHandleMap.get("transactionHandle");
-		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("背包",
-				bot, botSender, botUserManager.getValidBotUserById(26175L))));
+		BotSender botSender = botSenderCacheManager.getValidBotSenderById(3759L);
+		BaseMessageHandle handle = messageHandleMap.get("QQGroupQueryHandle");
+		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("查询 玩家4CD",
+				bot, botSender, botUserManager.getValidBotUserById(3384L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("测试#$", bot, botSender, botUserManager.getValidBotUserById(13L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("摸鱼", bot, botSender, botUserManager.getValidBotUserById(181L))));
 //		System.out.println(handle.handleMessageNew(botMessageActionUtil.buildEmptyAction("鱼呢", bot, botSender, botUserManager.getValidBotUserById(13L))));
