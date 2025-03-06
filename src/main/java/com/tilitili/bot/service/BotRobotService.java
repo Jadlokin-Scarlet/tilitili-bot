@@ -140,12 +140,14 @@ public class BotRobotService {
     }
 
     private void handleOnebotBot(BotRobot bot) {
-        Asserts.notNull(bot.getHost(), "请输入服务器地址");
+        Asserts.notNull(bot.getHost(), "请输入请求地址");
+        Asserts.notNull(bot.getWsHost(), "请输入ws地址");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType(BotRobotConstant.PUSH_TYPE_WS);
 
         BotRobot botInfo = botManager.getBotInfo(bot);
         Asserts.notNull(botInfo, "参数异常");
+        bot.setName(botInfo.getName());
         bot.setQq(botInfo.getQq());
 
         BotUserDTO botUser = botUserManager.addOrUpdateBotUser(new BotSender().setSendType(SendTypeEnum.GROUP_MESSAGE_STR),
@@ -191,7 +193,7 @@ public class BotRobotService {
 
     private void handleMinecraftBot(BotRobot bot) {
         Asserts.notBlank(bot.getName(), "请输入昵称");
-        Asserts.notNull(bot.getHost(), "请输入服务器地址");
+        Asserts.notNull(bot.getHost(), "请输入请求地址");
         Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
         bot.setPushType(BotRobotConstant.PUSH_TYPE_HOOK);
         String host = bot.getHost();
@@ -234,6 +236,12 @@ public class BotRobotService {
                 updBot.setHost(bot.getHost());
             }
         }
+        if (bot.getWsHost() != null) {
+            this.suppleWsHost(bot);
+            if (!bot.getWsHost().equals(dbBot.getWsHost())) {
+                updBot.setWsHost(bot.getWsHost());
+            }
+        }
         if (bot.getVerifyKey() != null && !bot.getVerifyKey().equals(dbBot.getVerifyKey())) {
             updBot.setVerifyKey(bot.getVerifyKey());
         }
@@ -251,6 +259,17 @@ public class BotRobotService {
         String host = bot.getHost();
         if (!host.startsWith("http")) {
             host = "https://"+host;
+        }
+        if (!host.endsWith("/")) {
+            host += "/";
+        }
+        bot.setHost(host);
+    }
+
+    private void suppleWsHost(BotRobot bot) {
+        String host = bot.getHost();
+        if (!host.startsWith("ws")) {
+            host = "ws://"+host;
         }
         if (!host.endsWith("/")) {
             host += "/";
