@@ -61,7 +61,7 @@ public class BotRobotService {
             if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_WS)) {
                 robotDTO.setWsStatus(webSocketFactory.getWsStatus(robot));
             } else if (Objects.equals(robot.getPushType(), BotRobotConstant.PUSH_TYPE_HOOK)) {
-                robotDTO.setHookUrl("https://api.bot.tilitili.club/pub/botReport/" + robot.getId());
+                robotDTO.setHookUrl("https://api-bot.tilitili.club/pub/botReport/" + robot.getId());
             }
             result.add(robotDTO);
         }
