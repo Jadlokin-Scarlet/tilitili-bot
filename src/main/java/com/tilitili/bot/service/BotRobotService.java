@@ -130,9 +130,29 @@ public class BotRobotService {
                 this.handleQQGuildBot(bot);
                 break;
             }
+            case BotRobotConstant.TYPE_ONE_BOT: {
+                this.handleOnebotBot(bot);
+                break;
+            }
             default: throw new AssertException("参数异常");
         }
 
+    }
+
+    private void handleOnebotBot(BotRobot bot) {
+        Asserts.notNull(bot.getHost(), "请输入服务器地址");
+        Asserts.notNull(bot.getVerifyKey(), "请输入api秘钥");
+        bot.setPushType(BotRobotConstant.PUSH_TYPE_WS);
+
+        BotRobot botInfo = botManager.getBotInfo(bot);
+        Asserts.notNull(botInfo, "参数异常");
+        bot.setQq(botInfo.getQq());
+
+        BotUserDTO botUser = botUserManager.addOrUpdateBotUser(new BotSender().setSendType(SendTypeEnum.GROUP_MESSAGE_STR),
+                new BotUserDTO(BotUserConstant.USER_TYPE_QQ_GROUP, botInfo.getQq()).setName(botInfo.getName()));
+        bot.setUserId(botUser.getId());
+
+        this.addBotRobot(bot);
     }
 
     private void handleQQGuildBot(BotRobot bot) {
