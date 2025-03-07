@@ -438,6 +438,9 @@ public class MusicService {
                 // change to random
             }
             case MusicRedisQueue.PLAY_TYPE_RANDOM:{
+//                String musicList
+//                redisCache.exists()
+
 				List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId)
                         .setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt) + 1));
                 Asserts.notEmpty(lastMusic, "没有音乐了");
