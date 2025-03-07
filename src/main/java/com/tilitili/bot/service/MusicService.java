@@ -441,8 +441,9 @@ public class MusicService {
 //                String musicList
 //                redisCache.exists()
 
-				List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId)
-                        .setPageSize(1).setPageNo(ThreadLocalRandom.current().nextInt(musicCnt) + 1));
+                int randomId = ThreadLocalRandom.current().nextInt(musicCnt);
+                List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId)
+                        .setPageSize(1).setPageNo((randomId + 1) % musicCnt));
                 Asserts.notEmpty(lastMusic, "没有音乐了");
                 music = lastMusic.get(0);
                 break;
