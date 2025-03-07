@@ -2,7 +2,6 @@ package com.tilitili.bot.service.mirai;
 
 import com.tilitili.bot.entity.bot.BotMessageAction;
 import com.tilitili.bot.service.mirai.base.BaseMessageHandleAdapt;
-import com.tilitili.common.emnus.SendTypeEnum;
 import com.tilitili.common.entity.BotForwardConfig;
 import com.tilitili.common.entity.BotRobot;
 import com.tilitili.common.entity.BotSender;
@@ -10,8 +9,8 @@ import com.tilitili.common.entity.query.BotForwardConfigQuery;
 import com.tilitili.common.entity.view.bot.BotMessage;
 import com.tilitili.common.entity.view.bot.BotMessageChain;
 import com.tilitili.common.exception.AssertException;
-import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.manager.BotSenderCacheManager;
+import com.tilitili.common.mapper.mysql.BotForwardConfigMapper;
 import com.tilitili.common.utils.Asserts;
 import com.tilitili.common.utils.RedisCache;
 import com.tilitili.common.utils.StreamUtil;
@@ -19,7 +18,10 @@ import com.tilitili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,11 +68,11 @@ public class ForwardHandle extends BaseMessageHandleAdapt {
 				respMessageList.add(BotMessage.simpleListMessage(newMessageChainList).setSenderId(targetSenderId));
 
 				// 往Minecraft的文字传话特别提醒
-				String key = "Minecraft-message-reply-"+senderId;
-				if (!redisCache.exists(key) && SendTypeEnum.MINECRAFT_MESSAGE_STR.equals(targetSender.getSendType())) {
-					respMessageList.add(BotMessage.simpleTextMessage("连接已建立。", messageAction.getBotMessage()));
-				}
-				redisCache.setValue(key, "yes", 5 * 60);
+//				String key = "Minecraft-message-reply-"+senderId;
+//				if (!redisCache.exists(key) && SendTypeEnum.MINECRAFT_MESSAGE_STR.equals(targetSender.getSendType())) {
+//					respMessageList.add(BotMessage.simpleTextMessage("连接已建立。", messageAction.getBotMessage()));
+//				}
+//				redisCache.setValue(key, "yes", 5 * 60);
 			} else if (forwardConfig.getMessageType() == 1) {
 				newMessageChainList = sourceMessageChainList.stream()
 						.filter(StreamUtil.isEqual(BotMessageChain::getType, BotMessage.MESSAGE_TYPE_IMAGE)).collect(Collectors.toList());
