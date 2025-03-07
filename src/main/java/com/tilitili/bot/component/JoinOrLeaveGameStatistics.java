@@ -80,7 +80,7 @@ public class JoinOrLeaveGameStatistics {
 						String text = eventList.stream().map(textMap::get).collect(Collectors.joining());
 						String message = String.format("%s%s了游戏", botUser.getName(), text);
 
-						sendMessageManager.sendMessage(BotMessage.simpleTextMessage(message).setBotSender(targetSender));
+						sendMessageManager.sendMessage(BotMessage.simpleTextMessage(message).setBotSender(targetSender).setBotUser(botUser));
 					} catch (AssertException e) {
 						log.warn("转发渠道配置失败", e);
 					}
