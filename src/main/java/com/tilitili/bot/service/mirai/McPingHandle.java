@@ -110,8 +110,8 @@ public class McPingHandle extends ExceptionRespMessageHandle {
 		List<String> successList = new ArrayList<>();
 		List<String> failList = new ArrayList<>();
 		for (String playerName : playerNameList) {
-			String result = botManager.addWhitelist(mcBot,  playerName);
-			if ("".equals(result)) {
+			boolean result = botManager.addWhitelist(mcBot,  playerName);
+			if (result) {
 				successList.add(playerName);
 			} else {
 				failList.add(playerName);
