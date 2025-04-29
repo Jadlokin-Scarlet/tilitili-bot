@@ -443,7 +443,7 @@ public class MusicService {
 
                 int randomId = ThreadLocalRandom.current().nextInt(musicCnt);
                 List<PlayerMusic> lastMusic = playerMusicMapper.getPlayerMusicByCondition(new PlayerMusicQuery().setUserId(userId).setListId(listId)
-                        .setPageSize(1).setPageNo(randomId);
+                        .setPageSize(1).setPageNo(randomId));
                 Asserts.notEmpty(lastMusic, "没有音乐了");
                 music = lastMusic.get(0);
                 break;
